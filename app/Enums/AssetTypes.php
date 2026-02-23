@@ -27,8 +27,23 @@ enum AssetTypes: string
     public function allowedMimes(): array
     {
         return match ($this) {
-            self::FILE => ['pdf'],
-            self::RESOURCES => ['jpg', 'jpeg', 'png', 'mp3', 'mp4', 'wav'],
+            self::FILE => [
+                'application/pdf',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ],
+            self::RESOURCES => [
+                'image/jpeg',
+                'image/png',
+                'image/webp',
+                'audio/mpeg',
+                'audio/wav',
+                'audio/aac',
+                'video/mp4',
+                'video/x-msvideo',
+                'video/quicktime',
+                'video/x-matroska',
+            ],
         };
     }
 }

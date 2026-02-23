@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\BookStatus;
+use App\Enums\PublishedBooks;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -26,6 +27,7 @@ return new class extends Migration
             $table->string('status')->default(BookStatus::AVAILABLE->value);
             $table->string('cover')->nullable();
             $table->unsignedBigInteger('price')->nullable();
+            $table->enum('is_published', PublishedBooks::values())->default(PublishedBooks::UNPUBLISH->value);
             $table->softDeletes();
             $table->timestamps();
         });
