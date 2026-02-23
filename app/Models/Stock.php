@@ -15,7 +15,6 @@ class Stock extends Model
 
     protected $fillable = [
         'book_id',
-        'asset_id',
         'total',
         'available',
         'loan',
@@ -26,10 +25,5 @@ class Stock extends Model
     public function book(): BelongsTo
     {
         return $this->belongsTo(Book::class, 'book_id');
-    }
-
-    public function asset(): BelongsTo
-    {
-        return $this->belongsTo(Asset::class, 'asset_id');
     }
 }

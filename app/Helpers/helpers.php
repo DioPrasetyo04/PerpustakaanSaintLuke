@@ -42,4 +42,15 @@ if (!function_exists('generateSlug')) {
             return $codeWithRandomInt;
         }
     }
+
+    if (!function_exists('RupiahFormatted')) {
+        function RupiahFormatted(?int $value)
+        {
+            if (!$value) {
+                return 'Rp. 0';
+            }
+
+            return 'Rp ' . number_format($value, 0, ',', '.');
+        }
+    }
 }

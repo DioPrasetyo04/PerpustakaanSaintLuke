@@ -63,9 +63,9 @@ class Book extends Model
         return $this->hasOne(Asset::class);
     }
 
-    public function stocks(): HasMany
+    public function stock(): HasOne
     {
-        return $this->hasMany(Stock::class);
+        return $this->hasOne(Stock::class);
     }
 
     public function language(): BelongsTo

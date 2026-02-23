@@ -20,11 +20,6 @@ class Asset extends Model
         'utility_path'
     ];
 
-    public function asset(): HasMany
-    {
-        return $this->hasMany(Stock::class);
-    }
-
     public function book(): BelongsTo
     {
         return $this->belongsTo(Book::class, 'book_id');
