@@ -19,10 +19,27 @@ if (!function_exists('generateSlug')) {
         return $slugWithRandomInt;
     }
 
-    function countryCodeToEmoji($countryCode)
-    {
-        return collect(str_split(strtoupper($countryCode)))
-            ->map(fn($char) => mb_chr(127397 + ord($char)))
-            ->join('');
+    if (!function_exists('generateUniqueCode')) {
+        function generateUniqueCode(string $prefix, string $model, string $field): string
+        {
+            $prefixLibrary = 'SAINT-LUKE-LIBRARY';
+
+            $Title = Str::lower($prefix);
+
+            $replaceSpaces = preg_replace('/\s+/', '', $Title);
+
+            $code = $prefixLibrary . '-' . $replaceSpaces . '-' . random_int(1000, 9999);
+
+            $codeWithRandomInt = $code;
+
+            $count = 1;
+
+            while ($model::where($field, $codeWithRandomInt)->exists()) {
+                $codeWithRandomInt = $code . '-' . random_int(1000, 9999) . '-' . $count;
+                $count++;
+            }
+
+            return $codeWithRandomInt;
+        }
     }
 }

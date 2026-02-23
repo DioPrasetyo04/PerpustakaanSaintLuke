@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\BookStatus;
+use App\Enums\PublishedBooks;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -29,7 +31,16 @@ class Book extends Model
         'number_of_pages',
         'status',
         'cover',
-        'price'
+        'price',
+        'is_published',
+    ];
+
+    protected $casts = [
+        'publication_year' => 'integer',
+        'number_of_pages' => 'integer',
+        'price' => 'integer',
+        'status' => BookStatus::class,
+        'is_published' => PublishedBooks::class
     ];
 
     public function publisher(): BelongsTo
