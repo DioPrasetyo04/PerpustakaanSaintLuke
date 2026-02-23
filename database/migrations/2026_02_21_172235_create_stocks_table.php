@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('stocks', function (Blueprint $table) {
             $table->id();
             $table->foreignId('book_id')->constrained('books', 'id')->cascadeOnDelete()->cascadeOnUpdate();
-            $table->foreignId('asset_id')->constrained('assets', 'id')->cascadeOnDelete()->cascadeOnUpdate();
             $table->unsignedBigInteger('total')->default(0);
             $table->unsignedBigInteger('available')->default(0);
             $table->unsignedBigInteger('loan')->default(0);
