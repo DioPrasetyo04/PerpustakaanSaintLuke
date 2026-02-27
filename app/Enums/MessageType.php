@@ -16,4 +16,16 @@ enum MessageType: string
         }
         return "{$this->value} {$entity}";
     }
+
+    public function label(): string
+    {
+        return strtoupper($this->name);
+    }
+
+    public function options(): array
+    {
+        return collect(self::cases())->mapWithKeys(fn($item) => [
+            $item->value => $item->label(),
+        ])->values()->toArray();
+    }
 }

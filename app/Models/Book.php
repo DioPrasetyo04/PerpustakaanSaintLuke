@@ -7,7 +7,7 @@ use App\Enums\PublishedBooks;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -53,9 +53,9 @@ class Book extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function categories(): HasMany
+    public function categories(): BelongsToMany
     {
-        return $this->hasMany(BookOfCategory::class);
+        return $this->belongsToMany(Category::class, 'book_of_categories', 'book_id', 'category_id');
     }
 
     public function asset(): HasOne

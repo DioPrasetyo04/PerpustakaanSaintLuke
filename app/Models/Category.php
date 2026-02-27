@@ -5,7 +5,7 @@ namespace App\Models;
 use App\Traits\OptimizesImages;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Category extends Model
@@ -24,9 +24,9 @@ class Category extends Model
         'is_active',
     ];
 
-    public function Books(): HasMany
+    public function books(): BelongsToMany
     {
-        return $this->hasMany(BookOfCategory::class);
+        return $this->belongsToMany(Book::class, 'book_of_categories', 'category_id', 'book_id');
     }
 
     protected $casts = [

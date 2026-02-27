@@ -12,7 +12,7 @@ class Loan extends Model
     /** @use HasFactory<\Database\Factories\LoanFactory> */
     use HasFactory;
 
-    protected $table = 'laoans';
+    protected $table = 'loans';
 
     protected $fillable = [
         'user_id',
@@ -40,5 +40,20 @@ class Loan extends Model
     public function returnBook(): HasOne
     {
         return $this->hasOne(ReturnBook::class, 'loan_id');
+    }
+
+    public static function hasActiveLoan(int $user_id, int $book_id): bool
+    {
+        return self::query()->where('user_id', $user_id)->where('book_id', $book_id)->whereDoesntHave('returnBook', fn($query) => $query->where('book_id', $book_id)->where('user_id', $user_id))->exists();
+    }
+
+    public function substractionStock(int $book_id)
+    {
+        return Book::query()->where('id', $book_id)->whereHas('stock', fn($query) => $query->where('available', '>', 0))->decrement('stock.available', 1);
+    }
+
+    public function checkStock(int $book_id)
+    {
+        return Book::query()->where('id', $book_id)->whereHas('stock', fn($query) => $query->where('available', '>', 0))->exists();
     }
 }
