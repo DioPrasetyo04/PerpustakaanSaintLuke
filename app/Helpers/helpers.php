@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Support\Str;
 
 if (!function_exists('generateSlug')) {
@@ -51,6 +52,25 @@ if (!function_exists('generateSlug')) {
             }
 
             return 'Rp ' . number_format($value, 0, ',', '.');
+        }
+    }
+
+    if (!function_exists('generateUsername')) {
+        function generateUsername(string $name)
+        {
+            $username = Str::lower(preg_replace('/\s+/', '_', trim($name)) . random_int(100, 999));
+
+            $origimal_username = $username;
+
+            $count = 1;
+
+            while (User::where('username', $username)->exists()) {
+                $username = $origimal_username . '-' . $count;
+
+                $count++;
+            }
+
+            return $username;
         }
     }
 }

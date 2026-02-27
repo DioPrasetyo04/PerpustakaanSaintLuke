@@ -3,19 +3,20 @@
 namespace App\Filament\Resources\Books\Schemas;
 
 use App\Enums\AssetTypes;
+use App\Enums\BookStatus;
+use App\Enums\PublishedBooks;
 use App\Models\Book;
+use App\Models\Category;
+use App\Models\Language;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Components\Wizard;
-use App\Models\Language;
-use Filament\Forms\Components\FileUpload;
 use Filament\Schemas\Schema;
-use App\Enums\BookStatus;
-use App\Enums\PublishedBooks;
-use Filament\Forms\Components\ToggleButtons;
 use Filament\Support\RawJs;
 
 class BookForm
@@ -70,7 +71,6 @@ class BookForm
                                         ->columnSpan(1),
                                     TextInput::make('isbn')
                                         ->label('ISBN')
-                                        ->numeric()
                                         ->maxLength(255)
                                         ->columnSpan(1),
                                     Select::make('author_id')
@@ -143,7 +143,7 @@ class BookForm
                                     ])->icons([
                                         'Published' => 'heroicon-o-check-circle',
                                         'Unpublished' => 'heroicon-o-pencil'
-                                    ])->columnSpan(1),
+                                    ])->columnSpan(1)->inline(),
                                     // TextInput::make('price')
                                     //     ->label('Price')
                                     //     ->prefix('Rp')
@@ -173,7 +173,8 @@ class BookForm
                                             fn($state) => (int) str_replace('.', '', $state)
                                         )
                                         ->rules(['required', 'integer'])
-                                        ->columnSpan(2),
+                                        ->columnSpan(1),
+                                    Select::make('categories')->relationship('categories', 'name')->multiple()->preload()->searchable()->required()->columnSpan(1),
                                 ])->columns(3),
                         ]),
                     Wizard\Step::make('Asset Books Information')->description('Asset Of Books')
@@ -207,9 +208,9 @@ class BookForm
                                     }
                                 })->columnSpanFull(),
                                 TextInput::make('available')->label('Buku Tersedia')->numeric()->default(0)->live()->dehydrated()->readOnly()->disabled()->required(),
-                                TextInput::make('loan')->label('Buku Dipinjam')->numeric()->default(0)->required(),
-                                TextInput::make('lost')->label('Buku Hilang')->numeric()->default(0)->required(),
-                                TextInput::make('damaged')->label('Buku Rusak')->numeric()->default(0)->required(),
+                                TextInput::make('loan')->label('Buku Dipinjam')->numeric()->default(0)->readOnly()->disabled()->required(),
+                                TextInput::make('lost')->label('Buku Hilang')->numeric()->default(0)->readOnly()->disabled()->required(),
+                                TextInput::make('damaged')->label('Buku Rusak')->numeric()->default(0)->readOnly()->disabled()->required(),
                             ])->columns(2),
                         ]),
                 ])->columnSpanFull(),
