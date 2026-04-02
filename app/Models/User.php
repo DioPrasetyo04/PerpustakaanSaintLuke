@@ -6,16 +6,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, TwoFactorAuthenticatable, HasRoles;
+    use HasFactory, Notifiable, TwoFactorAuthenticatable, HasRoles, SoftDeletes;
 
     protected $table = 'users';
 
@@ -62,18 +63,28 @@ class User extends Authenticatable
         ];
     }
 
-    public function loan(): HasOne
+    public function loans(): HasMany
     {
-        return $this->hasOne(Loan::class);
+        return $this->hasMany(Loan::class);
     }
 
-    public function returnBook(): HasOne
+    public function returnBooks(): HasMany
     {
-        return $this->hasOne(ReturnBook::class);
+        return $this->hasMany(ReturnBook::class);
     }
 
-    public function fine(): HasOne
+    public function fines(): HasMany
     {
-        return $this->hasOne(Fine::class);
+        return $this->hasMany(Fine::class);
+    }
+
+    public function books(): HasMany
+    {
+        return $this->hasMany(Book::class, 'added_by');
+    }
+
+    public function socialmedia(): MorphMany
+    {
+        return $this->morphMany(SocialMedia::class, 'socialable');
     }
 }

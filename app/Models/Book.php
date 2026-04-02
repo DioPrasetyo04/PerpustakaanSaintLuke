@@ -20,7 +20,7 @@ class Book extends Model
 
     protected $fillable = [
         'publisher_id',
-        'author_id',
+        'added_by',
         'language_id',
         'book_code',
         'title',
@@ -48,9 +48,9 @@ class Book extends Model
         return $this->belongsTo(Publisher::class);
     }
 
-    public function author(): BelongsTo
+    public function addedBy(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'added_by');
     }
 
     public function categories(): BelongsToMany
@@ -58,9 +58,9 @@ class Book extends Model
         return $this->belongsToMany(Category::class, 'book_of_categories', 'book_id', 'category_id');
     }
 
-    public function asset(): HasOne
+    public function assets(): BelongsToMany
     {
-        return $this->hasOne(Asset::class);
+        return $this->belongsToMany(Asset::class, 'book_of_assets', 'book_id', 'asset_id');
     }
 
     public function stock(): HasOne
@@ -71,5 +71,10 @@ class Book extends Model
     public function language(): BelongsTo
     {
         return $this->belongsTo(Language::class, 'language_id');
+    }
+
+    public function authors(): BelongsToMany
+    {
+        return $this->belongsToMany(Author::class, 'author_of_books', 'book_id', 'author_id');
     }
 }

@@ -2,8 +2,11 @@
 
 namespace App\Filament\Resources\Publishers\Schemas;
 
+use App\Enums\SocialMedia;
 use App\Models\Publisher;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -19,7 +22,6 @@ class PublishersForm
     {
         return $schema
             ->components([
-
                 Section::make('Publisher Information')
                     ->description('Provide the necessary information for the publisher.')
                     ->schema([
@@ -87,8 +89,45 @@ class PublishersForm
                                 ->columnSpanFull(),
 
                         ])
-                    ])
-                    ->columnSpanFull(), // 2 kolom utama
+                    ])->columnSpanFull(),
+                Section::make('Social Media')->description('Social Media Information of User')->schema([
+                    Repeater::make('socialmedia')
+                        ->relationship()
+                        ->schema([
+                            Select::make('platform')
+                                ->label('Platform')
+                                ->options(SocialMedia::options())
+                                ->allowHtml()
+                                ->getOptionLabelUsing(fn($value) => SocialMedia::from($value)->html())
+                                ->searchable()
+                                ->required()
+                                ->native(false)
+                                ->columnSpan(1),
+
+                            TextInput::make('url')
+                                ->label('URL')
+                                ->url()
+                                ->required()
+                                ->columnSpan(1),
+
+                            TextInput::make('username')
+                                ->label('Username')
+                                ->columnSpan(1),
+                        ])
+                        ->columns(3)
+                        ->defaultItems(1)
+                        ->minItems(1)
+                        ->afterStateHydrated(function ($component, $state) {
+                            if (blank($state)) {
+                                $component->state([
+                                    []
+                                ]);
+                            }
+                        })
+                        ->addActionLabel('Tambah Social Media')
+                        ->reorderable()
+                        ->collapsible()
+                ])->columnSpanFull() // 2 kolom utama
             ]);
     }
 }

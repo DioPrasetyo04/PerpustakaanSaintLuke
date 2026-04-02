@@ -5,31 +5,13 @@ namespace App\Filament\Resources\Roles\Pages;
 use App\Filament\Resources\Roles\RoleResource;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
-use Illuminate\Database\Eloquent\Model;
 use Spatie\Permission\Models\Role;
 
 class CreateRole extends CreateRecord
 {
     protected static string $resource = RoleResource::class;
 
-    // alur submit form
-
-    // submit form
-    // ↓
-    // validate
-    // ↓
-    // beforeValidate()
-    // ↓
-    // beforeCreate()
-    // ↓
-    // handleRecordCreation()
-    // ↓
-    // afterCreate()
-    // ↓
-    // redirect
-
-    // logic untuk create data berdasarkan data array
-    protected function handleRecordCreation(array $data): Model
+    protected function handleRecordCreation(array $data): \Illuminate\Database\Eloquent\Model
     {
         $created = 0;
         $skipped = 0;
@@ -50,7 +32,6 @@ class CreateRole extends CreateRecord
                 'guard_name' => $roleData['guard_name'],
             ]);
 
-            // Sync permissions kalau ada
             if (!empty($roleData['permissions'])) {
                 $role->syncPermissions($roleData['permissions']);
             }
@@ -58,6 +39,7 @@ class CreateRole extends CreateRecord
             $created++;
         }
 
+        // notif sukses
         if ($created > 0) {
             Notification::make()
                 ->title('Berhasil')
@@ -66,6 +48,7 @@ class CreateRole extends CreateRecord
                 ->send();
         }
 
+        // notif skip
         if ($skipped > 0) {
             Notification::make()
                 ->title('Perhatian')
@@ -74,7 +57,8 @@ class CreateRole extends CreateRecord
                 ->send();
         }
 
-        return new Role();
+        // return record pertama (WAJIB)
+        return Role::latest()->first();
     }
 
     protected function getRedirectUrl(): string
