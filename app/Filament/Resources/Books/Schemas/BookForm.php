@@ -5,8 +5,9 @@ namespace App\Filament\Resources\Books\Schemas;
 use App\Enums\AssetTypes;
 use App\Enums\BookStatus;
 use App\Enums\PublishedBooks;
+use App\Enums\UserGender;
+use App\Models\Author;
 use App\Models\Book;
-use App\Models\Category;
 use App\Models\Language;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
@@ -18,6 +19,11 @@ use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Components\Wizard;
 use Filament\Schemas\Schema;
 use Filament\Support\RawJs;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Repeater;
+use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Schemas\Components\Grid;
 
 class BookForm
 {
@@ -59,29 +65,68 @@ class BookForm
                                     //     ->label('Publication Year')
                                     //     ->displayFormat('Y')
                                     //     ->columnSpan(1),
-                                    Select::make('publication_year')
+                                    DatePicker::make('publication_year')
                                         ->label('Publication Year')
-                                        ->options(
-                                            collect(range(now()->year, 1))
-                                                ->mapWithKeys(fn($year) => [$year => $year])
-                                                ->toArray()
-                                        )
-                                        ->searchable()
+                                        ->default(now())
+                                        ->format('Y')
+                                        ->displayFormat('Y')
                                         ->required()
                                         ->columnSpan(1),
                                     TextInput::make('isbn')
                                         ->label('ISBN')
                                         ->maxLength(255)
                                         ->columnSpan(1),
-                                    Select::make('author_id')
-                                        ->label('Author')
-                                        ->relationship('author', 'name')
+                                    Select::make('added_by')
+                                        ->label('Added By')
+                                        ->relationship('addedBy', 'name')
                                         ->preload()
                                         ->dehydrated()
                                         ->default(fn() => auth()->id())
                                         ->searchable()
                                         ->required()
                                         ->columnSpan(1),
+                                    Select::make('authors')
+                                        ->label('Authors')
+                                        ->relationship('authors', 'name')
+                                        ->multiple()
+                                        ->searchable()
+                                        ->preload()
+                                        ->required()
+                                        ->createOptionForm([
+                                            Grid::make(3)->schema([
+                                                TextInput::make('name')->live()->afterStateUpdated(function (Set $set, $state) {
+                                                    if (filled($state)) {
+                                                        $set('username', generateUsername($state));
+                                                    } else {
+                                                        $set('username', null);
+                                                    }
+                                                })->required(),
+                                                TextInput::make('username')->unique(ignoreRecord: true)->readOnly()->disabled()->dehydrated(),
+                                                PhoneInput::make('phone')
+                                                    ->label('Phone')
+                                                    ->defaultCountry('id')
+                                                    ->separateDialCode()
+                                                    ->showFlags()
+                                                    ->required(),
+                                                Select::make('gender')
+                                                    ->label('Gender')
+                                                    ->options(UserGender::optionViews())
+                                                    ->allowHtml()
+                                                    ->getOptionLabelUsing(fn($value) => UserGender::from($value)->html())
+                                                    ->searchable()
+                                                    ->required(),
+                                                DatePicker::make('date_of_birth')->label('Date Of Birth')->required(),
+                                                Select::make('nationality')->label('Country')->options(countryOptions())->allowHtml()->searchable()->required(),
+                                                FileUpload::make('avatar')->image()->maxSize(2048)->directory('authors')->disk('public')->visibility('public')->columnSpanFull(),
+                                                Textarea::make('bio')->label('Biography')->columnSpanFull(),
+                                                // DatePicker::make('verified_at')->label('Verified At')->displayFormat('Y-m-d')->columnSpanFull(),
+                                            ]),
+                                        ])->label('Author')->createOptionUsing(function (array $data) {
+                                            $author = Author::firstOrCreate($data);
+                                            return $author->id;
+                                        })
+                                        ->createOptionModalHeading('Create Author Form')
+                                        ->columnSpanFull(),
                                     RichEditor::make('synopsis')
                                         ->label('Synopsis')
                                         ->columnSpanFull(),
@@ -179,22 +224,39 @@ class BookForm
                         ]),
                     Wizard\Step::make('Asset Books Information')->description('Asset Of Books')
                         ->schema([
-                            Section::make('Asset Books')->description('This is asset of books etc: pdf, image, audio, more...')->relationship('asset')->schema([
-                                Select::make('type')->label('Type Asset')->options(AssetTypes::options())->live()->afterStateUpdated(fn(Set $set) => $set('utility_path', null))->required(),
-                                FileUpload::make('utility_path')
-                                    ->key(fn($get) => 'upload-' . $get('type'))
-                                    ->disk('public')
-                                    ->directory('books/assets')
-                                    ->live()
-                                    ->acceptedFileTypes(
-                                        fn($get) =>
-                                        $get('type')
-                                            ? AssetTypes::from($get('type'))->allowedMimes()
-                                            : []
-                                    )
-                                    ->visible(fn($get) => filled($get('type')))
-                                    ->required()
-                            ])
+                            Section::make('Asset Books')->description('This is asset of books etc: pdf, image, audio, more...')
+                                ->schema([
+                                    Repeater::make('assets')
+                                        ->label('Assets')
+                                        ->relationship('assets')
+                                        ->schema([
+                                            Select::make('type')
+                                                ->label('Type Asset')
+                                                ->options(AssetTypes::options())
+                                                ->live()
+                                                ->afterStateUpdated(fn(Set $set) => $set('utility_path', null))
+                                                ->required()
+                                                ->columnSpan(1),
+                                            FileUpload::make('utility_path')
+                                                ->key(fn($get) => 'upload-' . $get('type'))
+                                                ->disk('public')
+                                                ->directory('books/assets')
+                                                ->live()
+                                                ->acceptedFileTypes(
+                                                    fn($get) =>
+                                                    $get('type')
+                                                        ? AssetTypes::from($get('type'))->allowedMimes()
+                                                        : []
+                                                )
+                                                ->visible(fn($get) => filled($get('type')))
+                                                ->required()
+                                                ->columnSpan(2),
+                                        ])
+                                        ->columns(3)
+                                        ->addActionLabel('Add Asset')
+                                        ->reorderable()
+                                        ->columnSpanFull(),
+                                ]),
                         ]),
                     Wizard\Step::make('Stock Books Information')
                         ->description('This is stock of books')

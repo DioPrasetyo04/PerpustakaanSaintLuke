@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\DB;
 
 class Loan extends Model
 {
@@ -47,13 +48,36 @@ class Loan extends Model
         return self::query()->where('user_id', $user_id)->where('book_id', $book_id)->whereDoesntHave('returnBook', fn($query) => $query->where('book_id', $book_id)->where('user_id', $user_id))->exists();
     }
 
-    public function substractionStock(int $book_id)
+    public static function substractionStock(int $book_id)
     {
-        return Book::query()->where('id', $book_id)->whereHas('stock', fn($query) => $query->where('available', '>', 0))->decrement('stock.available', 1);
+        return Stock::query()->whereHas('book', fn($query) => $query->where('id', $book_id))->where('available', '>', 0)->decrement('available', 1);
     }
 
-    public function checkStock(int $book_id)
+    public static function checkStock(int $book_id)
     {
         return Book::query()->where('id', $book_id)->whereHas('stock', fn($query) => $query->where('available', '>', 0))->exists();
+    }
+
+    public static function addLoanStock(int $book_id)
+    {
+        return Stock::query()->whereHas('book', fn($query) => $query->where('id', $book_id))->increment('loan', 1);
+    }
+
+    public static function addLostStock(int $book_id)
+    {
+        return Stock::query()->whereHas('book', fn($query) => $query->where('id', $book_id))->increment('lost', 1);
+    }
+
+    public static function addDamageStock(int $book_id)
+    {
+        return Stock::query()->whereHas('book', fn($query) => $query->where('id', $book_id))->increment('damage', 1);
+    }
+
+    public static function rollbacLoanStock($bookId)
+    {
+        return Stock::query()->where('book_id', $bookId)->where('loan', '>', 0)->update([
+            'available' => DB::raw('available + 1'),
+            'loan' => DB::raw('loan - 1'),
+        ]);
     }
 }

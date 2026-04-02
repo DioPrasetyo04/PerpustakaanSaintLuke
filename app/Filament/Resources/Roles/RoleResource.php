@@ -9,6 +9,7 @@ use App\Filament\Resources\Roles\Schemas\RoleEditForm;
 use App\Filament\Resources\Roles\Schemas\RoleForm;
 use App\Filament\Resources\Roles\Tables\RolesTable;
 use BackedEnum;
+use Filament\Resources\Pages\CreateRecord;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -25,7 +26,7 @@ class RoleResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        if (request()->routeIs('filament.admin.resources.roles.create')) {
+        if ($schema->getLivewire() instanceof CreateRecord) {
             return RoleForm::configure($schema);
         }
 

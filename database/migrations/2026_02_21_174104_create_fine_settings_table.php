@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('fine_settings', function (Blueprint $table) {
             $table->id();
-            $table->enum('late_discount_type', ['percentage', 'fixed']);
             $table->unsignedBigInteger('late_fee_per_day');
             $table->enum('damage_discount_type', ['percentage', 'fixed']);
             $table->unsignedBigInteger('damage_fee_book');

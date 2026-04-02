@@ -21,7 +21,6 @@ class ReturnBook extends Model
         'book_id',
         'user_id',
         'return_date',
-        'status'
     ];
 
     protected $casts = [

@@ -23,9 +23,11 @@ class LoanForm
                     ->description('Provide the necessary information for the loan')
                     ->schema([
                         Grid::make(2)->schema([
-                            Select::make('user_id')->relationship('user', 'name', fn(Builder $query) => $query->whereDoesntHave('roles', function ($q) {
-                                $q->where('name', 'admin');
-                            }))->searchable()->preload()->live()->afterStateUpdated(function (Set $set, $state) {
+                            Select::make('user_id')->relationship('user', 'name', function (Builder $query) {
+                                $query->whereDoesntHave('roles', function ($q) {
+                                    $q->whereIn('name', ['admin', 'manager', 'writer']);
+                                });
+                            })->searchable(['name', 'username', 'email', 'phone', 'address', 'date_of_birth'])->preload()->live()->afterStateUpdated(function (Set $set, $state) {
                                 if (filled($state)) {
                                     $set('loan_code', generateUniqueCode('Loan', Loan::class, 'loan_code'));
                                 } else {
@@ -36,7 +38,7 @@ class LoanForm
                             TextInput::make('loan_code')->readOnly()->disabled()->dehydrated()->columnSpanFull(),
                             DatePicker::make('loan_date')->live()->afterStateUpdated(function (Set $set, $state) {
                                 if ($state) {
-                                    $set('due_date', Carbon::parse($state)->addDays(7));
+                                    $set('due_date', Carbon::parse($state)->addDays(14));
                                 } else {
                                     $set('due_date', null);
                                 }

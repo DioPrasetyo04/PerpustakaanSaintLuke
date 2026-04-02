@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('books', function (Blueprint $table) {
             $table->id();
             $table->foreignId('publisher_id')->constrained('publishers', 'id')->cascadeOnDelete()->cascadeOnUpdate();
-            $table->foreignId('author_id')->constrained('users', 'id')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('author_id')->constrained('authors', 'id')->cascadeOnDelete()->cascadeOnUpdate();
             $table->string('book_code')->unique();
             $table->string('title');
             $table->string('slug')->unique();
