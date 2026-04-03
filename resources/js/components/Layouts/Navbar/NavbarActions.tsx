@@ -14,7 +14,7 @@ const NavbarActions = () => {
             {/* Dark Mode Toggle */}
             {/* <motion.button
                 // onClick={() => setDarkModeHandler(darkMode)}
-                className="rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] p-2.5 transition-all duration-300 hover:border-[#C8A45C] dark:border-[#334155] dark:bg-[#1E293B] dark:hover:border-[#D4AF37]"
+                className="rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] p-2.5 transition-all duration-300 hover:border-[#C8A45C]"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
             >

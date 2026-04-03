@@ -1,16 +1,25 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from '@inertiajs/react';
-import { ChevronDown, Moon, Sun } from 'lucide-react';
+import { ChevronDown, Moon, Sun, LayoutDashboard, Settings, History, LogOut } from 'lucide-react';
 import type { NavbarMobileProps } from '@/types/navbar';
 import { cn } from '@/lib/utils';
 import { ButtonVariants } from '@/components/ui/button3D';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useTheme } from 'next-themes';
 
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+    dashboard: LayoutDashboard,
+    settings: Settings,
+    riwayat: History,
+    logout: LogOut,
+};
+
 const NavbarMobile = ({
     navItems,
     navAuthItems,
+    profileAuth,
+    isAuthenticated,
     isMenuOpen,
     setIsMenuOpen,
     isActive,
@@ -202,49 +211,93 @@ const NavbarMobile = ({
                         {/* Divider */}
                         <div className="my-2 h-px bg-gray-100" />
 
-                        {/* Auth Buttons */}
-                        <div className="mt-2 flex flex-col gap-3 px-2">
-                            {navAuthItems.map((authItem) => {
-                                const label =
-                                    language === 'id'
-                                        ? authItem.label.id
-                                        : authItem.label.en;
+                        {/* Auth Section */}
+                        {isAuthenticated && profileAuth ? (
+                            <div className="mt-2 flex flex-col gap-1 px-2">
+                                {/* Profile header */}
+                                <div className="flex items-center gap-3 px-3 py-3">
+                                    <img
+                                        src={profileAuth.photo}
+                                        alt={profileAuth.name}
+                                        className="h-10 w-10 rounded-full object-cover ring-2 ring-[#C8A45C]/50"
+                                    />
+                                    <div>
+                                        <p className="text-sm font-semibold text-gray-800">
+                                            {profileAuth.name}
+                                        </p>
+                                    </div>
+                                </div>
 
-                                if (authItem.variant === 'ghost') {
+                                {/* Profile menu items */}
+                                {profileAuth.menu.map((item) => {
+                                    const Icon = iconMap[item.icon];
+                                    const label =
+                                        language === 'id'
+                                            ? item.label.id
+                                            : item.label.en;
+                                    const isLogout = item.icon === 'logout';
+
+                                    if (isLogout) {
+                                        return (
+                                            <div
+                                                key={item.id}
+                                                className="border-t border-gray-100 pt-1"
+                                            >
+                                                <Link
+                                                    href={item.href}
+                                                    method="post"
+                                                    as="button"
+                                                    onClick={handleClose}
+                                                    className="flex w-full items-center gap-3 rounded-lg px-5 py-2.5 text-sm text-red-500 transition-colors hover:bg-red-50"
+                                                >
+                                                    {Icon && (
+                                                        <Icon className="h-4 w-4" />
+                                                    )}
+                                                    {label}
+                                                </Link>
+                                            </div>
+                                        );
+                                    }
+
                                     return (
                                         <Link
-                                            key={authItem.id}
-                                            href={authItem.href}
+                                            key={item.id}
+                                            href={item.href}
                                             onClick={handleClose}
                                             className="w-full"
                                         >
                                             <ButtonVariants
-                                                variant="ghost"
-                                                className="w-full"
+                                                variant="navItem"
+                                                size="sm"
+                                                className="w-full justify-start gap-3 px-5"
                                             >
+                                                {Icon && (
+                                                    <Icon className="h-4 w-4" />
+                                                )}
                                                 {label}
                                             </ButtonVariants>
                                         </Link>
                                     );
-                                }
-
-                                return (
-                                    <Link
-                                        key={authItem.id}
-                                        href={authItem.href}
-                                        onClick={handleClose}
+                                })}
+                            </div>
+                        ) : (
+                            <div className="mt-2 flex flex-col gap-3 px-2">
+                                <Link
+                                    href={navAuthItems.href}
+                                    onClick={handleClose}
+                                    className="w-full"
+                                >
+                                    <ButtonVariants
+                                        variant="default"
                                         className="w-full"
                                     >
-                                        <ButtonVariants
-                                            variant="default"
-                                            className="w-full"
-                                        >
-                                            {label}
-                                        </ButtonVariants>
-                                    </Link>
-                                );
-                            })}
-                        </div>
+                                        {language === 'id'
+                                            ? navAuthItems.label.id
+                                            : navAuthItems.label.en}
+                                    </ButtonVariants>
+                                </Link>
+                            </div>
+                        )}
 
                         {/* Safe-area bottom spacing */}
                         <div className="h-2" />

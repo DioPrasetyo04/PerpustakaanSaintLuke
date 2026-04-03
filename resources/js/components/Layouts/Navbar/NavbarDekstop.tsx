@@ -6,6 +6,7 @@ import type { NavbarDesktopProps } from '@/types/navbar';
 import type { NavItem } from '@/types/navbar';
 import { cn } from '@/lib/utils';
 import { DropdownMenuItem } from './DropdownMenuItem';
+import { DropdownMenuProfile } from './DropdownMenuProfile';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useTheme } from 'next-themes';
 import { Moon, Sun } from 'lucide-react';
@@ -16,6 +17,8 @@ import DropdownMenuLanguage from './DropdownMenuLanguage';
 const NavbarDesktop = ({
     navItems,
     navAuthItems,
+    profileAuth,
+    isAuthenticated,
     isScrolled,
     activeSection,
     language,
@@ -88,37 +91,21 @@ const NavbarDesktop = ({
                 {/* Language Toggle */}
                 <DropdownMenuLanguage isScrolled={isScrolled} />
 
-                {navAuthItems.map((authItem) => {
-                    const label =
-                        language === 'id'
-                            ? authItem.label.id
-                            : authItem.label.en;
-
-                    if (authItem.variant === 'ghost') {
-                        return (
-                            <Link key={authItem.id} href={authItem.href}>
-                                <ButtonVariants
-                                    variant="ghost"
-                                    className={cn(
-                                        isScrolled
-                                            ? 'text-gray-700 hover:bg-gray-100'
-                                            : 'text-white/80 hover:bg-white/10 hover:text-white',
-                                    )}
-                                >
-                                    {label}
-                                </ButtonVariants>
-                            </Link>
-                        );
-                    }
-
-                    return (
-                        <Link key={authItem.id} href={authItem.href}>
-                            <ButtonVariants variant="default">
-                                {label}
-                            </ButtonVariants>
-                        </Link>
-                    );
-                })}
+                {isAuthenticated && profileAuth ? (
+                    <DropdownMenuProfile
+                        profileAuth={profileAuth}
+                        language={language}
+                        isScrolled={isScrolled}
+                    />
+                ) : (
+                    <Link href={navAuthItems.href}>
+                        <ButtonVariants variant="default">
+                            {language === 'id'
+                                ? navAuthItems.label.id
+                                : navAuthItems.label.en}
+                        </ButtonVariants>
+                    </Link>
+                )}
             </div>
         </section>
     );

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
-import { navAuthItems, navItems } from '@/data/data';
+import { router } from '@inertiajs/react';
+import { navAuthItems, navItems, profileSubNavItems } from '@/data/data';
 import { useScrollToSection } from '@/hooks/useScrollToSection';
 import { useLanguage } from '@/hooks/useLanguage';
 import NavbarLogo from './NavbarLogo';
@@ -9,8 +10,31 @@ import NavbarDesktop from './NavbarDekstop';
 import NavbarMobile from './NavbarMobile';
 import { useScroll } from '@/hooks/useScroll';
 import { useActiveScroll } from '@/hooks/useActiveScroll';
+import type { NavItemSettingsAuth } from '@/types/navbar';
 
-const Navbar = () => {
+const Navbar = ({ initialAuth }: { initialAuth?: any }) => {
+    const [auth, setAuth] = useState<any>(initialAuth ?? null);
+
+    useEffect(() => {
+        // Listen for Inertia page navigations to keep auth in sync
+        const removeListener = router.on('navigate', (event) => {
+            const pageAuth = (event.detail.page.props as any).auth;
+            setAuth(pageAuth ?? null);
+        });
+
+        return removeListener;
+    }, []);
+
+    const isAuthenticated = !!auth?.user;
+
+    const profileAuth: NavItemSettingsAuth | null = isAuthenticated
+        ? {
+              photo: auth.user.avatar || '/assets/images/default-avatar.png',
+              name: auth.user.name,
+              menu: profileSubNavItems,
+          }
+        : null;
+
     const { isScrolled } = useScroll();
     const { activeSection } = useActiveScroll();
     const { scrollToSection } = useScrollToSection();
@@ -50,7 +74,7 @@ const Navbar = () => {
                     mobileMenuOpen ? 'z-30' : 'z-50'
                 } ${
                     isScrolled
-                        ? 'border-b border-[#E5E7EB]/50 bg-white p-7 shadow-lg backdrop-blur-xl dark:border-[#334155]/50 dark:bg-[#0A0F1E]/90'
+                        ? 'border-b border-[#E5E7EB]/50 bg-white p-7 shadow-lg backdrop-blur-xl'
                         : 'bg-tranparent p-5'
                 }`}
             >
@@ -69,6 +93,8 @@ const Navbar = () => {
                             <NavbarDesktop
                                 navItems={navItems}
                                 navAuthItems={navAuthItems}
+                                profileAuth={profileAuth}
+                                isAuthenticated={isAuthenticated}
                                 isScrolled={isScrolled}
                                 activeSection={activeSection}
                                 language={language}
@@ -100,6 +126,8 @@ const Navbar = () => {
                 <NavbarMobile
                     navItems={navItems}
                     navAuthItems={navAuthItems}
+                    profileAuth={profileAuth}
+                    isAuthenticated={isAuthenticated}
                     isMenuOpen={mobileMenuOpen}
                     setIsMenuOpen={setMobileMenuOpen}
                     isActive={isActive}

@@ -19,16 +19,30 @@ export type NavItem = {
     menu?: SubNavItem[];
 };
 
-export type NavAuthItem = {
-    id: string;
+export type NavItemSettingsAuth = {
+    photo: string;
+    name: string;
+    menu: SubNavItemSettingsAuth[];
+};
+
+export type SubNavItemSettingsAuth = {
+    id: number;
+    icon: string;
     label: {
         id: string;
         en: string;
     };
     href: string;
-    variant?: 'ghost' | 'default';
 };
 
+export type NavAuth = {
+    label: {
+        id: string;
+        en: string;
+    };
+    href: string;
+    variant?: string;
+};
 export type NavbarProps = {
     isScrolled: boolean;
     mobileMenuOpen: boolean;
@@ -37,7 +51,9 @@ export type NavbarProps = {
 
 export type NavbarDesktopProps = {
     navItems: NavItem[];
-    navAuthItems: NavAuthItem[];
+    navAuthItems: NavAuth;
+    profileAuth: NavItemSettingsAuth | null;
+    isAuthenticated: boolean;
     isScrolled: boolean;
     activeSection: string;
     language: string;
@@ -45,7 +61,9 @@ export type NavbarDesktopProps = {
 
 export type NavbarMobileProps = {
     navItems: NavItem[];
-    navAuthItems: NavAuthItem[];
+    navAuthItems: NavAuth;
+    profileAuth: NavItemSettingsAuth | null;
+    isAuthenticated: boolean;
     isMenuOpen: boolean;
     setIsMenuOpen: Dispatch<SetStateAction<boolean>>;
     isActive: (path: string) => boolean;
