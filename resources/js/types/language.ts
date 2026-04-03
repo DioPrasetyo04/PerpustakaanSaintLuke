@@ -1,4 +1,6 @@
+export type Lang = 'id' | 'en';
+
 export interface LanguageType {
-    language: string;
-    setLanguage: (language: string) => void;
+    language: Lang;
+    setLanguage: (lang: Lang) => void;
 }

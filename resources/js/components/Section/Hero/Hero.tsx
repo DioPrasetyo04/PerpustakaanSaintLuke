@@ -48,7 +48,7 @@ const HeroSection = () => {
                     <motion.button
                         key={index}
                         onClick={() => setCurrentSlide(index)}
-                        className={`h-1.5 rounded-full transition-all duration-500 ${currentSlide === index ? 'w-12 bg-[#C8A45C] dark:bg-[#D4AF37]' : 'w-8 bg-white/40 hover:bg-white/50 dark:bg-white/10 dark:hover:bg-white/20'}`}
+                        className={`h-1.5 rounded-full transition-all duration-500 ${currentSlide === index ? 'w-12 bg-[#C8A45C]' : 'w-8 bg-white/40 hover:bg-white/50'}`}
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.95 }}
                     ></motion.button>
@@ -74,9 +74,9 @@ const HeroSection = () => {
                     >
                         <div className="group relative">
                             <div className="absolute inset-0 rounded-full bg-gradient-to-r from-[#C8A45C] to-[#D4AF37] opacity-50 blur-lg transition-opacity duration-500 group-hover:opacity-75"></div>
-                            <div className="relative inset-0 flex flex-row items-center gap-3 rounded-full bg-gradient-to-r from-[#C8A45C] to-[#D4AF37] px-3 py-2 shadow-[0_8px_0_0_rgba(200,164,92,0.4)] dark:bg-white/10 dark:shadow-[0px_4px_10px_rgba(0,0,0,0.3]">
+                            <div className="relative inset-0 flex flex-row items-center gap-3 rounded-full bg-gradient-to-r from-[#C8A45C] to-[#D4AF37] px-3 py-2 shadow-[0_8px_0_0_rgba(200,164,92,0.4)]">
                                 <MdOutlineMenuBook className="h-6 w-6 object-cover" />
-                                <span className="relative text-xs font-semibold tracking-wider text-[#C8A45C] uppercase dark:text-white">
+                                <span className="relative text-xs font-semibold tracking-wider text-[#C8A45C] uppercase">
                                     {content.badge}
                                 </span>
                             </div>
@@ -100,7 +100,7 @@ const HeroSection = () => {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.5, duration: 0.8 }}
-                                className="mb-2 block text-[#C8A45C] dark:text-[#D4AF37]"
+                                className="mb-2 block text-[#C8A45C]"
                             >
                                 {content.title}
                             </motion.span>
@@ -124,7 +124,7 @@ const HeroSection = () => {
                     </motion.div>
                 </motion.div>
             </div>
-            <div className="relative z-10 mx-auto max-w-[2000px] rounded-full bg-white px-4 py-2 sm:px-3 lg:px-2 dark:bg-[#D4AF37]">
+            <div className="relative z-10 mx-auto max-w-[2000px] rounded-full bg-white px-4 py-2 sm:px-3 lg:px-2">
                 <label
                     htmlFor="search"
                     className="flex flex-row items-center justify-between justify-center gap-1"
@@ -141,7 +141,7 @@ const HeroSection = () => {
                                     : 'Search Anyway...'
                             }
                             id="search"
-                            className="rounded-full px-5 py-2 text-white dark:text-black"
+                            className="rounded-full px-5 py-2 text-gray-800"
                         />
                         <ButtonVariants
                             variant={'default'}
@@ -190,9 +190,9 @@ const HeroSection = () => {
             </motion.div>
 
             {/* Decorative Elements */}
-            <div className="absolute top-1/4 left-10 h-32 w-32 animate-pulse rounded-full bg-[#C8A45C]/10 blur-3xl dark:bg-[#D4AF37]/10"></div>
+            <div className="absolute top-1/4 left-10 h-32 w-32 animate-pulse rounded-full bg-[#C8A45C]/10 blur-3xl"></div>
             <div
-                className="absolute right-10 bottom-1/4 h-40 w-40 animate-pulse rounded-full bg-[#C8A45C]/10 blur-3xl dark:bg-[#D4AF37]/10"
+                className="absolute right-10 bottom-1/4 h-40 w-40 animate-pulse rounded-full bg-[#C8A45C]/10 blur-3xl"
                 style={{ animationDelay: '1s' }}
             ></div>
         </section>

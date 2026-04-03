@@ -34,7 +34,7 @@ const NavbarLogo = ({ scrollToSection }: NavbarLogoProps) => {
                     >
                         <span
                             key={navLogo.id}
-                            className="text-[#C8A45C] transition-colors duration-300 group-hover:text-[#B69449] dark:text-[#D4AF37] dark:group-hover:text-[#E8C862]"
+                            className="text-[#C8A45C] transition-colors duration-300 group-hover:text-[#B69449]"
                         >
                             {language === 'id'
                                 ? navLogo.label.id
@@ -42,7 +42,7 @@ const NavbarLogo = ({ scrollToSection }: NavbarLogoProps) => {
                         </span>
                     </div>
                     <motion.div
-                        className="absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-[#C8A45C] to-transparent dark:from-[#D4AF37]"
+                        className="absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-[#C8A45C] to-transparent"
                         initial={{ width: 0 }}
                         whileHover={{ width: '100%' }}
                         transition={{ duration: 0.3 }}
