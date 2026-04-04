@@ -30,25 +30,31 @@ class ReturnBookCheck extends Model
 
     public static function addReturnStock(int $book_id)
     {
-        return Stock::query()->where('book_id', $book_id)->where('loan', '>', 0)->update([
-            'available' => DB::raw('available + 1'),
-            'loan' => DB::raw('loan - 1'),
-        ]);
+        return Stock::query()
+            ->where('book_id', $book_id)
+            ->update([
+                'available' => DB::raw('available + 1'),
+                'loan' => DB::raw('CASE WHEN loan > 0 THEN loan - 1 ELSE 0 END'),
+            ]);
     }
 
     public static function addDamagedStock(int $book_id)
     {
-        return Stock::query()->where('book_id', $book_id)->where('loan', '>', 0)->update([
-            'loan' => DB::raw('loan - 1'),
-            'damaged' => DB::raw('damaged + 1'),
-        ]);
+        return Stock::query()
+            ->where('book_id', $book_id)
+            ->update([
+                'loan' => DB::raw('CASE WHEN loan > 0 THEN loan - 1 ELSE 0 END'),
+                'damaged' => DB::raw('damaged + 1'),
+            ]);
     }
 
     public static function addLostStock(int $book_id)
     {
-        return Stock::query()->where('book_id', $book_id)->where('loan', '>', 0)->update([
-            'loan' => DB::raw('loan - 1'),
-            'lost' => DB::raw('lost + 1'),
-        ]);
+        return Stock::query()
+            ->where('book_id', $book_id)
+            ->update([
+                'loan' => DB::raw('CASE WHEN loan > 0 THEN loan - 1 ELSE 0 END'),
+                'lost' => DB::raw('lost + 1'),
+            ]);
     }
 }

@@ -46,4 +46,13 @@ enum AssetTypes: string
             ],
         };
     }
+
+
+    public function description(): string
+    {
+        return match ($this) {
+            self::FILE => 'Supported file such as: PDF, DOCX, XLSX',
+            self::RESOURCES => 'Supported resources such as: JPG, PNG, WEBP, MP3, WAV, AAC, MP4, AVI, MOV, MKV',
+        };
+    }
 }

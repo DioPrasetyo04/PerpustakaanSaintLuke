@@ -73,11 +73,19 @@ class Loan extends Model
         return Stock::query()->whereHas('book', fn($query) => $query->where('id', $book_id))->increment('damage', 1);
     }
 
-    public static function rollbacLoanStock($bookId)
+    public static function rollbacLoanStock(int $bookId)
     {
         return Stock::query()->where('book_id', $bookId)->where('loan', '>', 0)->update([
             'available' => DB::raw('available + 1'),
             'loan' => DB::raw('loan - 1'),
         ]);
+    }
+
+    public static function checkUserVerified(int $userId)
+    {
+         return User::query()
+        ->where('id', $userId)
+        ->whereNotNull('email_verified_at')
+        ->exists();
     }
 }

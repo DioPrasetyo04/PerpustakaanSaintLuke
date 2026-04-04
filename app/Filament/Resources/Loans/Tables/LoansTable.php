@@ -37,13 +37,23 @@ class LoansTable
                     ->url(fn($record) => ReturnBooksResource::getUrl('create', ['user_id' => $record->user_id]))
                     ->visible(fn($record) => !$record->returnBook()->exists()),
                 DeleteAction::make()
-                    ->before(fn($record) => Loan::rollbacLoanStock($record->book_id))
+                    ->before(function ($record) {
+                        if (!$record->returnBook()->exists()) {
+                            Loan::rollbacLoanStock($record->book_id);
+                        }
+                    })
                     ->visible(fn($record) => !$record->returnBook()->exists()),
             ])
             ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
+                DeleteBulkAction::make()
+                    ->before(function ($records) {
+
+                        foreach ($records as $record) {
+                            if (!$record->returnBook()->exists()) {
+                                Loan::rollbacLoanStock($record->book_id);
+                            }
+                        }
+                    }),
             ]);
     }
 }

@@ -2,16 +2,12 @@
 
 namespace App\Filament\Resources\ReturnBooks\Pages;
 
-use App\Enums\BookCondition;
-use App\Enums\DiscountType;
-use App\Enums\PaymentStatus;
 use App\Filament\Resources\ReturnBooks\ReturnBooksResource;
-use App\Models\Fine;
 use App\Models\FineSettings;
-use App\Models\ReturnBookCheck;
 use App\Traits\HandleReturnBook;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
-use Illuminate\Support\Carbon;
+use Filament\Support\Exceptions\Halt;
 
 class CreateReturnBooks extends CreateRecord
 {
@@ -19,8 +15,31 @@ class CreateReturnBooks extends CreateRecord
 
     use HandleReturnBook;
 
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        if (!FineSettings::exists()) {
+
+            Notification::make()
+                ->title('Pengaturan denda belum dibuat')
+                ->body('Silakan buat pengaturan denda terlebih dahulu.')
+                ->danger()
+                ->persistent()
+                ->send();
+
+            $this->redirectRoute(
+                'filament.admin.resources.fine-settings.create'
+            );
+
+            throw new Halt();
+        }
+
+        return $data;
+    }
+
     protected function afterCreate(): void
     {
+        $this->record->refresh();
+
         $this->handleReturnBookCheck($this->record);
     }
 

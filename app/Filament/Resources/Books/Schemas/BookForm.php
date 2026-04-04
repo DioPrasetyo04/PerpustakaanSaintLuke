@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Books\Schemas;
 
+use Illuminate\Support\HtmlString;
 use App\Enums\AssetTypes;
 use App\Enums\BookStatus;
 use App\Enums\PublishedBooks;
@@ -68,8 +69,8 @@ class BookForm
                                     DatePicker::make('publication_year')
                                         ->label('Publication Year')
                                         ->default(now())
-                                        ->format('Y')
-                                        ->displayFormat('Y')
+                                        // ->format('dddd-MMM')
+                                        ->displayFormat('d F Y')
                                         ->required()
                                         ->columnSpan(1),
                                     TextInput::make('isbn')
@@ -239,6 +240,17 @@ class BookForm
                                                 ->columnSpan(1),
                                             FileUpload::make('utility_path')
                                                 ->key(fn($get) => 'upload-' . $get('type'))
+                                                ->label('Asset')
+                                                ->helperText(
+                                                    fn($get) =>
+                                                    $get('type')
+                                                        ? new HtmlString(
+                                                            '<div class="text-sm text-danger-600 dark:text-danger-400">'
+                                                                . AssetTypes::from($get('type'))->description()
+                                                                . '</div>'
+                                                        )
+                                                        : 'Select type first'
+                                                )
                                                 ->disk('public')
                                                 ->directory('books/assets')
                                                 ->live()
