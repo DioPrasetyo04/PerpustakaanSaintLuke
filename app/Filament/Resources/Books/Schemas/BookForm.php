@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Books\Schemas;
 
+use Closure;
 use Illuminate\Support\HtmlString;
 use App\Enums\AssetTypes;
 use App\Enums\BookStatus;
@@ -25,6 +26,7 @@ use Filament\Forms\Components\Repeater;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Utilities\Get;
 
 class BookForm
 {
@@ -273,20 +275,79 @@ class BookForm
                     Wizard\Step::make('Stock Books Information')
                         ->description('This is stock of books')
                         ->schema([
-                            Section::make('Stock Books')->description('This is stock of books')->relationship('stock')->schema([
-                                TextInput::make('total')->label('Total Stock')->numeric()->default(0)->required()->live()->afterStateUpdated(function (Set $set, $state) {
-                                    if (filled($state)) {
-                                        $set('available', $state);
-                                    } else {
-                                        $set('available', 0);
-                                    }
-                                })->columnSpanFull(),
-                                TextInput::make('available')->label('Buku Tersedia')->numeric()->default(0)->live()->dehydrated()->readOnly()->disabled()->required(),
-                                TextInput::make('loan')->label('Buku Dipinjam')->numeric()->default(0)->readOnly()->disabled()->required(),
-                                TextInput::make('lost')->label('Buku Hilang')->numeric()->default(0)->readOnly()->disabled()->required(),
-                                TextInput::make('damaged')->label('Buku Rusak')->numeric()->default(0)->readOnly()->disabled()->required(),
-                            ])->columns(2),
-                        ]),
+                            Section::make('Stock Books')
+                                ->relationship('stock')
+                                ->schema([
+
+                                    TextInput::make('total')
+                                        ->label('Total Stock')
+                                        ->numeric()
+                                        ->required()
+                                        ->live()
+                                        ->rules([
+                                            fn(Get $get): Closure => function ($attribute, $value, $fail) use ($get) {
+
+                                                $available = (int) $get('available');
+                                                $loan = (int) $get('loan');
+                                                $lost = (int) $get('lost');
+                                                $damaged = (int) $get('damaged');
+
+                                                $sum = $available + $loan + $lost + $damaged;
+
+                                                if ($sum !== (int) $value) {
+                                                    $fail("Total harus {$sum}, tidak sinkron data");
+                                                }
+                                            }
+                                        ])
+                                        ->columnSpanFull(),
+
+                                    TextInput::make('available')
+                                        ->numeric()
+                                        ->required()
+                                        ->live(),
+
+                                    TextInput::make('loan')
+                                        ->numeric()
+                                        ->required()
+                                        ->live()
+                                        ->readOnly(
+                                            fn(Get $get) =>
+                                            $get('loan') > 0
+                                        )
+                                        ->disabled(
+                                            fn(Get $get) =>
+                                            $get('loan') > 0
+                                        ),
+
+                                    TextInput::make('lost')
+                                        ->numeric()
+                                        ->required()
+                                        ->live()
+                                        ->readOnly(
+                                            fn(Get $get) =>
+                                            $get('lost') > 0
+                                        )
+                                        ->disabled(
+                                            fn(Get $get) =>
+                                            $get('lost') > 0
+                                        ),
+
+                                    TextInput::make('damaged')
+                                        ->numeric()
+                                        ->required()
+                                        ->live()
+                                        ->readOnly(
+                                            fn(Get $get) =>
+                                            $get('damaged') > 0
+                                        )
+                                        ->disabled(
+                                            fn(Get $get) =>
+                                            $get('damaged') > 0
+                                        ),
+
+                                ])
+                                ->columns(2),
+                        ])
                 ])->columnSpanFull(),
             ]);
     }
