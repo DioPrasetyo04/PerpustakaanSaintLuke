@@ -99,25 +99,34 @@ class ReturnBooksForm
                             ])
                         ])->columnSpanFull(),
                     ]),
-                    Step::make('Return Book Condition Information')->description('All the information of the return book condition')->schema([
-                        Section::make('Return Book Condition Information')->description('Provide Informations Return Book Condition')->relationship('returnBookCheck')->schema([
-                            Grid::make(2)->schema([
-                                Select::make('condition')
-                                    ->options(BookCondition::options())
-                                    ->formatStateUsing(function ($state) {
-                                        if (!$state || !BookCondition::tryFrom($state)) {
-                                            return null;
-                                        }
+                    Step::make('Return Book Condition Information')
+                        ->description('All the information of the return book condition')
+                        ->schema([
+                            Section::make('Return Book Condition Information')
+                                ->description('Provide Informations Return Book Condition')
+                                ->relationship('returnBookCheck')
+                                ->dehydrated()
+                                ->schema([
+                                    Grid::make(2)->schema([
+                                        Select::make('condition')
+                                            ->options(BookCondition::options())
+                                            ->formatStateUsing(function ($state) {
+                                                if (!$state || !BookCondition::tryFrom($state)) {
+                                                    return null;
+                                                }
 
-                                        return BookCondition::from($state)->html();
-                                    })
-                                    ->native(false)
-                                    ->allowHtml()
-                                    ->required(),
-                                RichEditor::make('notes')->maxLength(255)->label('Notes Book'),
-                            ])
+                                                return BookCondition::from($state)->html();
+                                            })
+                                            ->native(false)
+                                            ->allowHtml()
+                                            ->required(),
+
+                                        RichEditor::make('notes')
+                                            ->maxLength(255)
+                                            ->label('Notes Book'),
+                                    ])
+                                ])
                         ])
-                    ])
                 ])->columnSpanFull()
             ]);
     }

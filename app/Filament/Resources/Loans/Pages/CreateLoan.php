@@ -27,11 +27,19 @@ class CreateLoan extends CreateRecord
 
         if ($bookId && !Loan::checkStock($bookId)) {
             Notification::make()->icon('heroicon-s-x-circle')->color('danger')->title('Failed')->body('Stock buku not available')->persistent()->send();
+
+            throw ValidationException::withMessages([
+                'stock' => 'Stock not available in database',
+            ]);
         }
 
-        // if ($userId && Loan::checkUserVerified($userId)) {
-        //     Notification::make()->icon('heroicon-s-x-circle')->color('danger')->title('Failed')->body('Email User Not Verified, Please Verified Email First!!!')->persistent()->send();
-        // }
+        if ($userId && !Loan::checkUserVerified($userId)) {
+            Notification::make()->icon('heroicon-s-x-circle')->color('danger')->title('Failed')->body('Email User Not Verified, Please Verified Email First!!!')->persistent()->send();
+
+            throw ValidationException::withMessages([
+                'user_id' => 'User email not verified, please verified email!!',
+            ]);
+        }
     }
 
     public function afterCreate()
@@ -40,7 +48,15 @@ class CreateLoan extends CreateRecord
             Loan::substractionStock($bookId);
             Loan::addLoanStock($bookId);
         }
+    }
 
-        Notification::make()->icon('heroicon-s-check-circle')->color('success')->title('Berhasil')->body('Data pinjaman berhasil disimpan')->persistent()->send();
+    protected function getCreatedNotification(): ?Notification
+    {
+        return Notification::make()
+            ->icon('heroicon-s-check-circle')
+            ->color('success')
+            ->title('Berhasil')
+            ->body('Data pinjaman berhasil disimpan')
+            ->persistent();
     }
 }
