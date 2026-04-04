@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -61,6 +62,11 @@ class Book extends Model
     public function assets(): BelongsToMany
     {
         return $this->belongsToMany(Asset::class, 'book_of_assets', 'book_id', 'asset_id');
+    }
+
+    public function loan(): HasMany
+    {
+        return $this->hasMany(Loan::class);
     }
 
     public function stock(): HasOne
