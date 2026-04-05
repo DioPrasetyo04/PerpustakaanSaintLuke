@@ -39,6 +39,14 @@ class AnnouncementResource extends Resource
         ];
     }
 
+    public static function canCreate(): bool
+    {
+        return !Announcement::query()
+            ->where('is_active', true)
+            ->withoutTrashed()
+            ->exists();
+    }
+
     public static function getPages(): array
     {
         return [

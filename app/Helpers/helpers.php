@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use PragmaRX\Countries\Package\Countries;
 
@@ -112,5 +113,23 @@ if (!function_exists('moneyFormatter')) {
 
         $formatter->setSymbol(NumberFormatter::CURRENCY_SYMBOL, 'Rp. ');
         return $formatter->formatCurrency($value, 'IDR');
+    }
+}
+
+if (!function_exists('generateRouteName')) {
+    function generateRoute(string $input, Model $model): string
+    {
+        $slug = Str::slug(Str::lower($input));
+
+        $slugWithRandomInt = $slug . '-' . random_int(1000, 9999);
+
+        $count = 1;
+
+        while ($model::where('slug', $slugWithRandomInt)->exists()) {
+            $slugWithRandomInt = $slug . '-' . random_int(1000, 9999) . '-' . $count;
+            $count++;
+        }
+
+        return $slugWithRandomInt;
     }
 }

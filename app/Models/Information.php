@@ -12,9 +12,12 @@ class Information extends Model
     /** @use HasFactory<\Database\Factories\InformationFactory> */
     use HasFactory;
 
+    protected $table = 'informations';
+
     protected $fillable = [
         'image',
         'name',
+        'description',
         'slug',
         'category_id'
     ];
