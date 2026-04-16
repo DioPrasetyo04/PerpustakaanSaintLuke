@@ -6,6 +6,7 @@ use App\Enums\BookCondition;
 use App\Filament\Resources\ReturnBooks\ReturnBooksResource;
 use App\Models\Fine;
 use App\Models\FineSettings;
+use App\Models\ReviewBook;
 use App\Traits\HandleReturnBook;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
@@ -59,6 +60,24 @@ class EditReturnBooks extends EditRecord
             $this->record,
             $this->oldCondition
         );
+
+        $data = $this->data;
+
+        if (isset($data['rating']) && $data['rating'] !== null) {
+            ReviewBook::updateOrCreate(
+                [
+                    'return_book_id' => $this->record->id
+                ],
+                [
+                    'user_id' => $this->record->user_id,
+                    'book_id' => $this->record->book_id,
+                    'rating' => $data['rating'],
+                    'comment' => isset($data['comment'])
+                        ? tiptapToHtml($data['comment'])
+                        : null,
+                ]
+            );
+        }
     }
 
     protected function beforeDelete(): void

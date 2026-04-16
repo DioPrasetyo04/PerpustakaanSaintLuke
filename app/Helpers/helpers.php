@@ -133,3 +133,43 @@ if (!function_exists('generateRouteName')) {
         return $slugWithRandomInt;
     }
 }
+
+if (!function_exists('tiptapToHtml')) {
+    function tiptapToHtml($content)
+    {
+        if (is_string($content)) {
+            $content = json_decode($content, true);
+        }
+
+        if (!is_array($content) || !isset($content['content'])) {
+            return null;
+        }
+
+        $html = '';
+
+        foreach ($content['content'] as $node) {
+            if ($node['type'] === 'paragraph') {
+                $text = '';
+
+                if (isset($node['content'])) {
+                    foreach ($node['content'] as $child) {
+                        if ($child['type'] === 'text') {
+                            $text .= $child['text'];
+                        }
+                    }
+                }
+
+                $html .= "<p>{$text}</p>";
+            }
+        }
+
+        return $html;
+    }
+}
+
+if (!function_exists('signatureMidtrans')) {
+    function signatureMidtrans($order_id, $status_code, $gross_amount, $server_key)
+    {
+        return hash("sha512", $order_id . $status_code . $gross_amount . $server_key);
+    }
+}

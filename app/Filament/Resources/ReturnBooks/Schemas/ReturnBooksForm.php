@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\ReturnBooks\Schemas;
 
 use App\Enums\BookCondition;
-use App\Enums\BookStatus;
 use App\Models\Loan;
 use App\Models\ReturnBook;
 use Filament\Forms\Components\DatePicker;
@@ -11,6 +10,7 @@ use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Set;
@@ -125,6 +125,45 @@ class ReturnBooksForm
                                             ->maxLength(255)
                                             ->label('Notes Book'),
                                     ])
+                                ])
+                        ]),
+                    Step::make('Review Book')
+                        ->description('User review after reading book')
+                        ->schema([
+                            Section::make('Review Book')
+                                ->description('User review after reading book')
+                                ->dehydrated()
+                                ->schema([
+                                    ToggleButtons::make('rating')
+                                        ->label('Rating Buku')
+                                        ->options([
+                                            '1'   => '⭐',
+                                            '1.5' => '⭐✨',
+                                            '2'   => '⭐⭐',
+                                            '2.5' => '⭐⭐✨',
+                                            '3'   => '⭐⭐⭐',
+                                            '3.5' => '⭐⭐⭐✨',
+                                            '4'   => '⭐⭐⭐⭐',
+                                            '4.5' => '⭐⭐⭐⭐✨',
+                                            '5'   => '⭐⭐⭐⭐⭐',
+                                        ])
+                                        ->dehydrateStateUsing(fn($state) => (float) $state)
+                                        ->afterStateHydrated(function ($state, $record, $set) {
+                                            if ($record && $record->review) {
+                                                $set('rating', $record->review->rating);
+                                            }
+                                        })
+                                        ->inline()
+                                        ->required(),
+
+                                    RichEditor::make('comment')
+                                        ->label('Komentar')
+                                        ->afterStateHydrated(function ($state, $record, $set) {
+                                            if ($record && $record->review) {
+                                                $set('comment', $record->review->comment);
+                                            }
+                                        })
+                                        ->columnSpanFull(),
                                 ])
                         ])
                 ])->columnSpanFull()

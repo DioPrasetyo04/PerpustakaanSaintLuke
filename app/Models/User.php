@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -86,5 +87,15 @@ class User extends Authenticatable
     public function socialmedia(): MorphMany
     {
         return $this->morphMany(SocialMedia::class, 'socialable');
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(ReviewBook::class);
+    }
+
+    public function bookmarks(): BelongsToMany
+    {
+        return $this->belongsToMany(Book::class, 'bookmarks', 'user_id', 'book_id');
     }
 }

@@ -21,6 +21,7 @@ class ReturnBook extends Model
         'book_id',
         'user_id',
         'return_date',
+        'status',
     ];
 
     protected $casts = [
@@ -51,5 +52,10 @@ class ReturnBook extends Model
     public function returnBookCheck(): HasOne
     {
         return $this->hasOne(ReturnBookCheck::class);
+    }
+
+    public function review(): HasOne
+    {
+        return $this->hasOne(ReviewBook::class);
     }
 }
