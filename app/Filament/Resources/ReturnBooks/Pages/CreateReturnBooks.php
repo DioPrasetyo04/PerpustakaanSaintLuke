@@ -4,6 +4,7 @@ namespace App\Filament\Resources\ReturnBooks\Pages;
 
 use App\Filament\Resources\ReturnBooks\ReturnBooksResource;
 use App\Models\FineSettings;
+use App\Models\ReviewBook;
 use App\Traits\HandleReturnBook;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
@@ -41,6 +42,20 @@ class CreateReturnBooks extends CreateRecord
         $this->record->refresh();
 
         $this->handleReturnBookCheck($this->record);
+
+        $data = $this->data;
+
+        if (isset($data['rating']) && $data['rating'] !== null) {
+            ReviewBook::create([
+                'return_book_id' => $this->record->id,
+                'user_id' => $this->record->user_id,
+                'book_id' => $this->record->book_id,
+                'rating' => $data['rating'],
+                'comment' => !empty($data['comment'])
+                    ? tiptapToHtml($data['comment'])
+                    : null,
+            ]);
+        }
     }
 
     protected function fillForm(): void

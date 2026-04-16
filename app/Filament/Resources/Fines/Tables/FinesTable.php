@@ -3,11 +3,14 @@
 namespace App\Filament\Resources\Fines\Tables;
 
 use App\Enums\PaymentStatus;
+use App\Services\MidtransService;
+use Filament\Actions\Action;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Carbon;
+use Filament\Notifications\Notification;
 
 class FinesTable
 {
@@ -86,6 +89,29 @@ class FinesTable
                     ->formatStateUsing(fn($state) => $state ? Carbon::parse($state)->format('d F Y') : '-')
                     ->sortable()
                     ->label('Tanggal Denda'),
+            ])
+            ->recordActions([
+                Action::make('pay')
+                    ->label('Bayar')
+                    ->icon('heroicon-o-credit-card')
+                    ->color('purple')
+                    ->visible(fn($record) => $record->payment_status === PaymentStatus::PENDING)
+                    ->action(function ($record, $livewire) {
+
+                        try {
+                            $snapToken = MidtransService::getSnapToken($record);
+
+                            // dd($snapToken);
+                            $livewire->dispatch('midtrans-pay', snapToken: $snapToken);
+                        } catch (\Exception $e) {
+
+                            Notification::make()
+                                ->title('Error Midtrans')
+                                ->body($e->getMessage()) // 🔥 tampilkan error asli
+                                ->danger()
+                                ->send();
+                        }
+                    }),
             ])
             ->filters([
                 SelectFilter::make('payment_status')
