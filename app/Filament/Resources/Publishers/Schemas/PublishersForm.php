@@ -77,7 +77,7 @@ class PublishersForm
                                 ->maxSize(4096) // 4MB
                                 ->disk('public')
                                 ->visibility('public')
-                                ->directory('Publishers/logos')
+                                ->directory('publishers/logos')
                                 ->imageResizeMode('cover')
                                 ->columnSpanFull(),
 

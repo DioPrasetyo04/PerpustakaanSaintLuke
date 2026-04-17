@@ -1,11 +1,17 @@
 document.addEventListener('livewire:initialized', () => {
     Livewire.on('midtrans-pay', (data) => {
-        console.log('MIDTRANS JS LOADED');
-        console.log('SNAP TOKEN:', data.snapToken); // DEBUG
+        console.log('DATA:', data);
 
-        snap.pay(data.snapToken, {
+        const snapToken = data.snapToken;
+
+        if (!snapToken) {
+            alert('Snap token tidak ditemukan!');
+            return;
+        }
+
+        snap.pay(snapToken, {
             onSuccess: function () {
-                alert('Pembayaran berhasil');
+                alert('Pembayaran Berhasil');
                 window.location.reload();
             },
             onPending: function () {
