@@ -62,7 +62,7 @@ class AuthorForm
                                     Select::make('nationality')->label('Country')->options(countryOptions())->allowHtml()->searchable()->required(),
                                     DatePicker::make('verified_at')->label('Tanggal Verifikasi')->displayFormat('d F Y'),
                                     RichEditor::make('bio')->label('biography')->maxLength(255)->columnSpanFull(),
-                                    FileUpload::make('avatar')->label('Photo')->acceptedFileTypes(['jpg', 'jpeg', 'png', 'webp', 'gif'])->image()->disk('public')->visibility('public')->required()->columnSpanFull(),
+                                    FileUpload::make('avatar')->label('Photo')->acceptedFileTypes(['jpg', 'jpeg', 'png', 'webp', 'gif'])->image()->disk('public')->visibility('public')->directory('authors')->required()->columnSpanFull(),
                                 ]),
                             ]),
                         ]),
