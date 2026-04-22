@@ -1,4 +1,5 @@
-import { Lang, LanguageType } from '@/types/language';
+import { LanguageType } from '@/interface/LanguageInterface';
+import { Lang } from '@/types/language';
 import { createContext, ReactNode, useState } from 'react';
 
 export const LanguageContext = createContext<LanguageType | null>(null);

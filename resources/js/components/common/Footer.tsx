@@ -43,7 +43,7 @@ export function Footer() {
         language === 'id' ? t[key].id : t[key].en;
 
     return (
-        <footer className="mt-auto border-t border-gray-200 bg-gray-50">
+        <footer className="bottom-0 mt-auto border-t border-gray-200 bg-gray-50">
             <div className="container mx-auto px-4 py-12 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
                     {/* About */}

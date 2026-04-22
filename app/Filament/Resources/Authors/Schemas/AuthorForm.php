@@ -54,7 +54,7 @@ class AuthorForm
                                         ->required(),
                                     Select::make('gender')
                                         ->label('Gender')
-                                        ->options(UserGender::options())
+                                        ->options(UserGender::optionViews())
                                         ->allowHtml()
                                         ->getOptionLabelUsing(fn($value) => UserGender::from($value)->html())
                                         ->searchable()

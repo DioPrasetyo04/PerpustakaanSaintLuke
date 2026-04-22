@@ -173,3 +173,45 @@ if (!function_exists('signatureMidtrans')) {
         return hash("sha512", $order_id . $status_code . $gross_amount . $server_key);
     }
 }
+
+if (!function_exists('paginateResource')) {
+    function paginateResource($paginator, string $resource)
+    {
+        return [
+            'data' => collect($paginator->items())->map(function ($item) use ($resource) {
+                return (new $resource($item))->toArray(request());
+            })->toArray(),
+            'meta' => [
+                'current_page' => $paginator->currentPage(),
+                'from' => $paginator->firstItem(),
+                'last_page' => $paginator->lastPage(),
+                'per_page' => $paginator->perPage(),
+                'to' => $paginator->lastItem(),
+                'total' => $paginator->total(),
+                'has_pages' => $paginator->hasPages(),
+            ],
+            'links' => [
+                'next' => $paginator->nextPageUrl(),
+                'prev' => $paginator->previousPageUrl(),
+            ]
+        ];
+    }
+}
+
+if (!function_exists('formatLast12Months')) {
+    function formatLast12Months(array $data, string $key): array
+    {
+        $result = [];
+        $start = now()->subMonths(11)->startOfMonth();
+
+        for ($i = 0; $i < 12; $i++) {
+            $date = $start->copy()->addMonths($i);
+            $yearMonth = $date->format('Y-m');
+            $result[] = [
+                'bulan' => ucfirst($date->translatedFormat('M')),
+                $key => $data[$yearMonth] ?? 0
+            ];
+        }
+        return $result;
+    }
+}
