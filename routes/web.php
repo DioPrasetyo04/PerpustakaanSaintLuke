@@ -24,7 +24,13 @@ Route::controller(HomeController::class)->group(function () {
 });
 
 Route::controller(CatalogController::class)->group(function () {
-    Route::get('/catalog', 'catalog')->name('catalog');
+    Route::get('/catalog/books', 'books')->name('catalog.books');
+    Route::get('/catalog/categories', 'categories')->name('catalog.categories');
+    Route::get('/catalog/category/{slug}/books', 'getBooksByCategory')->name('catalog.categories.book');
+    Route::get('/catalog/authors', 'authors')->name('catalog.authors');
+    Route::get('/catalog/author/{slug}/books', 'getBooksByAuthor')->name('catalog.authors.book');
+    Route::get('/catalog/publishers', 'publishers')->name('catalog.publishers');
+    Route::get('/catalog/publisher/{slug}/books', 'getBooksByPublisher')->name('catalog.publisher.book');
 });
 
 Route::controller(ResourceController::class)->group(function () {

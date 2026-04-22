@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Interface\CatalogInterfaceRepositories;
+use App\Interface\HomeInterfaceRepositories;
+use App\Repositories\CatalogRepositories;
+use App\Repositories\HomeRepositories;
 use Carbon\CarbonImmutable;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
@@ -17,7 +21,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(HomeInterfaceRepositories::class, HomeRepositories::class);
+        $this->app->bind(CatalogInterfaceRepositories::class, CatalogRepositories::class);
     }
 
     /**

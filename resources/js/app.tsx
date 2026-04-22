@@ -6,6 +6,7 @@ import '../css/app.css';
 // import { initializeTheme } from './hooks/use-appearance';
 import { LanguageProvider } from './context/LanguageContext';
 import Navbar from './components/Layouts/Navbar/Navbar';
+import { Footer } from './components/common/Footer';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -24,7 +25,10 @@ createInertiaApp({
             <StrictMode>
                 <LanguageProvider>
                     <Navbar initialAuth={initialAuth} />
-                    <App {...props} />
+                    <div className="pt-20">
+                        <App {...props} />
+                    </div>
+                    <Footer />
                 </LanguageProvider>
             </StrictMode>,
         );

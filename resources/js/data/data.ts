@@ -1,6 +1,6 @@
-import { BookDataProps } from '@/types/books';
+import { BookDataProps } from '@/types/HomePage/HomeType';
 import { CategoriesType } from '@/types/categories';
-import { faqHeaderType, faqType } from '@/types/faqtype';
+import { faqHeaderType, faqType } from '@/types/DataTypes/faqtype';
 import type {
     LanguageItem,
     NavAuth,
@@ -33,22 +33,22 @@ export const navItems: NavItem[] = [
             {
                 id: 'books',
                 label: { id: 'Buku', en: 'Books' },
-                href: '/catalog?tab=books',
+                href: '/catalog/books',
             },
             {
                 id: 'categories',
                 label: { id: 'Kategori Buku', en: 'Book Categories' },
-                href: '/catalog?tab=categories',
+                href: '/catalog/categories',
             },
             {
                 id: 'penulis',
                 label: { id: 'Penulis', en: 'Authors' },
-                href: '/catalog?tab=author',
+                href: '/catalog/authors',
             },
             {
                 id: 'publishers',
                 label: { id: 'Penerbit', en: 'Publishers' },
-                href: '/catalog?tab=publisher',
+                href: '/catalog/publishers',
             },
         ],
     },
@@ -70,12 +70,12 @@ export const navItems: NavItem[] = [
             {
                 id: 'profile',
                 label: { id: 'Profil', en: 'Profile' },
-                href: '/about#profile',
+                href: '/about/profile',
             },
             {
                 id: 'vision-mission',
                 label: { id: 'Visi dan Misi', en: 'Vision & Mission' },
-                href: '/about#vision-mission',
+                href: '/about/vision-mission',
             },
             {
                 id: 'structure',
@@ -83,12 +83,12 @@ export const navItems: NavItem[] = [
                     id: 'Struktur Organisasi',
                     en: 'Organization Structure',
                 },
-                href: '/about#structure',
+                href: '/about/organization-structure',
             },
             {
                 id: 'contact',
                 label: { id: 'Kontak', en: 'Contact' },
-                href: '/about#contact',
+                href: '/about/contact',
             },
         ],
     },
@@ -178,6 +178,45 @@ export const featureBookHeaderHome = {
         title: 'Popular Books',
         subtitle:
             'Discover our most popular and highly-rated books across various categories',
+    },
+};
+
+export const statsHeaderHome = {
+    id: {
+        title: 'Statistik Perpustakaan',
+        subtitle:
+            'Lihat statistik terkini tentang koleksi buku, kategori, anggota, dan aktivitas peminjaman',
+    },
+    en: {
+        title: 'Library Statistics',
+        subtitle:
+            'View the latest statistics about our book collection, categories, members, and borrowing activities',
+    },
+};
+
+export const catalogBooks = {
+    id: {
+        title: 'Katalog Buku',
+        subtitle: 'Cari dan temukan buku-buku populer yang tersedia',
+        placeholder: 'Cari buku....',
+    },
+    en: {
+        title: 'Books Catalog',
+        subtitle: 'Search and find popular books available',
+        placeholder: 'Search books...',
+    },
+};
+
+export const catalogCategories = {
+    id: {
+        title: 'Katalog Kategori',
+        subtitle: 'Jelajahi koleksi buku berdasarkan kategori yang diminati',
+        placeholder: 'Cari kategori....',
+    },
+    en: {
+        title: 'Categories Catalog',
+        subtitle: 'Browse our book collection by category',
+        placeholder: 'Search categories...',
     },
 };
 
