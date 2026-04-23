@@ -33,11 +33,11 @@ const BookCard = ({
             <div className="flex h-full flex-col overflow-hidden rounded-xl bg-white shadow-md transition-shadow duration-300">
                 {/* COVER */}
                 <Link
-                    href={`/book/${slug}`}
+                    href={`/book/detail/${slug}`}
                     className="relative aspect-[3/4] overflow-hidden bg-gray-100"
                 >
                     <img
-                        src={cover ? `/storage/${cover}` : ''}
+                        src={cover}
                         alt={`Cover ${title}`}
                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
@@ -97,11 +97,7 @@ const BookCard = ({
                                 className="mt-3 flex items-center gap-2"
                             >
                                 <img
-                                    src={
-                                        author?.avatar
-                                            ? `/storage/${author.avatar}`
-                                            : ''
-                                    }
+                                    src={author?.avatar}
                                     alt={author.name}
                                     className="h-8 w-8 rounded-full object-cover"
                                 />

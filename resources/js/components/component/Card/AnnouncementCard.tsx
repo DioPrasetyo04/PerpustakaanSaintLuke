@@ -1,8 +1,9 @@
 import { ImageWithFallback } from '@/components/common/ImageWithFallback';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { useLanguage } from '@/hooks/useLanguage';
 import { formattedDate } from '@/lib/utils';
-import { InformationProps } from '@/types/HomePage/HomeType';
+import { InformationProps } from '@/types/DataTypes/InformationProps';
 import { Link } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
@@ -15,18 +16,18 @@ export const AnnouncementCard = ({
     description,
     categories,
     created_at,
-    language,
     index,
 }: InformationProps) => {
+    const { language } = useLanguage();
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: index * 0.1 }}
+            transition={{ delay: 0.4 }}
             whileHover={{ y: -8 }}
         >
-            <div className="flex h-full flex-col overflow-hidden transition-shadow hover:shadow-xl">
+            <Card className="flex h-full flex-col overflow-hidden transition-shadow hover:shadow-xl">
                 <div className="relative aspect-video overflow-hidden bg-gray-100">
                     <ImageWithFallback
                         src={image}
@@ -36,7 +37,7 @@ export const AnnouncementCard = ({
                 </div>
                 <div className="flex flex-1 flex-col p-6">
                     <div className="mb-2 text-sm text-gray-500">
-                        {formattedDate(created_at, language)}
+                        {formattedDate(created_at ?? '', language)}
                     </div>
                     <h3 className="mb-2 font-['Poppins'] text-xl font-semibold text-gray-900">
                         {name}
@@ -51,7 +52,7 @@ export const AnnouncementCard = ({
                         </Button>
                     </Link>
                 </div>
-            </div>
+            </Card>
         </motion.div>
     );
 };

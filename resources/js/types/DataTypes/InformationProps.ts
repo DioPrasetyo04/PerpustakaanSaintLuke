@@ -1,8 +1,9 @@
 import { CategoryProps } from './CategoryProps';
 
 export type InformationProps = {
+    index?: number;
     id: number;
-    image: string;
+    image?: string;
     name: string;
     slug: string;
     description: string;

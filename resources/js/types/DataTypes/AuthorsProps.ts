@@ -3,4 +3,5 @@ export type AuthorProps = {
     name: string;
     username: string;
     avatar: string;
+    count_of_books?: number;
 };

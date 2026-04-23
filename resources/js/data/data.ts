@@ -1,5 +1,3 @@
-import { BookDataProps } from '@/types/HomePage/HomeType';
-import { CategoriesType } from '@/types/categories';
 import { faqHeaderType, faqType } from '@/types/DataTypes/faqtype';
 import type {
     LanguageItem,
@@ -220,178 +218,31 @@ export const catalogCategories = {
     },
 };
 
-export const featuredBooksDataHome: BookDataProps[] = [
-    {
-        id: 1,
-        book_code: 'BK-001',
-        title: 'Belajar React TypeScript',
-        slug: 'belajar-react-typescript',
-        publication_year: 2024,
-        isbn: '9786230000001',
-        synopsis:
-            'Panduan lengkap belajar React dengan TypeScript dari dasar hingga advanced.',
-        number_of_pages: 320,
-        status: 'available',
-        cover: '/assets/images/books/react-ts.jpg',
-        price: 120000,
-        is_published: true,
-
-        language: {
-            id: 1,
-            code: 'ID',
-            language: 'Indonesia',
-            photo: '/assets/images/language/id.png',
-        },
-
-        author: {
-            id: 1,
-            name: 'John Doe',
-            username: 'john',
-            email: 'john@example.com',
-            avatar: '/assets/images/authors/john.jpg',
-            created_at: '2025-01-01',
-            updated_at: '2025-01-01',
-        },
-
-        publisher: {
-            id: 1,
-            name: 'Gramedia',
-            slug: 'gramedia',
-            email: 'info@gramedia.com',
-            address: 'Jakarta, Indonesia',
-            phone: '08123456789',
-            logo: '/assets/images/publisher/gramedia.png',
-            is_active: true,
-        },
-
-        stock: {
-            id: 1,
-            book_id: 1,
-            total: 20,
-            available: 15,
-            loan: 3,
-            lost: 1,
-            damaged: 1,
-        },
-
-        assets: [
-            {
-                id: 1,
-                book_id: 1,
-                type: 'pdf',
-                utility_path: '/assets/books/react-ts.pdf',
-            },
-            {
-                id: 2,
-                book_id: 1,
-                type: 'cover',
-                utility_path: '/assets/books/react-ts.png',
-            },
-        ],
-
-        categories: [
-            {
-                id: 1,
-                name: 'Programming',
-                slug: 'programming',
-                icon: '/assets/book/programming.png',
-                BookOfCategories: {
-                    book_id: 1,
-                    category_id: 1,
-                },
-            },
-            {
-                id: 2,
-                name: 'Web Development',
-                slug: 'web-development',
-                icon: '/assets/book/web-development.png',
-                BookOfCategories: {
-                    book_id: 1,
-                    category_id: 2,
-                },
-            },
-        ],
-
-        created_at: '2025-01-01',
-        updated_at: '2025-01-01',
+export const catalogAuthors = {
+    id: {
+        title: 'Katalog Penulis',
+        subtitle: 'Jelajahi dan temukan penulis buku yang anda minati',
+        placeholder: 'Cari dan temukan penulis buku....',
     },
-
-    {
-        id: 2,
-        book_code: 'BK-002',
-        title: 'Laravel API Mastery',
-        slug: 'laravel-api-mastery',
-        publication_year: 2023,
-        isbn: '9786230000002',
-        synopsis:
-            'Membangun REST API Laravel dengan authentication JWT dan best practice.',
-        number_of_pages: 280,
-        status: 'available',
-        cover: '/assets/images/books/laravel-api.jpg',
-        price: 110000,
-        is_published: true,
-
-        language: {
-            id: 1,
-            code: 'ID',
-            language: 'Indonesia',
-        },
-
-        author: {
-            id: 2,
-            name: 'Angelica Indah',
-            username: 'angelica',
-            email: 'angelica@mail.com',
-            avatar: '/assets/images/authors/angelica.jpg',
-        },
-
-        publisher: {
-            id: 2,
-            name: 'Informatika',
-            slug: 'informatika',
-            email: 'info@informatika.com',
-            address: 'Bandung',
-            phone: '08222222222',
-            logo: '/assets/images/publisher/informatika.png',
-            is_active: true,
-        },
-
-        stock: {
-            id: 2,
-            book_id: 2,
-            total: 10,
-            available: 8,
-            loan: 2,
-            lost: 0,
-            damaged: 0,
-        },
-
-        assets: [
-            {
-                id: 3,
-                book_id: 2,
-                type: 'pdf',
-                utility_path: '/assets/books/laravel-api.pdf',
-            },
-        ],
-
-        categories: [
-            {
-                id: 3,
-                name: 'Backend',
-                slug: 'backend',
-                icon: '/assets/images/categories/backend.png',
-                BookOfCategories: {
-                    book_id: 2,
-                    category_id: 3,
-                },
-            },
-        ],
-
-        created_at: '2025-01-02',
-        updated_at: '2025-01-02',
+    en: {
+        title: 'Authors Catalog',
+        subtitle: 'Browse and find the authors of books that interest you',
+        placeholder: 'Search and find book authors....',
     },
-];
+};
+
+export const catalogPublishers = {
+    id: {
+        title: 'Katalog Penerbit',
+        subtitle: 'Jelajahi dan temukan penerbit buku yang anda minati',
+        placeholder: 'Cari dan temukan penerbit buku...',
+    },
+    en: {
+        title: 'Publishers Catalog',
+        subtitle: 'Browse and find the publishers of books that interest you',
+        placeholder: 'Search and find book publishers....',
+    },
+};
 
 export const categoriesHeaderHome = {
     id: {
@@ -405,81 +256,6 @@ export const categoriesHeaderHome = {
             'Explore our diverse collection organized by subject areas',
     },
 };
-
-export const CategoriesData: CategoriesType[] = [
-    {
-        id: 1,
-        name: 'Technology',
-        slug: 'technology',
-        icon: '',
-        emoji: '\uD83D\uDCBB',
-        photo: '',
-        description: 'Technology books',
-        is_active: true,
-        count_book: 1250,
-        color: 'bg-blue-100 text-blue-700',
-    },
-    {
-        id: 2,
-        name: 'Science',
-        slug: 'science',
-        icon: '',
-        emoji: '\uD83D\uDD2C',
-        photo: '',
-        description: 'Science books',
-        is_active: true,
-        count_book: 980,
-        color: 'bg-green-100 text-green-700',
-    },
-    {
-        id: 3,
-        name: 'History',
-        slug: 'history',
-        icon: '',
-        emoji: '\uD83D\uDCDC',
-        photo: '',
-        description: 'History books',
-        is_active: true,
-        count_book: 750,
-        color: 'bg-amber-100 text-amber-700',
-    },
-    {
-        id: 4,
-        name: 'Literature',
-        slug: 'literature',
-        icon: '',
-        emoji: '\uD83D\uDCDA',
-        photo: '',
-        description: 'Literature books',
-        is_active: true,
-        count_book: 1100,
-        color: 'bg-purple-100 text-purple-700',
-    },
-    {
-        id: 5,
-        name: 'Arts',
-        slug: 'arts',
-        icon: '',
-        emoji: '\uD83C\uDFA8',
-        photo: '',
-        description: 'Arts books',
-        is_active: true,
-        count_book: 650,
-        color: 'bg-pink-100 text-pink-700',
-    },
-    {
-        id: 6,
-        name: 'Business',
-        slug: 'business',
-        icon: '',
-        emoji: '\uD83D\uDCBC',
-        photo: '',
-        description: 'Business books',
-        is_active: true,
-        count_book: 820,
-        color: 'bg-indigo-100 text-indigo-700',
-    },
-];
 
 export const announcementsHeaderHome = {
     id: {

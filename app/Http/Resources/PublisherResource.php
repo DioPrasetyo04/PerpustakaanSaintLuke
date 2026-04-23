@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 class PublisherResource extends JsonResource
 {
@@ -21,7 +22,7 @@ class PublisherResource extends JsonResource
             'address' => $this->address,
             'email' => $this->email,
             'phone' => $this->phone,
-            'logo' => $this->logo,
+            'logo' => $this->logo ? Storage::url($this->logo) : null,
             'is_active' => $this->is_active,
             'count_of_books' => $this->count_of_books ?? 0,
         ];

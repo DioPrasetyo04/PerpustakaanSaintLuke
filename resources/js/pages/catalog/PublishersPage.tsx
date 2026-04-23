@@ -1,4 +1,3 @@
-import { catalogCategories } from '@/data/data';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useSearch } from '@/hooks/useSearch';
@@ -10,16 +9,18 @@ import { motion } from 'framer-motion';
 import { BiSolidCategory } from 'react-icons/bi';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { CategoriesCard } from '@/components/component/Card/CategoriesCard';
 import Pagination from '@/components/component/Home/Pagination/Pagination';
 import { TbCategoryPlus } from 'react-icons/tb';
+import { FeaturedCatalogPublisherProps } from '@/types/CatalogPage/CatalogPublisherPageProps';
+import { catalogPublishers } from '@/data/data';
+import { PublisherCard } from '@/components/component/Card/PublisherCard';
 
-const CategoriesPage = () => {
-    const { categories, state } =
-        usePage<FeaturedCatalogCategoriesProps>().props;
+const PublishersPage = () => {
+    const { publishers, state } =
+        usePage<FeaturedCatalogPublisherProps>().props;
     const { language } = useLanguage();
     const text =
-        language === 'id' ? catalogCategories.id : catalogCategories.en;
+        language === 'id' ? catalogPublishers.id : catalogPublishers.en;
     const { search, handleSearchChange } = useSearch({
         defaultValue: state.search || '',
     });
@@ -28,11 +29,11 @@ const CategoriesPage = () => {
 
     useEffect(() => {
         router.get(
-            route('catalog.categories'),
+            route('catalog.publishers'),
             {
                 search: debounceSearch,
-                categories_page: 1,
-                categories_load: state.load,
+                publishers_page: 1,
+                publishers_load: state.load,
             },
             {
                 preserveState: true,
@@ -44,11 +45,11 @@ const CategoriesPage = () => {
 
     const onPageChange = (page: number) => {
         router.get(
-            route('catalog.categories'),
+            route('catalog.publishers'),
             {
                 search,
                 categories_page: page,
-                categories_load: categories.meta.per_page,
+                categories_load: publishers.meta.per_page,
             },
             {
                 preserveState: true,
@@ -59,11 +60,11 @@ const CategoriesPage = () => {
 
     const onPerPageChange = (perPage: number) => {
         router.get(
-            route('catalog.categories'),
+            route('catalog.publishers'),
             {
                 search,
-                categories_page: 1,
-                categories_load: perPage,
+                publishers_page: 1,
+                publishers_load: perPage,
             },
             {
                 preserveState: true,
@@ -73,10 +74,10 @@ const CategoriesPage = () => {
     };
 
     const start =
-        (categories.meta.current_page - 1) * categories.meta.per_page + 1;
+        (publishers.meta.current_page - 1) * publishers.meta.per_page + 1;
     const end = Math.min(
-        categories.meta.current_page * categories.meta.per_page,
-        categories.meta.total,
+        publishers.meta.current_page * publishers.meta.per_page,
+        publishers.meta.total,
     );
 
     return (
@@ -94,7 +95,7 @@ const CategoriesPage = () => {
                         </div>
                         <div>
                             <h1 className="font-['Poppins'] text-3xl font-bold text-gray-900 sm:text-4xl">
-                                {`${text.title} (${categories.meta.total})`}
+                                {`${text.title} (${publishers.meta.total})`}
                             </h1>
                             <p className="font-['Poppins'] text-xl font-bold text-gray-900 sm:text-4xl">
                                 {`${text.subtitle}`}
@@ -115,28 +116,31 @@ const CategoriesPage = () => {
                 </div>
                 <div className="mb-4">
                     <p className="text-sm text-gray-600">
-                        Showing {start} to {end} of {categories.meta.total}
+                        Showing {start} to {end} of {publishers.meta.total}
                         results
                     </p>
                 </div>
-                {categories.data.length > 0 ? (
+                {publishers.data.length > 0 ? (
                     <>
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                            {categories.data.map((category) => (
-                                <CategoriesCard
-                                    key={category.id}
-                                    {...category}
-                                    href={route('catalog.category.books', {
-                                        slug: category.slug,
-                                    })}
+                            {publishers.data.map((publisher) => (
+                                <PublisherCard
+                                    key={publisher.id}
+                                    {...publisher}
+                                    onHandlePublisherClick={route(
+                                        'catalog.publisher.books',
+                                        {
+                                            slug: publisher.slug,
+                                        },
+                                    )}
                                 />
                             ))}
                         </div>
-                        {categories.meta.total > categories.meta.per_page && (
+                        {publishers.meta.total > publishers.meta.per_page && (
                             <Pagination
-                                page={categories.meta.current_page}
-                                total={categories.meta.total}
-                                perPage={categories.meta.per_page}
+                                page={publishers.meta.current_page}
+                                total={publishers.meta.total}
+                                perPage={publishers.meta.per_page}
                                 onPageChange={onPageChange}
                                 onPerPageChange={onPerPageChange}
                             />
@@ -148,13 +152,13 @@ const CategoriesPage = () => {
 
                         <h3 className="mb-2 text-2xl font-semibold text-gray-900">
                             {language === 'id'
-                                ? 'Category Tidak Ditemukan'
-                                : 'Categories Not Found'}
+                                ? 'Publishers Tidak Ditemukan'
+                                : 'Publishers Not Found'}
                         </h3>
                         <p className="text-xl text-gray-600">
                             {language === 'id'
-                                ? 'Coba gunakan kata kunci lain untuk mencari category yang anda inginkan.'
-                                : 'Try using different keywords to find the category you want.'}
+                                ? 'Coba gunakan kata kunci lain untuk mencari penerbit yang anda inginkan.'
+                                : 'Try using different keywords to find the publisher you want.'}
                         </p>
                     </div>
                 )}
@@ -163,4 +167,4 @@ const CategoriesPage = () => {
     );
 };
 
-export default CategoriesPage;
+export default PublishersPage;

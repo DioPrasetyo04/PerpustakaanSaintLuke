@@ -8,6 +8,7 @@ import { FeaturedCategoriesProps } from '@/types/HomePage/FeaturedHome';
 import { CategoriesCard } from '@/components/component/Card/CategoriesCard';
 import Pagination from '@/components/component/Home/Pagination/Pagination';
 import { useQueryParams } from '@/hooks/useQueryParams';
+import { route } from 'ziggy-js';
 
 const Categories = ({ categories }: FeaturedCategoriesProps) => {
     const { language } = useLanguage();
@@ -67,7 +68,13 @@ const Categories = ({ categories }: FeaturedCategoriesProps) => {
                         //         </Card>
                         //     </Link>
                         // </motion.div>
-                        <CategoriesCard key={category.id} {...category} />
+                        <CategoriesCard
+                            key={category.id}
+                            {...category}
+                            href={route('catalog.category.books', {
+                                slug: category.slug,
+                            })}
+                        />
                     ))}
                 </div>
                 <Pagination
