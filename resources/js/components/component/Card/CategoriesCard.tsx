@@ -1,9 +1,11 @@
+import { ImageWithFallback } from '@/components/common/ImageWithFallback';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { CategoryProps } from '@/types/HomePage/HomeType';
-import { Link } from '@inertiajs/react';
+import { CategoryProps } from '@/types/DataTypes/CategoryProps';
+import { Link, router } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import React from 'react';
+import { route } from 'ziggy-js';
 
 export const CategoriesCard = ({
     name,
@@ -11,6 +13,7 @@ export const CategoriesCard = ({
     icon,
     count_of_books,
     language,
+    href,
 }: CategoryProps) => {
     return (
         <motion.div
@@ -20,11 +23,11 @@ export const CategoriesCard = ({
             transition={{ delay: 0.5 }}
             whileHover={{ scale: 1.05 }}
         >
-            <Link href={`/categories/${slug}/books`}>
+            <Link href={href ?? '#'}>
                 <Card className="cursor-pointer p-6 text-center transition-shadow hover:shadow-lg">
                     <div className="mb-3 flex items-center text-4xl">
-                        <img
-                            src={icon ? `/storage/${icon}` : ''}
+                        <ImageWithFallback
+                            src={icon}
                             alt={name}
                             className="h-10 w-10 object-cover object-center"
                         />

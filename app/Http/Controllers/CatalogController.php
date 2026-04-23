@@ -93,21 +93,50 @@ class CatalogController extends Controller
         ]);
     }
 
-    public function getBooksByCategory(Request $request, string $slug)
+    private function renderBooksByFilter(Request $request, string $type, string $attribute)
     {
         $filters = $request->all();
-        $bookPage = (int) $request->get('category_books_page', 1);
-        $bookLoad = (int) $request->get('category_books_load', 10);
+        $page = (int) $request->get('page', 1);
+        $load = (int) $request->get('load', 10);
 
-        $booksPaginator = $this->catalogController->getBookByCategories($slug, $filters, $bookLoad, $bookPage);
+        switch ($type) {
+            case 'category':
+                $paginator = $this->catalogController->getBooksByCategory($attribute, $filters, $load, $page);
+                break;
+            case 'author':
+                $paginator = $this->catalogController->getBooksByAuthor($attribute, $filters, $load, $page);
+                break;
+            case 'publisher':
+                $paginator = $this->catalogController->getBooksByPublisher($attribute, $filters, $load, $page);
+                break;
+            default:
+                abort(404, 'Page Type Not Found');
+        }
 
-        return Inertia::render('catalog/BooksByCategoryPage', [
-            'books' => $this->catalogController->transformBooks($booksPaginator),
+        return Inertia::render('catalog/BooksByFilterPage', [
+            'books' => $this->catalogController->transformBooks($paginator),
+            'type' => $type,
+            'slug' => $attribute,
             'state' => [
-                'page' => $bookPage,
-                'load' => $bookLoad,
+                'page' => $page,
+                'load' => $load,
                 'search' => $request->search ?? '',
-            ]
+            ],
         ]);
+    }
+
+    public function getBooksByCategory(Request $request, string $slug)
+    {
+        return $this->renderBooksByFilter($request, 'category', $slug);
+    }
+
+    public function getBooksByAuthor(Request $request, string $username)
+    {
+        return $this->renderBooksByFilter($request, 'author', $username);
+    }
+
+    public function getBooksByPublisher(Request $request, string $slug)
+    {
+        return $this->renderBooksByFilter($request, 'publisher', $slug);
     }
 }

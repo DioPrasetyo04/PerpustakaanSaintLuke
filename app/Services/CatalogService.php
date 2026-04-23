@@ -37,12 +37,12 @@ class CatalogService
         return $this->catalogServices->getAllPublishers($filters, $perPage, $page);
     }
 
-    public function getBookByCategories(string $categorySlug, array $filters, int $perPage, int $page): LengthAwarePaginator
+    public function getBooksByCategory(string $categorySlug, array $filters, int $perPage, int $page): LengthAwarePaginator
     {
         return $this->catalogServices->getBooksByCategory($categorySlug, $filters, $perPage, $page);
     }
 
-    public function getBookByAuthors(string $authorUsername, array $filters, int $perPage, int $page): LengthAwarePaginator
+    public function getBooksByAuthor(string $authorUsername, array $filters, int $perPage, int $page): LengthAwarePaginator
     {
         return $this->catalogServices->getBooksByAuthor($authorUsername, $filters, $perPage, $page);
     }

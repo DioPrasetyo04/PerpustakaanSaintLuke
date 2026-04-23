@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 class BookResource extends JsonResource
 {
@@ -21,13 +22,13 @@ class BookResource extends JsonResource
                     'id' => $this->publisher->id,
                     'name' => $this->publisher->name,
                     'slug' => $this->publisher->slug,
-                    'icon' => $this->publisher->icon,
+                    'icon' => $this->publisher->icon ? Storage::url($this->publisher->icon) : null,
                 ];
             }),
             'language' => $this->whenLoaded('language', function () {
                 return [
                     'id' => $this->language->id,
-                    'photo' => $this->language->photo,
+                    'photo' => $this->language->photo ? Storage::url($this->language->photo) : null,
                     'language' => $this->language->language
                 ];
             }),
@@ -37,7 +38,7 @@ class BookResource extends JsonResource
                         'id' => $author->id,
                         'name' => $author->name,
                         'username' => $author->username,
-                        'avatar' => $author->avatar,
+                        'avatar' => $author->avatar ? Storage::url($author->avatar) : null,
                     ];
                 })->values()->toArray();
             }),
@@ -45,7 +46,7 @@ class BookResource extends JsonResource
                 return $this->categories->map(function ($category) {
                     return [
                         'id' => $category->id,
-                        'icon' => $category->icon,
+                        'icon' => $category->icon ? Storage::url($category->icon) : null,
                         'name' => $category->name,
                         'slug' => $category->slug,
                     ];
@@ -59,7 +60,7 @@ class BookResource extends JsonResource
             'synopsis' => $this->synopsis,
             'number_of_pages' => $this->number_of_pages,
             'status' => $this->status,
-            'cover' => $this->cover,
+            'cover' => $this->cover ? Storage::url($this->cover) : null,
             'price' => $this->price,
             'is_published' => $this->is_published,
         ];

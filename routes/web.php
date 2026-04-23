@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BookController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PaymentController;
@@ -18,19 +19,24 @@ use Illuminate\Support\Facades\Route;
 
 Route::controller(HomeController::class)->group(function () {
     Route::get('/', 'index')->name('home');
-    Route::get('/book/{id}', 'bookDetail')->name('book.detail');
-    Route::get('/announcements', 'announcements')->name('announcements');
-    Route::get('/dashboard', 'dashboard')->middleware(['auth', 'verified'])->name('dashboard');
+    // Route::get('/book/{id}', 'bookDetail')->name('book.detail');
+    // Route::get('/announcements', 'announcements')->name('announcements');
+    // Route::get('/dashboard', 'dashboard')->middleware(['auth', 'verified'])->name('dashboard');
+});
+
+
+Route::controller(BookController::class)->group(function () {
+    Route::get('/book/detail/{book:slug}', 'bookDetail')->name('book.detail');
 });
 
 Route::controller(CatalogController::class)->group(function () {
     Route::get('/catalog/books', 'books')->name('catalog.books');
     Route::get('/catalog/categories', 'categories')->name('catalog.categories');
-    Route::get('/catalog/category/{slug}/books', 'getBooksByCategory')->name('catalog.categories.book');
+    Route::get('/catalog/category/{slug}/books', 'getBooksByCategory')->name('catalog.category.books');
     Route::get('/catalog/authors', 'authors')->name('catalog.authors');
-    Route::get('/catalog/author/{slug}/books', 'getBooksByAuthor')->name('catalog.authors.book');
+    Route::get('/catalog/author/{username}/books', 'getBooksByAuthor')->name('catalog.author.books');
     Route::get('/catalog/publishers', 'publishers')->name('catalog.publishers');
-    Route::get('/catalog/publisher/{slug}/books', 'getBooksByPublisher')->name('catalog.publisher.book');
+    Route::get('/catalog/publisher/{slug}/books', 'getBooksByPublisher')->name('catalog.publisher.books');
 });
 
 Route::controller(ResourceController::class)->group(function () {

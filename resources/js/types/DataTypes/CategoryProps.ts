@@ -8,4 +8,5 @@ export type CategoryProps = {
     is_active?: boolean;
     count_of_books?: number;
     language?: string;
+    href?: string;
 };

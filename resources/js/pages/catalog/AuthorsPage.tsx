@@ -1,4 +1,4 @@
-import { catalogCategories } from '@/data/data';
+import { catalogAuthors, catalogCategories } from '@/data/data';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useSearch } from '@/hooks/useSearch';
@@ -13,13 +13,13 @@ import { Input } from '@/components/ui/input';
 import { CategoriesCard } from '@/components/component/Card/CategoriesCard';
 import Pagination from '@/components/component/Home/Pagination/Pagination';
 import { TbCategoryPlus } from 'react-icons/tb';
+import { FeaturedCatalogAuthorsProps } from '@/types/CatalogPage/CatalogAuthorProps';
+import { AuthorsCard } from '@/components/component/Card/AuthorCard';
 
-const CategoriesPage = () => {
-    const { categories, state } =
-        usePage<FeaturedCatalogCategoriesProps>().props;
+const AuthorsPage = () => {
+    const { authors, state } = usePage<FeaturedCatalogAuthorsProps>().props;
     const { language } = useLanguage();
-    const text =
-        language === 'id' ? catalogCategories.id : catalogCategories.en;
+    const text = language === 'id' ? catalogAuthors.id : catalogAuthors.en;
     const { search, handleSearchChange } = useSearch({
         defaultValue: state.search || '',
     });
@@ -28,11 +28,11 @@ const CategoriesPage = () => {
 
     useEffect(() => {
         router.get(
-            route('catalog.categories'),
+            route('catalog.authors'),
             {
                 search: debounceSearch,
-                categories_page: 1,
-                categories_load: state.load,
+                authors_page: 1,
+                authors_load: state.load,
             },
             {
                 preserveState: true,
@@ -44,11 +44,11 @@ const CategoriesPage = () => {
 
     const onPageChange = (page: number) => {
         router.get(
-            route('catalog.categories'),
+            route('catalog.authors'),
             {
                 search,
-                categories_page: page,
-                categories_load: categories.meta.per_page,
+                authors_page: page,
+                authors_load: authors.meta.per_page,
             },
             {
                 preserveState: true,
@@ -59,11 +59,11 @@ const CategoriesPage = () => {
 
     const onPerPageChange = (perPage: number) => {
         router.get(
-            route('catalog.categories'),
+            route('catalog.authors'),
             {
                 search,
-                categories_page: 1,
-                categories_load: perPage,
+                authors_page: 1,
+                authors_load: perPage,
             },
             {
                 preserveState: true,
@@ -72,11 +72,10 @@ const CategoriesPage = () => {
         );
     };
 
-    const start =
-        (categories.meta.current_page - 1) * categories.meta.per_page + 1;
+    const start = (authors.meta.current_page - 1) * authors.meta.per_page + 1;
     const end = Math.min(
-        categories.meta.current_page * categories.meta.per_page,
-        categories.meta.total,
+        authors.meta.current_page * authors.meta.per_page,
+        authors.meta.total,
     );
 
     return (
@@ -94,7 +93,7 @@ const CategoriesPage = () => {
                         </div>
                         <div>
                             <h1 className="font-['Poppins'] text-3xl font-bold text-gray-900 sm:text-4xl">
-                                {`${text.title} (${categories.meta.total})`}
+                                {`${text.title} (${authors.meta.total})`}
                             </h1>
                             <p className="font-['Poppins'] text-xl font-bold text-gray-900 sm:text-4xl">
                                 {`${text.subtitle}`}
@@ -115,28 +114,31 @@ const CategoriesPage = () => {
                 </div>
                 <div className="mb-4">
                     <p className="text-sm text-gray-600">
-                        Showing {start} to {end} of {categories.meta.total}
+                        Showing {start} to {end} of {authors.meta.total}
                         results
                     </p>
                 </div>
-                {categories.data.length > 0 ? (
+                {authors.data.length > 0 ? (
                     <>
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                            {categories.data.map((category) => (
-                                <CategoriesCard
-                                    key={category.id}
-                                    {...category}
-                                    href={route('catalog.category.books', {
-                                        slug: category.slug,
-                                    })}
+                            {authors.data.map((author) => (
+                                <AuthorsCard
+                                    key={author.id}
+                                    {...author}
+                                    onHandleAuthorClick={route(
+                                        'catalog.author.books',
+                                        {
+                                            username: author.username,
+                                        },
+                                    )}
                                 />
                             ))}
                         </div>
-                        {categories.meta.total > categories.meta.per_page && (
+                        {authors.meta.total > authors.meta.per_page && (
                             <Pagination
-                                page={categories.meta.current_page}
-                                total={categories.meta.total}
-                                perPage={categories.meta.per_page}
+                                page={authors.meta.current_page}
+                                total={authors.meta.total}
+                                perPage={authors.meta.per_page}
                                 onPageChange={onPageChange}
                                 onPerPageChange={onPerPageChange}
                             />
@@ -148,13 +150,13 @@ const CategoriesPage = () => {
 
                         <h3 className="mb-2 text-2xl font-semibold text-gray-900">
                             {language === 'id'
-                                ? 'Category Tidak Ditemukan'
-                                : 'Categories Not Found'}
+                                ? 'Pemulis Tidak Ditemukan'
+                                : 'Authors Not Found'}
                         </h3>
                         <p className="text-xl text-gray-600">
                             {language === 'id'
-                                ? 'Coba gunakan kata kunci lain untuk mencari category yang anda inginkan.'
-                                : 'Try using different keywords to find the category you want.'}
+                                ? 'Coba gunakan kata kunci lain untuk mencari penulis yang anda inginkan.'
+                                : 'Try using different keywords to find the author you want.'}
                         </p>
                     </div>
                 )}
@@ -163,4 +165,4 @@ const CategoriesPage = () => {
     );
 };
 
-export default CategoriesPage;
+export default AuthorsPage;

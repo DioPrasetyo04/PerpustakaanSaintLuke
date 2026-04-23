@@ -33,7 +33,7 @@ class HomeRepositories implements HomeInterfaceRepositories
             ->with([
                 'publisher:id,name,slug,logo',
                 'categories:id,name,slug,icon',
-                'authors:id,name,username', // cukup ini
+                'authors:id,name,username,avatar', // cukup ini
                 'language:id,language,photo', // cukup ini
             ])
             ->when(

@@ -28,7 +28,7 @@ class CatalogRepositories implements CatalogInterfaceRepositories
             ])->with([
                 'publisher:id,name,logo',
                 'categories:id,name,icon',
-                'authors:id,name,username', // cukup ini
+                'authors:id,name,username,avatar', // cukup ini
                 'language:id,language,photo', // cukup ini
             ])->when(
                 ($filters['field'] ?? null) && ($filters['direction'] ?? null),
@@ -44,7 +44,7 @@ class CatalogRepositories implements CatalogInterfaceRepositories
             })
             ->where('is_published', PublishedBooks::PUBLISH->value)
             ->where('status', BookStatus::AVAILABLE->value)
-            ->paginate($perPage, ['*'], 'book_page', $page);
+            ->paginate($perPage, ['*'], 'books_page', $page);
     }
     public function getAllCategories(array $filters, int $perPage, int $page): LengthAwarePaginator
     {
@@ -60,11 +60,11 @@ class CatalogRepositories implements CatalogInterfaceRepositories
                         ->orWhere('slug', 'REGEXP', $search);
                 });
             })
-            ->paginate($perPage, ['*'], 'category_page', $page);
+            ->paginate($perPage, ['*'], 'categories_page', $page);
     }
     public function getAllAuthors(array $filters, int $perPage, int $page): LengthAwarePaginator
     {
-        return Author::query()->select(['id', 'name', 'username'])->with('socialmedia')->withCount('books')
+        return Author::query()->select(['id', 'name', 'username', 'avatar'])->withCount('books as count_of_books')
             ->when(
                 ($filters['field'] ?? null) && ($filters['direction'] ?? null),
                 fn($query) => $query->orderBy($filters['field'], $filters['direction'])
@@ -74,11 +74,11 @@ class CatalogRepositories implements CatalogInterfaceRepositories
                         ->orWhere('username', 'REGEXP', $search);
                 });
             })
-            ->paginate($perPage, ['*'], 'author_page', $page);
+            ->paginate($perPage, ['*'], 'authors_page', $page);
     }
     public function getAllPublishers(array $filters, int $perPage, int $page): LengthAwarePaginator
     {
-        return Publisher::query()->select(['id', 'name', 'slug', 'logo'])->withCount('books as count_of_books')
+        return Publisher::query()->select(['id', 'name', 'address', 'slug', 'logo'])->withCount('books as count_of_books')
             ->when(
                 ($filters['field'] ?? null) && ($filters['direction'] ?? null),
                 fn($query) => $query->orderBy($filters['field'], $filters['direction'])
@@ -88,7 +88,7 @@ class CatalogRepositories implements CatalogInterfaceRepositories
                         ->orWhere('slug', 'REGEXP', $search);
                 });
             })
-            ->paginate($perPage, ['*'], 'publisher_page', $page);
+            ->paginate($perPage, ['*'], 'publishers_page', $page);
     }
 
     public function getBooksByCategory(
@@ -161,14 +161,14 @@ class CatalogRepositories implements CatalogInterfaceRepositories
             ->with([
                 'publisher:id,name,logo',
                 'categories:id,name,slug,icon',
-                'authors:id,name,username',
+                'authors:id,name,username,avatar',
                 'language:id,language,photo',
             ])
             ->where('is_published', PublishedBooks::PUBLISH->value)
             ->where('status', BookStatus::AVAILABLE->value)
 
-            ->whereHas('categories', function ($q) use ($authorUsername) {
-                $q->where('slug', $authorUsername);
+            ->whereHas('authors', function ($q) use ($authorUsername) {
+                $q->where('username', $authorUsername);
             })
 
             ->when($filters['search'] ?? null, function ($query, $search) {
@@ -209,13 +209,13 @@ class CatalogRepositories implements CatalogInterfaceRepositories
             ->with([
                 'publisher:id,name,slug,logo',
                 'categories:id,name,slug,icon',
-                'authors:id,name,username',
+                'authors:id,name,username,avatar',
                 'language:id,language,photo',
             ])
             ->where('is_published', PublishedBooks::PUBLISH->value)
             ->where('status', BookStatus::AVAILABLE->value)
 
-            ->whereHas('categories', function ($q) use ($publisherSlug) {
+            ->whereHas('publisher', function ($q) use ($publisherSlug) {
                 $q->where('slug', $publisherSlug);
             })
 

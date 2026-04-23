@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import SectionHeader from '@/components/ui/SectionHeaderVariants';
 import { useLanguage } from '@/hooks/useLanguage';
-import { featureBookHeaderHome, featuredBooksDataHome } from '@/data/data';
+import { featureBookHeaderHome } from '@/data/data';
 import BookCard from '@/components/component/Card/BookCard';
 import Pagination from '@/components/component/Home/Pagination/Pagination';
 import { FeaturedBookProps } from '@/types/HomePage/FeaturedHome';
