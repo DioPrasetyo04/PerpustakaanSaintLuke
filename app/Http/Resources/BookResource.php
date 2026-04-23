@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 
 class BookResource extends JsonResource
@@ -55,7 +56,7 @@ class BookResource extends JsonResource
             'book_code' => $this->book_code,
             'title' => $this->title,
             'slug' => $this->slug,
-            'publication_year' => $this->publication_year,
+            'publication_year' => Carbon::parse($this->publication_year)->format('Y'),
             'isbn' => $this->isbn,
             'synopsis' => $this->synopsis,
             'number_of_pages' => $this->number_of_pages,
@@ -63,6 +64,24 @@ class BookResource extends JsonResource
             'cover' => $this->cover ? Storage::url($this->cover) : null,
             'price' => $this->price,
             'is_published' => $this->is_published,
+            'avg_rating' => $this->avg_rating ?? 0,
+            'rating' => $this->whenLoaded('reviews', function () {
+                return $this->reviews->map(function ($review) {
+                    return [
+                        'id' => $review->id,
+                        'user' => $review->user ? [
+                            'id' => $review->user->id,
+                            'name' => $review->user->name,
+                            'username' => $review->user->username,
+                            'avatar' => $review->user->avatar
+                                ? Storage::url($review->user->avatar)
+                                : null,
+                        ] : null,
+                        'rating' => $review->rating ?? 0,
+                        'comment' => $review->comment ?? null,
+                    ];
+                })->values()->toArray();
+            }),
         ];
     }
 }

@@ -22,15 +22,10 @@ export const formattedDate = (value: string, language: string) => {
     });
 };
 
-export const getBooksRoute = (type: FilterType, attribute: string) => {
-    switch (type) {
-        case 'category':
-            return route('catalog.category.books', { slug: attribute });
-        case 'author':
-            return route('catalog.author.books', { username: attribute });
-        case 'publisher':
-            return route('catalog.publisher.books', { slug: attribute });
-        default:
-            return route('catalog.books');
-    }
+export const formattedRating = (
+    value?: number | string,
+    decimals: number = 1,
+) => {
+    const num = Number(value);
+    return !isNaN(num) ? num.toFixed(decimals) : '0.0';
 };
