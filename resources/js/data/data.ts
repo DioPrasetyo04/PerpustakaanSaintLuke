@@ -269,6 +269,21 @@ export const announcementsHeaderHome = {
     },
 };
 
+export const filtersHeaderPage = {
+    id: {
+        title: 'Sumber Daya Buku',
+        description:
+            'Temukan buku yang kamu inginkan menggunakan filter sumber daya yang dibutuhkan',
+        placeholder: 'Cari buku sesuai sumber daya....',
+    },
+    en: {
+        title: 'E-Resources Book',
+        description:
+            'Find the book you want using the required resource filters...',
+        placeholder: 'Search for books according to resources....',
+    },
+};
+
 export type AnnouncementType = {
     id: number;
     title: string;

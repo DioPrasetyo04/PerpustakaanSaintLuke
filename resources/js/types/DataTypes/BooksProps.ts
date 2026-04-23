@@ -17,4 +17,6 @@ export type BookProps = {
     categories: CategoryProps[];
     synopsis?: string;
     price?: number;
+    avg_rating?: number;
+    publication_year?: number;
 };

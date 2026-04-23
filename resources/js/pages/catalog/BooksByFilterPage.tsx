@@ -1,6 +1,9 @@
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/hooks/useLanguage';
-import { BooksByFilterPageProps } from '@/types/CatalogPage/CatalogBooksByCategoryPageProps';
+import {
+    BooksByFilterPageProps,
+    FilterType,
+} from '@/types/CatalogPage/CatalogBooksByCategoryPageProps';
 import { router, usePage } from '@inertiajs/react';
 import { ArrowLeft, BookOpenCheck, Search, UserPen } from 'lucide-react';
 import { route } from 'ziggy-js';
@@ -10,7 +13,6 @@ import { motion } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { useSearch } from '@/hooks/useSearch';
 import { useDebounce } from '@/hooks/useDebounce';
-import { getBooksRoute } from '@/lib/utils';
 import BookCard from '@/components/component/Card/BookCard';
 import Pagination from '@/components/component/Home/Pagination/Pagination';
 
@@ -24,6 +26,19 @@ const BooksByFilterPage = () => {
     });
 
     const debounceSearch = useDebounce(search, 400);
+
+    const getBooksRoute = (type: FilterType, attribute: string) => {
+        switch (type) {
+            case 'category':
+                return route('catalog.category.books', { slug: attribute });
+            case 'author':
+                return route('catalog.author.books', { username: attribute });
+            case 'publisher':
+                return route('catalog.publisher.books', { slug: attribute });
+            default:
+                return route('catalog.books');
+        }
+    };
 
     const titleMap: Record<typeof type, string> = {
         category: language === 'id' ? 'Kategori' : 'Category',
