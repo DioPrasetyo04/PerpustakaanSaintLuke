@@ -58,7 +58,7 @@ export const navItems: NavItem[] = [
     {
         id: 'announcement',
         label: { id: 'Berita', en: 'Announcement' },
-        href: '/announcements',
+        href: '/informations',
     },
     {
         id: 'about',
@@ -281,6 +281,37 @@ export const filtersHeaderPage = {
         description:
             'Find the book you want using the required resource filters...',
         placeholder: 'Search for books according to resources....',
+    },
+};
+
+export const bookDetailPage = {
+    id: {
+        bookNotFound: 'Buku Tidak Ditemukan',
+        backToCatalog: 'Kembali Ke Resources',
+        borrowBook: 'Pinjam Buku',
+        notAvailable: 'Buku Tidak Tersedia',
+        addWishlist: 'Simpan Buku',
+        publisher: 'Penerbit',
+        pubYear: 'Tahun Publikasi',
+        bookLanguage: 'Bahasa',
+        bookPages: 'Jumlah Halaman',
+        synopsis: 'Sinopsis',
+        recommended: 'Buku Rekomendasi',
+        headerReviews: 'Lihat beberapa komentar beberapa user terkait buku ini',
+    },
+    en: {
+        bookNotFound: 'Book Not Found',
+        backToCatalog: 'Back to Catalog',
+        borrowBook: 'Borrow Book',
+        notAvailable: 'Book Not Available',
+        addWishlist: 'Add To Wishlist',
+        publisher: 'Publisher',
+        pubYear: 'Publication Year',
+        bookLanguage: 'Language',
+        bookPages: 'Number Of Pages',
+        synopsis: 'Synopsis',
+        recommended: 'Recomended Books',
+        headerReviews: 'See what readers think about this book',
     },
 };
 

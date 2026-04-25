@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import React, { useState } from 'react';
 
 const ERROR_IMG_SRC =
@@ -13,7 +14,7 @@ export function ImageWithFallback(
     if (didError) {
         return (
             <div
-                className={`inline-block bg-gray-100 text-center align-middle ${className ?? ''}`}
+                className={`inline-block bg-gray-100 text-center ${className ?? ''}`}
                 style={style}
             >
                 <div className="flex h-full w-full items-center justify-center">
@@ -32,7 +33,10 @@ export function ImageWithFallback(
         <img
             src={src}
             alt={alt}
-            className={className}
+            className={cn(
+                'h-full w-full object-cover object-center',
+                className ?? '',
+            )}
             style={style}
             {...rest}
             onError={() => setDidError(true)}

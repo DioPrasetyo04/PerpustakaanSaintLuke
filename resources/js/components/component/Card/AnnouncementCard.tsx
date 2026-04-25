@@ -27,32 +27,35 @@ export const AnnouncementCard = ({
             transition={{ delay: 0.4 }}
             whileHover={{ y: -8 }}
         >
-            <Card className="flex h-full flex-col overflow-hidden transition-shadow hover:shadow-xl">
-                <div className="relative aspect-video overflow-hidden bg-gray-100">
-                    <ImageWithFallback
-                        src={image}
-                        alt={name}
-                        className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
-                    />
-                </div>
-                <div className="flex flex-1 flex-col p-6">
-                    <div className="mb-2 text-sm text-gray-500">
-                        {formattedDate(created_at ?? '', language)}
+            <Link href={`/announcements/${slug}`}>
+                <Card className="flex h-full flex-col overflow-hidden p-0 transition-shadow hover:shadow-xl">
+                    <div className="relative aspect-video overflow-hidden bg-gray-100">
+                        <ImageWithFallback
+                            src={image}
+                            alt={name}
+                            className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+                        />
                     </div>
-                    <h3 className="mb-2 font-['Poppins'] text-xl font-semibold text-gray-900">
-                        {name}
-                    </h3>
-                    <p
-                        className="mb-4 line-clamp-2 flex-1 text-gray-600"
-                        dangerouslySetInnerHTML={{ __html: description }}
-                    />
-                    <Link href={`/announcements/${slug}`}>
-                        <Button variant="link" className="p-0 text-primary">
-                            Read More <ArrowRight className="ml-1 h-4 w-4" />
-                        </Button>
-                    </Link>
-                </div>
-            </Card>
+                    <div className="flex flex-1 flex-col p-6">
+                        <div className="mb-2 text-sm text-gray-500">
+                            {formattedDate(created_at ?? '', language)}
+                        </div>
+                        <h3 className="mb-2 font-['Poppins'] text-xl font-semibold text-gray-900">
+                            {name}
+                        </h3>
+                        <p
+                            className="mb-4 line-clamp-2 flex-1 text-gray-600"
+                            dangerouslySetInnerHTML={{ __html: description }}
+                        />
+                        <div className="text-semibold font-poppins font-semibold">
+                            <Button variant="link" className="p-0 text-primary">
+                                Read More{' '}
+                                <ArrowRight className="ml-1 h-4 w-4" />
+                            </Button>
+                        </div>
+                    </div>
+                </Card>
+            </Link>
         </motion.div>
     );
 };

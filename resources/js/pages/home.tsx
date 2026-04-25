@@ -5,7 +5,7 @@ import Categories from '@/components/Section/Home/Category/Categories';
 import AnnouncementsSection from '@/components/Section/Home/Announcements/Announcements';
 import Faq from '@/components/Section/Home/FAQ/Faq';
 import { usePage } from '@inertiajs/react';
-import { HomePageProps } from '@/types/HomePage/HomePageProps';
+import type { HomePageProps } from '@/types/HomePage/HomePageProps';
 
 const home = () => {
     const { data, state } = usePage<HomePageProps>().props;

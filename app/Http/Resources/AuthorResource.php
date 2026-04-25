@@ -16,17 +16,17 @@ class AuthorResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'name' => $this->name,
-            'username' => $this->username,
-            'phone' => $this->phone,
-            'gender' => $this->gender,
-            'date_of_birth' => $this->date_of_birth,
-            'nationality' => $this->nationality,
-            'avatar' => $this->avatar ? Storage::url($this->avatar) : null,
-            'bio' => $this->bio,
-            'verified_at' => $this->verified_at,
-            'count_of_books' => $this->count_of_books ?? 0
+            'id' => $this->when(isset($this->id), $this->id),
+            'name' => $this->when(isset($this->name), $this->name),
+            'username' => $this->when(isset($this->username), $this->username),
+            'phone' => $this->when(isset($this->phone), $this->phone),
+            'gender' => $this->when(isset($this->gender), $this->gender),
+            'date_of_birth' => $this->when(isset($this->date_of_birth), $this->date_of_birth),
+            'nationality' => $this->when(isset($this->nationality), $this->nationality),
+            'avatar' => $this->when(isset($this->avatar), $this->avatar ? Storage::url($this->avatar) : null),
+            'bio' => $this->when(isset($this->bio), $this->bio),
+            'verified_at' => $this->when(isset($this->verified_at), $this->verified_at),
+            'count_of_books' => $this->whenHas('count_of_books', $this->count_of_books ?? 0)
         ];
     }
 }

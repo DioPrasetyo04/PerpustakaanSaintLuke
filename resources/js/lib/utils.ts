@@ -13,8 +13,8 @@ export function toUrl(url: NonNullable<InertiaLinkProps['href']>): string {
     return typeof url === 'string' ? url : url.url;
 }
 
-export const formattedDate = (value: string, language: string) => {
-    const date = new Date(value);
+export const formattedDate = (value: string | undefined, language: string) => {
+    const date = new Date(value ?? '');
     return date.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', {
         year: 'numeric',
         month: 'long',
@@ -28,4 +28,11 @@ export const formattedRating = (
 ) => {
     const num = Number(value);
     return !isNaN(num) ? num.toFixed(decimals) : '0.0';
+};
+
+export const formattedYear = (value: string | number, language: string) => {
+    const date = new Date(value);
+    return date.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', {
+        year: 'numeric',
+    });
 };

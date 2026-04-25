@@ -1,3 +1,4 @@
+import { ImageWithFallback } from '@/components/common/ImageWithFallback';
 import BookCard from '@/components/component/Card/BookCard';
 import Pagination from '@/components/component/Home/Pagination/Pagination';
 import { Badge } from '@/components/ui/badge';
@@ -15,11 +16,11 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { filtersHeaderPage } from '@/data/data';
 import { useLanguage } from '@/hooks/useLanguage';
-import { ResourceFilterPageProps } from '@/types/Resource/ResourceFilterPageProps';
+import type { ResourceFilterPageProps } from '@/types/ResourcePage/ResourceFilterPageProps';
 import { router, usePage } from '@inertiajs/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Filter, Search, X } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { route } from 'ziggy-js';
 export default function ResourcesPage() {
     const { props, url } = usePage<ResourceFilterPageProps>();
@@ -36,14 +37,30 @@ export default function ResourcesPage() {
     const text =
         language === 'id' ? filtersHeaderPage.id : filtersHeaderPage.en;
 
-    const getQuery = (key: string) => {
+    const getQuery = (url: string, key: string) => {
         const params = new URLSearchParams(url.split('?')[1]);
         return params.get(key);
     };
 
-    const [searchQuery, setSearchQuery] = useState(
-        getQuery('search') || filters?.search || '',
-    );
+    const searchFromUrl = useMemo(() => {
+        return getQuery(url, 'search') || props.filters?.search || '';
+    }, [url]);
+
+    const [searchInput, setSearchInput] = useState(searchFromUrl);
+    // useEffect url
+    useEffect(() => {
+        setSearchInput(searchFromUrl);
+    }, [searchFromUrl]);
+
+    const [debouncedSearch, setDebouncedSearch] = useState(searchInput);
+
+    useEffect(() => {
+        const delay = setTimeout(() => {
+            setDebouncedSearch(searchInput);
+        }, 400); // delay 400ms
+
+        return () => clearTimeout(delay);
+    }, [searchInput]);
 
     const [localFilters, setLocalFilters] = useState({
         categories: filters?.categories || [],
@@ -73,18 +90,12 @@ export default function ResourcesPage() {
         }
     };
 
-    // useEffect url
-    useEffect(() => {
-        const search = getQuery('search') || '';
-        setSearchQuery(search);
-    }, [url]);
-
     useEffect(() => {
         const sort = getSortParams(sortBy);
         router.get(
             '/resources',
             {
-                search: searchQuery,
+                search: debouncedSearch,
                 categories: localFilters.categories,
                 authors: localFilters.authors,
                 publishers: localFilters.publishers,
@@ -97,7 +108,7 @@ export default function ResourcesPage() {
                 replace: true,
             },
         );
-    }, [searchQuery, localFilters, sortBy]);
+    }, [debouncedSearch, localFilters, sortBy]);
 
     // toogleFilter;
     const toggleFilter = (type: keyof typeof localFilters, value: string) => {
@@ -120,7 +131,7 @@ export default function ResourcesPage() {
         router.get(
             route('resource'),
             {
-                search: searchQuery,
+                search: debouncedSearch,
                 resources_page: page,
                 resources_load: resources.meta.per_page,
             },
@@ -135,7 +146,7 @@ export default function ResourcesPage() {
         router.get(
             route('resource'),
             {
-                search: searchQuery,
+                search: debouncedSearch,
                 resources_page: 1,
                 resources_load: perPage,
             },
@@ -326,7 +337,7 @@ export default function ResourcesPage() {
                                     {publishersOptions?.map((publisher) => (
                                         <div
                                             key={publisher.id}
-                                            className="flex items-center"
+                                            className="flex items-center gap-2 p-2"
                                         >
                                             <Checkbox
                                                 id={`pub-${publisher.id}`}
@@ -340,12 +351,17 @@ export default function ResourcesPage() {
                                                     )
                                                 }
                                             />
-                                            <label
-                                                htmlFor={`pub-${publisher.id}`}
-                                                className="ml-3 cursor-pointer text-sm text-gray-700"
+                                            <ImageWithFallback
+                                                src={publisher.logo}
+                                                alt={publisher.name}
+                                                className="h-10 w-10 rounded-full object-cover object-center"
+                                            />
+                                            <span
+                                                className="text-md font-poppins"
+                                                font-semibold
                                             >
                                                 {publisher.name}
-                                            </label>
+                                            </span>
                                         </div>
                                     ))}
                                 </div>
@@ -410,9 +426,9 @@ export default function ResourcesPage() {
                                     <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
                                     <Input
                                         placeholder={text.placeholder}
-                                        value={searchQuery}
+                                        value={searchInput}
                                         onChange={(e) =>
-                                            setSearchQuery(e.target.value)
+                                            setSearchInput(e.target.value)
                                         }
                                         className="pl-10"
                                     />
@@ -516,12 +532,19 @@ export default function ResourcesPage() {
                                                                     htmlFor={`cat-mobile-${category.id}`}
                                                                     className="ml-3 flex cursor-pointer items-center gap-2 text-sm text-gray-700"
                                                                 >
-                                                                    <span>
-                                                                        {
+                                                                    <ImageWithFallback
+                                                                        src={
                                                                             category.icon
                                                                         }
-                                                                    </span>
-                                                                    <span>
+                                                                        alt={
+                                                                            category.name
+                                                                        }
+                                                                        className="h-10 w-10 rounded-full object-cover object-center"
+                                                                    />
+                                                                    <span
+                                                                        className="text-md font-poppins"
+                                                                        font-semibold
+                                                                    >
                                                                         {
                                                                             category.name
                                                                         }

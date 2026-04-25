@@ -1,15 +1,25 @@
-import { AuthorProps } from './AuthorsProps';
-import { CategoryProps } from './CategoryProps';
-import { LanguageProps } from './LanguageProps';
-import { PublisherProps } from './PublisherProps';
+import type { AuthorProps } from './AuthorsProps';
+import type { CategoryProps } from './CategoryProps';
+import type { LanguageProps } from './LanguageProps';
+import type { PublisherProps } from './PublisherProps';
+import type { StockProps } from './StockProps';
+
+export type BookStatus =
+    | 'Tersedia'
+    | 'Tidak Tersedia'
+    | 'Dipinjam'
+    | 'Hilang'
+    | 'Rusak';
 
 export type BookProps = {
     id: number;
     title: string;
     slug: string;
     cover: string;
+    number_of_pages: number;
+    isbn: string;
     book_code: string;
-    status: string;
+    status: BookStatus;
     is_published: boolean;
     publisher: PublisherProps;
     language: LanguageProps;
@@ -19,4 +29,5 @@ export type BookProps = {
     price?: number;
     avg_rating?: number;
     publication_year?: number;
+    stock?: StockProps;
 };

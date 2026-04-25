@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\InformationController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\HomeController;
@@ -19,14 +20,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::controller(HomeController::class)->group(function () {
     Route::get('/', 'index')->name('home');
-    // Route::get('/book/{id}', 'bookDetail')->name('book.detail');
-    // Route::get('/announcements', 'announcements')->name('announcements');
-    // Route::get('/dashboard', 'dashboard')->middleware(['auth', 'verified'])->name('dashboard');
 });
 
 
 Route::controller(BookController::class)->group(function () {
-    Route::get('/book/detail/{book:slug}', 'bookDetail')->name('book.detail');
+    Route::get('/book/detail/{slug}', 'detailBook')->name('book.detail');
 });
 
 Route::controller(CatalogController::class)->group(function () {
@@ -41,6 +39,11 @@ Route::controller(CatalogController::class)->group(function () {
 
 Route::controller(ResourceController::class)->group(function () {
     Route::get('/resources', 'index')->name('resource');
+});
+
+Route::controller(InformationController::class)->group(function () {
+    Route::get('/informations', 'index')->name('announcements.index');
+    Route::get('/information/{slug}', 'detail')->name('announcement.detail');
 });
 
 Route::controller(PaymentController::class)->group(function () {

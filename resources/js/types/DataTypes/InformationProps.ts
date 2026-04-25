@@ -1,4 +1,4 @@
-import { CategoryProps } from './CategoryProps';
+import type { CategoryProps } from './CategoryProps';
 
 export type InformationProps = {
     index?: number;
@@ -7,7 +7,7 @@ export type InformationProps = {
     name: string;
     slug: string;
     description: string;
-    categories: CategoryProps[];
+    category: CategoryProps;
     created_at?: string;
     language?: string;
 };

@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Publisher;
 use App\Services\ResourceServices;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class ResourceController extends Controller
@@ -24,7 +25,7 @@ class ResourceController extends Controller
             'search',
             'categories',
             'authors',
-            'publishers',
+            'publisher',
             'availability',
             'field',
             'direction',
@@ -39,9 +40,35 @@ class ResourceController extends Controller
             'resources' => $this->resourcesController->transformBooksData($resourcePaginator),
             'filters' => $filters,
             'statusOptions' => BookStatus::options(),
-            'authorsOptions' => Author::select(['id', 'name', 'avatar'])->get(),
-            'categoriesOptions' => Category::select(['id', 'name', 'icon'])->get(),
-            'publishersOptions' => Publisher::select(['id', 'name', 'logo'])->get(),
+            'authorsOptions' => Author::select(['id', 'name'])
+                ->get()
+                ->map(function ($author) {
+                    return [
+                        'id' => $author->id,
+                        'name' => $author->name,
+                        'avatar' => $author->avatar,
+                    ];
+                }),
+            'categoriesOptions' => Category::select(['id', 'name'])
+                ->get()
+                ->map(function ($category) {
+                    return [
+                        'id' => $category->id,
+                        'name' => $category->name,
+                        'icon' => $category->icon
+                    ];
+                }),
+            'publishersOptions' => Publisher::select(['id', 'name', 'logo'])
+                ->get()
+                ->map(function ($publisher) {
+                    return [
+                        'id' => $publisher->id,
+                        'name' => $publisher->name,
+                        'logo' => $publisher->logo
+                            ? Storage::url($publisher->logo)
+                            : null,
+                    ];
+                }),
         ]);
     }
 }
