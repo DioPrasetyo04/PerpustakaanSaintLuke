@@ -28,7 +28,7 @@ class ResourceRepositories implements ResourceInterfaceRepositories
             'price',
             'is_published'
         ])
-            ->with(['publisher', 'categories', 'authors', 'language', 'reviews.user'])
+            ->with(['publisher:id,name,logo,slug', 'categories:id,name,icon,slug', 'authors:id,name,avatar', 'language:language,photo', 'reviews.user'])
             ->withAvg('reviews as avg_rating', 'rating')
             ->when(
                 ($filters['field'] ?? null) && ($filters['direction'] ?? null),

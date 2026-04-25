@@ -34,7 +34,7 @@ const FeatureBooks = ({ books }: FeaturedBookProps) => {
                         <BookCard key={book.id} {...book} />
                     ))}
                 </div>
-
+                
                 <Pagination
                     page={books.meta.current_page}
                     total={books.meta.total}

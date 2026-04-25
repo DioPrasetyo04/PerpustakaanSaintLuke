@@ -5,9 +5,9 @@ import { Link } from '@inertiajs/react';
 import { Badge } from '../../ui/badge';
 import { cn, formattedRating } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
-import { Bookmark, BookmarkCheck } from 'lucide-react';
+import { Book, Bookmark, BookmarkCheck } from 'lucide-react';
 import { Button } from '../../ui/button';
-import { BookProps } from '@/types/DataTypes/BooksProps';
+import { BookProps, BookStatus } from '@/types/DataTypes/BooksProps';
 import { ImageWithFallback } from '@/components/common/ImageWithFallback';
 
 const BookCard = ({
@@ -21,8 +21,15 @@ const BookCard = ({
     synopsis,
     avg_rating,
 }: BookProps) => {
-    const { language } = useLanguage();
     const [isBookMarked, setIsBookMarked] = useState(false);
+    const getStatusColor = (status: BookStatus) => {
+        switch (status) {
+            case 'Tersedia':
+                return 'bg-green-500';
+            default:
+                return 'bg-red-500';
+        }
+    };
     const isAvailable = status === 'Tersedia';
     const toggleBookmark = () => {
         setIsBookMarked(!isBookMarked);
@@ -39,36 +46,50 @@ const BookCard = ({
                 stiffness: 300,
             }}
         >
-            <Link href={`/book/detail/${slug}`}>
-                <Card className="group overflow-hidden border-2 transition-all hover:border-primary hover:shadow-2xl">
+            <Link
+                href={isAvailable ? `/book/detail/${slug}` : ''}
+                onClick={(e) => {
+                    if (!isAvailable) e.preventDefault();
+                }}
+                className={cn(!isAvailable && 'pointer-events-none')}
+            >
+                <Card
+                    className={cn(
+                        'group overflow-hidden border-2 p-0 transition-all hover:border-primary hover:shadow-2xl',
+                        !isAvailable && 'cursor-not-allowed opacity-60',
+                    )}
+                >
                     <div className="relative aspect-[3/4] overflow-hidden bg-gray-100">
                         <ImageWithFallback
                             src={cover}
                             alt={title}
-                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            className="block h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                         />
                         <div className="absolute top-3 left-3 z-10">
                             <Badge
-                                className={`${status === 'Tersedia' ? 'bg-green-500' : 'bg-red-500'} text-white shadow-lg`}
+                                className={cn(
+                                    getStatusColor(status),
+                                    'text-white shadow-lg',
+                                )}
                             >
                                 {status}
                             </Badge>
                         </div>
                         {/* <button
-                            onClick={(e) => {
-                                e.preventDefault();
-                                toggleBookmark;
-                            }}
-                            className="absolute top-3 right-3 z-10 rounded-full bg-white/90 p-2 shadow-lg transition-all hover:bg-white"
-                        >
-                            <Bookmark
-                                className={`h-5 w-5 ${
-                                    isBookMarked.includes(book.id)
-                                        ? 'fill-primary text-primary'
-                                        : 'text-gray-600'
-                                }`}
-                            />
-                        </button> */}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    toggleBookmark;
+                                }}
+                                className="absolute top-3 right-3 z-10 rounded-full bg-white/90 p-2 shadow-lg transition-all hover:bg-white"
+                            >
+                                <Bookmark
+                                    className={`h-5 w-5 ${
+                                        isBookMarked.includes(book.id)
+                                            ? 'fill-primary text-primary'
+                                            : 'text-gray-600'
+                                    }`}
+                                />
+                            </button> */}
                     </div>
                     <div className="p-4">
                         <h3 className="mb-1 line-clamp-2 font-['Poppins'] font-semibold text-gray-900 transition-colors group-hover:text-primary">
@@ -124,6 +145,24 @@ const BookCard = ({
                                     {formattedRating(avg_rating) ?? 0}
                                 </span>
                             </div>
+                        </div>
+                        <div
+                            onClick={(e) => {
+                                if (!isAvailable) e.preventDefault();
+                            }}
+                            className="mt-8 block"
+                        >
+                            <Button
+                                className={cn(
+                                    'w-full',
+                                    isAvailable
+                                        ? 'bg-primary hover:bg-primary/90'
+                                        : `${getStatusColor(status)} cursor-not-allowed`,
+                                )}
+                                disabled={!isAvailable}
+                            >
+                                {isAvailable ? 'Lihat Detail Buku' : status}
+                            </Button>
                         </div>
                     </div>
                 </Card>

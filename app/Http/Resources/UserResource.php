@@ -4,9 +4,10 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 
-class PublisherResource extends JsonResource
+class UserResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -18,13 +19,13 @@ class PublisherResource extends JsonResource
         return [
             'id' => $this->when(isset($this->id), $this->id),
             'name' => $this->when(isset($this->name), $this->name),
-            'slug' => $this->when(isset($this->slug), $this->slug),
-            'address' => $this->when(isset($this->address), $this->address),
+            'username' => $this->when(isset($this->username), $this->username),
             'email' => $this->when(isset($this->email), $this->email),
+            'email_verified_at' => $this->when(isset($this->email_verified_at), $this->email_verified_at ? Carbon::parse($this->email_verified_at)->format('d F Y') : null),
             'phone' => $this->when(isset($this->phone), $this->phone),
-            'logo' => $this->when(isset($this->logo), $this->logo ? Storage::url($this->logo) : null),
-            'is_active' => $this->when(isset($this->is_active), $this->is_active),
-            'count_of_books' => $this->whenHas('count_of_books', $this->count_of_books ?? 0),
+            'avatar' => $this->when(isset($this->avatar), $this->avatar ? Storage::url($this->avatar) : null),
+            'date_of_birth' => $this->when(isset($this->date_of_birth), $this->date_of_birth),
+            'address' => $this->when(isset($this->address), $this->address)
         ];
     }
 }

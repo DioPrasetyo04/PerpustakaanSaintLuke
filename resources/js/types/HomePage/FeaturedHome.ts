@@ -1,7 +1,7 @@
-import { BookProps } from '../DataTypes/BooksProps';
-import { CategoryProps } from '../DataTypes/CategoryProps';
-import { InformationProps } from '../DataTypes/InformationProps';
-import { Paginated } from '../pagination';
+import type { BookProps } from '../DataTypes/BooksProps';
+import type { CategoryProps } from '../DataTypes/CategoryProps';
+import type { InformationProps } from '../DataTypes/InformationProps';
+import type { Paginated } from '../pagination';
 
 export type FeaturedBookProps = {
     books: Paginated<BookProps>;

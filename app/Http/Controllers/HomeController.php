@@ -28,10 +28,6 @@ class HomeController extends Controller
         $categoriesPaginator = $this->homeController->getCategoriesRaw($filters, $categoryLoad, $categoryPage);
         $informationsPaginator = $this->homeController->getInformationsRaw($filters, $infoLoad, $infoPage);
 
-        // dd([
-        //     'charts' => $this->homeController->getCharts(),
-        // ]);
-
         return Inertia::render('home', [
             'data' => [
                 'books' => $this->homeController->transformBooks($booksPaginator),

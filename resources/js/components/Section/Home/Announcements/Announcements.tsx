@@ -1,6 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ImageWithFallback } from '@/components/common/ImageWithFallback';
@@ -51,54 +51,6 @@ const AnnouncementsSection = ({ informations }: FeaturedInformationProps) => {
                         />
                     ))}
                 </div>
-
-                {/* Pagination */}
-                {/* {totalPages > 1 && (
-                    <div className="mt-8 flex items-center justify-center gap-2">
-                        <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() =>
-                                setCurrentPage((prev) => Math.max(1, prev - 1))
-                            }
-                            disabled={currentPage === 1}
-                            className="h-9 w-9"
-                        >
-                            <ChevronLeft className="h-4 w-4" />
-                        </Button>
-
-                        {Array.from(
-                            { length: totalPages },
-                            (_, i) => i + 1,
-                        ).map((page) => (
-                            <Button
-                                key={page}
-                                variant={
-                                    currentPage === page ? 'default' : 'outline'
-                                }
-                                size="sm"
-                                onClick={() => setCurrentPage(page)}
-                                className="h-9 w-9"
-                            >
-                                {page}
-                            </Button>
-                        ))}
-
-                        <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() =>
-                                setCurrentPage((prev) =>
-                                    Math.min(totalPages, prev + 1),
-                                )
-                            }
-                            disabled={currentPage === totalPages}
-                            className="h-9 w-9"
-                        >
-                            <ChevronRight className="h-4 w-4" />
-                        </Button>
-                    </div>
-                )} */}
                 <Pagination
                     page={informations.meta.current_page}
                     total={informations.meta.total}

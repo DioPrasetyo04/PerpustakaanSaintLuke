@@ -36,6 +36,7 @@ class HomeRepositories implements HomeInterfaceRepositories
                 'authors:id,name,username,avatar', // cukup ini
                 'language:id,language,photo', // cukup ini
             ])
+            ->withAvg('reviews as avg_rating', 'rating')
             ->when(
                 ($filters['field'] ?? null) && ($filters['direction'] ?? null),
                 fn($query) => $query->orderBy($filters['field'], $filters['direction'])

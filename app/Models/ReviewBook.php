@@ -31,6 +31,7 @@ class ReviewBook extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+
     public function returnBook(): BelongsTo
     {
         return $this->belongsTo(ReturnBook::class, 'return_book_id');
