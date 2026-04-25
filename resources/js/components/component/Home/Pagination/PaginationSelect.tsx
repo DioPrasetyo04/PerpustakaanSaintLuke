@@ -8,7 +8,7 @@ const PaginationSelect = ({ value, onChange }: PaginationSelectProps) => {
             <select
                 value={value}
                 onChange={(e) => onChange(Number(e.target.value))}
-                className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-white dark:border-white/10 dark:bg-amber-600"
+                className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-white"
             >
                 <option value={1}>1</option>
                 <option value={4}>4</option>

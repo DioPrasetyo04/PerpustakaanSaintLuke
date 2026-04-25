@@ -28,16 +28,16 @@ export const headerVariants = cva(
 
       color: {
         default:
-          "text-gray-900 dark:text-gray-900",
+          "text-gray-900",
 
         muted:
-          "text-gray-600 dark:text-gray-400",
+          "text-gray-600",
 
         white:
           "text-white",
 
         primary:
-          "text-indigo-600 dark:text-indigo-400",
+          "text-indigo-600",
       },
 
       hover: {
@@ -48,10 +48,10 @@ export const headerVariants = cva(
         lift: "hover:-translate-y-1 hover:scale-[1.02]",
 
         glow:
-          "hover:text-indigo-600 dark:hover:text-indigo-400",
+          "hover:text-indigo-600",
 
         underline:
-          "relative after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-indigo-600 dark:after:bg-indigo-400 after:transition-all hover:after:w-full",
+          "relative after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-indigo-600 after:transition-all hover:after:w-full",
       },
 
       weight: {

@@ -55,10 +55,10 @@ export const buttonVariants = cva(
                languageItem: [
                     'inline-flex items-center gap-2',
 
-                    'bg-[#F9FAFB]/80 dark:bg-[#1E293B]/80',
-                    'text-[#C8A45C] dark:text-[#D4AF37]',
+                    'bg-[#F9FAFB]/80',
+                    'text-[#C8A45C]',
 
-                    'border border-[#E5E7EB]/60 dark:border-[#334155]/60',
+                    'border border-[#E5E7EB]/60',
                     'backdrop-blur-md',
 
                     'px-3 h-9 rounded-xl',
