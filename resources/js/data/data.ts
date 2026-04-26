@@ -128,7 +128,7 @@ export const profileAuth: NavItemSettingsAuth = {
 // ─── Auth Nav Items (Login / Register) ────────────────────────────────────────
 export const navAuthItems: NavAuth = {
     label: { id: 'Masuk', en: 'Login' },
-    href: '/login',
+    href: '/register',
     variant: 'default',
 };
 
@@ -315,83 +315,40 @@ export const bookDetailPage = {
     },
 };
 
-export type AnnouncementType = {
-    id: number;
-    title: string;
-    description: string;
-    date: string;
-    imageUrl: string;
+export const LoginDataPage = {
+    id: {
+        logoHeader: 'Perpustakaan Santo Lukas',
+        header: 'Selamat Datang Kembali!',
+        description: 'Login Akun Anda Untuk Mengakses Data Anda',
+        fieldHeaderName: 'Nama',
+        placeholderName: 'Input Nama Kamu...',
+        fieldHeaderEmail: 'Email',
+        placeholderEmail: 'Input Email Kamu...',
+        fieldHeaderPassword: 'Password',
+        placeholderPassword: 'Input Password Kamu...',
+        fieldHeaderConfirmPassword: 'Konfirmasi Password',
+        placeholderConfirmPassword: 'Input Konfirmasi Password Kamu...',
+        fieldHeaderPhone: 'Nomor Telepon',
+        fieldHeaderAvatar: 'Foto Profil',
+        placeholderAvatar: 'Input Foto Profil Kamu...',
+    },
+    en: {
+        logoHeader: 'Saint Luke Library',
+        header: 'Welcome Back!',
+        description: 'Loggin Your Account This From To Access Your Data',
+        fieldHeaderName: 'Name',
+        placeholderName: 'Input Your Name...',
+        fieldHeaderEmail: 'Email',
+        placeholderEmail: 'Input Your Email...',
+        fieldHeaderPassword: 'Password',
+        placeholderPassword: 'Input Your Password...',
+        fieldHeaderConfirmPassword: 'Confirmation Password',
+        placeholderConfirmPassword: 'Input Your Confirm Password...',
+        fieldHeaderPhone: 'Phone Number',
+        fieldHeaderAvatar: 'Profile Image',
+        placeholderAvatar: 'Input Your Profile Image...',
+    },
 };
-
-export const announcementsData: AnnouncementType[] = [
-    {
-        id: 1,
-        title: 'New Digital Archive Available',
-        description: 'Access over 500 new digitized historical documents',
-        date: 'March 1, 2026',
-        imageUrl:
-            'https://images.unsplash.com/photo-1556360853-5c1e1b64ff6a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsaWJyYXJ5JTIwYW5ub3VuY2VtZW50JTIwZXZlbnR8ZW58MXx8fHwxNzcyNjA1MzE5fDA&ixlib=rb-4.1.0&q=80&w=1080',
-    },
-    {
-        id: 2,
-        title: 'Book Reading Event',
-        description: 'Join us for a community reading session every Saturday',
-        date: 'Ongoing',
-        imageUrl:
-            'https://images.unsplash.com/photo-1632830096559-fb7091533755?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzdHVkZW50JTIwcmVhZGluZyUyMGJvb2tzfGVufDF8fHx8MTc3MjQ4NzMwMXww&ixlib=rb-4.1.0&q=80&w=1080',
-    },
-    {
-        id: 3,
-        title: 'Extended Library Hours',
-        description:
-            'Library now open until 10 PM on weekdays for your convenience',
-        date: 'February 28, 2026',
-        imageUrl:
-            'https://images.unsplash.com/photo-1656849093660-f672e7dabaca?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsaWJyYXJ5JTIwYnVpbGRpbmclMjBpbnRlcmlvciUyMGJvb2tzfGVufDF8fHx8MTc3MjYwNTMxNnww&ixlib=rb-4.1.0&q=80&w=1080',
-    },
-    {
-        id: 4,
-        title: 'Author Meet & Greet',
-        description:
-            'Special event with bestselling author Emily Roberts on March 15th',
-        date: 'March 15, 2026',
-        imageUrl:
-            'https://images.unsplash.com/photo-1772380407481-81b8f13bd010?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsaXRlcmF0dXJlJTIwY2xhc3NpYyUyMGJvb2t8ZW58MXx8fHwxNzcyNTQyMjEzfDA&ixlib=rb-4.1.0&q=80&w=1080',
-    },
-    {
-        id: 5,
-        title: "New Children's Section",
-        description:
-            "Newly renovated children's area with over 1,000 books now open",
-        date: 'February 20, 2026',
-        imageUrl:
-            'https://images.unsplash.com/photo-1763905180945-977cd687f7f9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0ZWNobm9sb2d5JTIwcHJvZ3JhbW1pbmclMjBib29rfGVufDF8fHx8MTc3MjYwNTMxN3ww&ixlib=rb-4.1.0&q=80&w=1080',
-    },
-    {
-        id: 6,
-        title: 'Library Closed - Holiday',
-        description: 'Library will be closed on March 10th for public holiday',
-        date: 'March 10, 2026',
-        imageUrl:
-            'https://images.unsplash.com/photo-1725870475677-7dc91efe9f93?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzY2llbmNlJTIwdGV4dGJvb2slMjBlZHVjYXRpb258ZW58MXx8fHwxNzcyNTA5NDUxfDA&ixlib=rb-4.1.0&q=80&w=1080',
-    },
-    {
-        id: 7,
-        title: 'Summer Reading Challenge',
-        description: 'Join our summer reading program and win exciting prizes',
-        date: 'April 1, 2026',
-        imageUrl:
-            'https://images.unsplash.com/photo-1556360853-5c1e1b64ff6a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsaWJyYXJ5JTIwYW5ub3VuY2VtZW50JTIwZXZlbnR8ZW58MXx8fHwxNzcyNjA1MzE5fDA&ixlib=rb-4.1.0&q=80&w=1080',
-    },
-    {
-        id: 8,
-        title: 'New Study Rooms Available',
-        description: 'Reserve our newly added private study rooms online',
-        date: 'March 20, 2026',
-        imageUrl:
-            'https://images.unsplash.com/photo-1632830096559-fb7091533755?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzdHVkZW50JTIwcmVhZGluZyUyMGJvb2tzfGVufDF8fHx8MTc3MjQ4NzMwMXww&ixlib=rb-4.1.0&q=80&w=1080',
-    },
-];
 
 export const faqHeader: faqHeaderType = {
     id: {

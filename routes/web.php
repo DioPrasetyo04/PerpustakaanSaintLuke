@@ -43,7 +43,7 @@ Route::controller(ResourceController::class)->group(function () {
 
 Route::controller(InformationController::class)->group(function () {
     Route::get('/informations', 'index')->name('announcements.index');
-    Route::get('/information/{slug}', 'detail')->name('announcement.detail');
+    Route::get('/information/detail/{slug}', 'detail')->name('announcement.detail');
 });
 
 Route::controller(PaymentController::class)->group(function () {
@@ -55,5 +55,7 @@ Route::controller(PaymentController::class)->group(function () {
     Route::get('/payments/failed', 'handleFailed')->name('payment.failed');
     Route::get('/payments/cancel', 'handleCancel')->name('payment.cancel');
 });
+
+require __DIR__ . '/auth.php';
 
 require __DIR__ . '/settings.php';

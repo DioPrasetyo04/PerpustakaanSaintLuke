@@ -27,7 +27,7 @@ export const AnnouncementCard = ({
             transition={{ delay: 0.4 }}
             whileHover={{ y: -8 }}
         >
-            <Link href={`/announcements/${slug}`}>
+            <Link href={`/information/detail/${slug}`}>
                 <Card className="flex h-full flex-col overflow-hidden p-0 transition-shadow hover:shadow-xl">
                     <div className="relative aspect-video overflow-hidden bg-gray-100">
                         <ImageWithFallback

@@ -60,7 +60,7 @@ const AnnouncementsSection = ({ informations }: FeaturedInformationProps) => {
                 />
 
                 <div className="mt-8 text-center">
-                    <Link href="/announcements">
+                    <Link href="/informations">
                         <Button size="lg" variant="outline" className="group">
                             {language === 'id'
                                 ? 'Lihat Semua Pengumuman'
