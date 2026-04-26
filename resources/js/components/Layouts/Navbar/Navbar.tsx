@@ -29,7 +29,9 @@ const Navbar = ({ initialAuth }: { initialAuth?: any }) => {
 
     const profileAuth: NavItemSettingsAuth | null = isAuthenticated
         ? {
-              photo: auth.user.avatar || '/assets/images/default-avatar.png',
+              photo: auth.user.avatar
+                  ? `/storage/${auth.user.avatar}`
+                  : '/assets/images/default-avatar.png',
               name: auth.user.name,
               menu: profileSubNavItems,
           }

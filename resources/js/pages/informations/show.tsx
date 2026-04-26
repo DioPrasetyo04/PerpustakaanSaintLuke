@@ -22,10 +22,10 @@ export default function show() {
                     animate={{ opacity: 1, x: 0 }}
                     className="mb-6"
                 >
-                    <Link href="/announcements">
+                    <Link href="/informations">
                         <Button variant="ghost" className="group">
                             <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
-                            Back to Announcements
+                            Back to Informations
                         </Button>
                     </Link>
                 </motion.div>
@@ -79,10 +79,10 @@ export default function show() {
 
                             {/* CTA */}
                             <div className="mt-8 flex items-center justify-between">
-                                <Link href="/announcements">
+                                <Link href="/informations">
                                     <Button variant="outline">
                                         <ArrowLeft className="mr-2 h-4 w-4" />
-                                        View All Announcements
+                                        View All Informations
                                     </Button>
                                 </Link>
                             </div>
