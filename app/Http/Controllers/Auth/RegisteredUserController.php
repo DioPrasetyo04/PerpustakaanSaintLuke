@@ -60,6 +60,6 @@ class RegisteredUserController extends Controller
 
         $this->registerController->Register($request);
 
-        return redirect(route('dashboard', absolute: false));
+        return redirect(route('home', absolute: false));
     }
 }

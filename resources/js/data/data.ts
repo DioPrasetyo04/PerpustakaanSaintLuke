@@ -128,7 +128,7 @@ export const profileAuth: NavItemSettingsAuth = {
 // ─── Auth Nav Items (Login / Register) ────────────────────────────────────────
 export const navAuthItems: NavAuth = {
     label: { id: 'Masuk', en: 'Login' },
-    href: '/register',
+    href: '/login',
     variant: 'default',
 };
 
@@ -315,11 +315,11 @@ export const bookDetailPage = {
     },
 };
 
-export const LoginDataPage = {
+export const RegisterDataPage = {
     id: {
         logoHeader: 'Perpustakaan Santo Lukas',
-        header: 'Selamat Datang Kembali!',
-        description: 'Login Akun Anda Untuk Mengakses Data Anda',
+        header: 'Daftar Akun Anda!',
+        description: 'Daftar Akun Anda Untuk Mendapatkan Banyak Akses!',
         fieldHeaderName: 'Nama',
         placeholderName: 'Input Nama Kamu...',
         fieldHeaderEmail: 'Email',
@@ -334,8 +334,8 @@ export const LoginDataPage = {
     },
     en: {
         logoHeader: 'Saint Luke Library',
-        header: 'Welcome Back!',
-        description: 'Loggin Your Account This From To Access Your Data',
+        header: 'Register Your Account!',
+        description: 'Register Your Account This From To Access Your Data',
         fieldHeaderName: 'Name',
         placeholderName: 'Input Your Name...',
         fieldHeaderEmail: 'Email',
@@ -347,6 +347,27 @@ export const LoginDataPage = {
         fieldHeaderPhone: 'Phone Number',
         fieldHeaderAvatar: 'Profile Image',
         placeholderAvatar: 'Input Your Profile Image...',
+    },
+};
+
+export const AuthDataPage = {
+    id: {
+        logoHeader: 'Perpustakaan Santo Lukas',
+        header: 'Login Akun Anda!',
+        description: 'Selamat Datang Silahkan Login!',
+        fieldHeaderEmail: 'Email',
+        placeholderEmail: 'Input Email Kamu...',
+        fieldHeaderPassword: 'Password',
+        placeholderPassword: 'Input Password Kamu...',
+    },
+    en: {
+        logoHeader: 'Saint Luke Library',
+        header: 'Login Your Account!',
+        description: 'Welcome Back Please Login Your Account!',
+        fieldHeaderEmail: 'Email',
+        placeholderEmail: 'Input Your Email...',
+        fieldHeaderPassword: 'Password',
+        placeholderPassword: 'Input Your Password...',
     },
 };
 
