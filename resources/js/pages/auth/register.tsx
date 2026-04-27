@@ -1,8 +1,6 @@
-import { RegisterForm, RegisterFormData } from '@/components/register-form';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import GuestLayout from '@/Layouts/GuestLayout';
-import { Head, Link, useForm } from '@inertiajs/react';
+import type { RegisterFormData } from '@/components/register-form';
+import { RegisterForm } from '@/components/register-form';
+import { useForm } from '@inertiajs/react';
 import type { ChangeEvent, FormEventHandler } from 'react';
 
 type InputName = keyof RegisterFormData;
