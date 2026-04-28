@@ -43,9 +43,10 @@ class Loan extends Model
         return $this->hasOne(ReturnBook::class, 'loan_id');
     }
 
+
     public static function hasActiveLoan(int $user_id, int $book_id): bool
     {
-        return self::query()->where('user_id', $user_id)->where('book_id', $book_id)->whereDoesntHave('returnBook', fn($query) => $query->where('book_id', $book_id)->where('user_id', $user_id))->exists();
+        return self::query()->where('user_id', $user_id)->where('book_id', $book_id)->whereDoesntHave('returnBook')->exists();
     }
 
     public static function substractionStock(int $book_id)
@@ -83,9 +84,9 @@ class Loan extends Model
 
     public static function checkUserVerified(int $userId)
     {
-         return User::query()
-        ->where('id', $userId)
-        ->whereNotNull('email_verified_at')
-        ->exists();
+        return User::query()
+            ->where('id', $userId)
+            ->whereNotNull('email_verified_at')
+            ->exists();
     }
 }
