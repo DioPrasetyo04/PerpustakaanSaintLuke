@@ -51,6 +51,4 @@ class BookController extends Controller
             ],
         ]);
     }
-
-    public function borrowBook(Request $request) {}
 }

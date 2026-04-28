@@ -19,7 +19,8 @@ class FineSettings extends Model
         'damage_discount_type',
         'damage_fee_book',
         'lost_discount_type',
-        'lost_fee_book'
+        'lost_fee_book',
+        'loan_duration_days'
     ];
 
     protected function casts(): array
@@ -28,6 +29,12 @@ class FineSettings extends Model
             // 'late_discount_type' => DiscountType::class,
             'damage_discount_type' => DiscountType::class,
             'lost_discount_type' => DiscountType::class,
+            'loan_duration_days' => 'integer'
         ];
+    }
+
+    public static function checkSettings()
+    {
+        return self::query()->firstOrFail();
     }
 }
