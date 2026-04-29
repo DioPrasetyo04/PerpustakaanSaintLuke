@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('category_id')->constrained('categories', 'id')->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('book_id')->constrained('books', 'id')->cascadeOnDelete()->cascadeOnUpdate();
-            $table->timestamps();
         });
     }
 

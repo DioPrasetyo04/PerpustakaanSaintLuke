@@ -1,7 +1,9 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
 use PragmaRX\Countries\Package\Countries;
 
@@ -213,5 +215,29 @@ if (!function_exists('formatLast12Months')) {
             ];
         }
         return $result;
+    }
+}
+
+if (!function_exists('transformData')) {
+    function transformData($data, string $resource)
+    {
+        if (is_null($data)) {
+            return null;
+        }
+
+        // Pagination
+        if ($data instanceof LengthAwarePaginator) {
+            return paginateResource($data, $resource);
+        }
+
+        // Collection / Array
+        if ($data instanceof Collection || is_array($data)) {
+            return collect($data)->map(function ($item) use ($resource) {
+                return (new $resource($item))->toArray(request());
+            })->toArray();
+        }
+
+        // Single model
+        return (new $resource($data))->toArray(request());
     }
 }

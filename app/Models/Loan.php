@@ -49,6 +49,20 @@ class Loan extends Model
         return self::query()->where('user_id', $user_id)->where('book_id', $book_id)->whereDoesntHave('returnBook')->exists();
     }
 
+    public static function hasUserActiveLoan(int $user_id): bool
+    {
+        return self::query()->where('user_id', $user_id)->whereDoesntHave('returnBook')->exists();
+    }
+
+    public static function hasActiveLoanBySlug(int $userId, string $slug): bool
+    {
+        return self::query()
+            ->where('user_id', $userId)
+            ->whereDoesntHave('returnBook')
+            ->whereHas('book', fn($q) => $q->where('slug', $slug))
+            ->exists();
+    }
+
     public static function substractionStock(int $book_id)
     {
         return Stock::query()->whereHas('book', fn($query) => $query->where('id', $book_id))->where('available', '>', 0)->decrement('available', 1);

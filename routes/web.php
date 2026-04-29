@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\AssetController;
 use App\Http\Controllers\InformationController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LoanController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ResourceController;
 use Illuminate\Support\Facades\Route;
@@ -54,6 +56,22 @@ Route::controller(PaymentController::class)->group(function () {
     Route::get('/payments/success', 'handleSuccess')->name('payment.success');
     Route::get('/payments/failed', 'handleFailed')->name('payment.failed');
     Route::get('/payments/cancel', 'handleCancel')->name('payment.cancel');
+});
+
+Route::middleware(['auth', 'verified', 'dynamic.role_permission'])->group(function () {
+    Route::controller(LoanController::class)->group(function () {
+        Route::get('/dashboard/loans', 'index')->name('loan.index');
+        Route::get('/dashboard/loan/{loanCode}', 'detail')->name('loan.detail');
+        Route::get('/confirmation/loan/book/{slug}', 'confirmation')->name('loan.confirmation');
+        Route::post('/loan/book/{slug}', 'store')->name('loan.store');
+    });
+
+    Route::middleware(['ensure.loan'])->group(function () {
+        Route::controller(AssetController::class)->group(function () {
+            Route::get('/assets/book/{slug}', 'index')->name('book.assets');
+            Route::get('/assets/stream/{id}', 'stream')->name('asset.stream')->middleware(['auth', 'verified', 'ensure.loan']);
+        });
+    });
 });
 
 require __DIR__ . '/auth.php';
