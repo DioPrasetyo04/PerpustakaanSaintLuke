@@ -17,7 +17,6 @@ return new class extends Migration
                 $table->id();
                 $table->foreignId('book_id')->constrained('books', 'id')->cascadeOnUpdate()->cascadeOnDelete();
                 $table->foreignId('asset_id')->constrained('assets', 'id')->cascadeOnUpdate()->cascadeOnDelete();
-                $table->timestamps();
             }
         );
     }

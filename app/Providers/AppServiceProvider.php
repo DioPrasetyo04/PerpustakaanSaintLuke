@@ -2,15 +2,19 @@
 
 namespace App\Providers;
 
+use App\Interface\AssetInterfaceRepositories;
 use App\Interface\BookInterfaceRepositories;
 use App\Interface\CatalogInterfaceRepositories;
 use App\Interface\HomeInterfaceRepositories;
 use App\Interface\InformationRepositoriesInterface;
+use App\Interface\LoanInterfaceRepositories;
 use App\Interface\ResourceInterfaceRepositories;
+use App\Repositories\AssetRepositories;
 use App\Repositories\BookRepositories;
 use App\Repositories\CatalogRepositories;
 use App\Repositories\HomeRepositories;
 use App\Repositories\InformationRepositories;
+use App\Repositories\LoanRepositories;
 use App\Repositories\ResourceRepositories;
 use Carbon\CarbonImmutable;
 use Filament\Support\Assets\Js;
@@ -30,6 +34,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ResourceInterfaceRepositories::class, ResourceRepositories::class);
         $this->app->bind(BookInterfaceRepositories::class, BookRepositories::class);
         $this->app->bind(InformationRepositoriesInterface::class, InformationRepositories::class);
+        $this->app->bind(LoanInterfaceRepositories::class, LoanRepositories::class);
+        $this->app->bind(AssetInterfaceRepositories::class, AssetRepositories::class);
     }
 
     public function boot(): void

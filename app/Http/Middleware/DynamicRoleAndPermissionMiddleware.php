@@ -7,48 +7,38 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response;
 
 class DynamicRoleAndPermissionMiddleware
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
     public function handle(Request $request, Closure $next): Response
     {
-        $routeName = Route::currentRouteName();
-        $routeAccesses = RouteAccess::where('route_name', $routeName)->get();
-        if ($routeAccesses->isNotEmpty()) {
-            $isAuthorized = false;
+        $user = auth()->user();
 
-            foreach ($routeAccesses as $routeAccess) {
-                $role = $routeAccess->role_id ? Role::find($routeAccess->role_id) : null;
-                $permission = $routeAccess->permission_id ? Permission::find($routeAccess->permission_id) : null;
-                if (($role && auth()->user()->hasRole($role->name)) || ($permission && auth()->user()->can($permission->name))) {
-                    $isAuthorized = true;
-                    break;
-                }
-            }
-
-            if ($isAuthorized) {
-                return $next($request);
-            } else {
-                throw UnauthorizedException::forRolesOrPermissions(
-                    $routeAccesses->pluck('role_id')->filter()->map(function ($roleId) {
-                        return Role::find($roleId)->name;
-                    })->all(),
-                    $routeAccess->pluck('permission_id')->filter()->map(function ($permissionId) {
-                        return Permission::find($permissionId)->name;
-                    })->all(),
-                );
-            }
-        } else {
-            throw UnauthorizedException::forRolesOrPermissions([], []);
+        if (!$user) {
+            throw new UnauthorizedException(403, 'Unauthenticated');
         }
-        return $next($request);
+
+        $routeName = Route::currentRouteName();
+
+        $routeAccesses = RouteAccess::with(['role', 'permission'])
+            ->where('route_name', $routeName)
+            ->get();
+
+        if ($routeAccesses->isEmpty()) {
+            throw new UnauthorizedException(403, 'No access configuration');
+        }
+
+        $roles = $routeAccesses->pluck('role.name')->filter()->unique()->toArray();
+        $permissions = $routeAccesses->pluck('permission.name')->filter()->unique()->toArray();
+
+        if (
+            (!empty($roles) && $user->hasAnyRole($roles)) ||
+            (!empty($permissions) && $user->canAny($permissions))
+        ) {
+            return $next($request);
+        }
+
+        throw UnauthorizedException::forRolesOrPermissions($roles, $permissions);
     }
 }

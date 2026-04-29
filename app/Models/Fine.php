@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\PaymentStatus;
+use Faker\Provider\Payment;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -39,5 +40,14 @@ class Fine extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public static function hasUnpaidFine(int $userId): bool
+    {
+        return self::query()->where('user_id', $userId)->whereIn('payment_status', [
+            PaymentStatus::PENDING->value,
+            PaymentStatus::FAILED->value,
+            PaymentStatus::ERROR->value
+        ])->exists();
     }
 }

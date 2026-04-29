@@ -14,7 +14,6 @@ return new class extends Migration
     {
         Schema::create('assets', function (Blueprint $table) {
             $table->id();
-            // $table->foreignId('book_id')->constrained('books', 'id')->cascadeOnUpdate()->cascadeOnDelete();
             $table->enum('type', AssetTypes::values());
             $table->string('utility_path');
             $table->timestamps();

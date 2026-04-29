@@ -49,6 +49,7 @@ class ReturnBook extends Model
         return $this->hasOne(Fine::class);
     }
 
+
     public function returnBookCheck(): HasOne
     {
         return $this->hasOne(ReturnBookCheck::class);
