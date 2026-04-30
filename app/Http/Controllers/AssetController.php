@@ -20,7 +20,13 @@ class AssetController extends Controller
     {
         $data = $this->assetController->getAssetBookOfLoan($slug);
 
-        return Inertia::render('Asset/Index', [
+        // dd([
+        //     'book' => $data['book'],
+        //     'assets' => $data['assets'],
+        //     'totalAssets' => $data['total_assets'],
+        // ]);
+
+        return Inertia::render('book/asset/assets', [
             'book' => $data['book'],
             'assets' => $data['assets'],
             'totalAssets' => $data['total_assets'],

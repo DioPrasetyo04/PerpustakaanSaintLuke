@@ -14,7 +14,6 @@ class FineSettings extends Model
     protected $table = 'fine_settings';
 
     protected $fillable = [
-        // 'late_discount_type',
         'late_fee_per_day',
         'damage_discount_type',
         'damage_fee_book',

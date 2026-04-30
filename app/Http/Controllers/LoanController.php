@@ -35,11 +35,25 @@ class LoanController extends Controller
 
     public function confirmation(string $slug)
     {
+        // dd($slug);
+        // dd('masuk controller sebelum service');
+        $user = auth()->user();
+
+        // 🔥 HANDLE VERIFIED MANUAL (INERTIA WAY)
+        if (!$user->hasVerifiedEmail()) {
+            return Inertia::location(route('verification.notice'));
+        }
         $data = $this->loanController->getConfirmationLoanUserAuth($slug);
 
-        return Inertia::render('Loan/Confirm', [
+        // dd([
+        //     'book' => $data['book'],
+        //     'loanPreview' => $data['loan_preview']
+        // ]);
+
+        return Inertia::render('book/loan/Confirm', [
             'book' => $data['book'],
-            'loanPreview' => $data['loan_preview']
+            'loanPreview' => $data['loan_preview'],
+            'fineSettings' => $data['fine_settings']
         ]);
     }
 
@@ -49,8 +63,9 @@ class LoanController extends Controller
 
         $loan = $this->loanController->postDataLoanUserAuth($data);
 
-        return redirect()->route('book.assets', [
-            'slug' => $loan->book->slug
-        ])->with('success', 'loan.success');
+        return response()->json([
+            'message' => 'loan.success',
+            'slug' => $loan->book->slug,
+        ]);
     }
 }

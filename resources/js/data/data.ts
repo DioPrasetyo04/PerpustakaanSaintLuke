@@ -371,6 +371,41 @@ export const AuthDataPage = {
     },
 };
 
+export const dataLoan = {
+    id: {
+        headerNavigation: 'Kembali Ke Detail Buku',
+        days: 'Hari',
+        borrowingTerms: {
+            rule1: 'Pengembalian buku sebelum batas waktu',
+            rule2: 'Pengembalian buku setelah batas waktu denda',
+        },
+        'loan.success': 'Peminjaman berhasil',
+        'loan.only_one_active': 'Hanya boleh 1 pinjaman aktif',
+        'loan.same_book_active': 'Buku ini sudah dipinjam',
+        'loan.has_unpaid_fine': 'Masih ada denda yang belum dibayar',
+        'loan.stock_empty': 'Stok buku habis',
+        'loan.user_not_verified': 'Akun belum terverifikasi',
+        'loan.settings_not_configured': 'Pengaturan belum tersedia',
+        'loan.failed': 'Gagal melakukan peminjaman',
+    },
+    en: {
+        headerNavigation: 'Back to Book Details',
+        days: 'Days',
+        borrowingTerms: {
+            rule1: 'Return the book on or before the due date',
+            rule2: 'Late returns incur a fine',
+        },
+        'loan.success': 'Loan success',
+        'loan.only_one_active': 'Only one active loan allowed',
+        'loan.same_book_active': 'Book already borrowed',
+        'loan.has_unpaid_fine': 'You have unpaid fines',
+        'loan.stock_empty': 'Book out of stock',
+        'loan.user_not_verified': 'User not verified',
+        'loan.settings_not_configured': 'Settings not configured',
+        'loan.failed': 'Failed to borrow book',
+    },
+};
+
 export const faqHeader: faqHeaderType = {
     id: {
         title: 'Pertanyaan yang Sering Diajukan',

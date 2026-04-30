@@ -9,6 +9,7 @@ use App\Http\Controllers\LoanController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ResourceController;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
 // Route::get('/', function () {
 //     return Inertia::render('welcome', [
@@ -16,9 +17,9 @@ use Illuminate\Support\Facades\Route;
 //     ]);
 // })->name('home');
 
-// Route::get('dashboard', function () {
-//     return Inertia::render('dashboard');
-// })->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('dashboard', function () {
+    return Inertia::render('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::controller(HomeController::class)->group(function () {
     Route::get('/', 'index')->name('home');
@@ -58,7 +59,7 @@ Route::controller(PaymentController::class)->group(function () {
     Route::get('/payments/cancel', 'handleCancel')->name('payment.cancel');
 });
 
-Route::middleware(['auth', 'verified', 'dynamic.role_permission'])->group(function () {
+Route::middleware('auth')->group(function () {
     Route::controller(LoanController::class)->group(function () {
         Route::get('/dashboard/loans', 'index')->name('loan.index');
         Route::get('/dashboard/loan/{loanCode}', 'detail')->name('loan.detail');
