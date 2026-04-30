@@ -219,25 +219,16 @@ if (!function_exists('formatLast12Months')) {
 }
 
 if (!function_exists('transformData')) {
-    function transformData($data, string $resource)
+    function transformData($data, $resource)
     {
-        if (is_null($data)) {
-            return null;
-        }
-
-        // Pagination
         if ($data instanceof LengthAwarePaginator) {
-            return paginateResource($data, $resource);
+            return $resource::collection($data)->resolve();
         }
 
-        // Collection / Array
-        if ($data instanceof Collection || is_array($data)) {
-            return collect($data)->map(function ($item) use ($resource) {
-                return (new $resource($item))->toArray(request());
-            })->toArray();
+        if ($data instanceof Collection) {
+            return $resource::collection($data)->resolve();
         }
 
-        // Single model
-        return (new $resource($data))->toArray(request());
+        return $resource::make($data)->resolve();
     }
 }

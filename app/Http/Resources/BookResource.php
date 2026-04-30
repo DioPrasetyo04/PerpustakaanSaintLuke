@@ -69,7 +69,7 @@ class BookResource extends JsonResource
         }
 
         if ($this->relationLoaded('addedBy') && $this->addedBy) {
-            $data['added_by'] = UserResource::make($this->addedBy)->resolve();
+            $data['addedBy'] = UserResource::make($this->addedBy)->resolve();
         }
 
         if ($this->relationLoaded('stock') && $this->stock) {

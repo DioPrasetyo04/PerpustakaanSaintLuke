@@ -12,6 +12,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Spatie\Permission\Exceptions\UnauthorizedException as SpatieUnauthorizedException;
 use Spatie\Permission\Middleware\PermissionMiddleware;
@@ -46,40 +47,10 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-
-        // handle custom notification Handler bussines logic
-        $exceptions->render(function (BusinessException $e, $request) {
-            return redirect()->back()->with([
-                'error_key' => $e->getMessage(),
-            ]);
-        });
-
-        // ❌ 404 - Not Found
-        $exceptions->render(function (ModelNotFoundException $e, $request) {
-            return Inertia::render('Notification/Page404')->toResponse($request)->setStatusCode(404);
-        });
-
-        // ❌ 403 - Forbidden / Unauthorized
-        $exceptions->render(function ($e, $request) {
-            if (
-                $e instanceof AuthorizationException ||
-                $e instanceof SpatieUnauthorizedException
-            ) {
-                return Inertia::render('Notification/Page403')
-                    ->toResponse($request)
-                    ->setStatusCode(403);
-            }
-        });
-
-        // ❌ 401 - Not Authenticated
-        $exceptions->render(function (AuthenticationException $e, $request) {
-            return redirect()->route('login');
-        });
-
-        // ❌ 500 - Server Error
-        $exceptions->render(function (HttpException $e, $request) {
-            return Inertia::render('Notification/Page500')
-                ->toResponse($request)
-                ->setStatusCode($e->getStatusCode());
+        $exceptions->render(function (BusinessException $e, Request $request) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'context' => $e->context(),
+            ], $e->status());
         });
     })->create();

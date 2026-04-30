@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ImageWithFallback } from '@/components/common/ImageWithFallback';
 import { Footer } from '@/components/common/Footer';
-import { announcementsData } from '@/data/data';
 import { useLanguage } from '@/hooks/useLanguage';
 
 const getCategoryColor = (category: string) => {

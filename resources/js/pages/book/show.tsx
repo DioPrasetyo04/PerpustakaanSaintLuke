@@ -1,4 +1,4 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import {
     Star,
     Calendar,
@@ -29,6 +29,12 @@ function BookShow() {
     const t = bookDetailPage[language];
 
     const bookAvailable = book.status === 'Tersedia';
+
+    const onHandleBorrowConfirmation = () => {
+        if (bookAvailable) {
+            router.get(route('loan.confirmation', book.slug));
+        }
+    };
 
     if (!book) {
         return (
@@ -101,6 +107,7 @@ function BookShow() {
                                         className="mb-3 w-full bg-primary hover:bg-primary/90"
                                         size="lg"
                                         disabled={!bookAvailable}
+                                        onClick={onHandleBorrowConfirmation}
                                     >
                                         {book.status === 'Tersedia'
                                             ? t.borrowBook
@@ -353,167 +360,178 @@ function BookShow() {
                                     </div>
 
                                     {/* Reviews List */}
-                                    <div className="space-y-8">
-                                        {reviews.data.map((review, index) => {
-                                            const rating = Number(
-                                                review.rating,
-                                            );
-                                            const fullStars =
-                                                Math.floor(rating);
-                                            const hasHalf = rating % 1 >= 0.5;
-                                            return (
-                                                <motion.div
-                                                    key={review.id}
-                                                    initial={{
-                                                        opacity: 0,
-                                                        x: -20,
-                                                    }}
-                                                    animate={{
-                                                        opacity: 1,
-                                                        x: 0,
-                                                    }}
-                                                    transition={{
-                                                        delay: index * 0.15,
-                                                    }}
-                                                    className="transform rounded-2xl border-2 border-primary/10 bg-white p-6 shadow-xl transition-all duration-300 hover:scale-[1.02] hover:border-primary/30 hover:shadow-2xl sm:p-8"
-                                                >
-                                                    <div className="flex gap-6">
-                                                        {/* Reviewer Avatar with Badge */}
-                                                        <div className="relative flex-shrink-0">
-                                                            <div className="absolute -top-2 -right-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-accent text-sm font-bold text-white shadow-lg">
-                                                                #{index + 1}
-                                                            </div>
-                                                            <ImageWithFallback
-                                                                src={
-                                                                    review.user
-                                                                        ?.avatar
-                                                                }
-                                                                alt={
-                                                                    review.user
-                                                                        ?.name
-                                                                }
-                                                                className="h-20 w-20 rounded-2xl border-4 border-white object-cover shadow-xl ring-4 ring-primary/20 sm:h-24 sm:w-24"
-                                                            />
-                                                        </div>
-
-                                                        {/* Review Content */}
-                                                        <div className="min-w-0 flex-1">
-                                                            {/* Reviewer Info */}
-                                                            <div className="mb-4 rounded-xl bg-gradient-to-r from-primary/5 to-secondary/5 p-4">
-                                                                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                                                    <div className="flex-1">
-                                                                        <h3 className="mb-1 flex items-center gap-2 font-['Poppins'] text-xl font-black text-gray-900 sm:text-2xl">
-                                                                            {
-                                                                                review
-                                                                                    .user
-                                                                                    ?.name
-                                                                            }
-                                                                            <span className="text-green-500">
-                                                                                ✓
-                                                                            </span>
-                                                                        </h3>
-                                                                        <p className="text-sm font-medium text-gray-600">
-                                                                            📧{' '}
-                                                                            {
-                                                                                review
-                                                                                    .user
-                                                                                    ?.email
-                                                                            }
-                                                                        </p>
+                                    {reviews.data.length > 0 && (
+                                        <div className="space-y-8">
+                                            {reviews.data.map(
+                                                (review, index) => {
+                                                    const rating = Number(
+                                                        review.rating,
+                                                    );
+                                                    const fullStars =
+                                                        Math.floor(rating);
+                                                    const hasHalf =
+                                                        rating % 1 >= 0.5;
+                                                    return (
+                                                        <motion.div
+                                                            key={review.id}
+                                                            initial={{
+                                                                opacity: 0,
+                                                                x: -20,
+                                                            }}
+                                                            animate={{
+                                                                opacity: 1,
+                                                                x: 0,
+                                                            }}
+                                                            transition={{
+                                                                delay:
+                                                                    index *
+                                                                    0.15,
+                                                            }}
+                                                            className="transform rounded-2xl border-2 border-primary/10 bg-white p-6 shadow-xl transition-all duration-300 hover:scale-[1.02] hover:border-primary/30 hover:shadow-2xl sm:p-8"
+                                                        >
+                                                            <div className="flex gap-6">
+                                                                {/* Reviewer Avatar with Badge */}
+                                                                <div className="relative flex-shrink-0">
+                                                                    <div className="absolute -top-2 -right-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-accent text-sm font-bold text-white shadow-lg">
+                                                                        #
+                                                                        {index +
+                                                                            1}
                                                                     </div>
-                                                                    <div className="text-left sm:text-right">
-                                                                        <div className="mb-2 flex flex-wrap items-center gap-1">
-                                                                            {[
-                                                                                ...Array(
-                                                                                    5,
-                                                                                ),
-                                                                            ].map(
-                                                                                (
-                                                                                    _,
-                                                                                    i,
-                                                                                ) => {
-                                                                                    if (
-                                                                                        i <
-                                                                                        fullStars
-                                                                                    ) {
-                                                                                        return (
-                                                                                            <Star
-                                                                                                key={
-                                                                                                    i
-                                                                                                }
-                                                                                                className="h-6 w-6 fill-amber-400 text-amber-400"
-                                                                                            />
-                                                                                        );
-                                                                                    }
+                                                                    <ImageWithFallback
+                                                                        src={
+                                                                            review
+                                                                                .user
+                                                                                ?.avatar
+                                                                        }
+                                                                        alt={
+                                                                            review
+                                                                                .user
+                                                                                ?.name
+                                                                        }
+                                                                        className="h-20 w-20 rounded-2xl border-4 border-white object-cover shadow-xl ring-4 ring-primary/20 sm:h-24 sm:w-24"
+                                                                    />
+                                                                </div>
 
-                                                                                    if (
-                                                                                        i ===
-                                                                                            fullStars &&
-                                                                                        hasHalf
-                                                                                    ) {
-                                                                                        return (
-                                                                                            <div
-                                                                                                key={
-                                                                                                    i
-                                                                                                }
-                                                                                                className="relative h-6 w-6"
-                                                                                            >
-                                                                                                <Star className="absolute h-6 w-6 text-gray-300" />
-                                                                                                <Star
-                                                                                                    className="absolute h-6 w-6 fill-amber-400 text-amber-400"
-                                                                                                    style={{
-                                                                                                        clipPath:
-                                                                                                            'inset(0 50% 0 0)',
-                                                                                                    }}
-                                                                                                />
-                                                                                            </div>
-                                                                                        );
+                                                                {/* Review Content */}
+                                                                <div className="min-w-0 flex-1">
+                                                                    {/* Reviewer Info */}
+                                                                    <div className="mb-4 rounded-xl bg-gradient-to-r from-primary/5 to-secondary/5 p-4">
+                                                                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                                                            <div className="flex-1">
+                                                                                <h3 className="mb-1 flex items-center gap-2 font-['Poppins'] text-xl font-black text-gray-900 sm:text-2xl">
+                                                                                    {
+                                                                                        review
+                                                                                            .user
+                                                                                            ?.name
                                                                                     }
-
-                                                                                    return (
-                                                                                        <Star
-                                                                                            key={
-                                                                                                i
+                                                                                    <span className="text-green-500">
+                                                                                        ✓
+                                                                                    </span>
+                                                                                </h3>
+                                                                                <p className="text-sm font-medium text-gray-600">
+                                                                                    📧{' '}
+                                                                                    {
+                                                                                        review
+                                                                                            .user
+                                                                                            ?.email
+                                                                                    }
+                                                                                </p>
+                                                                            </div>
+                                                                            <div className="text-left sm:text-right">
+                                                                                <div className="mb-2 flex flex-wrap items-center gap-1">
+                                                                                    {[
+                                                                                        ...Array(
+                                                                                            5,
+                                                                                        ),
+                                                                                    ].map(
+                                                                                        (
+                                                                                            _,
+                                                                                            i,
+                                                                                        ) => {
+                                                                                            if (
+                                                                                                i <
+                                                                                                fullStars
+                                                                                            ) {
+                                                                                                return (
+                                                                                                    <Star
+                                                                                                        key={
+                                                                                                            i
+                                                                                                        }
+                                                                                                        className="h-6 w-6 fill-amber-400 text-amber-400"
+                                                                                                    />
+                                                                                                );
                                                                                             }
-                                                                                            className="h-6 w-6 text-gray-300"
-                                                                                        />
-                                                                                    );
-                                                                                },
-                                                                            )}
-                                                                            <span className="ml-2 text-lg font-bold text-primary">
-                                                                                {formattedRating(
-                                                                                    review.rating,
-                                                                                )}
-                                                                            </span>
+
+                                                                                            if (
+                                                                                                i ===
+                                                                                                    fullStars &&
+                                                                                                hasHalf
+                                                                                            ) {
+                                                                                                return (
+                                                                                                    <div
+                                                                                                        key={
+                                                                                                            i
+                                                                                                        }
+                                                                                                        className="relative h-6 w-6"
+                                                                                                    >
+                                                                                                        <Star className="absolute h-6 w-6 text-gray-300" />
+                                                                                                        <Star
+                                                                                                            className="absolute h-6 w-6 fill-amber-400 text-amber-400"
+                                                                                                            style={{
+                                                                                                                clipPath:
+                                                                                                                    'inset(0 50% 0 0)',
+                                                                                                            }}
+                                                                                                        />
+                                                                                                    </div>
+                                                                                                );
+                                                                                            }
+
+                                                                                            return (
+                                                                                                <Star
+                                                                                                    key={
+                                                                                                        i
+                                                                                                    }
+                                                                                                    className="h-6 w-6 text-gray-300"
+                                                                                                />
+                                                                                            );
+                                                                                        },
+                                                                                    )}
+                                                                                    <span className="ml-2 text-lg font-bold text-primary">
+                                                                                        {formattedRating(
+                                                                                            review.rating,
+                                                                                        )}
+                                                                                    </span>
+                                                                                </div>
+                                                                                <p className="inline-block rounded-full bg-gray-100 px-3 py-1 text-sm font-semibold text-gray-500">
+                                                                                    🕐{' '}
+                                                                                    {
+                                                                                        review.created_at
+                                                                                    }
+                                                                                </p>
+                                                                            </div>
                                                                         </div>
-                                                                        <p className="inline-block rounded-full bg-gray-100 px-3 py-1 text-sm font-semibold text-gray-500">
-                                                                            🕐{' '}
-                                                                            {
-                                                                                review.created_at
-                                                                            }
-                                                                        </p>
+                                                                    </div>
+
+                                                                    {/* Review Comment */}
+                                                                    <div className="mb-4 rounded-xl border-l-4 border-primary bg-gradient-to-br from-gray-50 to-blue-50 p-5 shadow-md">
+                                                                        <p
+                                                                            className="text-base leading-relaxed font-medium text-gray-800 sm:text-lg"
+                                                                            dangerouslySetInnerHTML={{
+                                                                                __html: DOMPurify.sanitize(
+                                                                                    review.comment ??
+                                                                                        '',
+                                                                                ),
+                                                                            }}
+                                                                        ></p>
                                                                     </div>
                                                                 </div>
                                                             </div>
-
-                                                            {/* Review Comment */}
-                                                            <div className="mb-4 rounded-xl border-l-4 border-primary bg-gradient-to-br from-gray-50 to-blue-50 p-5 shadow-md">
-                                                                <p
-                                                                    className="text-base leading-relaxed font-medium text-gray-800 sm:text-lg"
-                                                                    dangerouslySetInnerHTML={{
-                                                                        __html: DOMPurify.sanitize(
-                                                                            review.comment ??
-                                                                                '',
-                                                                        ),
-                                                                    }}
-                                                                ></p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </motion.div>
-                                            );
-                                        })}
-                                    </div>
+                                                        </motion.div>
+                                                    );
+                                                },
+                                            )}
+                                        </div>
+                                    )}
 
                                     {/* Load More Section */}
                                     {/* <div className="mt-10 border-t-4 border-dashed border-primary/30 pt-8 text-center">

@@ -36,3 +36,12 @@ export const formattedYear = (value: string | number, language: string) => {
         year: 'numeric',
     });
 };
+
+export const moneyFormatter = (value: string | number) => {
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+    }).format(Number(value));
+};

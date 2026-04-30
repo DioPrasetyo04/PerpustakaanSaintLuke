@@ -4,15 +4,13 @@ namespace App\Services;
 
 use App\Exceptions\BusinessException;
 use App\Http\Resources\BookResource;
+use App\Http\Resources\FineSettingsResource;
 use App\Http\Resources\LoanResource;
 use App\Interface\LoanInterfaceRepositories;
 use App\Models\Fine;
 use App\Models\FineSettings;
 use App\Models\Loan;
-use Exception;
-use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -31,11 +29,31 @@ class LoanService
 
         $duration = FineSettings::query()->value('loan_duration_days') ?? 14;
 
+        $fineSetting = FineSettings::query()->select([
+            'id',
+            'late_fee_per_day',
+            'damage_discount_type',
+            'damage_fee_book',
+            'lost_discount_type',
+            'lost_fee_book'
+        ])->firstOrFail();
+
+        // dd([
+        //     'book' => BookResource::make($book)->resolve(),
+        //     'fine_settings' => FineSettingsResource::make($fineSetting)->resolve(),
+        //     'loan_preview' => [
+        //         'loan_date' => Carbon::parse(now())->format('d F Y'),
+        //         'due_date' => Carbon::parse(now())->addDays($duration)->format('d F Y'),
+        //         'duration' => $duration
+        //     ]
+        // ]);
+
         return [
-            'book' => transformData($book, BookResource::class),
+            'book' => BookResource::make($book)->resolve(),
+            'fine_settings' => FineSettingsResource::make($fineSetting)->resolve(),
             'loan_preview' => [
-                'loan_date' => now(),
-                'due_date' => now()->addDays($duration),
+                'loan_date' => Carbon::parse(now())->format('d F Y'),
+                'due_date' => Carbon::parse(now())->addDays($duration)->format('d F Y'),
                 'duration' => $duration
             ]
         ];

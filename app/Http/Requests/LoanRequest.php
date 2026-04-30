@@ -20,16 +20,18 @@ class LoanRequest extends FormRequest
      *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
-    public function rules($book): array
+    public function rules(): array
     {
-        $bookId = $this->book()->id;
-        $userId = $this->user()->id;
         return [
-            'loan_code' => ['required', 'string', 'unique:loans,loan_code'],
-            'loan_date' => ['required', 'date'],
-            'due_date' => ['required', 'date'],
-            'book_id' => ['required', 'numeric' . $bookId],
-            'user_id' => ['required', 'numeric' . $userId]
+            'book_id' => [
+                'required',
+                'exists:books,id',
+                function ($attr, $value, $fail) {
+                    if (!\App\Models\Loan::checkStock($value)) {
+                        $fail('loan.stock_empty');
+                    }
+                }
+            ]
         ];
     }
 }

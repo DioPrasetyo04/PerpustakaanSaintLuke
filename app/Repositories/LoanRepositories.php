@@ -18,11 +18,26 @@ class LoanRepositories implements LoanInterfaceRepositories
 
     public function findBookBySlug(string $slug)
     {
-        return Book::query()
-            ->select(['id', 'title', 'slug', 'cover'])
-            ->where('slug', $slug)
-            ->with('authors:id,name,avatar')
+        return Book::query()->select([
+            'id',
+            'publisher_id',
+            'language_id',
+            'book_code',
+            'title',
+            'slug',
+            'publication_year',
+            'isbn',
+            'synopsis',
+            'number_of_pages',
+            'status',
+            'cover',
+            'is_published',
+            'price'
+        ])
+            ->with(['publisher:id,name,logo,slug', 'categories:id,name,icon,slug', 'authors:id,name,avatar', 'language:id,language,photo', 'stock:id,book_id,total,available,loan,damaged,lost'])
+            ->withCount('stock')
             ->withAvg('reviews as avg_rating', 'rating')
+            ->where('slug', $slug)
             ->firstOrFail();
     }
 

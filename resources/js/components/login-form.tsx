@@ -25,7 +25,7 @@ export interface AuthFormData {
 }
 interface loginForm {
     canResetPassword: boolean;
-    status: string;
+    status?: string;
     data: AuthFormData;
     processing: boolean;
     error: Partial<Record<keyof AuthFormData, string>>;
@@ -34,7 +34,7 @@ interface loginForm {
     onSubmit: (e: FormEvent<HTMLFormElement>) => void;
     className?: string;
 }
-export function LoginForm({
+export const LoginForm = ({
     className,
     data,
     processing,
@@ -45,7 +45,7 @@ export function LoginForm({
     canResetPassword,
     status,
     ...props
-}: loginForm) {
+}: loginForm) => {
     const { language } = useLanguage();
     const text = AuthDataPage[language];
     return (
@@ -213,4 +213,4 @@ export function LoginForm({
             </FieldDescription>
         </div>
     );
-}
+};

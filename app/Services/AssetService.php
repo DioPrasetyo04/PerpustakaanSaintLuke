@@ -21,7 +21,7 @@ class AssetService
         $bookAssets =  $this->assetService->findBookWithAssets($bookSlug);
 
         return [
-            'book' => (new BookResource($bookAssets))->toArray(request()),
+            'book' => BookResource::make($bookAssets)->resolve(),
             'assets' => AssetResource::collection($bookAssets->assets)->resolve(),
             'total_assets' => $bookAssets->assets->count(),
         ];
