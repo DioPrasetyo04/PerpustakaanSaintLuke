@@ -18,7 +18,12 @@ class AssetService
 
     public function getAssetBookOfLoan(string $bookSlug)
     {
-        $bookAssets =  $this->assetService->findBookWithAssets($bookSlug);
+        $bookAssets = $this->assetService->findBookWithAssets($bookSlug);
+
+        // 🔥 double security (optional tapi recommended)
+        if ($bookAssets->loan->isEmpty()) {
+            throw new AuthorizationException('You do not have access to this book');
+        }
 
         return [
             'book' => BookResource::make($bookAssets)->resolve(),

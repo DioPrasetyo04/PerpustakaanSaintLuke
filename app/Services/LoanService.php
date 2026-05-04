@@ -10,6 +10,7 @@ use App\Interface\LoanInterfaceRepositories;
 use App\Models\Fine;
 use App\Models\FineSettings;
 use App\Models\Loan;
+use App\Models\Stock;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -37,16 +38,6 @@ class LoanService
             'lost_discount_type',
             'lost_fee_book'
         ])->firstOrFail();
-
-        // dd([
-        //     'book' => BookResource::make($book)->resolve(),
-        //     'fine_settings' => FineSettingsResource::make($fineSetting)->resolve(),
-        //     'loan_preview' => [
-        //         'loan_date' => Carbon::parse(now())->format('d F Y'),
-        //         'due_date' => Carbon::parse(now())->addDays($duration)->format('d F Y'),
-        //         'duration' => $duration
-        //     ]
-        // ]);
 
         return [
             'book' => BookResource::make($book)->resolve(),

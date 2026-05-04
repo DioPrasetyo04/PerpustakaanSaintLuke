@@ -1,6 +1,7 @@
 import type { AuthorProps } from './AuthorsProps';
 import type { CategoryProps } from './CategoryProps';
 import type { LanguageProps } from './LanguageProps';
+import { LoanProps } from './LoanProps';
 import type { PublisherProps } from './PublisherProps';
 import type { StockProps } from './StockProps';
 
@@ -30,4 +31,5 @@ export type BookProps = {
     avg_rating?: number;
     publication_year?: number;
     stock?: StockProps;
+    loan?: LoanProps[];
 };

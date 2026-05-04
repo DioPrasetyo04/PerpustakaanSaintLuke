@@ -76,6 +76,10 @@ class BookResource extends JsonResource
             $data['stock'] = StockResource::make($this->stock)->resolve();
         }
 
+        if ($this->relationLoaded('loan') && $this->loan->isNotEmpty()) {
+            $data['loan'] = LoanResource::collection($this->loan)->resolve();
+        }
+
         return $data;
     }
 }
