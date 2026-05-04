@@ -9,6 +9,7 @@ use App\Http\Controllers\LoanController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ResourceController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\URL;
 use Inertia\Inertia;
 
 // Route::get('/', function () {
@@ -20,6 +21,10 @@ use Inertia\Inertia;
 Route::get('dashboard', function () {
     return Inertia::render('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+// Route::get('/assets/stream/{id}', [AssetController::class, 'stream'])
+//     ->name('asset.stream')
+//     ->middleware('signed'); // 🔐 pakai signed, bukan auth
 
 Route::controller(HomeController::class)->group(function () {
     Route::get('/', 'index')->name('home');
@@ -67,14 +72,13 @@ Route::middleware('auth')->group(function () {
         Route::post('/loan/book/{slug}', 'store')->name('loan.store');
     });
 
-    Route::middleware(['ensure.loan'])->group(function () {
+    Route::middleware('ensure.loan')->group(function () {
         Route::controller(AssetController::class)->group(function () {
             Route::get('/assets/book/{slug}', 'index')->name('book.assets');
-            Route::get('/assets/stream/{id}', 'stream')->name('asset.stream')->middleware(['auth', 'verified', 'ensure.loan']);
         });
     });
 });
 
 require __DIR__ . '/auth.php';
 
-require __DIR__ . '/settings.php';
+// require __DIR__ . '/settings.php';

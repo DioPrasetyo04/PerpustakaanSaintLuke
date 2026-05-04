@@ -379,6 +379,8 @@ export const dataLoan = {
             rule1: 'Pengembalian buku sebelum batas waktu',
             rule2: 'Pengembalian buku setelah batas waktu denda',
         },
+        checked:
+            'Mohon Centang Persetujuan Untuk Menyetujui Persyaratan Peminjaman',
         'loan.success': 'Peminjaman berhasil',
         'loan.only_one_active': 'Hanya boleh 1 pinjaman aktif',
         'loan.same_book_active': 'Buku ini sudah dipinjam',
@@ -395,6 +397,7 @@ export const dataLoan = {
             rule1: 'Return the book on or before the due date',
             rule2: 'Late returns incur a fine',
         },
+        checked: 'Please tick the box to agree to the loan terms',
         'loan.success': 'Loan success',
         'loan.only_one_active': 'Only one active loan allowed',
         'loan.same_book_active': 'Book already borrowed',

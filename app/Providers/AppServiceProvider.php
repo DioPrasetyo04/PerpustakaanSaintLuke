@@ -9,6 +9,7 @@ use App\Interface\HomeInterfaceRepositories;
 use App\Interface\InformationRepositoriesInterface;
 use App\Interface\LoanInterfaceRepositories;
 use App\Interface\ResourceInterfaceRepositories;
+use App\Interface\ReturnBookInterfaceRepositories;
 use App\Repositories\AssetRepositories;
 use App\Repositories\BookRepositories;
 use App\Repositories\CatalogRepositories;
@@ -16,6 +17,7 @@ use App\Repositories\HomeRepositories;
 use App\Repositories\InformationRepositories;
 use App\Repositories\LoanRepositories;
 use App\Repositories\ResourceRepositories;
+use App\Repositories\ReturnBookRepositories;
 use Carbon\CarbonImmutable;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
@@ -36,6 +38,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(InformationRepositoriesInterface::class, InformationRepositories::class);
         $this->app->bind(LoanInterfaceRepositories::class, LoanRepositories::class);
         $this->app->bind(AssetInterfaceRepositories::class, AssetRepositories::class);
+        $this->app->bind(ReturnBookInterfaceRepositories::class, ReturnBookRepositories::class);
     }
 
     public function boot(): void

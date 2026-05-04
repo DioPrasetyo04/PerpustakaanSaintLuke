@@ -14,6 +14,8 @@ import { Label } from '@/components/ui/label';
 import { moneyFormatter } from '@/lib/utils';
 import LoanNotification from '@/components/component/Loan/LoanNotification';
 import axios from 'axios';
+import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
+import { Checkbox } from '@/components/ui/checkbox';
 
 type LoanKey =
     | 'loan.success'
@@ -32,6 +34,7 @@ type LoanTranslation = {
         rule1: string;
         rule2: string;
     };
+    checked: string;
 } & Record<LoanKey, string>;
 
 type PagePropsWithFlash = ConfirmLoanPageProps & {
@@ -43,13 +46,13 @@ export default function Confirm() {
     const { language } = useLanguage();
     const { props } = usePage<PagePropsWithFlash>();
     const { book, fineSettings, loanPreview } = props;
+    const [loading, setLoading] = useState(false);
+    const [checkBox, setCheckBox] = useState(false);
     const data = dataLoan[language] as LoanTranslation;
     const [notification, setNotification] = useState<{
         type: 'success' | 'error';
         message: string;
     } | null>(null);
-
-    const [loading, setLoading] = useState(false);
 
     const t = (key: LoanKey) => data[key];
 
@@ -78,9 +81,19 @@ export default function Confirm() {
         return calculators[type]?.(price, fee) ?? 0;
     }, [book, fineSettings]);
 
+    const onHandleCheckBoxChange = (checked: boolean) => {
+        setCheckBox(checked);
+    };
+
     // 🔥 HANDLE BORROW
     const onHandleBorrowBook = async () => {
         try {
+            if (!checkBox) {
+                return setNotification({
+                    type: 'error',
+                    message: data?.checked,
+                });
+            }
             setLoading(true);
 
             const response = await axios.post(`/loan/book/${book.slug}`, {
@@ -233,6 +246,26 @@ export default function Confirm() {
                             </ul>
                         </div>
 
+                        <FieldGroup className="w-full">
+                            <Field
+                                orientation="horizontal"
+                                data-invalid={
+                                    !checkBox && notification?.type === 'error'
+                                }
+                            >
+                                <Checkbox
+                                    checked={checkBox}
+                                    id="terms-checkbox-invalid"
+                                    name="terms-checkbox-invalid"
+                                    aria-invalid
+                                    onCheckedChange={onHandleCheckBoxChange}
+                                />
+                                <FieldLabel htmlFor="terms-checkbox-invalid">
+                                    {data?.checked}
+                                </FieldLabel>
+                            </Field>
+                        </FieldGroup>
+
                         {/* Action Buttons */}
                         <div className="flex gap-3">
                             <Button
@@ -259,44 +292,12 @@ export default function Confirm() {
                     </Card>
                 </motion.div>
 
-                {/* Success Animation */}
-                {/* <AnimatePresence>
-                    {showSuccess && (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-                        >
-                            <motion.div
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                exit={{ scale: 0 }}
-                                className="rounded-2xl bg-white p-8 text-center"
-                            >
-                                <motion.div
-                                    initial={{ scale: 0 }}
-                                    animate={{ scale: 1 }}
-                                    transition={{ delay: 0.2 }}
-                                    className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-green-100"
-                                >
-                                    <CheckCircle className="h-12 w-12 text-green-600" />
-                                </motion.div>
-                                <h3 className="mb-2 text-2xl font-bold text-gray-900">
-                                    Success!
-                                </h3>
-                                <p className="text-gray-600">
-                                    Book borrowed successfully
-                                </p>
-                            </motion.div>
-                        </motion.div>
-                    )}
-                </AnimatePresence> */}
-
-                <LoanNotification
-                    notification={notification}
-                    onClose={() => setNotification(null)}
-                />
+                {notification && (
+                    <LoanNotification
+                        notification={notification}
+                        onClose={() => setNotification(null)}
+                    />
+                )}
             </div>
         </div>
     );
