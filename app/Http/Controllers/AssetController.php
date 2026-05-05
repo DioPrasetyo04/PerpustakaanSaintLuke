@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ConvertStatusTypes;
 use App\Models\Asset;
 use App\Services\AssetService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class AssetController extends Controller
@@ -25,12 +27,41 @@ class AssetController extends Controller
         //     'book' => $data['book'],
         //     'assets' => $data['assets'],
         //     'totalAssets' => $data['total_assets'],
-        // ]); 
+        // ]);
 
         return Inertia::render('book/asset/assets', [
             'book' => $data['book'],
             'assets' => $data['assets'],
             'totalAssets' => $data['total_assets'],
+        ]);
+    }
+
+    public function stream($id)
+    {
+        $asset = Asset::findOrFail($id);
+
+        if ($asset->status !== ConvertStatusTypes::READY) {
+            abort(404, 'File not ready');
+        }
+
+        $path = $asset->pdf_path ?? $asset->utility_path;
+        $fullPath = storage_path('app/public/' . $path);
+
+        if (!file_exists($fullPath)) {
+            abort(404, 'File not found');
+        }
+
+        $mime = mime_content_type($fullPath);
+
+        return response()->stream(function () use ($fullPath) {
+            readfile($fullPath);
+        }, 200, [
+            'Content-Type' => $mime,
+            'Content-Length' => filesize($fullPath),
+            'Content-Disposition' => 'inline; filename="' . basename($fullPath) . '"',
+            'Accept-Ranges' => 'bytes',
+            'Cache-Control' => 'public, max-age=3600',
+            'Access-Control-Allow-Origin' => '*',
         ]);
     }
 }

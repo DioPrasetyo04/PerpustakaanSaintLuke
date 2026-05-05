@@ -8,6 +8,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoanController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ResourceController;
+use App\Http\Controllers\ReturnBookController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
 use Inertia\Inertia;
@@ -76,9 +77,22 @@ Route::middleware('auth')->group(function () {
         Route::controller(AssetController::class)->group(function () {
             Route::get('/assets/book/{slug}', 'index')->name('book.assets');
         });
+
+        Route::controller(ReturnBookController::class)->group(function () {
+            Route::get('/confirmation/return/book/{slug}/{loanCode}', 'confirmation')->name('return.confirmation');
+
+            Route::post('/return/book/{slug}', 'store')->name('return.store');
+
+            Route::get('/dashboard/returns', 'index')->name('return.index');
+
+            Route::get('/dashboard/return/{returnBookCode}', 'detail')->name('return.detail');
+        });
     });
+
+    Route::get('/assets/stream/{id}', [AssetController::class, 'stream'])
+        ->name('assets.stream');
 });
 
 require __DIR__ . '/auth.php';
 
-// require __DIR__ . '/settings.php';
+require __DIR__ . '/settings.php';

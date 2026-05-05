@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ImageWithFallback } from '@/components/common/ImageWithFallback';
-import { Footer } from '@/components/common/Footer';
+import { Footer } from '@/components/Layouts/Footer/Footer';
 import { useLanguage } from '@/hooks/useLanguage';
 
 const getCategoryColor = (category: string) => {
@@ -97,7 +97,7 @@ export default function AnnouncementsPage() {
                                                 : announcement.title.en}
                                         </h3>
 
-                                        <p className="mb-4 flex-1 line-clamp-3 text-gray-600">
+                                        <p className="mb-4 line-clamp-3 flex-1 text-gray-600">
                                             {language === 'id'
                                                 ? announcement.description.id
                                                 : announcement.description.en}
@@ -121,4 +121,3 @@ export default function AnnouncementsPage() {
         </>
     );
 }
-

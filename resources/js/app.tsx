@@ -6,7 +6,20 @@ import '../css/app.css';
 // import { initializeTheme } from './hooks/use-appearance';
 import { LanguageProvider } from './context/LanguageContext';
 import Navbar from './components/Layouts/Navbar/Navbar';
-import { Footer } from './components/common/Footer';
+import { Footer } from './components/Layouts/Footer/Footer';
+import axios from 'axios';
+
+// csrf setup
+
+axios.defaults.withCredentials = true;
+
+const token = document
+    .querySelector('meta[name="csrf-token"]')
+    ?.getAttribute('content');
+
+if (token) {
+    axios.defaults.headers.common['X-CSRF-TOKEN'] = token;
+}
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
