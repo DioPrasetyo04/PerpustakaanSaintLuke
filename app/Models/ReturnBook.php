@@ -26,8 +26,16 @@ class ReturnBook extends Model
 
     protected $casts = [
         'return_date' => 'date',
-        'status' => ReturnBookStatus::class
+        'status' => ReturnBookStatus::class,
     ];
+
+    public static function checkUserVerified(int $userId)
+    {
+        return User::query()
+            ->where('id', $userId)
+            ->whereNotNull('email_verified_at')
+            ->exists();
+    }
 
     public function user(): BelongsTo
     {
