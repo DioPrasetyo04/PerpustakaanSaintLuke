@@ -4,6 +4,7 @@ use App\Enums\BookCondition;
 use App\Enums\DiscountType;
 use App\Enums\PaymentStatus;
 use App\Enums\ReturnBookStatus;
+use App\Exceptions\BusinessException;
 use App\Http\Resources\LoanResource;
 use App\Http\Resources\ReturnBookResource;
 use App\Interface\LoanInterfaceRepositories;
@@ -61,8 +62,17 @@ class ReturnBookService
     {
         return DB::transaction(function () use ($data, $userId, $slug) {
             $loan = $this->loanService->getLoanDetail($userId, $data['loan_code']);
+
+            if ($loan->returnBook) {
+                throw new BusinessException('return.has_return_book');
+            }
+
+            $condition = $data['condition'] ?? BookCondition::GOOD->value;
+
             $book = $this->returnBookService->findBookBySlug($slug);
             $fineSetting = FineSettings::checkSettings();
+
+            $this->validateReturnBook($userId, $loan->book_id);
 
             $today = Carbon::now();
             $dueDate = Carbon::parse($loan->due_date);
@@ -77,28 +87,20 @@ class ReturnBookService
 
             $otherFee = 0;
 
-            if ($data['condition'] === BookCondition::DAMAGED->value) {
-                if ($fineSetting->damage_discount_type === DiscountType::PERCENTAGE->value) {
-                    $otherFee = ($fineSetting->damage_fee_book * $book->price) / 100;
-                } else {
-                    $otherFee = $fineSetting->damage_fee_book;
-                }
+            if ($condition === BookCondition::DAMAGED->value) {
+                $otherFee = $fineSetting->damage_discount_type === DiscountType::PERCENTAGE->value ? ($fineSetting->damage_fee_book * $book->price) / 100 : $fineSetting->damage_fee_book;
             }
 
-            if ($data['condition'] === BookCondition::LOST->value) {
-                if ($fineSetting->lost_discount_type === DiscountType::PERCENTAGE->value) {
-                    $otherFee = ($fineSetting->lost_fee_book * $book->price) / 100;
-                } else {
-                    $otherFee = $fineSetting->lost_fee_book;
-                }
+            if ($condition === BookCondition::LOST->value) {
+                $otherFee = $fineSetting->lost_discount_type === DiscountType::PERCENTAGE->value ? ($fineSetting->lost_fee_book * $book->price) / 100 :  $fineSetting->lost_fee_book;
             }
 
             $totalFee = $lateFee + $otherFee;
 
-            $status = $totalFee > 0 ? ReturnBookStatus::COST->value : ReturnBookStatus::RETURNED->value;
+            $status = $totalFee > 0 ? ReturnBookStatus::COST : ReturnBookStatus::RETURNED;
 
             $returnBook = $this->returnBookService->createReturnBook([
-                'return_book_code' => generateUniqueCode('return_book', ReturnBook::class, $data['return_book_code']),
+                'return_book_code' => generateUniqueCode('return_book', ReturnBook::class, 'return_book_code'),
                 'loan_id' => $loan->id,
                 'book_id' => $loan->book_id,
                 'user_id' => $userId,
@@ -106,25 +108,19 @@ class ReturnBookService
                 'status' => $status
             ]);
 
-            $notes = '';
-
-            if ($data['condition'] === BookCondition::DAMAGED->value) {
-                $notes = 'Buku Dikembalikan Dalam Keadaan Rusak';
-            }
-
-            if ($data['condition'] === BookCondition::LOST->value) {
-                $notes = 'Buku Dikembalikan Dalam Keadaan Hilang';
-            }
-
-            $notes = 'Buku Dikembalikan dalam keadaan aman dan baik';
+            $notes = match ($condition) {
+                BookCondition::DAMAGED->value => 'Buku Rusak Saat Dikembalikan',
+                BookCondition::LOST->value => 'Buku Hilang Saat Dikembalikan',
+                default => 'Buku Dalam Kondisi Baik Saat Dikembalikan'
+            };
 
             $this->returnBookService->createReturnBookCheck([
                 'return_book_id' => $returnBook->id,
-                'condition' => $data['condition'],
+                'condition' => $condition,
                 'notes' => $notes
             ]);
 
-            match ($data['condition']) {
+            match ($condition) {
                 BookCondition::GOOD->value => ReturnBookCheck::addReturnStock($loan->book_id),
                 BookCondition::DAMAGED->value => ReturnBookCheck::addDamagedStock($loan->book_id),
                 BookCondition::LOST->value => ReturnBookCheck::addLostStock($loan->book_id),
@@ -135,6 +131,7 @@ class ReturnBookService
                     'return_book_id' => $returnBook->id,
                     'user_id' => $userId,
                     'late_fee' => $lateFee,
+                    'other_fee' => $otherFee,
                     'total_fee' => $totalFee,
                     'fine_date' => now(),
                     'payment_status' => PaymentStatus::PENDING->value,
@@ -170,5 +167,20 @@ class ReturnBookService
         $return = $this->returnBookService->getReturnBookDetail($auth->id, $returnBookCode);
 
         return transformData($return, ReturnBookResource::class);
+    }
+
+    private function validateReturnBook(int $userId, int $bookId)
+    {
+        if (!FineSettings::checkSettings()) {
+            throw new BusinessException("return.settings_not_configured", 500);
+        }
+
+        if (Fine::hasUnpaidFine($userId)) {
+            throw new BusinessException("return.has_unpaid_fine");
+        }
+
+        if (!ReturnBook::checkUserVerified($userId)) {
+            throw new BusinessException("loan.user_not_verified", 403);
+        }
     }
 }
