@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Enums\ConvertStatusTypes;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
@@ -23,10 +24,14 @@ class AssetResource extends JsonResource
             // 🔥 untuk frontend UI (icon & warna)
             'file_type' => $this->mapFileType($extension),
 
-            'url' => Storage::url($this->utility_path),
-
-
             // 'url' => Storage::url($this->utility_path),
+
+            // ✅ hanya kasih url jika READY
+            'url' => $this->status === ConvertStatusTypes::READY
+                ? route('assets.stream', $this->id)
+                : null,
+
+            'status' => $this->status?->value,
 
             // optional (bagus buat debug / UI)
             'meta' => [

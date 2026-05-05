@@ -23,7 +23,7 @@ class AssetRepositories implements AssetInterfaceRepositories
             })
 
             ->with([
-                'assets:id,type,utility_path',
+                'assets:id,type,utility_path,pdf_path,status',
                 'authors:id,name,username,avatar',
                 'categories:id,name,icon',
 

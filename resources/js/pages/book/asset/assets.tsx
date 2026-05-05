@@ -17,7 +17,11 @@ import { ImageWithFallback } from '@/components/common/ImageWithFallback';
 import { Badge } from '@/components/ui/badge';
 import { formattedDate } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
-import { Document, Page } from 'react-pdf';
+import { pdfjs } from 'react-pdf';
+import PDFViewer from '@/components/common/PDFViewer';
+
+// 🔥 WAJIB untuk react-pdf
+pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 export default function assets() {
     const { props } = usePage<AssetPageProps>();
@@ -28,29 +32,37 @@ export default function assets() {
         assets[0] ?? null,
     );
 
-    const [currentPage, setCurrentPage] = useState(1);
-    const [numPages, setNumPages] = useState<number>(0);
-    const [scale, setScale] = useState(1);
-
-    const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
-        setNumPages(numPages);
-    };
-
-    // 🔥 PAKSA REFRESH SIGNED URL SAAT LOAD
     useEffect(() => {
-        router.reload({
-            only: ['assets'],
-        });
+        const hasProcessing = assets.some((a) => a.status === 'Processing');
+
+        if (!hasProcessing) return;
+
+        const interval = setInterval(() => {
+            router.reload({ only: ['assets'] });
+        }, 3000);
+
+        return () => clearInterval(interval);
+    }, [assets]);
+
+    useEffect(() => {
+        if (!selectedAsset) return;
+
+        const updated = assets.find((a) => a.id === selectedAsset.id);
+
+        if (updated) {
+            setSelectedAsset(updated);
+        }
+    }, [assets]);
+
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            e.preventDefault();
+        };
+        document.addEventListener('contextmenu', handler);
+        return () => {
+            document.removeEventListener('contextmenu', handler);
+        };
     }, []);
-
-    useEffect(() => {
-        document.addEventListener('contextmenu', (e) => e.preventDefault());
-    }, []);
-
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [selectedAsset]);
-
     const getAssetIcon = (type: FileType) => {
         const icons = {
             pdf: <FileText className="h-5 w-5" />,
@@ -78,61 +90,44 @@ export default function assets() {
     const renderAssetViewer = () => {
         if (!selectedAsset) return null;
 
+        if (selectedAsset.status === 'Processing') {
+            return (
+                <div className="flex h-[500px] items-center justify-center">
+                    <div className="text-center">
+                        <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
+                        <p className="text-lg font-semibold">
+                            Converting to PDF...
+                        </p>
+                        <p className="text-sm text-gray-500">
+                            Please wait a moment
+                        </p>
+                    </div>
+                </div>
+            );
+        }
+
+        if (selectedAsset.status === 'Failed') {
+            return (
+                <div className="flex h-[500px] items-center justify-center">
+                    <p className="text-red-500">Failed to process file</p>
+                </div>
+            );
+        }
+
         switch (selectedAsset.file_type) {
             case 'pdf':
-                return (
-                    <div className="p-4">
-                        <div className="mb-4 flex justify-center gap-4">
-                            <Button
-                                onClick={() =>
-                                    setCurrentPage((p) => Math.max(p - 1, 1))
-                                }
-                            >
-                                Prev
-                            </Button>
-
-                            <span>
-                                {currentPage} / {numPages}
-                            </span>
-
-                            <Button
-                                onClick={() =>
-                                    setCurrentPage((p) =>
-                                        Math.min(p + 1, numPages),
-                                    )
-                                }
-                            >
-                                Next
-                            </Button>
-                        </div>
-
-                        <div className="mb-4 flex justify-center gap-2">
-                            <Button onClick={() => setScale((s) => s + 0.1)}>
-                                Zoom +
-                            </Button>
-                            <Button
-                                onClick={() =>
-                                    setScale((s) => Math.max(0.5, s - 0.1))
-                                }
-                            >
-                                Zoom -
-                            </Button>
-                        </div>
-
-                        <Document
-                            file={selectedAsset.url}
-                            onLoadSuccess={onDocumentLoadSuccess}
-                            key={selectedAsset.url} // 🔥 WAJIB
-                        >
-                            <Page pageNumber={currentPage} scale={scale} />
-                        </Document>
-                    </div>
+            case 'word':
+            case 'excel':
+                return selectedAsset.url ? (
+                    <PDFViewer url={selectedAsset.url} />
+                ) : (
+                    <div className="p-4 text-center">Loading...</div>
                 );
 
             case 'video':
                 return (
                     <video
-                        src={selectedAsset.url} // ❗ FIX
+                        src={selectedAsset.url}
                         key={selectedAsset.url}
                         controls
                         controlsList="nodownload noremoteplayback"
@@ -274,6 +269,20 @@ export default function assets() {
                                                     >
                                                         {asset.file_type.toUpperCase()}
                                                     </p>
+                                                    {/* 🔥 STATUS */}
+                                                    {asset.status ===
+                                                        'Processing' && (
+                                                        <p className="text-xs text-yellow-500">
+                                                            Processing...
+                                                        </p>
+                                                    )}
+
+                                                    {asset.status ===
+                                                        'Ready' && (
+                                                        <p className="text-xs text-green-500">
+                                                            Ready
+                                                        </p>
+                                                    )}
                                                 </div>
                                             </div>
                                         </button>

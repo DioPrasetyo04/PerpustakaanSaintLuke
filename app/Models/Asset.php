@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ConvertStatusTypes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -16,7 +17,13 @@ class Asset extends Model
     protected $fillable = [
         'book_id',
         'type',
-        'utility_path'
+        'utility_path',
+        'pdf_path',
+        'status'
+    ];
+
+    protected $casts = [
+        'status' => ConvertStatusTypes::class
     ];
 
     public function books(): BelongsToMany
