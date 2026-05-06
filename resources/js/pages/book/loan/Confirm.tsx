@@ -12,7 +12,7 @@ import { ImageWithFallback } from '@/components/common/ImageWithFallback';
 import { Label } from '@/components/ui/label';
 // import { FaPercentage } from 'react-icons/fa';
 import { moneyFormatter } from '@/lib/utils';
-import LoanNotification from '@/components/component/Loan/LoanNotification';
+import LoanNotification from '@/components/component/Notification/Notification';
 import axios from 'axios';
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Checkbox } from '@/components/ui/checkbox';
