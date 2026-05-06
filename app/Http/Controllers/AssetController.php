@@ -32,6 +32,7 @@ class AssetController extends Controller
         return Inertia::render('book/asset/assets', [
             'book' => $data['book'],
             'assets' => $data['assets'],
+            'loan' => $data['loan'],
             'totalAssets' => $data['total_assets'],
         ]);
     }

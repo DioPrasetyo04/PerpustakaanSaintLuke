@@ -25,7 +25,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pd
 
 export default function assets() {
     const { props } = usePage<AssetPageProps>();
-    const { book, assets, totalAssets } = props;
+    const { book, assets, totalAssets, loan } = props;
     const { language } = useLanguage();
 
     const [selectedAsset, setSelectedAsset] = useState<AssetProps | null>(
@@ -63,6 +63,7 @@ export default function assets() {
             document.removeEventListener('contextmenu', handler);
         };
     }, []);
+
     const getAssetIcon = (type: FileType) => {
         const icons = {
             pdf: <FileText className="h-5 w-5" />,
@@ -163,6 +164,15 @@ export default function assets() {
                 return <div>Preview not supported</div>;
         }
     };
+
+    const onHandleReturnBook = () => {
+        router.get(
+            route('return.confirmation', {
+                slug: book?.slug,
+                loanCode: loan?.loan_code,
+            }),
+        );
+    };
     return (
         <div className="min-h-screen bg-gray-50 py-8">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -191,39 +201,59 @@ export default function assets() {
                     className="mb-8"
                 >
                     <Card className="p-6">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <h1 className="mb-2 font-['Poppins'] text-2xl font-bold text-gray-900 sm:text-3xl">
+                        <div className="flex items-center justify-between gap-4 p-3">
+                            {/* LEFT SIDE (TITLE + AUTHOR) */}
+                            <div className="flex flex-col gap-y-3 p-3">
+                                <h1 className="font-['Poppins'] text-2xl font-bold text-gray-900 sm:text-3xl">
                                     {book.title}
                                 </h1>
-                                <div className="flex flex-1 flex-row items-center gap-2 p-2">
+
+                                <div className="flex flex-row items-center gap-2">
                                     {book.authors.map((author) => (
-                                        <div key={author.id}>
+                                        <div
+                                            key={author.id}
+                                            className="flex items-center gap-2"
+                                        >
                                             <ImageWithFallback
                                                 src={author.avatar}
                                                 alt={author.name}
-                                                className="obejct-cover h-8 w-8 rounded-full object-center"
+                                                className="h-8 w-8 rounded-full object-cover"
                                             />
-                                            <p className="text-gray-600">
+                                            <p className="text-sm text-gray-600">
                                                 {author.name}
                                             </p>
                                         </div>
                                     ))}
                                 </div>
                             </div>
-                            <div className="flex flex-1 flex-row items-center gap-2 p-2">
-                                {book.categories.map((category) => (
-                                    <div key={category.id}>
-                                        <ImageWithFallback
-                                            src={category.icon}
-                                            alt={category.name}
-                                            className="h-8 w-8 object-cover object-center"
-                                        />
-                                        <Badge variant="outline">
-                                            {category.name}
-                                        </Badge>
-                                    </div>
-                                ))}
+
+                            <div className="flex flex-col items-center gap-3 p-3">
+                                {/* RIGHT SIDE (CATEGORY) */}
+                                <div className="flex flex-row items-center gap-2 p-3">
+                                    {book.categories.map((category) => (
+                                        <div
+                                            key={category.id}
+                                            className="flex items-center gap-2"
+                                        >
+                                            <ImageWithFallback
+                                                src={category.icon}
+                                                alt={category.name}
+                                                className="h-8 w-8 object-cover"
+                                            />
+                                            <Badge variant="outline">
+                                                {category.name}
+                                            </Badge>
+                                        </div>
+                                    ))}
+                                </div>
+                                <Button
+                                    disabled={!loan}
+                                    onClick={onHandleReturnBook}
+                                    variant={'destructive'}
+                                    size={'md'}
+                                >
+                                    Return Book
+                                </Button>
                             </div>
                         </div>
                     </Card>

@@ -12,6 +12,8 @@ import axios from 'axios';
 // csrf setup
 
 axios.defaults.withCredentials = true;
+axios.defaults.headers.common['Accept'] = 'application/json';
+axios.defaults.headers.common['Content-Type'] = 'application/json';
 
 const token = document
     .querySelector('meta[name="csrf-token"]')

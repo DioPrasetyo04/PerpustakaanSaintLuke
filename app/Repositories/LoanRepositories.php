@@ -58,7 +58,7 @@ class LoanRepositories implements LoanInterfaceRepositories
                 'created_at',
                 'updated_at'
             ])
-            ->with(['book:id,title,author,cover', 'book.authors:id,name,username,avatar', 'user:id,name,email,username,avatar'])
+            ->with(['book:id,title,cover', 'book.authors:id,name,username,avatar', 'user:id,name,email,username,avatar'])
             ->where('user_id', $userId)
             ->when($filters['search'] ?? null, function ($query, $search) {
                 $query->where(function ($query) use ($search) {
@@ -89,10 +89,9 @@ class LoanRepositories implements LoanInterfaceRepositories
                 'created_at',
                 'updated_at'
             ])
-            ->with(['book:id,title,author,cover', 'book.authors:id,name,username,avatar', 'user:id,name,email,username,avatar'])
+            ->with(['book:id,title,cover', 'book.authors:id,name,username,avatar', 'user:id,name,email,username,avatar'])
             ->where('user_id', $userId)
             ->where('loan_code', $loanCode)
-            ->withAvg('book.reviews as avg_rating', 'rating')
             ->firstOrFail();
     }
 }

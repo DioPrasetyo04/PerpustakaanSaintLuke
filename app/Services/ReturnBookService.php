@@ -1,10 +1,13 @@
 <?php
 
+namespace App\Services;
+
 use App\Enums\BookCondition;
 use App\Enums\DiscountType;
 use App\Enums\PaymentStatus;
 use App\Enums\ReturnBookStatus;
 use App\Exceptions\BusinessException;
+use App\Http\Resources\BookResource;
 use App\Http\Resources\LoanResource;
 use App\Http\Resources\ReturnBookResource;
 use App\Interface\LoanInterfaceRepositories;
@@ -39,7 +42,7 @@ class ReturnBookService
         $fineSetting = FineSettings::checkSettings();
 
         $today = Carbon::now();
-        $dueDate = Carbon::parse($loan->due_date);
+        $dueDate = Carbon::parse($loan['due_date']);
 
         $lateDays = 0;
         $lateFee = 0;
@@ -50,7 +53,7 @@ class ReturnBookService
         }
 
         return [
-            'book' => $book,
+            'book' => transformData($book, BookResource::class),
             'loan' => $loan,
             'late_days' => $lateDays,
             'late_fee' => $lateFee,

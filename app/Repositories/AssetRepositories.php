@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Interface\AssetInterfaceRepositories;
 use App\Models\Book;
+use App\Models\Loan;
 use Illuminate\Support\Facades\Auth;
 
 class AssetRepositories implements AssetInterfaceRepositories
@@ -34,6 +35,20 @@ class AssetRepositories implements AssetInterfaceRepositories
                         ->whereDoesntHave('returnBook');
                 }
             ])
+            ->firstOrFail();
+    }
+
+    public function getDataLoanWithAuthUser(int $bookId)
+    {
+        $userId = Auth::id();
+
+        return Loan::query()
+            ->select(['id', 'loan_code'])
+            ->where('user_id', $userId)
+            ->where('book_id', $bookId)
+            ->whereDoesntHave('returnBook')
+            ->with(['book:id,title,cover'])
+            ->latest()
             ->firstOrFail();
     }
 }

@@ -54,7 +54,7 @@ export default function Confirm() {
         message: string;
     } | null>(null);
 
-    const t = (key: LoanKey) => data[key];
+    const t = (key: LoanKey) => data[key] ?? key;
 
     const calculators = {
         percentage: (price: number, fee: number) => (price * fee) / 100,
@@ -116,7 +116,9 @@ export default function Confirm() {
         } catch (error: any) {
             setLoading(false);
 
-            const errorKey = error?.response?.data?.message || 'loan.failed';
+            const errorKey =
+                (error?.response?.data?.message as string)?.trim() ||
+                'loan.failed';
 
             setNotification({
                 type: 'error',
@@ -164,9 +166,7 @@ export default function Confirm() {
                                             className="flex items-center justify-center gap-2 p-2"
                                         >
                                             <ImageWithFallback
-                                                className="h-8 w-8 rounded-full"
-                                                object-center
-                                                object-cover
+                                                className="h-8 w-8 rounded-full object-cover object-center"
                                                 src={author?.avatar}
                                             />
                                             <p className="text-sm text-gray-600">
