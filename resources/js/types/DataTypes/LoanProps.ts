@@ -5,6 +5,7 @@ export type LoanProps = {
     id: number;
     user_id: number;
     book_id: number;
+    loan_code: string;
     loan_date: string;
     due_date: string;
     user?: UserProps;

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\ConvertStatusTypes;
 use App\Http\Resources\AssetResource;
 use App\Http\Resources\BookResource;
+use App\Http\Resources\LoanResource;
 use App\Interface\AssetInterfaceRepositories;
 use App\Jobs\ConnvertAssetToPdfJob;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -22,6 +23,8 @@ class AssetService
     public function getAssetBookOfLoan(string $bookSlug)
     {
         $bookAssets = $this->assetService->findBookWithAssets($bookSlug);
+
+        $loan = $this->assetService->getDataLoanWithAuthUser($bookAssets->id);
 
         $convertable = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'];
 
@@ -62,6 +65,7 @@ class AssetService
         return [
             'book' => BookResource::make($bookAssets)->resolve(),
             'assets' => AssetResource::collection($bookAssets->assets)->resolve(),
+            'loan' => LoanResource::make($loan)->resolve(),
             'total_assets' => $bookAssets->assets->count(),
         ];
     }

@@ -1,9 +1,6 @@
-import { useLanguage } from '@/hooks/useLanguage';
-import { FilterType } from '@/types/CatalogPage/CatalogBooksByCategoryPageProps';
 import type { InertiaLinkProps } from '@inertiajs/react';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { route } from 'ziggy-js';
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));

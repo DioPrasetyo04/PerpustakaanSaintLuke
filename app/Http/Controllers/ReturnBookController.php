@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Services\ReturnBookService;
 use Inertia\Inertia;
-use ReturnBookService;
 
 class ReturnBookController extends Controller
 {

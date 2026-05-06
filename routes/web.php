@@ -88,10 +88,10 @@ Route::middleware('auth')->group(function () {
             Route::get('/dashboard/return/{returnBookCode}', 'detail')->name('return.detail');
         });
     });
-
-    Route::get('/assets/stream/{id}', [AssetController::class, 'stream'])
-        ->name('assets.stream');
 });
+
+Route::get('/assets/stream/{id}', [AssetController::class, 'stream'])
+    ->name('assets.stream');
 
 require __DIR__ . '/auth.php';
 
