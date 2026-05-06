@@ -23,7 +23,7 @@ class EnsureUserHasActiveLoan
         }
         $slug = $request->route('slug');
 
-        if (!Loan::hasActiveLoanBySlug($user->id, $slug)) {
+        if ($slug && !Loan::hasActiveLoanBySlug($user->id, $slug)) {
             throw new BusinessException("asset.loan_required");
         }
 

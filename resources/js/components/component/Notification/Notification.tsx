@@ -9,7 +9,7 @@ type Props = {
     onClose: () => void;
 };
 
-export default function LoanNotification({ notification, onClose }: Props) {
+export default function Notification({ notification, onClose }: Props) {
     if (!notification) return null;
 
     const isSuccess = notification.type === 'success';
