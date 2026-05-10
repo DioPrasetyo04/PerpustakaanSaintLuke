@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Carbon;
 
 class LoanResource extends JsonResource
 {
@@ -19,8 +20,30 @@ class LoanResource extends JsonResource
             'user_id' => $this->when(isset($this->user_id), $this->user_id),
             'book_id' => $this->when(isset($this->book_id), $this->book_id),
             'loan_code' => $this->when(isset($this->loan_code), $this->loan_code),
-            'loan_date' => $this->when(isset($this->loan_date), $this->loan_date),
-            'due_date' => $this->when(isset($this->due_date), $this->due_date),
+            'loan_date' => $this->when(
+                isset($this->loan_date),
+                $this->loan_date
+                    ? Carbon::parse($this->loan_date)->format('d F Y')
+                    : null
+            ),
+
+            'due_date' => $this->when(
+                isset($this->due_date),
+                $this->due_date
+                    ? Carbon::parse($this->due_date)->format('d F Y')
+                    : null
+            ),
+
+            // OPTIONAL ATTRIBUTE
+            'days_left' => $this->when(
+                isset($this->days_left),
+                $this->days_left
+            ),
+
+            'deadline_status' => $this->when(
+                isset($this->deadline_status),
+                $this->deadline_status
+            ),
         ];
 
         if ($this->relationLoaded('user') && $this->user) {
