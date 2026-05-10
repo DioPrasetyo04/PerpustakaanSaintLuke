@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Interface\AssetInterfaceRepositories;
 use App\Interface\BookInterfaceRepositories;
 use App\Interface\CatalogInterfaceRepositories;
+use App\Interface\DashboardInterfaceRepositories;
 use App\Interface\HomeInterfaceRepositories;
 use App\Interface\InformationRepositoriesInterface;
 use App\Interface\LoanInterfaceRepositories;
@@ -13,6 +14,7 @@ use App\Interface\ReturnBookInterfaceRepositories;
 use App\Repositories\AssetRepositories;
 use App\Repositories\BookRepositories;
 use App\Repositories\CatalogRepositories;
+use App\Repositories\DashboardRepositories;
 use App\Repositories\HomeRepositories;
 use App\Repositories\InformationRepositories;
 use App\Repositories\LoanRepositories;
@@ -39,6 +41,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(LoanInterfaceRepositories::class, LoanRepositories::class);
         $this->app->bind(AssetInterfaceRepositories::class, AssetRepositories::class);
         $this->app->bind(ReturnBookInterfaceRepositories::class, ReturnBookRepositories::class);
+        $this->app->bind(DashboardInterfaceRepositories::class, DashboardRepositories::class);
     }
 
     public function boot(): void
