@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Enums\ReturnBookStatus;
 use App\Interface\DashboardInterfaceRepositories;
+use App\Models\Author;
 use App\Models\Fine;
 use App\Models\Loan;
 use App\Models\ReturnBook;
@@ -20,9 +21,11 @@ class DashboardRepositories implements DashboardInterfaceRepositories
         $now = Carbon::now();
         $getAllCountBorrowingBook = Loan::query()->where('user_id', $authUser->id)->count();
         $getAllCountHasActiveLoan = Loan::query()->where('user_id', $authUser->id)->whereDoesntHave('returnBook')->count();
-        $getAllCountDeadlineDueDateBook = Loan::query()->where('user_id', $authUser->id)->whereDoesntHave('returnBook')->whereDate('due_date', '>=', $now)->whereDate('due_date', '<=', $now->copy()->addDays(3));
-        $getAllCountFinePayment = Loan::query()->where('user_id', $authUser->id)->whereHas('returnBook')->whereHas('fine')->count();
-        return compact('getAllCountBorrowingBook', 'getAllCountHasActiveLoan', 'getAllCountReturnBook', 'getAllCountFinePayment');
+        $getAllCountDeadlineDueDateBook = Loan::query()->where('user_id', $authUser->id)->whereDoesntHave('returnBook')->whereDate('due_date', '>=', $now)->whereDate('due_date', '<=', $now->copy()->addDays(3))->count();
+        $getAllCountReturnBook = ReturnBook::query()->where('user_id', $authUser->id)->count();
+        $getAllCountFinePayment = ReturnBook::query()->where('user_id', $authUser->id)->has('fine')->count();
+        $totalFineNominal = (int) Fine::query()->where('user_id', $authUser->id)->sum('total_fee');
+        return compact('getAllCountBorrowingBook', 'getAllCountHasActiveLoan', 'getAllCountDeadlineDueDateBook', 'getAllCountReturnBook', 'getAllCountFinePayment', 'totalFineNominal');
     }
 
     public function getUserAuthCountBorrowingWeek()
@@ -63,7 +66,7 @@ class DashboardRepositories implements DashboardInterfaceRepositories
         $endDate = now()->endOfDay();
 
         $results = Fine::query()
-            ->selectRaw('DATE(fine_date) as fine_date, COUNT(*) as total')
+            ->selectRaw('DATE(fine_date) as fine_date, SUM(total_fee) as total')
             ->where('user_id', $authUser->id)
             ->whereBetween('fine_date', [$startDate, $endDate])
             ->groupBy(DB::raw('DATE(fine_date)'))
@@ -76,10 +79,67 @@ class DashboardRepositories implements DashboardInterfaceRepositories
     public function getUserAuthAllLoanBook(array $filters, int $perPage, int $page): LengthAwarePaginator
     {
         $authUser = auth()->user();
-        $loans = Loan::query()->with(['book', 'book.publisher', 'book.language', 'book.authors'])->where('user_id', $authUser->id)->withAvg('book.reviews as avg_rating', 'rating')->paginate($perPage, ['*'], 'loans_page', $page);
+        $query = Loan::query()
+            ->with(['book' => function ($q) {
+                $q->withAvg('reviews', 'rating');
+            }, 'book.publisher', 'book.language', 'book.authors', 'book.categories'])
+            ->where('loans.user_id', $authUser->id)
+            ->whereDoesntHave('returnBook');
+
+        // Category filter
+        if (!empty($filters['category']) && $filters['category'] !== 'All Categories') {
+            $query->whereHas('book.categories', function ($q) use ($filters) {
+                $q->where('name', $filters['category']);
+            });
+        }
+
+        // Status filter
+        if (!empty($filters['status']) && $filters['status'] !== 'All Status') {
+            $now = Carbon::now();
+            if ($filters['status'] === 'Due Soon') {
+                $query->whereDate('due_date', '>=', $now)->whereDate('due_date', '<=', $now->copy()->addDays(7));
+            } elseif ($filters['status'] === 'Overdue') {
+                $query->whereDate('due_date', '<', $now);
+            } elseif ($filters['status'] === 'On Time') {
+                $query->whereDate('due_date', '>', $now->copy()->addDays(7));
+            }
+        }
+
+        // Date range filter
+        if (!empty($filters['dateRange']) && $filters['dateRange'] !== 'All Time') {
+            $now = Carbon::now();
+            if ($filters['dateRange'] === 'Last 7 Days') {
+                $query->where('loan_date', '>=', $now->copy()->subDays(7));
+            } elseif ($filters['dateRange'] === 'Last 30 Days') {
+                $query->where('loan_date', '>=', $now->copy()->subDays(30));
+            } elseif ($filters['dateRange'] === 'Last 3 Months') {
+                $query->where('loan_date', '>=', $now->copy()->subMonths(3));
+            }
+        }
+
+        // Sorting
+        $sortBy = $filters['sortBy'] ?? 'Due Date';
+        if ($sortBy === 'Title') {
+            $query->leftJoin('books', 'loans.book_id', '=', 'books.id')
+                ->orderBy('books.title', 'asc')
+                ->select('loans.*');
+        } elseif ($sortBy === 'Author') {
+            $query->addSelect([
+                'first_author_name' => Author::select('name')
+                    ->join('author_of_books', 'authors.id', '=', 'author_of_books.author_id')
+                    ->whereColumn('author_of_books.book_id', 'loans.book_id')
+                    ->limit(1)
+            ])->orderBy('first_author_name', 'asc');
+        } elseif ($sortBy === 'Borrow Date') {
+            $query->orderBy('loan_date', 'desc');
+        } else {
+            $query->orderBy('due_date', 'asc');
+        }
+
+        $loans = $query->paginate($perPage, ['*'], 'loans_page', $page);
 
         $loans->getCollection()->transform(function ($loan) {
-            $daysLeft = now()->diffInDays($loan->die_date, false);
+            $daysLeft = now()->diffInDays($loan->due_date, false);
 
             $loan->days_left = $daysLeft;
 
@@ -98,7 +158,54 @@ class DashboardRepositories implements DashboardInterfaceRepositories
     public function getUserAuthAllReturnBook(array $filters, int $perPage, int $page): LengthAwarePaginator
     {
         $authUser = auth()->user();
-        $returnBooks = ReturnBook::query()->with(['book', 'loan', 'fine', 'book.publisher', 'book.language', 'book.authors'])->where('user_id', $authUser->id)->withAvg('book.reviews as avg_rating', 'rating')->whereNot('status', ReturnBookStatus::CHECKED)->paginate($perPage, ['*'], 'return_books_page', $page);
+        $query = ReturnBook::query()
+            ->with(['book' => function ($q) {
+                $q->withAvg('reviews', 'rating');
+            }, 'loan', 'fine', 'book.publisher', 'book.language', 'book.authors', 'book.categories'])
+            ->where('return_books.user_id', $authUser->id)
+            ->whereNot('return_books.status', ReturnBookStatus::CHECKED);
+
+        // Category filter
+        if (!empty($filters['category']) && $filters['category'] !== 'All Categories') {
+            $query->whereHas('book.categories', function ($q) use ($filters) {
+                $q->where('name', $filters['category']);
+            });
+        }
+
+        // Date range filter
+        if (!empty($filters['dateRange']) && $filters['dateRange'] !== 'All Time') {
+            $now = Carbon::now();
+            if ($filters['dateRange'] === 'Last 7 Days') {
+                $query->where('return_date', '>=', $now->copy()->subDays(7));
+            } elseif ($filters['dateRange'] === 'Last 30 Days') {
+                $query->where('return_date', '>=', $now->copy()->subDays(30));
+            } elseif ($filters['dateRange'] === 'Last 3 Months') {
+                $query->where('return_date', '>=', $now->copy()->subMonths(3));
+            }
+        }
+
+        // Sorting
+        $sortBy = $filters['sortBy'] ?? 'Due Date';
+        if ($sortBy === 'Title') {
+            $query->leftJoin('books', 'return_books.book_id', '=', 'books.id')
+                ->orderBy('books.title', 'asc')
+                ->select('return_books.*');
+        } elseif ($sortBy === 'Author') {
+            $query->addSelect([
+                'first_author_name' => Author::select('name')
+                    ->join('author_of_books', 'authors.id', '=', 'author_of_books.author_id')
+                    ->whereColumn('author_of_books.book_id', 'return_books.book_id')
+                    ->limit(1)
+            ])->orderBy('first_author_name', 'asc');
+        } elseif ($sortBy === 'Borrow Date') {
+            $query->leftJoin('loans', 'return_books.loan_id', '=', 'loans.id')
+                ->orderBy('loans.loan_date', 'desc')
+                ->select('return_books.*');
+        } else {
+            $query->orderBy('return_date', 'desc');
+        }
+
+        $returnBooks = $query->paginate($perPage, ['*'], 'return_books_page', $page);
         $returnBooks->getCollection()->transform(function ($returnBook) {
             $isFine = $returnBook->status === ReturnBookStatus::COST;
 

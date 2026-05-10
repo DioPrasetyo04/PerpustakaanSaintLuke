@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AssetController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InformationController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\CatalogController;
@@ -19,9 +20,7 @@ use Inertia\Inertia;
 //     ]);
 // })->name('home');
 
-Route::get('dashboard', function () {
-    return Inertia::render('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
 // Route::get('/assets/stream/{id}', [AssetController::class, 'stream'])
 //     ->name('asset.stream')
