@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { router } from '@inertiajs/react';
+import { route } from 'ziggy-js';
 import { useLanguage } from '@/hooks/useLanguage';
 import { contentHero, slidesHero } from '@/data/data';
 import { MdOutlineMenuBook } from 'react-icons/md';
@@ -8,7 +10,18 @@ import { ButtonVariants } from '@/components/ui/button3D';
 
 const HeroSection = () => {
     const [currentSlide, setCurrentSlide] = useState(0);
+    const [searchInput, setSearchInput] = useState('');
     const { language } = useLanguage();
+
+    const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const keyword = searchInput.trim();
+        router.get(
+            route('resource'),
+            keyword ? { search: keyword } : {},
+            { preserveScroll: false },
+        );
+    };
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -132,7 +145,10 @@ const HeroSection = () => {
                     <div className="object-cover object-center p-2">
                         <FaSearch className="h-6 w-6 text-white" />
                     </div>
-                    <form method="post" className="flex gap-2 px-2 py-2">
+                    <form
+                        onSubmit={handleSearchSubmit}
+                        className="flex gap-2 px-2 py-2"
+                    >
                         <input
                             type="text"
                             placeholder={
@@ -141,6 +157,9 @@ const HeroSection = () => {
                                     : 'Search Anyway...'
                             }
                             id="search"
+                            name="search"
+                            value={searchInput}
+                            onChange={(e) => setSearchInput(e.target.value)}
                             className="rounded-full px-5 py-2 text-gray-800"
                         />
                         <ButtonVariants

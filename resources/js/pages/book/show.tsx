@@ -10,6 +10,7 @@ import {
     XCircle,
     ArrowLeft,
 } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
@@ -21,6 +22,7 @@ import { bookDetailPage } from '@/data/data';
 import SectionRecomended from '@/components/Section/BookDetail/RecomendedBooks';
 import { formattedRating, formattedYear } from '@/lib/utils';
 import DOMPurify from 'dompurify';
+import Notification from '@/components/component/Notification/Notification';
 
 function BookShow() {
     const { language } = useLanguage();
@@ -28,12 +30,47 @@ function BookShow() {
     const { book, recomendedBooks, reviews } = props;
     const t = bookDetailPage[language];
 
-    const bookAvailable = book.status === 'Tersedia';
+    const bookAvailable = book?.status === 'Tersedia';
+    const [wishlistPending, setWishlistPending] = useState(false);
+    const [wishlistSaved, setWishlistSaved] = useState(false);
+    const [notification, setNotification] = useState<{
+        type: 'success' | 'error';
+        message: string;
+    } | null>(null);
 
     const onHandleBorrowConfirmation = () => {
         if (bookAvailable) {
             router.get(route('loan.confirmation', book.slug));
         }
+    };
+
+    const onHandleAddWishlist = () => {
+        if (!book || wishlistPending) return;
+        setWishlistPending(true);
+
+        router.post(
+            route('bookmark.store', { slug: book.slug }),
+            {},
+            {
+                preserveScroll: true,
+                preserveState: true,
+                onSuccess: () => {
+                    setWishlistSaved(true);
+                    setNotification({
+                        type: 'success',
+                        message: `Bookmark untuk "${book.title}" berhasil disimpan.`,
+                    });
+                },
+                onError: () => {
+                    setNotification({
+                        type: 'error',
+                        message:
+                            'Gagal menyimpan bookmark. Pastikan Anda sudah login dan coba lagi.',
+                    });
+                },
+                onFinish: () => setWishlistPending(false),
+            },
+        );
     };
 
     if (!book) {
@@ -118,8 +155,16 @@ function BookShow() {
                                         variant="outline"
                                         className="w-full"
                                         size="lg"
+                                        onClick={onHandleAddWishlist}
+                                        disabled={
+                                            wishlistPending || wishlistSaved
+                                        }
                                     >
-                                        {t.addWishlist}
+                                        {wishlistSaved
+                                            ? '✔ Bookmarked'
+                                            : wishlistPending
+                                              ? 'Saving...'
+                                              : t.addWishlist}
                                     </Button>
                                 </div>
                             </div>
@@ -548,6 +593,10 @@ function BookShow() {
                     </motion.div>
                 </div>
             </div>
+            <Notification
+                notification={notification}
+                onClose={() => setNotification(null)}
+            />
         </>
     );
 }
