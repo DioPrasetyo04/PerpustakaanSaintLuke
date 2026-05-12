@@ -2,8 +2,10 @@
 
 use App\Http\Controllers\AssetController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\InformationController;
 use App\Http\Controllers\BookController;
+use App\Http\Controllers\BookmarkController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoanController;
@@ -64,7 +66,18 @@ Route::controller(PaymentController::class)->group(function () {
     Route::get('/payments/cancel', 'handleCancel')->name('payment.cancel');
 });
 
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::controller(HistoryController::class)->group(function () {
+        Route::get('/history', 'index')->name('history.index');
+    });
+});
+
 Route::middleware('auth')->group(function () {
+    Route::controller(BookmarkController::class)->group(function () {
+        Route::post('/bookmark/{slug}', 'store')->name('bookmark.store');
+        Route::delete('/bookmark/{slug}', 'destroy')->name('bookmark.destroy');
+    });
+
     Route::controller(LoanController::class)->group(function () {
         Route::get('/dashboard/loans', 'index')->name('loan.index');
         Route::get('/dashboard/loan/{loanCode}', 'detail')->name('loan.detail');

@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php -l app/Interface/HistoryInterfaceRepositories.php)",
+      "Bash(php -l app/Repositories/HistoryRepositories.php)",
+      "Bash(php -l app/Services/HistoryService.php)",
+      "Bash(php -l app/Http/Controllers/HistoryController.php)",
+      "Bash(php -l app/Providers/AppServiceProvider.php)"
+    ]
+  }
+}

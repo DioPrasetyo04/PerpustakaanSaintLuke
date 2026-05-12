@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php artisan *)",
+      "Bash(npx --no-install tsc --noEmit -p tsconfig.json)",
+      "Bash(npx --no-install tsc --noEmit --skipLibCheck --jsx preserve --target es2020 --module esnext --moduleResolution node --baseUrl ./resources/js --paths \"@/*:[./*]\" resources/js/pages/user/history.tsx)",
+      "Bash(php -l app/Interface/BookmarkInterfaceRepositories.php)",
+      "Bash(php -l app/Repositories/BookmarkRepositories.php)",
+      "Bash(php -l app/Services/BookmarkService.php)",
+      "Bash(php -l app/Http/Controllers/BookmarkController.php)",
+      "Bash(php -l routes/web.php)",
+      "Bash(php -l app/Interface/ProfileInterfaceRepositories.php)",
+      "Bash(php -l app/Repositories/ProfileRepositories.php)",
+      "Bash(php -l app/Services/ProfileService.php)",
+      "Bash(php -l app/Http/Controllers/Settings/ProfileController.php)",
+      "Bash(php -l app/Http/Controllers/Settings/SocialMediaController.php)",
+      "Bash(php -l app/Http/Requests/Settings/ProfileUpdateRequest.php)",
+      "Bash(php -l app/Http/Requests/Settings/SocialMediaRequest.php)",
+      "Bash(php -l routes/settings.php)",
+      "Bash(php -l app/Models/SocialMedia.php)"
+    ]
+  }
+}
