@@ -13,8 +13,7 @@ return new class extends Migration
     {
         Schema::create('review_books', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('book_id')->constrained('books', 'id')->cascadeOnUpdate()->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained('users', 'id')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('loan_user_id')->constrained('loan_details', 'id')->cascadeOnUpdate()->cascadeOnDelete();
             $table->foreignId('return_book_id')->constrained('return_books', 'id')->cascadeOnUpdate()->cascadeOnDelete();
             $table->decimal('rating', 2, 1)->default(0);
             $table->string('comment')->nullable();

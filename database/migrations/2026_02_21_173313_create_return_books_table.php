@@ -15,11 +15,12 @@ return new class extends Migration
         Schema::create('return_books', function (Blueprint $table) {
             $table->id();
             $table->string('return_book_code')->unique();
-            $table->foreignId('loan_id')->constrained('loans', 'id')->cascadeOnUpdate()->cascadeOnDelete();
-            $table->foreignId('book_id')->constrained('books', 'id')->cascadeOnUpdate()->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained('users', 'id')->cascadeOnUpdate()->cascadeOnDelete();
+            // $table->foreignId('loan_id')->constrained('loans', 'id')->cascadeOnUpdate()->cascadeOnDelete();
+            // $table->foreignId('book_id')->constrained('books', 'id')->cascadeOnUpdate()->cascadeOnDelete();
+            // $table->foreignId('user_id')->constrained('users', 'id')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('loan_user_id')->constrained('loan_details', 'id')->cascadeOnUpdate()->cascadeOnDelete();
             $table->date('return_date');
-            $table->string('status')->default(ReturnBookStatus::CHECKED->value);
+            $table->enum('status', ReturnBookStatus::values())->default(ReturnBookStatus::CHECKED->value);
             $table->timestamps();
         });
     }

@@ -2,11 +2,15 @@
 
 namespace App\Enums;
 
-enum ReturnBookStatus: string
+enum Days: string
 {
-    case RETURNED = "Dikembalikan";
-    case CHECKED = "Pengecekan";
-    case COST = "Denda";
+    case MONDAY = 'Senin';
+    case TUESDAY = 'Selasa';
+    case WEDNESDAY = 'Rabu';
+    case THURSDAY = 'Kamis';
+    case FRIDAY = 'Jumat';
+    case SATURDAY = 'Sabtu';
+    case SUNDAY = 'Minggu';
 
     public static function values(): array
     {
