@@ -2,12 +2,11 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -22,11 +21,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
     protected $table = 'users';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
         'name',
         'username',
@@ -36,14 +30,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'phone',
         'avatar',
         'date_of_birth',
-        'address'
+        'address',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'two_factor_secret',
@@ -51,11 +40,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -67,17 +51,19 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function loans(): HasMany
     {
-        return $this->hasMany(Loan::class);
+        return $this->hasMany(Loan::class, 'user_id');
     }
 
-    public function returnBooks(): HasMany
+    public function loanDetails(): HasManyThrough
     {
-        return $this->hasMany(ReturnBook::class);
-    }
-
-    public function fines(): HasMany
-    {
-        return $this->hasMany(Fine::class);
+        return $this->hasManyThrough(
+            LoanDetail::class,
+            Loan::class,
+            'user_id',
+            'loan_id',
+            'id',
+            'id'
+        );
     }
 
     public function books(): HasMany
@@ -85,18 +71,13 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Book::class, 'added_by');
     }
 
-    public function socialmedia(): MorphMany
-    {
-        return $this->morphMany(SocialMedia::class, 'socialable');
-    }
-
-    public function reviews(): HasMany
-    {
-        return $this->hasMany(ReviewBook::class);
-    }
-
     public function bookmarks(): BelongsToMany
     {
         return $this->belongsToMany(Book::class, 'bookmarks', 'user_id', 'book_id');
+    }
+
+    public function socialmedia(): MorphMany
+    {
+        return $this->morphMany(SocialMedia::class, 'socialable');
     }
 }
