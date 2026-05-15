@@ -5,10 +5,8 @@ namespace App\Models;
 use App\Traits\OptimizesImages;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Category extends Model
@@ -32,9 +30,9 @@ class Category extends Model
         return $this->belongsToMany(Book::class, 'book_of_categories', 'category_id', 'book_id');
     }
 
-    public function information(): HasOne
+    public function informations(): HasMany
     {
-        return $this->hasOne(Information::class);
+        return $this->hasMany(Information::class, 'category_id');
     }
 
     protected $casts = [

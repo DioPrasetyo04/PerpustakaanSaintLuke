@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Enums\LoanStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Support\Facades\DB;
 
 class Loan extends Model
@@ -17,15 +20,16 @@ class Loan extends Model
 
     protected $fillable = [
         'user_id',
-        'book_id',
         'loan_code',
         'loan_date',
         'due_date',
+        'status',
     ];
 
     protected $casts = [
         'loan_date' => 'date',
-        'due_date' => 'date'
+        'due_date' => 'date',
+        'status' => LoanStatus::class,
     ];
 
     public function user(): BelongsTo
@@ -33,33 +37,52 @@ class Loan extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function book(): BelongsTo
+    public function loanDetails(): HasMany
     {
-        return $this->belongsTo(Book::class, 'book_id');
+        return $this->hasMany(LoanDetail::class, 'loan_id');
     }
 
-    public function returnBook(): HasOne
+    public function books(): BelongsToMany
     {
-        return $this->hasOne(ReturnBook::class, 'loan_id');
+        return $this->belongsToMany(Book::class, 'loan_details', 'loan_id', 'book_id');
     }
 
+    public function returnBooks(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            ReturnBook::class,
+            LoanDetail::class,
+            'loan_id',
+            'loan_user_id',
+            'id',
+            'id'
+        );
+    }
 
     public static function hasActiveLoan(int $user_id, int $book_id): bool
     {
-        return self::query()->where('user_id', $user_id)->where('book_id', $book_id)->whereDoesntHave('returnBook')->exists();
+        return self::query()
+            ->where('user_id', $user_id)
+            ->whereHas('loanDetails', fn($q) => $q->where('book_id', $book_id)->whereDoesntHave('returnBook'))
+            ->exists();
     }
 
     public static function hasUserActiveLoan(int $user_id): bool
     {
-        return self::query()->where('user_id', $user_id)->whereDoesntHave('returnBook')->exists();
+        return self::query()
+            ->where('user_id', $user_id)
+            ->whereHas('loanDetails', fn($q) => $q->whereDoesntHave('returnBook'))
+            ->exists();
     }
 
     public static function hasActiveLoanBySlug(int $userId, string $slug): bool
     {
         return self::query()
             ->where('user_id', $userId)
-            ->whereDoesntHave('returnBook')
-            ->whereHas('book', fn($q) => $q->where('slug', $slug))
+            ->whereHas('loanDetails', fn($q) => $q
+                ->whereDoesntHave('returnBook')
+                ->whereHas('book', fn($b) => $b->where('slug', $slug))
+            )
             ->exists();
     }
 
@@ -85,7 +108,7 @@ class Loan extends Model
 
     public static function addDamageStock(int $book_id)
     {
-        return Stock::query()->whereHas('book', fn($query) => $query->where('id', $book_id))->increment('damage', 1);
+        return Stock::query()->whereHas('book', fn($query) => $query->where('id', $book_id))->increment('damaged', 1);
     }
 
     public static function rollbacLoanStock(int $bookId)

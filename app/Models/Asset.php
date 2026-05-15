@@ -15,15 +15,14 @@ class Asset extends Model
     protected $table = 'assets';
 
     protected $fillable = [
-        'book_id',
         'type',
         'utility_path',
         'pdf_path',
-        'status'
+        'status',
     ];
 
     protected $casts = [
-        'status' => ConvertStatusTypes::class
+        'status' => ConvertStatusTypes::class,
     ];
 
     public function books(): BelongsToMany

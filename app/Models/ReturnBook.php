@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 class ReturnBook extends Model
 {
@@ -17,9 +18,7 @@ class ReturnBook extends Model
 
     protected $fillable = [
         'return_book_code',
-        'loan_id',
-        'book_id',
-        'user_id',
+        'loan_user_id',
         'return_date',
         'status',
     ];
@@ -29,42 +28,55 @@ class ReturnBook extends Model
         'status' => ReturnBookStatus::class,
     ];
 
+    public function loanDetail(): BelongsTo
+    {
+        return $this->belongsTo(LoanDetail::class, 'loan_user_id');
+    }
+
+    public function loan(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            Loan::class,
+            LoanDetail::class,
+            'id',
+            'id',
+            'loan_user_id',
+            'loan_id'
+        );
+    }
+
+    public function book(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            Book::class,
+            LoanDetail::class,
+            'id',
+            'id',
+            'loan_user_id',
+            'book_id'
+        );
+    }
+
+    public function fine(): HasOne
+    {
+        return $this->hasOne(Fine::class, 'return_book_id');
+    }
+
+    public function returnBookCheck(): HasOne
+    {
+        return $this->hasOne(ReturnBookCheck::class, 'return_book_id');
+    }
+
+    public function review(): HasOne
+    {
+        return $this->hasOne(ReviewBook::class, 'return_book_id');
+    }
+
     public static function checkUserVerified(int $userId)
     {
         return User::query()
             ->where('id', $userId)
             ->whereNotNull('email_verified_at')
             ->exists();
-    }
-
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
-
-    public function loan(): BelongsTo
-    {
-        return $this->belongsTo(Loan::class, 'loan_id');
-    }
-
-    public function book(): BelongsTo
-    {
-        return $this->belongsTo(Book::class, 'book_id');
-    }
-
-    public function fine(): HasOne
-    {
-        return $this->hasOne(Fine::class);
-    }
-
-
-    public function returnBookCheck(): HasOne
-    {
-        return $this->hasOne(ReturnBookCheck::class);
-    }
-
-    public function review(): HasOne
-    {
-        return $this->hasOne(ReviewBook::class);
     }
 }
