@@ -16,7 +16,7 @@ return new class extends Migration
             $table->id();
 
             // Hari announcement
-            $table->enum('day', Days::values())->unique();
+            $table->enum('days', Days::values())->unique();
 
             $table->string('title');
 
