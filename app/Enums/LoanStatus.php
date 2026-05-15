@@ -2,11 +2,11 @@
 
 namespace App\Enums;
 
-enum ReturnBookStatus: string
+enum LoanStatus: string
 {
-    case RETURNED = "Dikembalikan";
-    case CHECKED = "Pengecekan";
-    case COST = "Denda";
+    case LOANED = 'loaned';
+    case PARTIAL_RETURNED = 'partial_returned';
+    case RETURNED = 'returned';
 
     public static function values(): array
     {
