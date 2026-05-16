@@ -9,6 +9,9 @@ enum SocialMedia: string
     case TWITTER = 'twitter';
     case TIKTOK = 'tiktok';
     case WHATSAPP = 'whatsapp';
+    case LINKEDIN = 'linkedin';
+
+    case GMAIL = 'gmail';
 
 
     public function labels(): string
@@ -19,6 +22,8 @@ enum SocialMedia: string
             self::TWITTER => 'Twitter',
             self::TIKTOK => 'Tiktok',
             self::WHATSAPP => 'WhatsApp',
+            self::LINKEDIN => 'Linkedin',
+            self::GMAIL => 'Gmail',
         };
     }
 
@@ -35,6 +40,8 @@ enum SocialMedia: string
             self::TWITTER => '#1DA1F2',
             self::TIKTOK => 'linear-gradient(45deg, #000000, #25F4EE, #FE2C55)',
             self::WHATSAPP => '#25D366',
+            self::LINKEDIN =>  'linear-gradient(45deg, #0077B5, #0A66C2)',
+            self::GMAIL => 'linear-gradient(45deg, #EA4335, #FBBC05, #34A853, #4285F4)',
         };
     }
 
@@ -59,6 +66,63 @@ enum SocialMedia: string
             self::WHATSAPP => '
                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" aria-label="WhatsApp" role="img" viewBox="0 0 512 512" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><rect width="512" height="512" rx="15%" fill="#25d366"></rect><path fill="#25d366" stroke="#ffffff" stroke-width="26" d="M123 393l14-65a138 138 0 1150 47z"></path><path fill="#ffffff" d="M308 273c-3-2-6-3-9 1l-12 16c-3 2-5 3-9 1-15-8-36-17-54-47-1-4 1-6 3-8l9-14c2-2 1-4 0-6l-12-29c-3-8-6-7-9-7h-8c-2 0-6 1-10 5-22 22-13 53 3 73 3 4 23 40 66 59 32 14 39 12 48 10 11-1 22-10 27-19 1-3 6-16 2-18"></path></g></svg>
             ',
+            self::LINKEDIN => '
+                <svg viewBox="0 0 382 382" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#000000">
+                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                    <g id="SVGRepo_iconCarrier">
+                        <path style="fill:#0077B7;" d="M347.445,0H34.555C15.472,0,0,15.472,0,34.555v312.889
+                        C0,366.528,15.472,382,34.555,382h312.889C366.528,382,382,366.528,382,347.445V34.555
+                        C382,15.472,366.528,0,347.445,0z"/>
+
+                        <path style="fill:#FFFFFF;" d="M118.207,329V138.809H54.555V329H118.207z
+                        M86.381,112.828h-0.414c-21.344,0-35.148-14.701-35.148-33.07
+                        c0-18.779,14.221-33.07,35.979-33.07c21.758,0,35.148,14.291,35.562,33.07
+                        C122.36,98.127,108.556,112.828,86.381,112.828z
+                        M329,329V219.521c0-58.65-31.304-85.949-73.073-85.949
+                        c-33.672,0-48.751,18.504-57.184,31.522v-27.049h-63.652
+                        c0.845,17.916,0,190.955,0,190.955h63.652V222.363
+                        c0-5.711,0.414-11.422,2.106-15.5c4.616-11.422,15.134-23.25,32.793-23.25
+                        c23.107,0,32.379,17.539,32.379,43.223V329H329z"/>
+                    </g>
+                </svg>
+            ',
+            self::GMAIL => '
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 24 24"
+     width="16"
+     height="16"
+     fill="none">
+
+    <path
+        d="M20 18H18V9.8L12 14.3L6 9.8V18H4V7L12 13L20 7V18Z"
+        fill="#EA4335"/>
+
+    <path
+        d="M4 7L12 13L20 7"
+        stroke="#EA4335"
+        stroke-width="2"
+        stroke-linejoin="round"/>
+
+    <path
+        d="M4 18V7"
+        stroke="#4285F4"
+        stroke-width="2"
+        stroke-linecap="round"/>
+
+    <path
+        d="M20 18V7"
+        stroke="#34A853"
+        stroke-width="2"
+        stroke-linecap="round"/>
+
+    <path
+        d="M20 7L17 9.3"
+        stroke="#FBBC04"
+        stroke-width="2"
+        stroke-linecap="round"/>
+</svg>
+',
         };
     }
 

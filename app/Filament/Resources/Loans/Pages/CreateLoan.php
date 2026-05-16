@@ -15,38 +15,51 @@ class CreateLoan extends CreateRecord
     protected function beforeCreate(): void
     {
         $userId = $this->data['user_id'] ?? null;
-        $bookId = $this->data['book_id'] ?? null;
+        $details = $this->data['loanDetails'] ?? [];
 
-        if ($userId && Loan::hasActiveLoan($userId, $bookId)) {
-            Notification::make()->icon('heroicon-s-x-circle')->color('danger')->title('Failed')->body('User have loan book')->persistent()->send();
-
-            throw ValidationException::withMessages([
-                'user_id' => 'User masih memiliki pinjaman buku yang belum dikembalikan',
-            ]);
+        if ($userId && ! Loan::checkUserVerified($userId)) {
+            $this->failWith(
+                'user_id',
+                'Email user belum terverifikasi. Verifikasi email terlebih dahulu sebelum melakukan peminjaman.'
+            );
         }
 
-        if ($bookId && !Loan::checkStock($bookId)) {
-            Notification::make()->icon('heroicon-s-x-circle')->color('danger')->title('Failed')->body('Stock buku not available')->persistent()->send();
-
-            throw ValidationException::withMessages([
-                'stock' => 'Stock not available in database',
-            ]);
+        if (empty($details)) {
+            $this->failWith(
+                'loanDetails',
+                'Minimal harus ada 1 buku yang dipinjam.'
+            );
         }
 
-        if ($userId && !Loan::checkUserVerified($userId)) {
-            Notification::make()->icon('heroicon-s-x-circle')->color('danger')->title('Failed')->body('Email User Not Verified, Please Verified Email First!!!')->persistent()->send();
+        foreach ($details as $index => $detail) {
+            $bookId = $detail['book_id'] ?? null;
+            if (! $bookId) {
+                continue;
+            }
 
-            throw ValidationException::withMessages([
-                'user_id' => 'User email not verified, please verified email!!',
-            ]);
+            if ($userId && Loan::hasActiveLoan($userId, $bookId)) {
+                $this->failWith(
+                    "loanDetails.$index.book_id",
+                    'Peminjam masih memiliki pinjaman aktif untuk buku ini yang belum dikembalikan.'
+                );
+            }
+
+            if (! Loan::checkStock($bookId)) {
+                $this->failWith(
+                    "loanDetails.$index.book_id",
+                    'Stok buku tidak tersedia.'
+                );
+            }
         }
     }
 
-    public function afterCreate()
+    public function afterCreate(): void
     {
-        if ($bookId = $this->data['book_id']) {
-            Loan::substractionStock($bookId);
-            Loan::addLoanStock($bookId);
+        foreach ($this->data['loanDetails'] ?? [] as $detail) {
+            if ($bookId = $detail['book_id'] ?? null) {
+                Loan::substractionStock($bookId);
+                Loan::addLoanStock($bookId);
+            }
         }
     }
 
@@ -56,7 +69,20 @@ class CreateLoan extends CreateRecord
             ->icon('heroicon-s-check-circle')
             ->color('success')
             ->title('Berhasil')
-            ->body('Data pinjaman berhasil disimpan')
+            ->body('Data pinjaman berhasil disimpan.')
             ->persistent();
+    }
+
+    protected function failWith(string $field, string $message): void
+    {
+        Notification::make()
+            ->icon('heroicon-s-x-circle')
+            ->color('danger')
+            ->title('Gagal')
+            ->body($message)
+            ->persistent()
+            ->send();
+
+        throw ValidationException::withMessages([$field => $message]);
     }
 }

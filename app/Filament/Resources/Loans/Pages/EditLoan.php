@@ -13,78 +13,79 @@ class EditLoan extends EditRecord
 {
     protected static string $resource = LoanResource::class;
 
-    protected ?int $oldBookId = null;
+    /** @var array<int> */
+    protected array $oldBookIds = [];
 
     protected function beforeSave(): void
     {
         $userId = $this->data['user_id'] ?? null;
-        $bookId = $this->data['book_id'] ?? null;
         $loanId = $this->record->id;
+        $details = $this->data['loanDetails'] ?? [];
 
-        // simpan book lama sebelum update
-        $this->oldBookId = $this->record->book_id;
+        $this->oldBookIds = $this->record->loanDetails()->pluck('book_id')->all();
 
-        // cek loan aktif selain record ini
-        if (
-            $userId && Loan::query()
-            ->where('id', '!=', $loanId)
-            ->where('user_id', $userId)
-            ->whereDoesntHave('returnBook')
-            ->exists()
-        ) {
-            Notification::make()
-                ->danger()
-                ->title('Failed')
-                ->body('User masih memiliki pinjaman buku')
-                ->persistent()
-                ->send();
-
-            throw ValidationException::withMessages([
-                'user_id' => 'User masih memiliki pinjaman buku',
-            ]);
+        if ($userId && ! Loan::checkUserVerified($userId)) {
+            $this->failWith(
+                'user_id',
+                'Email user belum terverifikasi.'
+            );
         }
 
-        // cek email verified
-        if ($userId && !Loan::checkUserVerified($userId)) {
-            Notification::make()
-                ->danger()
-                ->title('Failed')
-                ->body('Email user belum terverifikasi')
-                ->persistent()
-                ->send();
-
-            throw ValidationException::withMessages([
-                'user_id' => 'User email belum diverifikasi',
-            ]);
+        if (empty($details)) {
+            $this->failWith(
+                'loanDetails',
+                'Minimal harus ada 1 buku yang dipinjam.'
+            );
         }
 
-        // cek stock buku baru
-        if ($bookId && !Loan::checkStock($bookId)) {
-            Notification::make()
-                ->danger()
-                ->title('Failed')
-                ->body('Stock buku tidak tersedia')
-                ->persistent()
-                ->send();
+        foreach ($details as $index => $detail) {
+            $bookId = $detail['book_id'] ?? null;
+            if (! $bookId) {
+                continue;
+            }
 
-            throw ValidationException::withMessages([
-                'book_id' => 'Stock buku tidak tersedia',
-            ]);
+            $activeElsewhere = Loan::query()
+                ->where('id', '!=', $loanId)
+                ->where('user_id', $userId)
+                ->whereHas('loanDetails', fn($q) => $q
+                    ->where('book_id', $bookId)
+                    ->whereDoesntHave('returnBook'))
+                ->exists();
+
+            if ($activeElsewhere) {
+                $this->failWith(
+                    "loanDetails.$index.book_id",
+                    'Peminjam masih memiliki pinjaman aktif untuk buku ini di transaksi peminjaman lain.'
+                );
+            }
+
+            if (! \in_array($bookId, $this->oldBookIds, true) && ! Loan::checkStock($bookId)) {
+                $this->failWith(
+                    "loanDetails.$index.book_id",
+                    'Stok buku tidak tersedia.'
+                );
+            }
         }
     }
 
     protected function afterSave(): void
     {
-        $newBookId = $this->data['book_id'];
+        $newBookIds = collect($this->data['loanDetails'] ?? [])
+            ->pluck('book_id')
+            ->filter()
+            ->map(fn($v) => (int) $v)
+            ->all();
 
-        // jika buku diganti
-        if ($this->oldBookId != $newBookId) {
-            // rollback buku lama
-            Loan::rollbacLoanStock($this->oldBookId);
+        $added = array_diff($newBookIds, $this->oldBookIds);
+        $removed = array_diff($this->oldBookIds, $newBookIds);
 
-            // kurangi buku baru
-            Loan::substractionStock($newBookId);
-            Loan::addLoanStock($newBookId);
+        foreach ($removed as $bookId) {
+            Loan::rollbacLoanStock($bookId);
+        }
+
+        foreach ($added as $bookId) {
+            Loan::substractionStock($bookId);
+            Loan::addLoanStock($bookId);
         }
     }
 
@@ -93,13 +94,26 @@ class EditLoan extends EditRecord
         return [
             DeleteAction::make()
                 ->before(function () {
-
-                    if (!$this->record->returnBook()->exists()) {
-                        Loan::rollbacLoanStock(
-                            $this->record->book_id
-                        );
+                    $bookIds = $this->record->loanDetails()
+                        ->whereDoesntHave('returnBook')
+                        ->pluck('book_id');
+                    foreach ($bookIds as $bookId) {
+                        Loan::rollbacLoanStock($bookId);
                     }
                 }),
         ];
+    }
+
+    protected function failWith(string $field, string $message): void
+    {
+        Notification::make()
+            ->icon('heroicon-s-x-circle')
+            ->color('danger')
+            ->title('Gagal')
+            ->body($message)
+            ->persistent()
+            ->send();
+
+        throw ValidationException::withMessages([$field => $message]);
     }
 }
