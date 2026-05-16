@@ -2,15 +2,22 @@
 
 namespace App\Filament\Resources\Books\Schemas;
 
+use App\Enums\SocialMedia;
+use App\Models\Category;
+use App\Models\Publisher;
 use Closure;
+use Filament\Forms\Components\Toggle;
 use Illuminate\Support\HtmlString;
 use App\Enums\AssetTypes;
 use App\Enums\BookStatus;
+use App\Enums\BookType;
 use App\Enums\PublishedBooks;
 use App\Enums\UserGender;
 use App\Models\Author;
 use App\Models\Book;
 use App\Models\Language;
+use App\Models\Type;
+use Filament\Notifications\Notification;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
@@ -27,6 +34,7 @@ use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Utilities\Get;
+use Illuminate\Database\Eloquent\Builder;
 
 class BookForm
 {
@@ -68,13 +76,13 @@ class BookForm
                                     //     ->label('Publication Year')
                                     //     ->displayFormat('Y')
                                     //     ->columnSpan(1),
-                                    DatePicker::make('publication_year')
+                                    TextInput::make('publication_year')
                                         ->label('Publication Year')
-                                        ->default(now())
-                                        // ->format('dddd-MMM')
-                                        ->displayFormat('d F Y')
-                                        ->required()
-                                        ->columnSpan(1),
+                                        ->numeric()
+                                        ->maxValue(date('Y'))
+                                        ->default(date('Y'))
+                                        ->placeholder('2026')
+                                        ->required(),
                                     TextInput::make('isbn')
                                         ->label('ISBN')
                                         ->maxLength(255)
@@ -82,50 +90,175 @@ class BookForm
                                     Select::make('added_by')
                                         ->label('Added By')
                                         ->relationship('addedBy', 'name')
+                                        ->getOptionLabelFromRecordUsing(function ($record) {
+                                            $avatarUrl = $record->avatar ? asset('storage/' . $record->avatar) : null;
+
+                                            $avatar = $avatarUrl
+                                                ? '<img src="' . e($avatarUrl) . '" style="width:22px;height:22px;border-radius:9999px;object-fit:cover;flex-shrink:0;border:1px solid #e5e7eb;vertical-align:middle;" alt="">'
+                                                : '<span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:9999px;background:#dbeafe;color:#1e40af;font-weight:600;font-size:10px;flex-shrink:0;vertical-align:middle;">'
+                                                . e(mb_strtoupper(mb_substr((string) $record->name, 0, 1)))
+                                                . '</span>';
+
+                                            return '<span style="display:inline-flex;align-items:center;gap:8px;">'
+                                                . $avatar
+                                                . '<span style="font-weight:500;color:#111827;">' . e($record->name) . '</span>'
+                                                . '</span>';
+                                        })
+                                        ->allowHtml()
                                         ->preload()
                                         ->dehydrated()
                                         ->default(fn() => auth()->id())
-                                        ->searchable()
+                                        ->searchable(['name', 'username', 'email'])
                                         ->required()
                                         ->columnSpan(1),
                                     Select::make('authors')
                                         ->label('Authors')
-                                        ->relationship('authors', 'name')
+                                        ->relationship(
+                                            name: 'authors',
+                                            titleAttribute: 'name',
+                                            modifyQueryUsing: fn(Builder $query) => $query->whereHas('roles', function ($q) {
+                                                $q->where('name', 'writer');
+                                            }),
+                                        )
+                                        ->getOptionLabelFromRecordUsing(function ($record) {
+                                            $avatarUrl = $record->avatar ? asset('storage/' . $record->avatar) : null;
+
+                                            $avatar = $avatarUrl
+                                                ? '<img src="' . e($avatarUrl) . '" style="width:28px;height:28px;border-radius:9999px;object-fit:cover;flex-shrink:0;border:1px solid #e5e7eb;" alt="">'
+                                                : '<span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:9999px;background:#e5e7eb;color:#374151;font-weight:600;font-size:11px;flex-shrink:0;">'
+                                                . e(mb_strtoupper(mb_substr((string) $record->name, 0, 1)))
+                                                . '</span>';
+
+                                            $username = $record->username ? '@' . $record->username : '';
+
+                                            $verifiedBadge = $record->verified_at
+                                                ? '<span style="font-size:10px;padding:1px 6px;border-radius:9999px;background:#dcfce7;color:#15803d;margin-left:6px;font-weight:500;">Verified</span>'
+                                                : '<span style="font-size:10px;padding:1px 6px;border-radius:9999px;background:#fee2e2;color:#b91c1c;margin-left:6px;font-weight:500;">Unverified</span>';
+
+                                            return new HtmlString(
+                                                '<span style="display:inline-flex;align-items:center;gap:8px;line-height:1.25;">'
+                                                    . $avatar
+                                                    . '<span style="display:inline-flex;flex-direction:column;min-width:0;">'
+                                                    . '<span style="font-weight:600;color:#111827;display:inline-flex;align-items:center;">'
+                                                    . e($record->name) . $verifiedBadge
+                                                    . '</span>'
+                                                    . ($username ? '<span style="font-size:11px;color:#6b7280;">' . e($username) . '</span>' : '')
+                                                    . '</span>'
+                                                    . '</span>'
+                                            );
+                                        })
+                                        ->allowHtml()
                                         ->multiple()
-                                        ->searchable()
+                                        ->searchable(['name', 'username'])
                                         ->preload()
                                         ->required()
-                                        ->createOptionForm([
-                                            Grid::make(3)->schema([
-                                                TextInput::make('name')->live()->afterStateUpdated(function (Set $set, $state) {
-                                                    if (filled($state)) {
-                                                        $set('username', generateUsername($state));
-                                                    } else {
-                                                        $set('username', null);
+                                        ->rules([
+                                            fn(): Closure => function (string $attribute, $value, Closure $fail) {
+                                                if (blank($value)) {
+                                                    return;
+                                                }
+
+                                                $ids = \is_array($value) ? $value : [$value];
+
+                                                $unverified = Author::whereIn('id', $ids)
+                                                    ->whereNull('verified_at')
+                                                    ->pluck('name')
+                                                    ->all();
+
+                                                if (! empty($unverified)) {
+                                                    foreach ($unverified as $name) {
+                                                        $fail("Penulis dengan nama \"{$name}\" belum terverifikasi.");
                                                     }
-                                                })->required(),
-                                                TextInput::make('username')->unique(ignoreRecord: true)->readOnly()->disabled()->dehydrated(),
-                                                PhoneInput::make('phone')
-                                                    ->label('Phone')
-                                                    ->defaultCountry('id')
-                                                    ->separateDialCode()
-                                                    ->showFlags()
-                                                    ->required(),
-                                                Select::make('gender')
-                                                    ->label('Gender')
-                                                    ->options(UserGender::optionViews())
-                                                    ->allowHtml()
-                                                    ->getOptionLabelUsing(fn($value) => UserGender::from($value)->html())
-                                                    ->searchable()
-                                                    ->required(),
-                                                DatePicker::make('date_of_birth')->label('Date Of Birth')->required(),
-                                                Select::make('nationality')->label('Country')->options(countryOptions())->allowHtml()->searchable()->required(),
-                                                FileUpload::make('avatar')->image()->maxSize(2048)->directory('authors')->disk('public')->visibility('public')->columnSpanFull(),
-                                                Textarea::make('bio')->label('Biography')->columnSpanFull(),
-                                                // DatePicker::make('verified_at')->label('Verified At')->displayFormat('Y-m-d')->columnSpanFull(),
-                                            ]),
+                                                }
+                                            },
+                                        ])
+                                        ->createOptionForm([
+                                            Section::make('Author Information')
+                                                ->description('Provide the necessary information for the author.')
+                                                ->schema([
+                                                    Grid::make(2)->schema([
+                                                        TextInput::make('name')->live()->afterStateUpdated(function (Set $set, $state) {
+                                                            if (filled($state)) {
+                                                                $set('username', generateUsername($state));
+                                                            } else {
+                                                                $set('username', null);
+                                                            }
+                                                        })->required(),
+                                                        TextInput::make('username')->unique(ignoreRecord: true)->readOnly()->disabled()->dehydrated(),
+                                                        PhoneInput::make('phone')
+                                                            ->label('Phone')
+                                                            ->defaultCountry('id')
+                                                            ->separateDialCode()
+                                                            ->showFlags()
+                                                            ->required(),
+                                                        Select::make('gender')
+                                                            ->label('Gender')
+                                                            ->options(UserGender::optionViews())
+                                                            ->allowHtml()
+                                                            ->getOptionLabelUsing(fn($value) => UserGender::from($value)->html())
+                                                            ->searchable()
+                                                            ->required(),
+                                                        DatePicker::make('date_of_birth')->label('Date Of Birth')->required(),
+                                                        Select::make('nationality')->label('Country')->options(countryOptions())->allowHtml()->searchable()->required(),
+                                                        RichEditor::make('bio')->label('Biography'),
+                                                        DatePicker::make('verified_at')->label('Verified At')->displayFormat('Y-m-d'),
+                                                        FileUpload::make('avatar')->image()->maxSize(2048)->directory('authors')->disk('public')->visibility('public')->columnSpanFull(),
+                                                    ]),
+                                                ])->columnSpanFull(),
+                                            Section::make('Social Media')->description('Social Media Information of User')->schema([
+                                                Repeater::make('socialmedia')
+                                                    ->relationship()
+                                                    ->schema([
+                                                        Select::make('platform')
+                                                            ->label('Platform')
+                                                            ->options(SocialMedia::options())
+                                                            ->allowHtml()
+                                                            ->getOptionLabelUsing(fn($value) => SocialMedia::from($value)->html())
+                                                            ->searchable()
+                                                            ->required()
+                                                            ->native(false)
+                                                            ->columnSpan(1),
+
+                                                        TextInput::make('url')
+                                                            ->label('URL')
+                                                            ->url()
+                                                            ->columnSpan(1),
+
+                                                        TextInput::make('username')
+                                                            ->label('Username / Text')
+                                                            ->columnSpan(1),
+                                                    ])
+                                                    ->columns(3)
+                                                    ->defaultItems(1)
+                                                    ->minItems(1)
+                                                    ->afterStateHydrated(function ($component, $state) {
+                                                        if (blank($state)) {
+                                                            $component->state([
+                                                                []
+                                                            ]);
+                                                        }
+                                                    })
+                                                    ->addActionLabel('Tambah Social Media')
+                                                    ->reorderable()
+                                                    ->collapsible()
+                                            ])->columnSpanFull()
                                         ])->label('Author')->createOptionUsing(function (array $data) {
-                                            $author = Author::firstOrCreate($data);
+                                            $author = Author::firstOrCreate(
+                                                ['username' => $data['username'] ?? null],
+                                                $data
+                                            );
+
+                                            if (! $author->hasRole('writer')) {
+                                                Notification::make()
+                                                    ->title('Author dibuat, namun belum bisa dipilih')
+                                                    ->body("Author \"{$author->name}\" berhasil dibuat. Sebelum bisa dipilih sebagai penulis buku, tambahkan author ini ke role \"writer\" di menu Roles → Writer → Authors.")
+                                                    ->warning()
+                                                    ->duration(12000)
+                                                    ->send();
+
+                                                return null;
+                                            }
+
                                             return $author->id;
                                         })
                                         ->createOptionModalHeading('Create Author Form')
@@ -140,50 +273,243 @@ class BookForm
                                     Select::make('publisher_id')
                                         ->label('Publisher')
                                         ->relationship('publisher', 'name')
+                                        ->getOptionLabelFromRecordUsing(function ($record) {
+                                            $logoUrl = $record->logo ? asset('storage/' . $record->logo) : null;
+
+                                            $logo = $logoUrl
+                                                ? '<img src="' . e($logoUrl) . '" style="width:22px;height:22px;border-radius:4px;object-fit:cover;flex-shrink:0;border:1px solid #e5e7eb;background:#ffffff;vertical-align:middle;" alt="">'
+                                                : '<span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;background:#fef3c7;color:#92400e;font-weight:700;font-size:11px;flex-shrink:0;vertical-align:middle;">'
+                                                . e(mb_strtoupper(mb_substr((string) $record->name, 0, 1)))
+                                                . '</span>';
+
+                                            return '<span style="display:inline-flex;align-items:center;gap:8px;">'
+                                                . $logo
+                                                . '<span style="font-weight:500;color:#111827;text-transform:capitalize;">' . e($record->name) . '</span>'
+                                                . '</span>';
+                                        })
+                                        ->allowHtml()
+                                        ->searchable(['name', 'email'])
                                         ->preload()
                                         ->required()
-                                        ->columnSpan(1),
+                                        ->columnSpan(1)
+                                        ->createOptionForm([
+                                            Section::make('Publisher Information')
+                                                ->description('Provide the necessary information for the publisher.')
+                                                ->schema([
+                                                    Grid::make(2)->schema([
+                                                        // NAME
+                                                        TextInput::make('name')
+                                                            ->label('Name')
+                                                            ->live()
+                                                            ->maxLength(255)
+                                                            ->afterStateUpdated(function (Set $set, $state) {
+                                                                if (filled($state)) {
+                                                                    $set('slug', generateSlug($state, Publisher::class));
+                                                                } else {
+                                                                    $set('slug', null);
+                                                                }
+                                                            })
+                                                            ->required()
+                                                            ->columnSpan(1),
+
+                                                        // SLUG
+                                                        TextInput::make('slug')
+                                                            ->label('Slug')
+                                                            ->maxLength(255)
+                                                            ->unique(ignoreRecord: true)
+                                                            ->readOnly()
+                                                            ->dehydrated()
+                                                            ->columnSpan(1),
+
+                                                        TextInput::make('email')
+                                                            ->label('Email')
+                                                            ->email()
+                                                            ->maxLength(255)
+                                                            ->columnSpan(1),
+
+                                                        PhoneInput::make('phone')
+                                                            ->label('Phone')
+                                                            ->defaultCountry('id')
+                                                            ->separateDialCode()
+                                                            ->showFlags()
+                                                            ->required()
+                                                            ->columnSpan(1),
+
+
+                                                        Textarea::make('address')
+                                                            ->label('Address')
+                                                            ->maxLength(65535)
+                                                            ->columnSpanFull(),
+
+                                                        // PHOTO (FULL WIDTH)
+                                                        FileUpload::make('logo')
+                                                            ->label('Logo')
+                                                            ->image()
+                                                            ->maxSize(4096) // 4MB
+                                                            ->disk('public')
+                                                            ->visibility('public')
+                                                            ->directory('publishers/logos')
+                                                            ->imageResizeMode('cover')
+                                                            ->columnSpanFull(),
+
+                                                        Toggle::make('is_active')
+                                                            ->label('activate this publisher')
+                                                            ->onIcon('heroicon-m-check-badge')
+                                                            ->offIcon('heroicon-m-x-circle')
+                                                            ->default(true)
+                                                            ->columnSpanFull(),
+
+                                                    ])
+                                                ])->columnSpanFull(),
+                                            Section::make('Social Media')->description('Social Media Information of User')->schema([
+                                                Repeater::make('socialmedia')
+                                                    ->relationship()
+                                                    ->schema([
+                                                        Select::make('platform')
+                                                            ->label('Platform')
+                                                            ->options(SocialMedia::options())
+                                                            ->allowHtml()
+                                                            ->getOptionLabelUsing(fn($value) => SocialMedia::from($value)->html())
+                                                            ->searchable()
+                                                            ->required()
+                                                            ->native(false)
+                                                            ->columnSpan(1),
+
+                                                        TextInput::make('url')
+                                                            ->label('URL')
+                                                            ->url()
+                                                            ->columnSpan(1),
+
+                                                        TextInput::make('username')
+                                                            ->label('Username / Text')
+                                                            ->columnSpan(1),
+                                                    ])
+                                                    ->columns(3)
+                                                    ->defaultItems(1)
+                                                    ->minItems(1)
+                                                    ->afterStateHydrated(function ($component, $state) {
+                                                        if (blank($state)) {
+                                                            $component->state([
+                                                                []
+                                                            ]);
+                                                        }
+                                                    })
+                                                    ->addActionLabel('Tambah Social Media')
+                                                    ->reorderable()
+                                                    ->collapsible()
+                                            ])->columnSpanFull() // 2 kolom utama
+                                        ])->label('Publisher')->createOptionUsing(function (array $data) {
+                                            $publisher = Publisher::firstOrCreate($data);
+                                            return $publisher->id;
+                                        })
+                                        ->createOptionModalHeading('Create Publisher Form'),
                                     Select::make('status')
                                         ->label('Status')
-                                        ->options(
-                                            BookStatus::options()
-                                        )
-                                        ->default(BookStatus::AVAILABLE)
+                                        ->options(BookStatus::optionViews())
+                                        ->getOptionLabelUsing(fn($value) => BookStatus::from($value)->html())
+                                        ->allowHtml()
+                                        ->native(false)
+                                        ->searchable()
+                                        ->default(BookStatus::AVAILABLE->value)
                                         ->columnSpan(1),
-                                    Select::make('language_id')
-                                        ->label('Language')
-                                        ->relationship('language', 'language')
-                                        ->getOptionLabelFromRecordUsing(function ($record) {
-                                            $flagUrl = $record->photo ? asset('storage/' . $record->photo) : null;
+                                    Grid::make(2)->schema([
+                                        Select::make('types')
+                                            ->label('Types')
+                                            ->relationship('types', 'type')
+                                            ->getOptionLabelFromRecordUsing(function ($record) {
+                                                $iconUrl = $record->icon ? asset('storage/' . $record->icon) : null;
+                                                $typeEnum = BookType::tryFrom($record->type);
 
-                                            return
-                                                "<div style='display:flex;align-items:center;gap:6px'>
+                                                $iconHtml = $iconUrl
+                                                    ? '<img src="' . $iconUrl . '" style="width:18px;height:18px;border-radius:3px;object-fit:cover" alt="' . e($record->type) . '">'
+                                                    : ($typeEnum?->icon() ?? '');
+
+                                                $color = $typeEnum?->color() ?? '#374151';
+                                                $label = $typeEnum?->label() ?? ucfirst((string) $record->type);
+
+                                                return new HtmlString(
+                                                    '<span style="display:inline-flex;align-items:center;gap:6px;">'
+                                                        . $iconHtml
+                                                        . '<span style="color:' . $color . ';font-weight:500;text-transform:capitalize;">' . e($label) . '</span>'
+                                                        . '</span>'
+                                                );
+                                            })
+                                            ->allowHtml()
+                                            ->multiple()
+                                            ->preload()
+                                            ->searchable()
+                                            ->required()
+                                            ->columnSpan(1)
+                                            ->createOptionForm([
+                                                Section::make('Type Information')
+                                                    ->description('Choose the type enum and upload its icon.')
+                                                    ->schema([
+                                                        Grid::make(2)->schema([
+                                                            Select::make('type')
+                                                                ->label('Type')
+                                                                ->options(BookType::options())
+                                                                ->allowHtml()
+                                                                ->getOptionLabelUsing(fn($value) => BookType::from($value)->html())
+                                                                ->native(false)
+                                                                ->searchable()
+                                                                ->unique(table: 'types', column: 'type', ignoreRecord: true)
+                                                                ->required()
+                                                                ->columnSpan(1),
+                                                            FileUpload::make('icon')
+                                                                ->label('Icon')
+                                                                ->image()
+                                                                ->maxSize(1024)
+                                                                ->directory('types/icons')
+                                                                ->disk('public')
+                                                                ->visibility('public')
+                                                                ->imageResizeMode('cover')
+                                                                ->columnSpan(1),
+                                                        ]),
+                                                    ])->columnSpanFull(),
+                                            ])
+                                            ->createOptionUsing(function (array $data) {
+                                                $type = Type::firstOrCreate(
+                                                    ['type' => $data['type']],
+                                                    ['icon' => $data['icon'] ?? null]
+                                                );
+
+                                                return $type->id;
+                                            })
+                                            ->createOptionModalHeading('Create Type Form'),
+                                        Select::make('language_id')
+                                            ->label('Language')
+                                            ->relationship('language', 'language')
+                                            ->getOptionLabelFromRecordUsing(function ($record) {
+                                                $flagUrl = $record->photo ? asset('storage/' . $record->photo) : null;
+
+                                                return
+                                                    "<div style='display:flex;align-items:center;gap:6px'>
                                                 " . ($flagUrl ? "<img src='{$flagUrl}' width='20' height='15' style='border-radius:3px' />" : "") . "
                                                 <span>{$record->language}</span>
                                                 </div>";
-                                        })
-                                        ->allowHtml()
-                                        ->searchable()
-                                        ->preload()
-                                        ->required()
-                                        ->createOptionForm([
-                                            Section::make('language')->schema([
-                                                TextInput::make('language')->maxLength(255)->live()->afterStateUpdated(function (Set $set, $state) {
-                                                    if (filled($state)) {
-                                                        $set('code', generateUniqueCode($state, Language::class, 'code'));
-                                                    } else {
-                                                        $set('code', null);
-                                                    }
-                                                })->required()->columnSpan(1),
-                                                TextInput::make('code')->maxLength(255)->unique(ignoreRecord: true)->readOnly()->disabled()->dehydrated(),
-                                                FileUpload::make('photo')->image()->maxSize(2048)->directory('languages')->disk('public')->visibility('public')->columnSpanFull(),
-                                            ])->label('Create Language'),
-                                        ])
-                                        ->createOptionUsing(function (array $data) {
-                                            $language = Language::firstOrCreate($data);
-                                            return $language->id;
-                                        })
-                                        ->columnSpanFull(),
+                                            })
+                                            ->allowHtml()
+                                            ->searchable()
+                                            ->preload()
+                                            ->required()
+                                            ->createOptionForm([
+                                                Section::make('language')->schema([
+                                                    TextInput::make('language')->maxLength(255)->live()->afterStateUpdated(function (Set $set, $state) {
+                                                        if (filled($state)) {
+                                                            $set('code', generateUniqueCode($state, Language::class, 'code'));
+                                                        } else {
+                                                            $set('code', null);
+                                                        }
+                                                    })->required()->columnSpan(1),
+                                                    TextInput::make('code')->maxLength(255)->unique(ignoreRecord: true)->readOnly()->disabled()->dehydrated(),
+                                                    FileUpload::make('photo')->image()->maxSize(2048)->directory('languages')->disk('public')->visibility('public')->columnSpanFull(),
+                                                ])->label('Create Language'),
+                                            ])
+                                            ->createOptionUsing(function (array $data) {
+                                                $language = Language::firstOrCreate($data);
+                                                return $language->id;
+                                            }),
+                                    ])->columnSpanFull(),
                                     FileUpload::make('cover')->image()->disk('public')->directory('books/cover')->maxSize(2048)->columnSpanFull(),
                                     ToggleButtons::make('is_published')->options(PublishedBooks::options())->default(PublishedBooks::PUBLISH->value)->colors([
                                         'Published' => 'success',
@@ -222,7 +548,98 @@ class BookForm
                                         )
                                         ->rules(['required', 'integer'])
                                         ->columnSpan(1),
-                                    Select::make('categories')->relationship('categories', 'name')->multiple()->preload()->searchable()->required()->columnSpan(1),
+                                    Select::make('categories')->relationship('categories', 'name')
+                                        ->getOptionLabelFromRecordUsing(function ($record) {
+                                            $iconUrl = $record->icon ? asset('storage/' . $record->icon) : null;
+
+                                            $icon = $iconUrl
+                                                ? '<img src="' . e($iconUrl) . '" style="width:22px;height:22px;border-radius:4px;object-fit:cover;flex-shrink:0;border:1px solid #e5e7eb;background:#ffffff;" alt="">'
+                                                : '<span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;background:#fce7f3;color:#9d174d;flex-shrink:0;">'
+                                                . '<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+                                                . '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>'
+                                                . '<path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>'
+                                                . '</svg>'
+                                                . '</span>';
+
+                                            return new HtmlString(
+                                                '<span style="display:inline-flex;align-items:center;gap:8px;line-height:1.25;">'
+                                                    . $icon
+                                                    . '<span style="font-weight:500;color:#111827;text-transform:capitalize;">' . e($record->name) . '</span>'
+                                                    . '</span>'
+                                            );
+                                        })
+                                        ->allowHtml()
+                                        ->multiple()
+                                        ->preload()
+                                        ->searchable()
+                                        ->required()
+                                        ->columnSpan(1)
+                                        ->createOptionForm([
+                                            Grid::make(2)->schema([
+
+                                                // NAME
+                                                TextInput::make('name')
+                                                    ->label('Name Of Category')
+                                                    ->live()
+                                                    ->maxLength(255)
+                                                    ->afterStateUpdated(function (Set $set, $state) {
+                                                        if (filled($state)) {
+                                                            $set('slug', generateSlug($state, Category::class));
+                                                        } else {
+                                                            $set('slug', null);
+                                                        }
+                                                    })
+                                                    ->required()
+                                                    ->columnSpan(1),
+
+                                                // SLUG
+                                                TextInput::make('slug')
+                                                    ->label('Slug Of Category')
+                                                    ->maxLength(255)
+                                                    ->unique(ignoreRecord: true)
+                                                    ->readOnly()
+                                                    ->dehydrated()
+                                                    ->columnSpan(1),
+
+                                                // ICON
+                                                FileUpload::make('icon')
+                                                    ->label('Icon Of Categories')
+                                                    ->image()
+                                                    ->maxSize(1024) // 1MB
+                                                    ->directory('categories/icons')
+                                                    ->disk('public')
+                                                    ->visibility('public')
+                                                    ->columnSpanFull(),
+
+                                                // PHOTO (FULL WIDTH)
+                                                FileUpload::make('photo')
+                                                    ->label('Photo Of Categories')
+                                                    ->image()
+                                                    ->maxSize(4096) // 4MB
+                                                    ->disk('public')
+                                                    ->directory('categories/images')
+                                                    ->imageResizeMode('cover')
+                                                    ->visibility('public')
+                                                    ->columnSpanFull(),
+
+                                                // DESCRIPTION (FULL WIDTH)
+                                                RichEditor::make('description')
+                                                    ->label('Description Of Categories')
+                                                    ->columnSpanFull(),
+
+                                                // TOGGLE
+                                                Toggle::make('is_active')
+                                                    ->label('Is Active')
+                                                    ->onIcon('heroicon-m-check-badge')
+                                                    ->offIcon('heroicon-m-x-circle')
+                                                    ->default(true)
+                                                    ->columnSpanFull(),
+                                            ])
+                                        ])->label('Category')->createOptionUsing(function (array $data) {
+                                            $category = Category::firstOrCreate($data);
+                                            return $category->id;
+                                        })
+                                        ->createOptionModalHeading('Create Category Form'),
                                 ])->columns(3),
                         ]),
                     Wizard\Step::make('Asset Books Information')->description('Asset Of Books')
@@ -299,17 +716,45 @@ class BookForm
                                                 }
                                             }
                                         ])
+                                        ->afterStateUpdated(function (Set $set, $state) {
+
+                                            // ketika total diisi maka available otomatis mengikuti
+                                            $set('available', (int) $state);
+
+                                            // reset field lainnya
+                                            $set('loan', 0);
+                                            $set('lost', 0);
+                                            $set('damaged', 0);
+
+                                            // jika total kosong
+                                            if (blank($state)) {
+                                                $set('available', 0);
+                                                $set('loan', 0);
+                                                $set('lost', 0);
+                                                $set('damaged', 0);
+                                            }
+                                        })
                                         ->columnSpanFull(),
 
                                     TextInput::make('available')
                                         ->numeric()
                                         ->required()
-                                        ->live(),
+                                        ->live()
+                                        ->default(0)
+                                        ->readOnly(
+                                            fn(Get $get) =>
+                                            $get('loan') > 0
+                                        )
+                                        ->disabled(
+                                            fn(Get $get) =>
+                                            $get('loan') > 0
+                                        ),
 
                                     TextInput::make('loan')
                                         ->numeric()
                                         ->required()
                                         ->live()
+                                        ->default(0)
                                         ->readOnly(
                                             fn(Get $get) =>
                                             $get('loan') > 0
@@ -323,6 +768,7 @@ class BookForm
                                         ->numeric()
                                         ->required()
                                         ->live()
+                                        ->default(0)
                                         ->readOnly(
                                             fn(Get $get) =>
                                             $get('lost') > 0
@@ -336,6 +782,7 @@ class BookForm
                                         ->numeric()
                                         ->required()
                                         ->live()
+                                        ->default(0)
                                         ->readOnly(
                                             fn(Get $get) =>
                                             $get('damaged') > 0

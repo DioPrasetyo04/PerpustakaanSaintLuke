@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('book_code')->unique();
             $table->string('title');
             $table->string('slug')->unique();
-            $table->date('publication_year')->nullable();
+            $table->year('publication_year')->nullable();
             $table->text('isbn')->nullable();
             $table->text('synopsis')->nullable();
             $table->unsignedBigInteger('number_of_pages')->nullable();

@@ -38,7 +38,7 @@ class Book extends Model
     ];
 
     protected $casts = [
-        'publication_year' => 'date',
+        'publication_year' => 'integer',
         'number_of_pages' => 'integer',
         'price' => 'integer',
         'status' => BookStatus::class,

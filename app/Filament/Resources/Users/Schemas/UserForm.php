@@ -81,12 +81,12 @@ class UserForm
 
                                         TextInput::make('url')
                                             ->label('URL')
-                                            ->url()
                                             ->required()
+                                            ->url()
                                             ->columnSpan(1),
 
                                         TextInput::make('username')
-                                            ->label('Username')
+                                            ->label('Username / Text')
                                             ->columnSpan(1),
                                     ])
                                     ->columns(3)

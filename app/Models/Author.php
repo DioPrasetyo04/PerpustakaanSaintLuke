@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Enums\UserGender;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Spatie\Permission\Traits\HasRoles;
@@ -16,6 +15,8 @@ class Author extends Model
     use HasFactory, HasRoles;
 
     protected $table = 'authors';
+
+    protected $guard_name = 'web';
 
     protected $fillable = [
         'name',
