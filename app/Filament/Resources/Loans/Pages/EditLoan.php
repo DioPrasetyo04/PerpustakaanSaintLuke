@@ -3,7 +3,9 @@
 namespace App\Filament\Resources\Loans\Pages;
 
 use App\Filament\Resources\Loans\LoanResource;
+use App\Models\FineSettings;
 use App\Models\Loan;
+use App\Models\LoanDetail;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
@@ -15,6 +17,35 @@ class EditLoan extends EditRecord
 
     /** @var array<int> */
     protected array $oldBookIds = [];
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $existingDetails = $this->record
+            ->loanDetails()
+            ->get(['id', 'loan_date', 'due_date'])
+            ->keyBy('id');
+
+        $duration = (int) (FineSettings::query()->value('loan_duration_days') ?? 14);
+        $today = now()->startOfDay();
+        $loanDate = $today->toDateString();
+        $dueDate = $today->copy()->addDays($duration)->toDateString();
+
+        if (! empty($data['loanDetails']) && \is_array($data['loanDetails'])) {
+            foreach ($data['loanDetails'] as $key => $detail) {
+                $existing = $existingDetails->get($key);
+
+                if ($existing) {
+                    $data['loanDetails'][$key]['loan_date'] = $existing->loan_date?->toDateString();
+                    $data['loanDetails'][$key]['due_date'] = $existing->due_date?->toDateString();
+                } else {
+                    $data['loanDetails'][$key]['loan_date'] = $loanDate;
+                    $data['loanDetails'][$key]['due_date'] = $dueDate;
+                }
+            }
+        }
+
+        return $data;
+    }
 
     protected function beforeSave(): void
     {

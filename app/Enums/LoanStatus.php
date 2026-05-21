@@ -5,7 +5,7 @@ namespace App\Enums;
 enum LoanStatus: string
 {
     case LOANED = 'loaned';
-    case PARTIAL_RETURNED = 'partial_returned';
+    case PARTIAL_RETURNED = 'partial returned';
     case RETURNED = 'returned';
 
     public static function values(): array

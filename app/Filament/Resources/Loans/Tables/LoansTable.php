@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Loans\Tables;
 
+use App\Enums\LoanBookStatus;
 use App\Enums\LoanStatus;
 use App\Filament\Resources\ReturnBooks\ReturnBooksResource;
 use App\Models\Loan;
@@ -9,7 +10,9 @@ use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -25,10 +28,28 @@ class LoansTable
                     ->sortable()
                     ->copyable(),
 
+                ImageColumn::make('user.avatar')
+                    ->label('Avatar Peminjam')
+                    ->disk('public')
+                    ->imageSize(50)
+                    ->circular()
+                    ->stacked()
+                    ->overlap(0)
+                    ->ring(2),
+
                 TextColumn::make('user.name')
                     ->label('Peminjam')
                     ->searchable()
                     ->sortable(),
+
+                ImageColumn::make('loanDetails.book.cover')
+                    ->label('Cover Book')
+                    ->disk('public')
+                    ->imageSize(50)
+                    ->circular()
+                    ->stacked()
+                    ->overlap(0)
+                    ->ring(2),
 
                 TextColumn::make('loanDetails.book.title')
                     ->label('Buku Dipinjam')
@@ -38,6 +59,26 @@ class LoansTable
                     ->limitList(3)
                     ->expandableLimitedList(),
 
+                TextColumn::make('loanDetails.status')
+                    ->label('Status Per Buku')
+                    ->badge()
+                    ->listWithLineBreaks()
+                    ->limitList(3)
+                    ->expandableLimitedList()
+                    ->formatStateUsing(fn($state) => $state instanceof LoanBookStatus
+                        ? $state->label()
+                        : (LoanBookStatus::tryFrom((string) $state)?->label() ?? (string) $state))
+                    ->color(fn($state) => match (LoanBookStatus::tryFrom((string) ($state instanceof \BackedEnum ? $state->value : $state))) {
+                        LoanBookStatus::BORROWED => 'warning',
+                        LoanBookStatus::RETURNED => 'success',
+                        default => 'gray',
+                    })
+                    ->icon(fn($state) => match (LoanBookStatus::tryFrom((string) ($state instanceof \BackedEnum ? $state->value : $state))) {
+                        LoanBookStatus::BORROWED => 'heroicon-s-book-open',
+                        LoanBookStatus::RETURNED => 'heroicon-s-check-circle',
+                        default => 'heroicon-s-question-mark-circle',
+                    }),
+
                 TextColumn::make('loan_details_count')
                     ->counts('loanDetails')
                     ->label('Total Buku')
@@ -46,15 +87,23 @@ class LoansTable
                     ->alignCenter()
                     ->sortable(),
 
-                TextColumn::make('loan_date')
+                TextColumn::make('loanDetails.loan_date')
                     ->label('Tanggal Pinjam')
                     ->date()
-                    ->sortable(),
+                    ->badge()
+                    ->color('gray')
+                    ->listWithLineBreaks()
+                    ->limitList(3)
+                    ->expandableLimitedList(),
 
-                TextColumn::make('due_date')
+                TextColumn::make('loanDetails.due_date')
                     ->label('Jatuh Tempo')
                     ->date()
-                    ->sortable(),
+                    ->badge()
+                    ->color('gray')
+                    ->listWithLineBreaks()
+                    ->limitList(3)
+                    ->expandableLimitedList(),
 
                 TextColumn::make('status')
                     ->label('Status Pinjaman')
@@ -79,12 +128,13 @@ class LoansTable
                 //
             ])
             ->recordActions([
+                ViewAction::make(),
                 EditAction::make(),
                 Action::make('return_book')
                     ->label('Pengembalian Buku')
                     ->icon(Heroicon::OutlinedArrowUturnLeft)
                     ->color('success')
-                    ->url(fn($record) => ReturnBooksResource::getUrl('create', ['user_id' => $record->user_id]))
+                    ->url(fn($record) => ReturnBooksResource::getUrl('create', ['loan_id' => $record->id]))
                     ->visible(fn($record) => $record->loanDetails()->whereDoesntHave('returnBook')->exists()),
                 DeleteAction::make()
                     ->before(function ($record) {

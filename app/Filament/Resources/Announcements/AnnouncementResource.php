@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Announcements;
 
+use App\Enums\Days;
 use App\Filament\Resources\Announcements\Pages\CreateAnnouncement;
 use App\Filament\Resources\Announcements\Pages\EditAnnouncement;
 use App\Filament\Resources\Announcements\Pages\ListAnnouncements;
@@ -18,9 +19,17 @@ class AnnouncementResource extends Resource
 {
     protected static ?string $model = Announcement::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::Megaphone;
 
-    protected static ?string $recordTitleAttribute = 'Announcement';
+    protected static string|\UnitEnum|null $navigationGroup = 'Informasi';
+
+    protected static ?int $navigationSort = 31;
+
+    protected static ?string $recordTitleAttribute = 'title';
+
+    protected static ?string $modelLabel = 'Announcement';
+
+    protected static ?string $pluralModelLabel = 'Announcements';
 
     public static function form(Schema $schema): Schema
     {
@@ -34,25 +43,29 @@ class AnnouncementResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
+    /**
+     * Allow creation until all 7 days are covered (unique constraint per day).
+     */
     public static function canCreate(): bool
     {
-        return !Announcement::query()
-            ->where('is_active', true)
+        $existingDays = Announcement::query()
             ->withoutTrashed()
-            ->exists();
+            ->pluck('days')
+            ->map(fn($d) => $d instanceof Days ? $d->value : $d)
+            ->toArray();
+
+        return count($existingDays) < count(Days::cases());
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => ListAnnouncements::route('/'),
+            'index'  => ListAnnouncements::route('/'),
             'create' => CreateAnnouncement::route('/create'),
-            'edit' => EditAnnouncement::route('/{record}/edit'),
+            'edit'   => EditAnnouncement::route('/{record}/edit'),
         ];
     }
 }

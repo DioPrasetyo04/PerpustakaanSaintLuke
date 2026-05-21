@@ -7,35 +7,39 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
 
 class RouteAccessesTable
 {
     public static function configure(Table $table): Table
     {
         return $table
-
             ->columns([
                 TextColumn::make('route_name')
                     ->label('Route Name')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->icon('heroicon-m-link')
+                    ->copyable(),
 
-                TextColumn::make('role.name')
-                    ->label('Role')->searchable()->sortable(),
+                TextColumn::make('role_ids')
+                    ->label('Roles')
+                    ->badge()
+                    ->state(fn ($record) =>
+                        Role::whereIn('id', $record->role_ids ?? [])->pluck('name')->all()
+                    )
+                    ->color('info'),
 
-                TextColumn::make('permission.name')
-                    ->label('Permissions')->searchable()->sortable(),
+                TextColumn::make('permission_ids')
+                    ->label('Permissions')
+                    ->state(fn ($record) => count($record->permission_ids ?? []) . ' permission')
+                    ->badge()
+                    ->color('success'),
             ])
-
-            ->filters([
-                //
-            ])
-
+            ->filters([])
             ->recordActions([
                 EditAction::make(),
             ])
-
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

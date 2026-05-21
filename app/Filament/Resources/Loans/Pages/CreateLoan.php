@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Loans\Pages;
 
 use App\Filament\Resources\Loans\LoanResource;
+use App\Models\FineSettings;
 use App\Models\Loan;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
@@ -11,6 +12,23 @@ use Illuminate\Validation\ValidationException;
 class CreateLoan extends CreateRecord
 {
     protected static string $resource = LoanResource::class;
+
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        $duration = (int) (FineSettings::query()->value('loan_duration_days') ?? 14);
+        $today = now()->startOfDay();
+        $loanDate = $today->toDateString();
+        $dueDate = $today->copy()->addDays($duration)->toDateString();
+
+        if (! empty($data['loanDetails']) && \is_array($data['loanDetails'])) {
+            foreach ($data['loanDetails'] as $index => $detail) {
+                $data['loanDetails'][$index]['loan_date'] = $loanDate;
+                $data['loanDetails'][$index]['due_date'] = $dueDate;
+            }
+        }
+
+        return $data;
+    }
 
     protected function beforeCreate(): void
     {

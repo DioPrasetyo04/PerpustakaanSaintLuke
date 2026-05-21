@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\UserApprovalController;
 use App\Http\Controllers\AssetController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HistoryController;
@@ -104,6 +105,15 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/assets/stream/{id}', [AssetController::class, 'stream'])
     ->name('assets.stream');
+
+Route::middleware('signed')->prefix('admin/users')->name('admin.users.')->group(function () {
+    Route::get('/{user}/approve', [UserApprovalController::class, 'approve'])
+        ->withTrashed()
+        ->name('approve');
+    Route::get('/{user}/reject', [UserApprovalController::class, 'reject'])
+        ->withTrashed()
+        ->name('reject');
+});
 
 require __DIR__ . '/auth.php';
 

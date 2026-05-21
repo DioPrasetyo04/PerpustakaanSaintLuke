@@ -1,0 +1,36 @@
+/* ── Katalog Buku ── */
+.fi-sidebar-item:has(a[href*="/admin/books"]) .fi-sidebar-item-icon         { color: #2563eb; }
+.fi-sidebar-item:has(a[href*="/admin/authors"]) .fi-sidebar-item-icon       { color: #7c3aed; }
+.fi-sidebar-item:has(a[href*="/admin/categories"]) .fi-sidebar-item-icon    { color: #16a34a; }
+.fi-sidebar-item:has(a[href*="/admin/publishers"]) .fi-sidebar-item-icon    { color: #ea580c; }
+
+/* ── Peminjaman ── */
+.fi-sidebar-item:has(a[href*="/admin/loans"]) .fi-sidebar-item-icon         { color: #4f46e5; }
+.fi-sidebar-item:has(a[href*="/admin/return-books"]) .fi-sidebar-item-icon  { color: #0d9488; }
+
+/* ── Keuangan ── */
+.fi-sidebar-item:has(a[href*="/admin/fine-settings"]) .fi-sidebar-item-icon { color: #475569; }
+.fi-sidebar-item:has(a[href*="/admin/fines"]) .fi-sidebar-item-icon         { color: #dc2626; }
+
+/* ── Informasi ── */
+.fi-sidebar-item:has(a[href*="/admin/announcements"]) .fi-sidebar-item-icon { color: #d97706; }
+.fi-sidebar-item:has(a[href*="/admin/information"]) .fi-sidebar-item-icon   { color: #0284c7; }
+
+/* ── Kunjungan ── */
+.fi-sidebar-item:has(a[href*="/admin/visits"]) .fi-sidebar-item-icon        { color: #059669; }
+
+/* ── Manajemen Pengguna ── */
+.fi-sidebar-item:has(a[href*="/admin/users"]) .fi-sidebar-item-icon         { color: #1d4ed8; }
+.fi-sidebar-item:has(a[href*="/admin/roles"]) .fi-sidebar-item-icon         { color: #6d28d9; }
+.fi-sidebar-item:has(a[href*="/admin/permissions"]) .fi-sidebar-item-icon   { color: #c2410c; }
+.fi-sidebar-item:has(a[href*="/admin/route-accesses"]) .fi-sidebar-item-icon{ color: #b91c1c; }
+
+/* ── Dashboard ── */
+.fi-sidebar-item:has(a[href$="/admin"]) .fi-sidebar-item-icon                      { color: #d97706; }
+
+/* ── Laporan ── */
+.fi-sidebar-item:has(a[href*="/admin/laporan-kunjungan"]) .fi-sidebar-item-icon   { color: #059669; }
+.fi-sidebar-item:has(a[href*="/admin/laporan-peminjaman"]) .fi-sidebar-item-icon  { color: #2563eb; }
+.fi-sidebar-item:has(a[href*="/admin/laporan-pengembalian"]) .fi-sidebar-item-icon{ color: #0d9488; }
+.fi-sidebar-item:has(a[href*="/admin/laporan-buku"]) .fi-sidebar-item-icon        { color: #7c3aed; }
+.fi-sidebar-item:has(a[href*="/admin/laporan-denda"]) .fi-sidebar-item-icon       { color: #dc2626; }

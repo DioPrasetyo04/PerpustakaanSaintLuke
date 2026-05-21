@@ -6,6 +6,7 @@ use App\Enums\PaymentStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\User;
 
 class Fine extends Model
 {
@@ -36,6 +37,11 @@ class Fine extends Model
     public function returnBook(): BelongsTo
     {
         return $this->belongsTo(ReturnBook::class, 'return_book_id');
+    }
+
+    public function getUserAttribute(): ?User
+    {
+        return $this->returnBook?->loanDetail?->loan?->user;
     }
 
     public static function hasUnpaidFine(int $userId): bool

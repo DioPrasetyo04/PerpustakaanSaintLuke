@@ -19,13 +19,28 @@ enum Days: string
 
     public function label(): string
     {
-        return strtoupper($this->name);
+        return $this->value;
     }
 
     public static function options(): array
     {
         return collect(self::cases())->mapWithKeys(fn($item) => [
-            $item->value => $item->label()
+            $item->value => $item->value
         ])->toArray();
+    }
+
+    public static function today(): self
+    {
+        $map = [
+            'Sunday'    => self::SUNDAY,
+            'Monday'    => self::MONDAY,
+            'Tuesday'   => self::TUESDAY,
+            'Wednesday' => self::WEDNESDAY,
+            'Thursday'  => self::THURSDAY,
+            'Friday'    => self::FRIDAY,
+            'Saturday'  => self::SATURDAY,
+        ];
+
+        return $map[now()->dayName];
     }
 }

@@ -96,30 +96,37 @@ class HistoryService
 
     private function transformLoan($loan): array
     {
+        $detail = $loan->loanDetails->first();
+        $book = $detail?->book;
+
         $today = Carbon::today();
-        $dueDate = Carbon::parse($loan->due_date);
-        $status = $today->lte($dueDate) ? 'active' : 'overdue';
+        $dueDate = $detail?->due_date ? Carbon::parse($detail->due_date) : null;
+        $loanDate = $detail?->loan_date ? Carbon::parse($detail->loan_date) : null;
+
+        $status = ($dueDate && $today->lte($dueDate)) ? 'active' : 'overdue';
 
         return [
             'id' => (string) $loan->id,
             'loan_code' => $loan->loan_code,
-            'book_title' => $loan->book?->title,
-            'slug' => $loan->book?->slug,
-            'author' => $loan->book?->authors->pluck('name')->join(', '),
-            'cover_url' => $loan->book?->cover ? Storage::url($loan->book->cover) : null,
-            'borrow_date' => Carbon::parse($loan->loan_date)->toDateString(),
-            'due_date' => $dueDate->toDateString(),
+            'book_title' => $book?->title,
+            'slug' => $book?->slug,
+            'author' => $book?->authors->pluck('name')->join(', '),
+            'cover_url' => $book?->cover ? Storage::url($book->cover) : null,
+            'borrow_date' => $loanDate?->toDateString(),
+            'due_date' => $dueDate?->toDateString(),
             'status' => $status,
         ];
     }
 
     private function transformReturn($return): array
     {
-        $loan = $return->loan;
+        $detail = $return->loanDetail;
+        $book = $detail?->book;
         $check = $return->returnBookCheck;
 
         $returnDate = $return->return_date ? Carbon::parse($return->return_date) : null;
-        $dueDate = $loan ? Carbon::parse($loan->due_date) : null;
+        $dueDate = $detail?->due_date ? Carbon::parse($detail->due_date) : null;
+        $loanDate = $detail?->loan_date ? Carbon::parse($detail->loan_date) : null;
 
         $status = 'on-time';
         if ($returnDate && $dueDate && $returnDate->gt($dueDate)) {
@@ -129,11 +136,11 @@ class HistoryService
         return [
             'id' => (string) $return->id,
             'return_book_code' => $return->return_book_code,
-            'book_title' => $return->book?->title,
-            'slug' => $return->book?->slug,
-            'author' => $return->book?->authors->pluck('name')->join(', '),
-            'cover_url' => $return->book?->cover ? Storage::url($return->book->cover) : null,
-            'borrow_date' => $loan ? Carbon::parse($loan->loan_date)->toDateString() : null,
+            'book_title' => $book?->title,
+            'slug' => $book?->slug,
+            'author' => $book?->authors->pluck('name')->join(', '),
+            'cover_url' => $book?->cover ? Storage::url($book->cover) : null,
+            'borrow_date' => $loanDate?->toDateString(),
             'return_date' => $returnDate?->toDateString(),
             'due_date' => $dueDate?->toDateString(),
             'condition' => $check?->condition?->value,
@@ -144,10 +151,10 @@ class HistoryService
     private function transformFine($fine): array
     {
         $returnBook = $fine->returnBook;
-        $loan = $returnBook?->loan;
-        $book = $returnBook?->book;
+        $detail = $returnBook?->loanDetail;
+        $book = $detail?->book;
 
-        $dueDate = $loan ? Carbon::parse($loan->due_date) : null;
+        $dueDate = $detail?->due_date ? Carbon::parse($detail->due_date) : null;
         $returnDate = $returnBook?->return_date ? Carbon::parse($returnBook->return_date) : null;
 
         $referenceDate = $returnDate ?? Carbon::today();

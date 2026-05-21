@@ -4,14 +4,9 @@ namespace App\Repositories;
 
 use App\Interface\LoanInterfaceRepositories;
 use App\Models\Book;
-use App\Models\FineSettings;
 use App\Models\Loan;
-use Exception;
-use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
-use Override;
+
 
 class LoanRepositories implements LoanInterfaceRepositories
 {
@@ -41,31 +36,34 @@ class LoanRepositories implements LoanInterfaceRepositories
             ->firstOrFail();
     }
 
-    public function createLoan(array $data)
+    public function createLoan(array $loanData, array $detailData)
     {
-        return Loan::create($data);
+        return DB::transaction(function () use ($loanData, $detailData) {
+            $loan = Loan::create($loanData);
+            $loan->loanDetails()->create($detailData);
+
+            return $loan->load('loanDetails.book');
+        });
     }
 
     public function getLoansByUser(int $userId, array $filters, int $perPage, int $page)
     {
         return Loan::query()
-            ->select([
-                'user_id',
-                'book_id',
-                'loan_code',
-                'loan_date',
-                'due_date',
-                'created_at',
-                'updated_at'
+            ->select(['id', 'user_id', 'loan_code', 'status', 'created_at', 'updated_at'])
+            ->with([
+                'loanDetails:id,loan_id,book_id,loan_date,due_date,status',
+                'loanDetails.book:id,title,cover,slug',
+                'loanDetails.book.authors:id,name,username,avatar',
+                'user:id,name,email,username,avatar',
             ])
-            ->with(['book:id,title,cover', 'book.authors:id,name,username,avatar', 'user:id,name,email,username,avatar'])
             ->where('user_id', $userId)
             ->when($filters['search'] ?? null, function ($query, $search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('loan_code', 'REGEXP', $search)
-                        ->orWhere('loan_date', 'REGEXP', $search)
-                        ->orWhere('due_date', 'REGEXP', $search)
-                        ->orWhereHas('book', fn($q) => $q->where('title', 'REGEXP', $search))
+                        ->orWhereHas('loanDetails', fn($q) => $q
+                            ->where('loan_date', 'REGEXP', $search)
+                            ->orWhere('due_date', 'REGEXP', $search))
+                        ->orWhereHas('loanDetails.book', fn($q) => $q->where('title', 'REGEXP', $search))
                         ->orWhereHas('user', fn($q) => $q->where('name', 'REGEXP', $search));
                 });
             })
@@ -73,23 +71,18 @@ class LoanRepositories implements LoanInterfaceRepositories
                 ($filters['field'] ?? null) && ($filters['direction'] ?? null),
                 fn($query) => $query->orderBy($filters['field'], $filters['direction'])
             )
-            ->withAvg('book.reviews as avg_rating', 'rating')
             ->paginate($perPage, ['*'], 'loans_page', $page);
     }
     public function getLoanDetail(int $userId, string $loanCode)
     {
         return Loan::query()
-            ->select([
-                'id',
-                'user_id',
-                'book_id',
-                'loan_code',
-                'loan_date',
-                'due_date',
-                'created_at',
-                'updated_at'
+            ->select(['id', 'user_id', 'loan_code', 'status', 'created_at', 'updated_at'])
+            ->with([
+                'loanDetails:id,loan_id,book_id,loan_date,due_date,status',
+                'loanDetails.book:id,title,cover,slug',
+                'loanDetails.book.authors:id,name,username,avatar',
+                'user:id,name,email,username,avatar',
             ])
-            ->with(['book:id,title,cover', 'book.authors:id,name,username,avatar', 'user:id,name,email,username,avatar'])
             ->where('user_id', $userId)
             ->where('loan_code', $loanCode)
             ->firstOrFail();

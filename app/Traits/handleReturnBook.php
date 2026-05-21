@@ -19,8 +19,8 @@ trait HandleReturnBook
             $fineSetting = FineSettings::first();
 
             $record->refresh()->load([
-                'book',
-                'loan'
+                'loanDetail.book',
+                'loanDetail.loan.user',
             ]);
 
             $condition = ReturnBookCheck::where('return_book_id', $record->id)
@@ -30,8 +30,13 @@ trait HandleReturnBook
                 return;
             }
 
-            $book = $record->book;
-            $loan = $record->loan;
+            $loanDetail = $record->loanDetail;
+            $book = $loanDetail?->book;
+            $loan = $loanDetail?->loan;
+
+            if (! $loanDetail || ! $book) {
+                return;
+            }
 
             /*
             |--------------------------------------------------------------------------
@@ -88,8 +93,10 @@ trait HandleReturnBook
             $lateFee = 0;
             $otherFee = 0;
 
-            if ($record->return_date > $loan->due_date) {
-                $daysLate = $loan->due_date->diffInDays($record->return_date);
+            $dueDate = $loanDetail->due_date;
+
+            if ($dueDate && $record->return_date > $dueDate) {
+                $daysLate = $dueDate->diffInDays($record->return_date);
                 $lateFee = $daysLate * $fineSetting->late_fee_per_day;
             }
 
@@ -110,7 +117,6 @@ trait HandleReturnBook
             Fine::updateOrCreate(
                 ['return_book_id' => $record->id],
                 [
-                    'user_id' => $record->user_id,
                     'late_fee' => $lateFee,
                     'other_fee' => $otherFee,
                     'total_fee' => $total,

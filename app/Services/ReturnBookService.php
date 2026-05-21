@@ -36,13 +36,14 @@ class ReturnBookService
         $book = $this->returnBookService->findBookBySlug($slug);
 
         $loan = $this->loanService->getLoanDetail($userId, $loanCode);
+        $loanDetail = $this->resolveLoanDetailForBook($loan, $book->id);
 
-        $loan = transformData($loan, LoanResource::class);
+        $loanArray = transformData($loan, LoanResource::class);
 
         $fineSetting = FineSettings::checkSettings();
 
         $today = Carbon::now();
-        $dueDate = Carbon::parse($loan['due_date']);
+        $dueDate = Carbon::parse($loanDetail->due_date);
 
         $lateDays = 0;
         $lateFee = 0;
@@ -54,7 +55,7 @@ class ReturnBookService
 
         return [
             'book' => transformData($book, BookResource::class),
-            'loan' => $loan,
+            'loan' => $loanArray,
             'late_days' => $lateDays,
             'late_fee' => $lateFee,
             'total_fee' => $lateFee,
@@ -65,20 +66,21 @@ class ReturnBookService
     {
         return DB::transaction(function () use ($data, $userId, $slug) {
             $loan = $this->loanService->getLoanDetail($userId, $data['loan_code']);
+            $book = $this->returnBookService->findBookBySlug($slug);
+            $loanDetail = $this->resolveLoanDetailForBook($loan, $book->id);
 
-            if ($loan->returnBook) {
+            if ($loanDetail->returnBook) {
                 throw new BusinessException('return.has_return_book');
             }
 
             $condition = $data['condition'] ?? BookCondition::GOOD->value;
 
-            $book = $this->returnBookService->findBookBySlug($slug);
             $fineSetting = FineSettings::checkSettings();
 
-            $this->validateReturnBook($userId, $loan->book_id);
+            $this->validateReturnBook($userId, $loanDetail->book_id);
 
             $today = Carbon::now();
-            $dueDate = Carbon::parse($loan->due_date);
+            $dueDate = Carbon::parse($loanDetail->due_date);
 
             $lateDays = 0;
             $lateFee = 0;
@@ -91,11 +93,11 @@ class ReturnBookService
             $otherFee = 0;
 
             if ($condition === BookCondition::DAMAGED->value) {
-                $otherFee = $fineSetting->damage_discount_type === DiscountType::PERCENTAGE->value ? ($fineSetting->damage_fee_book * $book->price) / 100 : $fineSetting->damage_fee_book;
+                $otherFee = $fineSetting->damage_discount_type === DiscountType::PERCENTAGE ? ($fineSetting->damage_fee_book * $book->price) / 100 : $fineSetting->damage_fee_book;
             }
 
             if ($condition === BookCondition::LOST->value) {
-                $otherFee = $fineSetting->lost_discount_type === DiscountType::PERCENTAGE->value ? ($fineSetting->lost_fee_book * $book->price) / 100 :  $fineSetting->lost_fee_book;
+                $otherFee = $fineSetting->lost_discount_type === DiscountType::PERCENTAGE ? ($fineSetting->lost_fee_book * $book->price) / 100 :  $fineSetting->lost_fee_book;
             }
 
             $totalFee = $lateFee + $otherFee;
@@ -104,9 +106,7 @@ class ReturnBookService
 
             $returnBook = $this->returnBookService->createReturnBook([
                 'return_book_code' => generateUniqueCode('return_book', ReturnBook::class, 'return_book_code'),
-                'loan_id' => $loan->id,
-                'book_id' => $loan->book_id,
-                'user_id' => $userId,
+                'loan_user_id' => $loanDetail->id,
                 'return_date' => $today,
                 'status' => $status
             ]);
@@ -124,15 +124,14 @@ class ReturnBookService
             ]);
 
             match ($condition) {
-                BookCondition::GOOD->value => ReturnBookCheck::addReturnStock($loan->book_id),
-                BookCondition::DAMAGED->value => ReturnBookCheck::addDamagedStock($loan->book_id),
-                BookCondition::LOST->value => ReturnBookCheck::addLostStock($loan->book_id),
+                BookCondition::GOOD->value => ReturnBookCheck::addReturnStock($loanDetail->book_id),
+                BookCondition::DAMAGED->value => ReturnBookCheck::addDamagedStock($loanDetail->book_id),
+                BookCondition::LOST->value => ReturnBookCheck::addLostStock($loanDetail->book_id),
             };
 
             if ($totalFee > 0) {
                 $this->returnBookService->createFinePayment([
                     'return_book_id' => $returnBook->id,
-                    'user_id' => $userId,
                     'late_fee' => $lateFee,
                     'other_fee' => $otherFee,
                     'total_fee' => $totalFee,
@@ -142,6 +141,19 @@ class ReturnBookService
             }
             return $returnBook;
         });
+    }
+
+    private function resolveLoanDetailForBook($loan, int $bookId)
+    {
+        $loan->loadMissing(['loanDetails.returnBook', 'loanDetails.book']);
+
+        $detail = $loan->loanDetails->firstWhere('book_id', $bookId);
+
+        if (! $detail) {
+            throw new BusinessException('return.loan_detail_not_found', 404);
+        }
+
+        return $detail;
     }
 
     public function createReviewBook(array $data)

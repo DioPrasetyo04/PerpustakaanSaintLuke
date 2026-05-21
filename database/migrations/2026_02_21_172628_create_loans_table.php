@@ -16,8 +16,6 @@ return new class extends Migration
             $table->id();
             $table->string('loan_code')->unique();
             $table->foreignId('user_id')->constrained('users', 'id')->cascadeOnUpdate()->cascadeOnDelete();
-            $table->date('loan_date');
-            $table->date('due_date');
             $table->enum('status', LoanStatus::values())->default(LoanStatus::LOANED->value);
             $table->timestamps();
         });

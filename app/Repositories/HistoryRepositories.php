@@ -58,32 +58,35 @@ class HistoryRepositories implements HistoryInterfaceRepositories
             ->select([
                 'loans.id',
                 'loans.user_id',
-                'loans.book_id',
                 'loans.loan_code',
-                'loans.loan_date',
-                'loans.due_date',
+                'loans.status',
                 'loans.created_at',
             ])
             ->with([
-                'book:id,title,slug,cover',
-                'book.authors:id,name,username,avatar',
+                'loanDetails:id,loan_id,book_id,loan_date,due_date,status',
+                'loanDetails.book:id,title,slug,cover',
+                'loanDetails.book.authors:id,name,username,avatar',
             ])
             ->where('loans.user_id', $userId)
-            ->whereDoesntHave('returnBook')
+            ->whereHas('loanDetails', fn($q) => $q->whereDoesntHave('returnBook'))
             ->when($search, function ($query, $value) {
                 $query->where(function ($q) use ($value) {
                     $q->where('loans.loan_code', 'LIKE', "%{$value}%")
-                        ->orWhereHas('book', fn($b) => $b->where('title', 'LIKE', "%{$value}%"))
-                        ->orWhereHas('book.authors', fn($a) => $a->where('name', 'LIKE', "%{$value}%"));
+                        ->orWhereHas('loanDetails.book', fn($b) => $b->where('title', 'LIKE', "%{$value}%"))
+                        ->orWhereHas('loanDetails.book.authors', fn($a) => $a->where('name', 'LIKE', "%{$value}%"));
                 });
             })
             ->when($status === 'active', function ($query) {
-                $query->whereDate('loans.due_date', '>=', now()->toDateString());
+                $query->whereHas('loanDetails', fn($q) => $q
+                    ->whereDoesntHave('returnBook')
+                    ->whereDate('due_date', '>=', now()->toDateString()));
             })
             ->when($status === 'overdue', function ($query) {
-                $query->whereDate('loans.due_date', '<', now()->toDateString());
+                $query->whereHas('loanDetails', fn($q) => $q
+                    ->whereDoesntHave('returnBook')
+                    ->whereDate('due_date', '<', now()->toDateString()));
             })
-            ->orderByDesc('loans.loan_date')
+            ->orderByDesc('loans.created_at')
             ->paginate($perPage, ['*'], 'loans_page', $page)
             ->withQueryString();
     }
@@ -97,35 +100,34 @@ class HistoryRepositories implements HistoryInterfaceRepositories
             ->select([
                 'return_books.id',
                 'return_books.return_book_code',
-                'return_books.loan_id',
-                'return_books.book_id',
-                'return_books.user_id',
+                'return_books.loan_user_id',
                 'return_books.return_date',
                 'return_books.status',
                 'return_books.created_at',
             ])
             ->with([
-                'book:id,title,slug,cover',
-                'book.authors:id,name,username,avatar',
-                'loan:id,loan_code,loan_date,due_date',
+                'loanDetail:id,loan_id,book_id,loan_date,due_date',
+                'loanDetail.book:id,title,slug,cover',
+                'loanDetail.book.authors:id,name,username,avatar',
+                'loanDetail.loan:id,loan_code,user_id',
                 'returnBookCheck:id,return_book_id,condition,notes',
             ])
-            ->where('return_books.user_id', $userId)
+            ->whereHas('loanDetail.loan', fn($q) => $q->where('user_id', $userId))
             ->when($search, function ($query, $value) {
                 $query->where(function ($q) use ($value) {
                     $q->where('return_books.return_book_code', 'LIKE', "%{$value}%")
-                        ->orWhereHas('book', fn($b) => $b->where('title', 'LIKE', "%{$value}%"))
-                        ->orWhereHas('book.authors', fn($a) => $a->where('name', 'LIKE', "%{$value}%"));
+                        ->orWhereHas('loanDetail.book', fn($b) => $b->where('title', 'LIKE', "%{$value}%"))
+                        ->orWhereHas('loanDetail.book.authors', fn($a) => $a->where('name', 'LIKE', "%{$value}%"));
                 });
             })
             ->when($status === 'on-time', function ($query) {
-                $query->whereHas('loan', function ($q) {
-                    $q->whereColumn('return_books.return_date', '<=', 'loans.due_date');
+                $query->whereHas('loanDetail', function ($q) {
+                    $q->whereColumn('return_books.return_date', '<=', 'loan_details.due_date');
                 });
             })
             ->when($status === 'late', function ($query) {
-                $query->whereHas('loan', function ($q) {
-                    $q->whereColumn('return_books.return_date', '>', 'loans.due_date');
+                $query->whereHas('loanDetail', function ($q) {
+                    $q->whereColumn('return_books.return_date', '>', 'loan_details.due_date');
                 });
             })
             ->orderByDesc('return_books.return_date')
@@ -142,7 +144,6 @@ class HistoryRepositories implements HistoryInterfaceRepositories
             ->select([
                 'fines.id',
                 'fines.return_book_id',
-                'fines.user_id',
                 'fines.late_fee',
                 'fines.other_fee',
                 'fines.total_fee',
@@ -153,17 +154,18 @@ class HistoryRepositories implements HistoryInterfaceRepositories
                 'fines.created_at',
             ])
             ->with([
-                'returnBook:id,return_book_code,loan_id,book_id,return_date',
-                'returnBook.book:id,title,slug,cover',
-                'returnBook.book.authors:id,name,username,avatar',
-                'returnBook.loan:id,loan_code,loan_date,due_date',
+                'returnBook:id,return_book_code,loan_user_id,return_date',
+                'returnBook.loanDetail:id,loan_id,book_id,loan_date,due_date',
+                'returnBook.loanDetail.book:id,title,slug,cover',
+                'returnBook.loanDetail.book.authors:id,name,username,avatar',
+                'returnBook.loanDetail.loan:id,loan_code,user_id',
             ])
-            ->where('fines.user_id', $userId)
+            ->whereHas('returnBook.loanDetail.loan', fn($q) => $q->where('user_id', $userId))
             ->when($search, function ($query, $value) {
                 $query->where(function ($q) use ($value) {
                     $q->where('fines.order_id', 'LIKE', "%{$value}%")
-                        ->orWhereHas('returnBook.book', fn($b) => $b->where('title', 'LIKE', "%{$value}%"))
-                        ->orWhereHas('returnBook.book.authors', fn($a) => $a->where('name', 'LIKE', "%{$value}%"));
+                        ->orWhereHas('returnBook.loanDetail.book', fn($b) => $b->where('title', 'LIKE', "%{$value}%"))
+                        ->orWhereHas('returnBook.loanDetail.book.authors', fn($a) => $a->where('name', 'LIKE', "%{$value}%"));
                 });
             })
             ->when($status === 'paid', function ($query) {

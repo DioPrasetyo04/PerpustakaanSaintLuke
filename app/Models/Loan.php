@@ -21,14 +21,10 @@ class Loan extends Model
     protected $fillable = [
         'user_id',
         'loan_code',
-        'loan_date',
-        'due_date',
         'status',
     ];
 
     protected $casts = [
-        'loan_date' => 'date',
-        'due_date' => 'date',
         'status' => LoanStatus::class,
     ];
 
@@ -125,5 +121,24 @@ class Loan extends Model
             ->where('id', $userId)
             ->whereNotNull('email_verified_at')
             ->exists();
+    }
+
+    public function recomputeStatus(): LoanStatus
+    {
+        $total = $this->loanDetails()->count();
+        $returnedCount = $this->loanDetails()->whereHas('returnBook')->count();
+
+        $status = match (true) {
+            $total === 0 || $returnedCount === 0 => LoanStatus::LOANED,
+            $returnedCount === $total            => LoanStatus::RETURNED,
+            default                              => LoanStatus::PARTIAL_RETURNED,
+        };
+
+        if ($this->status !== $status) {
+            $this->status = $status;
+            $this->save();
+        }
+
+        return $status;
     }
 }

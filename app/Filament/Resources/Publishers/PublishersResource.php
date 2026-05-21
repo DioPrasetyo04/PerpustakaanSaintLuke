@@ -20,7 +20,11 @@ class PublishersResource extends Resource
 {
     protected static ?string $model = Publisher::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::BuildingOffice;
+
+    protected static string|\UnitEnum|null $navigationGroup = 'Katalog Buku';
+
+    protected static ?int $navigationSort = 4;
 
     protected static ?string $recordTitleAttribute = 'Publishers';
 

@@ -17,7 +17,14 @@
       "Bash(php -l app/Http/Requests/Settings/ProfileUpdateRequest.php)",
       "Bash(php -l app/Http/Requests/Settings/SocialMediaRequest.php)",
       "Bash(php -l routes/settings.php)",
-      "Bash(php -l app/Models/SocialMedia.php)"
+      "Bash(php -l app/Models/SocialMedia.php)",
+      "PowerShell(Set-Location \"c:\\\\laragon\\\\www\\\\perpustakaan-saint-luke\"; php artisan tinker --execute=\"use Spatie\\\\Permission\\\\Models\\\\Role; \\\\$admin = Role::findByName\\('admin','web'\\); \\\\$manager = Role::findByName\\('manager','web'\\); \\\\$writer = Role::findByName\\('writer','web'\\); echo 'admin: ' . \\\\$admin->permissions\\(\\)->where\\('name','like','%Laporan%'\\)->count\\(\\) . PHP_EOL; echo 'manager: ' . \\\\$manager->permissions\\(\\)->where\\('name','like','%Laporan%'\\)->count\\(\\) . PHP_EOL; echo 'writer: ' . \\\\$writer->permissions\\(\\)->where\\('name','like','%Laporan%'\\)->count\\(\\) . PHP_EOL;\" 2>&1)",
+      "PowerShell(php artisan shield:generate --page=LaporanBuku 2>&1)",
+      "PowerShell(php artisan shield:generate --page=LaporanBuku --panel=admin 2>&1; Write-Host \"EXIT: $LASTEXITCODE\")",
+      "PowerShell(php artisan tinker --no-interaction --execute=\"use Spatie\\\\Permission\\\\Models\\\\Permission; use Spatie\\\\Permission\\\\Models\\\\Role; \\\\$perm = Permission::where\\('name', 'LIKE', '%LaporanBuku%'\\)->get\\(\\); echo \\\\$perm->pluck\\('name'\\)->implode\\(', '\\);\" 2>&1)"
+    ],
+    "additionalDirectories": [
+      "c:\\laragon\\www\\perpustakaan-saint-luke"
     ]
   }
 }

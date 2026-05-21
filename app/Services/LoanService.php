@@ -61,13 +61,17 @@ class LoanService
         try {
             return DB::transaction(function () use ($auth, $data, $duration) {
 
-                $loan = $this->loanService->createLoan([
-                    'user_id' => $auth->id,
-                    'loan_code' => generateUniqueCode('Loan', Loan::class, 'loan_code'),
-                    'book_id' => $data['book_id'],
-                    'loan_date' => now(),
-                    'due_date' => now()->addDays($duration),
-                ]);
+                $loan = $this->loanService->createLoan(
+                    [
+                        'user_id' => $auth->id,
+                        'loan_code' => generateUniqueCode('Loan', Loan::class, 'loan_code'),
+                    ],
+                    [
+                        'book_id' => $data['book_id'],
+                        'loan_date' => now(),
+                        'due_date' => now()->addDays($duration),
+                    ]
+                );
 
                 Loan::substractionStock($data['book_id']);
                 Loan::addLoanStock($data['book_id']);

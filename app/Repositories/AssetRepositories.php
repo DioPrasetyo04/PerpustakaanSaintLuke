@@ -17,10 +17,10 @@ class AssetRepositories implements AssetInterfaceRepositories
             ->select(['id', 'title', 'slug', 'cover'])
             ->where('slug', $slug)
 
-            // 🔥 pastikan hanya buku yang dipinjam user
-            ->whereHas('loan', function ($q) use ($userId) {
-                $q->where('user_id', $userId)
-                    ->whereDoesntHave('returnBook');
+            // 🔥 pastikan hanya buku yang dipinjam user dan belum dikembalikan
+            ->whereHas('loanDetails', function ($q) use ($userId) {
+                $q->whereDoesntHave('returnBook')
+                    ->whereHas('loan', fn($l) => $l->where('user_id', $userId));
             })
 
             ->with([
@@ -28,11 +28,12 @@ class AssetRepositories implements AssetInterfaceRepositories
                 'authors:id,name,username,avatar',
                 'categories:id,name,icon',
 
-                // 🔥 hanya loan milik user login
-                'loan' => function ($q) use ($userId) {
-                    $q->select('id', 'book_id', 'user_id', 'loan_date', 'due_date')
-                        ->where('user_id', $userId)
-                        ->whereDoesntHave('returnBook');
+                // 🔥 hanya loan_details milik user login yang masih aktif
+                'loanDetails' => function ($q) use ($userId) {
+                    $q->select('id', 'loan_id', 'book_id', 'loan_date', 'due_date')
+                        ->whereDoesntHave('returnBook')
+                        ->whereHas('loan', fn($l) => $l->where('user_id', $userId))
+                        ->with('loan:id,loan_code,user_id');
                 }
             ])
             ->firstOrFail();
@@ -43,11 +44,17 @@ class AssetRepositories implements AssetInterfaceRepositories
         $userId = Auth::id();
 
         return Loan::query()
-            ->select(['id', 'loan_code'])
+            ->select(['id', 'loan_code', 'user_id'])
             ->where('user_id', $userId)
-            ->where('book_id', $bookId)
-            ->whereDoesntHave('returnBook')
-            ->with(['book:id,title,cover'])
+            ->whereHas('loanDetails', fn($q) => $q
+                ->where('book_id', $bookId)
+                ->whereDoesntHave('returnBook'))
+            ->with([
+                'loanDetails' => fn($q) => $q
+                    ->where('book_id', $bookId)
+                    ->whereDoesntHave('returnBook')
+                    ->with('book:id,title,cover,slug'),
+            ])
             ->latest()
             ->firstOrFail();
     }
