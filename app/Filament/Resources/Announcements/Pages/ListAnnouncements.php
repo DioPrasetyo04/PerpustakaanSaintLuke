@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\Announcements\Pages;
 
 use App\Filament\Resources\Announcements\AnnouncementResource;
-use App\Models\Announcement;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
@@ -15,12 +14,7 @@ class ListAnnouncements extends ListRecords
     {
         return [
             CreateAction::make()
-                ->visible(
-                    fn() => !Announcement::query()
-                        ->where('is_active', true)
-                        ->withoutTrashed()
-                        ->exists()
-                ),
+                ->visible(fn() => AnnouncementResource::canCreate()),
         ];
     }
 }

@@ -3,18 +3,23 @@
 namespace App\Filament\Resources\Users\Schemas;
 
 use App\Enums\SocialMedia;
+use App\Enums\UserType;
+use App\Models\User;
+use App\Notifications\AccountApprovedNotification;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Components\Wizard;
 use Filament\Schemas\Components\Wizard\Step;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
@@ -62,7 +67,27 @@ class UserForm
                                         ->required(),
                                     DatePicker::make('date_of_birth')->label('Tanggal Ulang Tahun')->nullable(),
                                     Textarea::make('address')->label('Alamat')->string()->nullable(),
-                                    FileUpload::make('avatar')->disk('public')->directory('users')->visibility('public')
+                                    FileUpload::make('avatar')->disk('public')->directory('users')->visibility('public'),
+                                    Select::make('type')
+                                        ->label('Tingkat Pendidikan')
+                                        ->options(UserType::options())
+                                        ->native(false)
+                                        ->searchable()
+                                        ->live()
+                                        ->placeholder('Pilih tingkat pendidikan')
+                                        ->afterStateUpdated(function (Set $set, $state) {
+                                            if ($state !== UserType::OTHER->value) {
+                                                $set('type_other', null);
+                                            }
+                                        })
+                                        ->columnSpanFull(),
+                                    TextInput::make('type_other')
+                                        ->label('Jabatan lainnya')
+                                        ->placeholder('Tulis jabatan lainnya')
+                                        ->maxLength(100)
+                                        ->columnSpanFull()
+                                        ->visible(fn(\Filament\Schemas\Components\Utilities\Get $get) => $get('type') === UserType::OTHER->value)
+                                        ->required(fn(\Filament\Schemas\Components\Utilities\Get $get) => $get('type') === UserType::OTHER->value),
                                 ])
                             ]),
                             Section::make('Social Media')->description('Social Media Information of User')->schema([
@@ -106,6 +131,25 @@ class UserForm
                         ]),
                     Step::make('Roles & Permissions')->description('Information Roles & Permissions User')
                         ->schema([
+                            Section::make('Status Persetujuan')->description('Kelola status persetujuan akun user')->schema([
+                                Grid::make(2)->schema([
+                                    Toggle::make('is_approved')
+                                        ->label('Disetujui')
+                                        ->helperText('Aktifkan untuk menyetujui akun user ini agar bisa mengakses panel admin.')
+                                        ->afterStateUpdated(function (bool $state, $record) {
+                                            if ($state && $record instanceof User && ! $record->is_approved) {
+                                                $record->approve(Auth::user());
+                                                $record->notify(new AccountApprovedNotification());
+                                            }
+                                        })
+                                        ->live(),
+                                    DatePicker::make('approved_at')
+                                        ->label('Disetujui Pada')
+                                        ->nullable()
+                                        ->readOnly()
+                                        ->visibleOn('edit'),
+                                ]),
+                            ]),
                             Section::make('Give Roles & Permissions To User')->description('Roles & Permissions To Access Maintain Information & Modification Data')->schema([
                                 Grid::make(2)->schema([
                                     Select::make('roles')->multiple()->relationship('roles', 'name')->preload()->nullable(),

@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -17,17 +16,22 @@ class RouteAccess extends Model
 
     protected $fillable = [
         'route_name',
-        'role_id',
-        'permission_id'
+        'role_ids',
+        'permission_ids',
     ];
 
-    public function role(): BelongsTo
+    protected $casts = [
+        'role_ids'       => 'array',
+        'permission_ids' => 'array',
+    ];
+
+    public function getRoleNamesAttribute(): string
     {
-        return $this->belongsTo(Role::class, 'role_id');
+        return Role::whereIn('id', $this->role_ids ?? [])->pluck('name')->join(', ');
     }
 
-    public function permission(): BelongsTo
+    public function getPermissionNamesAttribute(): string
     {
-        return $this->belongsTo(Permission::class, 'permission_id');
+        return Permission::whereIn('id', $this->permission_ids ?? [])->pluck('name')->join(', ');
     }
 }

@@ -30,7 +30,7 @@ class LoanForm
         return $schema
             ->components([
                 Section::make('Informasi Peminjaman')
-                    ->description('Pilih peminjam. Tanggal pinjam terkunci ke hari ini, jatuh tempo dihitung otomatis.')
+                    ->description('Pilih peminjam. Tanggal pinjam & jatuh tempo dicatat per buku di bagian bawah.')
                     ->icon(Heroicon::OutlinedUser)
                     ->schema([
                         Grid::make(2)->schema([
@@ -66,29 +66,12 @@ class LoanForm
                                 ->dehydrated()
                                 ->columnSpanFull(),
 
-                            DatePicker::make('loan_date')
-                                ->label('Tanggal Pinjam')
-                                ->default(fn() => now()->startOfDay())
-                                ->disabled()
-                                ->dehydrated()
-                                ->required(),
-
-                            DatePicker::make('due_date')
-                                ->label('Tanggal Jatuh Tempo')
-                                ->default(function () {
-                                    $duration = (int) (FineSettings::query()->value('loan_duration_days') ?? 14);
-                                    return now()->startOfDay()->addDays($duration);
-                                })
-                                ->disabled()
-                                ->dehydrated()
-                                ->required(),
-
                             Hidden::make('status')->default(LoanStatus::LOANED->value),
                         ]),
                     ])->columnSpanFull(),
 
                 Section::make('Daftar Buku Pinjaman')
-                    ->description('1 peminjam dapat meminjam beberapa buku sekaligus. Tambah baris untuk setiap buku.')
+                    ->description('1 peminjam dapat meminjam beberapa buku sekaligus. Setiap buku memiliki tanggal pinjam & jatuh tempo masing-masing.')
                     ->icon(Heroicon::OutlinedBookOpen)
                     ->schema([
                         Repeater::make('loanDetails')
@@ -103,6 +86,24 @@ class LoanForm
                                     ->required()
                                     ->distinct()
                                     ->columnSpanFull(),
+
+                                Grid::make(2)->schema([
+                                    DatePicker::make('loan_date')
+                                        ->label('Tanggal Pinjam')
+                                        ->default(fn() => now()->startOfDay())
+                                        ->disabled()
+                                        ->dehydrated()
+                                        ->required(),
+
+                                    DatePicker::make('due_date')
+                                        ->label('Tanggal Jatuh Tempo')
+                                        ->default(function () {
+                                            $duration = (int) (FineSettings::query()->value('loan_duration_days') ?? 14);
+                                            return now()->startOfDay()->addDays($duration);
+                                        })
+                                        ->dehydrated()
+                                        ->required(),
+                                ]),
 
                                 Hidden::make('status')->default(LoanBookStatus::BORROWED->value),
                             ])

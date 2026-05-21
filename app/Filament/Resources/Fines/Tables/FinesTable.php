@@ -18,7 +18,7 @@ class FinesTable
     {
         return $table
             ->columns([
-                ImageColumn::make('user.avatar')
+                ImageColumn::make('returnBook.loanDetail.loan.user.avatar')
                     ->size(70)
                     ->disk('public')
                     ->visibility('public')
@@ -26,24 +26,24 @@ class FinesTable
                     ->label('Avatar')
                     ->alignCenter(),
 
-                TextColumn::make('user.name')
+                TextColumn::make('returnBook.loanDetail.loan.user.name')
                     ->searchable()
                     ->sortable()
                     ->label('Peminjam'),
 
-                TextColumn::make('returnBook.book.title')
+                TextColumn::make('returnBook.loanDetail.book.title')
                     ->searchable()
                     ->sortable()
                     ->label('Buku'),
 
-                ImageColumn::make('returnBook.book.cover')->disk('public')->visibility('public')->size(70)->circular()->label('Cover Book'),
+                ImageColumn::make('returnBook.loanDetail.book.cover')->disk('public')->visibility('public')->size(70)->circular()->label('Cover Book'),
 
                 TextColumn::make('returnBook.return_date')
                     ->formatStateUsing(fn($state) => $state ? Carbon::parse($state)->format('d F Y') : '-')
                     ->sortable()
                     ->label('Tanggal Pengembalian'),
 
-                TextColumn::make('returnBook.loan.due_date')
+                TextColumn::make('returnBook.loanDetail.due_date')
                     ->formatStateUsing(fn($state) => $state ? Carbon::parse($state)->format('d F Y') : '-')
                     ->sortable()
                     ->label('Jatuh Tempo'),

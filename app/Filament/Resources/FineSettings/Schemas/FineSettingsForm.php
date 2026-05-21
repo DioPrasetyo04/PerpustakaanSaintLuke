@@ -118,6 +118,18 @@ class FineSettingsForm
                                 ]),
                         ]),
                     ]),
+                Section::make('Pengaturan Batas Peminjaman')
+                    ->description('Atur batas peminjaman buku.')
+                    ->icon('heroicon-o-clock')
+                    ->schema([
+                        TextInput::make('loan_duration_days')
+                            ->label('Durasi Peminjaman')
+                            ->required()
+                            ->numeric()
+                            ->minValue(1)
+                            ->suffix('hari')
+                            ->default(14),
+                    ]),
             ]);
     }
 }

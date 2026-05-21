@@ -8,6 +8,7 @@ import type { Paginated } from '../pagination';
 import type { BookProps } from '../DataTypes/BooksProps';
 import type { CategoryProps } from '../DataTypes/CategoryProps';
 import type { InformationProps } from '../DataTypes/InformationProps';
+
 export type HomePageProps = {
     data: {
         books: Paginated<BookProps>;

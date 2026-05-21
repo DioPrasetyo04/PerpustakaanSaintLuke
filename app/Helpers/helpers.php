@@ -111,7 +111,7 @@ if (!function_exists('moneyFormatter')) {
     {
         $formatter = new NumberFormatter('id_ID', NumberFormatter::CURRENCY);
 
-        $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
+        $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 2);
 
         $formatter->setSymbol(NumberFormatter::CURRENCY_SYMBOL, 'Rp. ');
         return $formatter->formatCurrency($value, 'IDR');

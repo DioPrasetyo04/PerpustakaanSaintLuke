@@ -18,7 +18,11 @@ class AuthorResource extends Resource
 {
     protected static ?string $model = Author::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::UserCircle;
+
+    protected static string|\UnitEnum|null $navigationGroup = 'Katalog Buku';
+
+    protected static ?int $navigationSort = 2;
 
     protected static ?string $recordTitleAttribute = 'Author';
 

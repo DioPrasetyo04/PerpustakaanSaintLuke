@@ -14,7 +14,7 @@ class FineResource extends Resource
 {
     protected static ?string $model = Fine::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::Banknotes;
 
     protected static ?string $navigationLabel = 'Denda';
 
@@ -22,7 +22,9 @@ class FineResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Denda';
 
-    protected static ?int $navigationSort = 2;
+    protected static string|\UnitEnum|null $navigationGroup = 'Keuangan';
+
+    protected static ?int $navigationSort = 22;
 
     public static function table(Table $table): Table
     {

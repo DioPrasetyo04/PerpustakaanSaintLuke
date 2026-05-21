@@ -16,6 +16,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('loan_id')->constrained('loans', 'id')->cascadeOnUpdate()->cascadeOnDelete();
             $table->foreignId('book_id')->constrained('books', 'id')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->date('loan_date');
+            $table->date('due_date');
             $table->enum('status', LoanBookStatus::cases())->default(LoanBookStatus::BORROWED->value);
         });
     }
@@ -25,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('loan_details');
     }
 };

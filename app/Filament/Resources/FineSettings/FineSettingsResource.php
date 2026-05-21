@@ -18,7 +18,7 @@ class FineSettingsResource extends Resource
 {
     protected static ?string $model = FineSettings::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCog6Tooth;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::Cog6Tooth;
 
     protected static ?string $navigationLabel = 'Pengaturan Denda';
 
@@ -26,9 +26,9 @@ class FineSettingsResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Pengaturan Denda';
 
-    // protected static ?string $navigationGroup = 'Pengaturan';
+    protected static string|\UnitEnum|null $navigationGroup = 'Keuangan';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 21;
 
     public static function form(Schema $schema): Schema
     {

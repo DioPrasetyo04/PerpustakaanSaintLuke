@@ -20,10 +20,14 @@ class LoanDetail extends Model
     protected $fillable = [
         'loan_id',
         'book_id',
+    'loan_date',
+        'due_date',
         'status',
     ];
 
     protected $casts = [
+        'loan_date' => 'date',
+        'due_date' => 'date',
         'status' => LoanBookStatus::class,
     ];
 

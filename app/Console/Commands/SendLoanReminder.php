@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Loan;
+use App\Models\LoanDetail;
 use App\Notifications\LoanReminderNotification;
 use App\Services\WhatsAppService;
 use Illuminate\Console\Command;
@@ -31,19 +31,25 @@ class SendLoanReminder extends Command
     {
         $today = Carbon::today();
 
-        $loans = Loan::with(['user', 'book'])
-            ->whereDoesntHave('returnBook')->get();
+        $details = LoanDetail::with(['book', 'loan.user'])
+            ->whereDoesntHave('returnBook')
+            ->get();
 
-        foreach ($loans as $loan) {
-            $dueDate = Carbon::parse($loan->due_date);
+        foreach ($details as $detail) {
+            $user = $detail->loan?->user;
+            if (! $user) {
+                continue;
+            }
+
+            $dueDate = Carbon::parse($detail->due_date);
             $diff = $today->diffInDays($dueDate, false);
 
-            if (in_array($diff, [3, 1, 0])) {
-                $loan->user->notify(new LoanReminderNotification($loan, $diff));
+            if (\in_array($diff, [3, 1, 0], true)) {
+                $user->notify(new LoanReminderNotification($detail, $diff));
 
                 app(WhatsAppService::class)->sendReminder(
-                    $loan->user->phone,
-                    $loan,
+                    $user->phone,
+                    $detail,
                     $diff
                 );
             }

@@ -15,6 +15,7 @@ use App\Enums\PublishedBooks;
 use App\Enums\UserGender;
 use App\Models\Author;
 use App\Models\Book;
+use App\Models\User;
 use App\Models\Language;
 use App\Models\Type;
 use Filament\Notifications\Notification;
@@ -72,10 +73,6 @@ class BookForm
                                         ->maxLength(255)
                                         ->unique(ignoreRecord: true)
                                         ->readOnly(),
-                                    // DatePicker::make('publication_year')
-                                    //     ->label('Publication Year')
-                                    //     ->displayFormat('Y')
-                                    //     ->columnSpan(1),
                                     TextInput::make('publication_year')
                                         ->label('Publication Year')
                                         ->numeric()
@@ -89,20 +86,53 @@ class BookForm
                                         ->columnSpan(1),
                                     Select::make('added_by')
                                         ->label('Added By')
-                                        ->relationship('addedBy', 'name')
+                                        ->relationship(
+                                            name: 'addedBy',
+                                            titleAttribute: 'name',
+                                            modifyQueryUsing: fn(Builder $query) => $query->whereHas('roles', function ($q) {
+                                                $q->where('name', 'admin')->orWhere('name', 'manager')->orWhere('name', 'writer');
+                                            }),
+                                        )
                                         ->getOptionLabelFromRecordUsing(function ($record) {
                                             $avatarUrl = $record->avatar ? asset('storage/' . $record->avatar) : null;
 
                                             $avatar = $avatarUrl
-                                                ? '<img src="' . e($avatarUrl) . '" style="width:22px;height:22px;border-radius:9999px;object-fit:cover;flex-shrink:0;border:1px solid #e5e7eb;vertical-align:middle;" alt="">'
-                                                : '<span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:9999px;background:#dbeafe;color:#1e40af;font-weight:600;font-size:10px;flex-shrink:0;vertical-align:middle;">'
+                                                ? '<img src="' . e($avatarUrl) . '" style="width:28px;height:28px;border-radius:9999px;object-fit:cover;flex-shrink:0;border:1px solid #e5e7eb;" alt="">'
+                                                : '<span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:9999px;background:#dbeafe;color:#1e40af;font-weight:600;font-size:11px;flex-shrink:0;">'
                                                 . e(mb_strtoupper(mb_substr((string) $record->name, 0, 1)))
                                                 . '</span>';
 
-                                            return '<span style="display:inline-flex;align-items:center;gap:8px;">'
-                                                . $avatar
-                                                . '<span style="font-weight:500;color:#111827;">' . e($record->name) . '</span>'
+                                            return new HtmlString(
+                                                '<span style="display:inline-flex;align-items:center;gap:8px;line-height:1.25;">'
+                                                    . $avatar
+                                                    . '<span style="display:inline-flex;flex-direction:column;min-width:0;">'
+                                                    . '<span style="font-weight:600;color:#111827;font-size:13px;">' . e($record->name) . '</span>'
+                                                    . '<span style="font-size:11px;color:#6b7280;">' . e($record->email) . '</span>'
+                                                    . '</span>'
+                                                    . '</span>'
+                                            );
+                                        })
+                                        ->getOptionLabelUsing(function ($value) {
+                                            $record = User::find($value);
+                                            if (! $record) return (string) $value;
+
+                                            $avatarUrl = $record->avatar ? asset('storage/' . $record->avatar) : null;
+
+                                            $avatar = $avatarUrl
+                                                ? '<img src="' . e($avatarUrl) . '" style="width:28px;height:28px;border-radius:9999px;object-fit:cover;flex-shrink:0;border:1px solid #e5e7eb;" alt="">'
+                                                : '<span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:9999px;background:#dbeafe;color:#1e40af;font-weight:600;font-size:11px;flex-shrink:0;">'
+                                                . e(mb_strtoupper(mb_substr((string) $record->name, 0, 1)))
                                                 . '</span>';
+
+                                            return new HtmlString(
+                                                '<span style="display:inline-flex;align-items:center;gap:8px;line-height:1.25;">'
+                                                    . $avatar
+                                                    . '<span style="display:inline-flex;flex-direction:column;min-width:0;">'
+                                                    . '<span style="font-weight:600;color:#111827;font-size:13px;">' . e($record->name) . '</span>'
+                                                    . '<span style="font-size:11px;color:#6b7280;">' . e($record->email) . '</span>'
+                                                    . '</span>'
+                                                    . '</span>'
+                                            );
                                         })
                                         ->allowHtml()
                                         ->preload()
@@ -117,7 +147,7 @@ class BookForm
                                             name: 'authors',
                                             titleAttribute: 'name',
                                             modifyQueryUsing: fn(Builder $query) => $query->whereHas('roles', function ($q) {
-                                                $q->where('name', 'writer');
+                                                $q->where('name', 'writer')->orWhere('name', 'admin')->orWhere('name', 'manager');
                                             }),
                                         )
                                         ->getOptionLabelFromRecordUsing(function ($record) {

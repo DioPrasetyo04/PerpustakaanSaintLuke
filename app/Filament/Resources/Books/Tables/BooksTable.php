@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Books\Tables;
 
 use App\Enums\BookStatus;
+use App\Enums\BookType;
 use App\Enums\PublishedBooks;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -24,18 +25,47 @@ class BooksTable
     {
         return $table
             ->columns([
-                ImageColumn::make('cover')->label('cover')->circular()->size(50)->label('image')->disk('public'),
-                TextColumn::make('book_code')->label('book_code')->searchable()->sortable(),
-                TextColumn::make('title')->label('title')->searchable()->sortable(),
-                TextColumn::make('slug')->label('slug')->searchable()->sortable(),
+                ImageColumn::make('cover')->label('Cover')->circular()->imageSize(50)->disk('public'),
+                TextColumn::make('book_code')->label('Book Code')->searchable()->sortable()->copyable(),
+                TextColumn::make('title')->label('Title')->searchable()->sortable()->limit(40)->tooltip(fn($state) => $state),
+                TextColumn::make('slug')->label('Slug')->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('addedBy.name')->label('Added By')->searchable()->sortable(),
-                TextColumn::make('authors.name')->label('Penulis')->searchable()->sortable(),
+                TextColumn::make('authors.name')
+                    ->label('Penulis')
+                    ->badge()
+                    ->color('gray')
+                    ->listWithLineBreaks()
+                    ->limitList(2)
+                    ->expandableLimitedList()
+                    ->searchable(),
                 TextColumn::make('publisher.name')->label('Penerbit')->searchable()->sortable(),
                 TextColumn::make('publication_year')->label('Tahun Terbit')->searchable()->sortable(),
-                TextColumn::make('isbn')->label('ISBN')->searchable()->sortable(),
-                TextColumn::make('synopsis')->label('sinopsis')->limit(80)->wrap(),
-                TextColumn::make('number_of_pages')->label('Jumlah Halaman')->searchable()->sortable(),
-                TextColumn::make('price')->label('Harga')->formatStateUsing(fn($state) => RupiahFormatted($state))->searchable()->sortable(),
+                TextColumn::make('isbn')->label('ISBN')->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('types.type')
+                    ->label('Tipe Resource')
+                    ->badge()
+                    ->listWithLineBreaks()
+                    ->formatStateUsing(fn($state) => BookType::tryFrom((string) $state)?->label() ?? ucfirst((string) $state))
+                    ->color(fn($state): string => match (BookType::tryFrom((string) $state)) {
+                        BookType::DIGITAL => 'info',
+                        BookType::FISIK => 'warning',
+                        default => 'gray',
+                    })
+                    ->icon(fn($state) => match (BookType::tryFrom((string) $state)) {
+                        BookType::DIGITAL => 'heroicon-s-computer-desktop',
+                        BookType::FISIK => 'heroicon-s-book-open',
+                        default => 'heroicon-s-question-mark-circle',
+                    }),
+
+                TextColumn::make('synopsis')->label('Sinopsis')->limit(60)->wrap()->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('number_of_pages')->label('Halaman')->numeric()->sortable()->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('price')
+                    ->label('Harga')
+                    ->money('IDR', divideBy: 1, locale: 'id_ID')
+                    ->sortable(),
+
                 TextColumn::make('status')->badge()
                     ->formatStateUsing(fn(BookStatus $state) => $state->label())
                     ->color(fn(BookStatus $state) => match ($state) {
@@ -51,6 +81,7 @@ class BooksTable
                         BookStatus::LOST        => 'heroicon-s-exclamation-triangle',
                         BookStatus::DAMAGED     => 'heroicon-s-wrench-screwdriver',
                     })->label('Status')->searchable()->sortable(),
+
                 TextColumn::make('is_published')->badge()
                     ->formatStateUsing(fn(PublishedBooks $state) => $state->label())
                     ->color(fn(PublishedBooks $state) => match ($state) {
@@ -59,14 +90,30 @@ class BooksTable
                     })->icon(fn(PublishedBooks $state) => match ($state) {
                         PublishedBooks::PUBLISH => 'heroicon-s-check-badge',
                         PublishedBooks::UNPUBLISH => 'heroicon-s-pencil',
-                    })->label('Status')->searchable()->sortable(),
+                    })->label('Publikasi')->searchable()->sortable(),
+
+                TextColumn::make('active_loans_count')
+                    ->label('Sedang Dipinjam')
+                    ->badge()
+                    ->state(fn($record) => $record->loanDetails()->whereDoesntHave('returnBook')->count())
+                    ->formatStateUsing(fn($state) => $state > 0 ? "{$state} Dipinjam" : 'Tidak Dipinjam')
+                    ->color(fn($state) => $state > 0 ? 'warning' : 'success')
+                    ->icon(fn($state) => $state > 0 ? 'heroicon-s-arrow-right-circle' : 'heroicon-s-check-circle'),
+
+                TextColumn::make('returned_loans_count')
+                    ->label('Dikembalikan')
+                    ->badge()
+                    ->state(fn($record) => $record->loanDetails()->whereHas('returnBook')->count())
+                    ->formatStateUsing(fn($state) => "{$state} Dikembalikan")
+                    ->color(fn($state) => $state > 0 ? 'info' : 'gray')
+                    ->icon('heroicon-s-arrow-left-circle'),
             ])
             ->filters([
                 TrashedFilter::make(),
             ])
             ->recordActions([
-                EditAction::make(),
                 ViewAction::make(),
+                EditAction::make(),
                 DeleteAction::make(),
                 ForceDeleteAction::make(),
                 RestoreAction::make()

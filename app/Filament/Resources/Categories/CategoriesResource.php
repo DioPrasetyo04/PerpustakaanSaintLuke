@@ -20,7 +20,11 @@ class CategoriesResource extends Resource
 {
     protected static ?string $model = Category::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::Tag;
+
+    protected static string|\UnitEnum|null $navigationGroup = 'Katalog Buku';
+
+    protected static ?int $navigationSort = 3;
 
     protected static ?string $recordTitleAttribute = 'Categories';
 

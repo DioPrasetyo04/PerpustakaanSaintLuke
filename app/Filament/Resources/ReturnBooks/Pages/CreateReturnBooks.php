@@ -2,24 +2,33 @@
 
 namespace App\Filament\Resources\ReturnBooks\Pages;
 
+use App\Enums\BookCondition;
+use App\Enums\DiscountType;
+use App\Enums\LoanBookStatus;
+use App\Enums\PaymentStatus;
+use App\Enums\ReturnBookStatus;
 use App\Filament\Resources\ReturnBooks\ReturnBooksResource;
+use App\Models\Fine;
 use App\Models\FineSettings;
+use App\Models\Loan;
+use App\Models\LoanDetail;
+use App\Models\ReturnBook;
+use App\Models\ReturnBookCheck;
 use App\Models\ReviewBook;
-use App\Traits\HandleReturnBook;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Support\Exceptions\Halt;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class CreateReturnBooks extends CreateRecord
 {
     protected static string $resource = ReturnBooksResource::class;
 
-    use HandleReturnBook;
-
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        if (!FineSettings::exists()) {
-
+        if (! FineSettings::exists()) {
             Notification::make()
                 ->title('Pengaturan denda belum dibuat')
                 ->body('Silakan buat pengaturan denda terlebih dahulu.')
@@ -27,9 +36,17 @@ class CreateReturnBooks extends CreateRecord
                 ->persistent()
                 ->send();
 
-            $this->redirectRoute(
-                'filament.admin.resources.fine-settings.create'
-            );
+            $this->redirectRoute('filament.admin.resources.fine-settings.create');
+
+            throw new Halt();
+        }
+
+        if (empty($data['returns'] ?? [])) {
+            Notification::make()
+                ->title('Tidak ada buku untuk dikembalikan')
+                ->body('Tambahkan minimal satu buku pada daftar pengembalian.')
+                ->danger()
+                ->send();
 
             throw new Halt();
         }
@@ -37,37 +54,193 @@ class CreateReturnBooks extends CreateRecord
         return $data;
     }
 
-    protected function afterCreate(): void
+    protected function handleRecordCreation(array $data): Model
     {
-        $this->record->refresh();
+        return DB::transaction(function () use ($data) {
+            $loan = Loan::with('loanDetails.book')->findOrFail($data['loan_id']);
+            $fineSetting = FineSettings::first();
 
-        $this->handleReturnBookCheck($this->record);
+            foreach ($data['returns'] as $item) {
+                $loanDetail = LoanDetail::with('book')->findOrFail($item['loan_detail_id']);
 
-        $data = $this->data;
+                if ($loanDetail->loan_id !== $loan->id) {
+                    continue;
+                }
 
-        if (isset($data['rating']) && $data['rating'] !== null) {
-            ReviewBook::create([
-                'return_book_id' => $this->record->id,
-                'user_id' => $this->record->user_id,
-                'book_id' => $this->record->book_id,
-                'rating' => $data['rating'],
-                'comment' => !empty($data['comment'])
-                    ? tiptapToHtml($data['comment'])
-                    : null,
+                if ($loanDetail->returnBook()->exists()) {
+                    continue;
+                }
+
+                $this->createOneReturn($loanDetail, $item, $fineSetting);
+            }
+
+            $loan->recomputeStatus();
+
+            return $loan->refresh();
+        });
+    }
+
+    protected function createOneReturn(LoanDetail $loanDetail, array $item, ?FineSettings $fineSetting): ReturnBook
+    {
+        $book = $loanDetail->book;
+        $condition = $item['condition'] ?? BookCondition::GOOD->value;
+        $returnDate = Carbon::parse($item['return_date'] ?? now());
+        $dueDate = Carbon::parse($loanDetail->due_date);
+
+        $lateFee = 0;
+        $otherFee = 0;
+
+        $bookPrice = (float) $book->price;
+
+        $damageType = $fineSetting?->damage_discount_type instanceof DiscountType
+            ? $fineSetting->damage_discount_type
+            : DiscountType::tryFrom((string) $fineSetting?->damage_discount_type);
+
+        $lostType = $fineSetting?->lost_discount_type instanceof DiscountType
+            ? $fineSetting->lost_discount_type
+            : DiscountType::tryFrom((string) $fineSetting?->lost_discount_type);
+
+        $damageFee = (float) ($fineSetting?->damage_fee_book ?? 0);
+        $lostFee   = (float) ($fineSetting?->lost_fee_book ?? 0);
+
+        if ($fineSetting && $returnDate->gt($dueDate)) {
+            $lateDays = (int) $dueDate->diffInDays($returnDate);
+            $lateFee = $lateDays * (float) $fineSetting->late_fee_per_day;
+        }
+
+        if ($fineSetting && $condition === BookCondition::DAMAGED->value) {
+            $otherFee = $damageType === DiscountType::PERCENTAGE
+                ? ($damageFee * $bookPrice) / 100
+                : $damageFee;
+        }
+
+        if ($fineSetting && $condition === BookCondition::LOST->value) {
+            $otherFee = $lostType === DiscountType::PERCENTAGE
+                ? ($lostFee * $bookPrice) / 100
+                : $lostFee;
+        }
+
+        $totalFee = $lateFee + $otherFee;
+        $status = $totalFee > 0 ? ReturnBookStatus::COST : ReturnBookStatus::RETURNED;
+
+        $returnBook = ReturnBook::create([
+            'return_book_code' => generateUniqueCode('return_book', ReturnBook::class, 'return_book_code'),
+            'loan_user_id' => $loanDetail->id,
+            'return_date' => $returnDate->toDateString(),
+            'status' => $status,
+        ]);
+
+        $normalizedNotes = self::normalizeRichText($item['notes'] ?? null);
+        $notes = $normalizedNotes ?: match ($condition) {
+            BookCondition::DAMAGED->value => 'Buku rusak saat dikembalikan',
+            BookCondition::LOST->value    => 'Buku hilang saat dikembalikan',
+            default                       => 'Buku dalam kondisi baik saat dikembalikan',
+        };
+
+        ReturnBookCheck::create([
+            'return_book_id' => $returnBook->id,
+            'condition' => $condition,
+            'notes' => $notes,
+        ]);
+
+        match ($condition) {
+            BookCondition::GOOD->value    => ReturnBookCheck::addReturnStock($book->id),
+            BookCondition::DAMAGED->value => ReturnBookCheck::addDamagedStock($book->id),
+            BookCondition::LOST->value    => ReturnBookCheck::addLostStock($book->id),
+        };
+
+        $loanDetail->update(['status' => LoanBookStatus::RETURNED]);
+
+        if ($totalFee > 0) {
+            Fine::create([
+                'return_book_id' => $returnBook->id,
+                'late_fee' => $lateFee,
+                'other_fee' => $otherFee,
+                'total_fee' => $totalFee,
+                'fine_date' => now(),
+                'payment_status' => PaymentStatus::PENDING->value,
             ]);
         }
+
+        if (! empty($item['rating'])) {
+            ReviewBook::create([
+                'loan_user_id' => $loanDetail->id,
+                'return_book_id' => $returnBook->id,
+                'rating' => (float) $item['rating'],
+                'comment' => self::normalizeRichText($item['comment'] ?? null),
+            ]);
+        }
+
+        return $returnBook;
+    }
+
+    public static function normalizeRichText($value): ?string
+    {
+        if (blank($value)) {
+            return null;
+        }
+
+        if (is_array($value)) {
+            $html = tiptapToHtml($value);
+            return blank($html) ? null : $html;
+        }
+
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            if (is_array($decoded) && isset($decoded['content'])) {
+                $html = tiptapToHtml($decoded);
+                return blank($html) ? null : $html;
+            }
+            return $value;
+        }
+
+        return null;
     }
 
     protected function fillForm(): void
     {
-        parent::fillForm();
+        $loanId = (int) request()->query('loan_id');
 
-        $userId = request()->query('user_id');
-
-        if (filled($userId)) {
-            $this->form->fill([
-                'user_id' => (int) $userId,
-            ]);
+        if (! $loanId) {
+            parent::fillForm();
+            return;
         }
+
+        $loan = Loan::with(['user', 'loanDetails.book', 'loanDetails.returnBook'])->find($loanId);
+
+        if (! $loan) {
+            parent::fillForm();
+            return;
+        }
+
+        $returns = $loan->loanDetails
+            ->filter(fn(LoanDetail $detail) => ! $detail->returnBook)
+            ->values()
+            ->map(fn(LoanDetail $detail) => [
+                'loan_detail_id' => $detail->id,
+                'book_id' => $detail->book_id,
+                'book_title' => $detail->book?->title,
+                'return_date' => now()->toDateString(),
+                'condition' => BookCondition::GOOD->value,
+                'notes' => null,
+                'rating' => null,
+                'comment' => null,
+            ])
+            ->all();
+
+        if (empty($returns)) {
+            Notification::make()
+                ->title('Semua buku sudah dikembalikan')
+                ->body('Tidak ada buku yang dapat dikembalikan untuk peminjaman ini.')
+                ->warning()
+                ->send();
+        }
+
+        $this->form->fill([
+            'loan_id' => $loan->id,
+            'user_name' => $loan->user?->name,
+            'loan_code' => $loan->loan_code,
+            'returns' => $returns,
+        ]);
     }
 }

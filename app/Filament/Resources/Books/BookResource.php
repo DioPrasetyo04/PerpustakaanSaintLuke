@@ -5,7 +5,9 @@ namespace App\Filament\Resources\Books;
 use App\Filament\Resources\Books\Pages\CreateBook;
 use App\Filament\Resources\Books\Pages\EditBook;
 use App\Filament\Resources\Books\Pages\ListBooks;
+use App\Filament\Resources\Books\Pages\ViewBook;
 use App\Filament\Resources\Books\Schemas\BookForm;
+use App\Filament\Resources\Books\Schemas\BookInfolist;
 use App\Filament\Resources\Books\Tables\BooksTable;
 use App\Models\Book;
 use BackedEnum;
@@ -20,13 +22,22 @@ class BookResource extends Resource
 {
     protected static ?string $model = Book::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::BookOpen;
+
+    protected static string|\UnitEnum|null $navigationGroup = 'Katalog Buku';
+
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'Book';
 
     public static function form(Schema $schema): Schema
     {
         return BookForm::configure($schema);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return BookInfolist::configure($schema);
     }
 
     public static function table(Table $table): Table
@@ -46,6 +57,7 @@ class BookResource extends Resource
         return [
             'index' => ListBooks::route('/'),
             'create' => CreateBook::route('/create'),
+            'view' => ViewBook::route('/{record}'),
             'edit' => EditBook::route('/{record}/edit'),
         ];
     }

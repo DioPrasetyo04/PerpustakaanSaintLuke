@@ -33,22 +33,23 @@ class EditFineSettings extends EditRecord
         $fineSetting = $this->record->fresh();
 
         Fine::where('payment_status', PaymentStatus::PENDING)
-            ->with(['returnBook.loan', 'returnBook.book', 'returnBook.returnBookCheck'])
+            ->with(['returnBook.loanDetail.book', 'returnBook.returnBookCheck'])
             ->each(function (Fine $fine) use ($fineSetting) {
                 $returnBook = $fine->returnBook;
                 if (!$returnBook) return;
 
-                $loan = $returnBook->loan;
-                $book = $returnBook->book;
+                $loanDetail = $returnBook->loanDetail;
+                $book = $loanDetail?->book;
                 $condition = $returnBook->returnBookCheck?->condition;
 
-                if (!$loan || !$book || !$condition) return;
+                if (!$loanDetail || !$book || !$condition) return;
 
                 $lateFee = 0;
                 $otherFee = 0;
 
-                if ($returnBook->return_date > $loan->due_date) {
-                    $daysLate = $loan->due_date->diffInDays($returnBook->return_date);
+                $dueDate = $loanDetail->due_date;
+                if ($dueDate && $returnBook->return_date > $dueDate) {
+                    $daysLate = $dueDate->diffInDays($returnBook->return_date);
                     $lateFee = $daysLate * $fineSetting->late_fee_per_day;
                 }
 

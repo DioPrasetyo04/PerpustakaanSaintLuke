@@ -55,30 +55,34 @@ class ReturnBookRepositories implements ReturnBookInterfaceRepositories
     {
         return ReturnBook::query()
             ->select([
+                'id',
                 'return_book_code',
-                'loan_id',
-                'book_id',
-                'user_id',
+                'loan_user_id',
                 'return_date',
                 'status',
             ])
-            ->with(['loan:id,loan_code,loan_date,due_date', 'book:id,title,cover,publication_year,synopsis', 'book.authors:id,name,username,avatar', 'user:id,name,email,username,avatar'])
-            ->where('user_id', $userId)
+            ->with([
+                'loanDetail:id,loan_id,book_id,loan_date,due_date',
+                'loanDetail.book:id,title,cover,publication_year,synopsis,slug',
+                'loanDetail.book.authors:id,name,username,avatar',
+                'loanDetail.loan:id,loan_code,user_id',
+                'loanDetail.loan.user:id,name,email,username,avatar',
+            ])
+            ->whereHas('loanDetail.loan', fn($q) => $q->where('user_id', $userId))
             ->when($filters['search'] ?? null, function ($query, $search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('return_book_code', 'REGEXP', $search)
                         ->orWhere('return_date', 'REGEXP', $search)
                         ->orWhere('status', 'REGEXP', $search)
-                        ->orWhereHas('book', fn($q) => $q->where('title', 'REGEXP', $search))
-                        ->orWhereHas('book.authors', fn($q) => $q->where('name', 'REGEXP', $search))
-                        ->orWhereHas('user', fn($q) => $q->where('name', 'REGEXP', $search));
+                        ->orWhereHas('loanDetail.book', fn($q) => $q->where('title', 'REGEXP', $search))
+                        ->orWhereHas('loanDetail.book.authors', fn($q) => $q->where('name', 'REGEXP', $search))
+                        ->orWhereHas('loanDetail.loan.user', fn($q) => $q->where('name', 'REGEXP', $search));
                 });
             })
             ->when(
                 ($filters['field'] ?? null) && ($filters['direction'] ?? null),
                 fn($query) => $query->orderBy($filters['field'], $filters['direction'])
             )
-            ->withAvg('book.reviews as avg_rating', 'rating')
             ->paginate($perPage, ['*'], 'returns_page', $page);
     }
 
@@ -86,17 +90,21 @@ class ReturnBookRepositories implements ReturnBookInterfaceRepositories
     {
         return ReturnBook::query()
             ->select([
+                'id',
                 'return_book_code',
-                'loan_id',
-                'book_id',
-                'user_id',
+                'loan_user_id',
                 'return_date',
                 'status',
             ])
-            ->with(['loan:id,loan_code,loan_date,due_date', 'book:id,title,cover,publication_year,synopsis', 'book.authors:id,name,username,avatar', 'user:id,name,email,username,avatar'])
-            ->where('user_id', $userId)
+            ->with([
+                'loanDetail:id,loan_id,book_id,loan_date,due_date',
+                'loanDetail.book:id,title,cover,publication_year,synopsis,slug',
+                'loanDetail.book.authors:id,name,username,avatar',
+                'loanDetail.loan:id,loan_code,user_id',
+                'loanDetail.loan.user:id,name,email,username,avatar',
+            ])
+            ->whereHas('loanDetail.loan', fn($q) => $q->where('user_id', $userId))
             ->where('return_book_code', $returnBookCode)
-            ->withAvg('book.reviews as avg_rating', 'rating')
             ->firstOrFail();
     }
 

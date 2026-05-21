@@ -7,6 +7,7 @@ use App\Interface\DashboardInterfaceRepositories;
 use App\Models\Author;
 use App\Models\Fine;
 use App\Models\Loan;
+use App\Models\LoanDetail;
 use App\Models\ReturnBook;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
@@ -19,12 +20,38 @@ class DashboardRepositories implements DashboardInterfaceRepositories
     {
         $authUser = auth()->user();
         $now = Carbon::now();
-        $getAllCountBorrowingBook = Loan::query()->where('user_id', $authUser->id)->count();
-        $getAllCountHasActiveLoan = Loan::query()->where('user_id', $authUser->id)->whereDoesntHave('returnBook')->count();
-        $getAllCountDeadlineDueDateBook = Loan::query()->where('user_id', $authUser->id)->whereDoesntHave('returnBook')->whereDate('due_date', '>=', $now)->whereDate('due_date', '<=', $now->copy()->addDays(3))->count();
-        $getAllCountReturnBook = ReturnBook::query()->where('user_id', $authUser->id)->count();
-        $getAllCountFinePayment = ReturnBook::query()->where('user_id', $authUser->id)->has('fine')->count();
-        $totalFineNominal = (int) Fine::query()->where('user_id', $authUser->id)->sum('total_fee');
+
+        $getAllCountBorrowingBook = Loan::query()
+            ->where('user_id', $authUser->id)
+            ->withCount('loanDetails')
+            ->get()
+            ->sum('loan_details_count');
+
+        $getAllCountHasActiveLoan = LoanDetail::query()
+            ->whereHas('loan', fn($q) => $q->where('user_id', $authUser->id))
+            ->whereDoesntHave('returnBook')
+            ->count();
+
+        $getAllCountDeadlineDueDateBook = LoanDetail::query()
+            ->whereHas('loan', fn($q) => $q->where('user_id', $authUser->id))
+            ->whereDoesntHave('returnBook')
+            ->whereDate('due_date', '>=', $now)
+            ->whereDate('due_date', '<=', $now->copy()->addDays(3))
+            ->count();
+
+        $getAllCountReturnBook = ReturnBook::query()
+            ->whereHas('loanDetail.loan', fn($q) => $q->where('user_id', $authUser->id))
+            ->count();
+
+        $getAllCountFinePayment = ReturnBook::query()
+            ->whereHas('loanDetail.loan', fn($q) => $q->where('user_id', $authUser->id))
+            ->has('fine')
+            ->count();
+
+        $totalFineNominal = (int) Fine::query()
+            ->whereHas('returnBook.loanDetail.loan', fn($q) => $q->where('user_id', $authUser->id))
+            ->sum('total_fee');
+
         return compact('getAllCountBorrowingBook', 'getAllCountHasActiveLoan', 'getAllCountDeadlineDueDateBook', 'getAllCountReturnBook', 'getAllCountFinePayment', 'totalFineNominal');
     }
 
@@ -35,7 +62,13 @@ class DashboardRepositories implements DashboardInterfaceRepositories
         $startDate = now()->subDays(6)->startOfDay();
         $endDate = now()->endOfDay();
 
-        $results = Loan::query()->selectRaw('DATE(loan_date) as loan_date, COUNT(*) as total')->where('user_id', $authUser->id)->whereBetween('loan_date', [$startDate, $endDate])->groupBy(DB::raw('DATE(loan_date)'))->orderBy('loan_date')->get();
+        $results = LoanDetail::query()
+            ->selectRaw('DATE(loan_details.loan_date) as loan_date, COUNT(*) as total')
+            ->whereHas('loan', fn($q) => $q->where('user_id', $authUser->id))
+            ->whereBetween('loan_details.loan_date', [$startDate, $endDate])
+            ->groupBy(DB::raw('DATE(loan_details.loan_date)'))
+            ->orderBy('loan_date')
+            ->get();
 
         return $this->formatWeeklyChartData($results, 'loan_date');
     }
@@ -79,11 +112,18 @@ class DashboardRepositories implements DashboardInterfaceRepositories
     public function getUserAuthAllLoanBook(array $filters, int $perPage, int $page): LengthAwarePaginator
     {
         $authUser = auth()->user();
-        $query = Loan::query()
-            ->with(['book' => function ($q) {
-                $q->withAvg('reviews', 'rating');
-            }, 'book.publisher', 'book.language', 'book.authors', 'book.categories'])
-            ->where('loans.user_id', $authUser->id)
+
+        $query = LoanDetail::query()
+            ->select('loan_details.*')
+            ->with([
+                'book' => fn($q) => $q->withAvg('reviews', 'rating'),
+                'book.publisher',
+                'book.language',
+                'book.authors',
+                'book.categories',
+                'loan:id,loan_code,user_id',
+            ])
+            ->whereHas('loan', fn($q) => $q->where('user_id', $authUser->id))
             ->whereDoesntHave('returnBook');
 
         // Category filter
@@ -97,11 +137,12 @@ class DashboardRepositories implements DashboardInterfaceRepositories
         if (!empty($filters['status']) && $filters['status'] !== 'All Status') {
             $now = Carbon::now();
             if ($filters['status'] === 'Due Soon') {
-                $query->whereDate('due_date', '>=', $now)->whereDate('due_date', '<=', $now->copy()->addDays(7));
+                $query->whereDate('loan_details.due_date', '>=', $now)
+                    ->whereDate('loan_details.due_date', '<=', $now->copy()->addDays(7));
             } elseif ($filters['status'] === 'Overdue') {
-                $query->whereDate('due_date', '<', $now);
+                $query->whereDate('loan_details.due_date', '<', $now);
             } elseif ($filters['status'] === 'On Time') {
-                $query->whereDate('due_date', '>', $now->copy()->addDays(7));
+                $query->whereDate('loan_details.due_date', '>', $now->copy()->addDays(7));
             }
         }
 
@@ -109,48 +150,50 @@ class DashboardRepositories implements DashboardInterfaceRepositories
         if (!empty($filters['dateRange']) && $filters['dateRange'] !== 'All Time') {
             $now = Carbon::now();
             if ($filters['dateRange'] === 'Last 7 Days') {
-                $query->where('loan_date', '>=', $now->copy()->subDays(7));
+                $query->where('loan_details.loan_date', '>=', $now->copy()->subDays(7));
             } elseif ($filters['dateRange'] === 'Last 30 Days') {
-                $query->where('loan_date', '>=', $now->copy()->subDays(30));
+                $query->where('loan_details.loan_date', '>=', $now->copy()->subDays(30));
             } elseif ($filters['dateRange'] === 'Last 3 Months') {
-                $query->where('loan_date', '>=', $now->copy()->subMonths(3));
+                $query->where('loan_details.loan_date', '>=', $now->copy()->subMonths(3));
             }
         }
 
         // Sorting
         $sortBy = $filters['sortBy'] ?? 'Due Date';
         if ($sortBy === 'Title') {
-            $query->leftJoin('books', 'loans.book_id', '=', 'books.id')
+            $query->leftJoin('books', 'loan_details.book_id', '=', 'books.id')
                 ->orderBy('books.title', 'asc')
-                ->select('loans.*');
+                ->select('loan_details.*');
         } elseif ($sortBy === 'Author') {
             $query->addSelect([
                 'first_author_name' => Author::select('name')
                     ->join('author_of_books', 'authors.id', '=', 'author_of_books.author_id')
-                    ->whereColumn('author_of_books.book_id', 'loans.book_id')
+                    ->whereColumn('author_of_books.book_id', 'loan_details.book_id')
                     ->limit(1)
             ])->orderBy('first_author_name', 'asc');
         } elseif ($sortBy === 'Borrow Date') {
-            $query->orderBy('loan_date', 'desc');
+            $query->orderBy('loan_details.loan_date', 'desc');
         } else {
-            $query->orderBy('due_date', 'asc');
+            $query->orderBy('loan_details.due_date', 'asc');
         }
 
         $loans = $query->paginate($perPage, ['*'], 'loans_page', $page);
 
-        $loans->getCollection()->transform(function ($loan) {
-            $daysLeft = now()->diffInDays($loan->due_date, false);
+        $loans->getCollection()->transform(function ($detail) {
+            $daysLeft = now()->diffInDays($detail->due_date, false);
 
-            $loan->days_left = $daysLeft;
+            $detail->days_left = $daysLeft;
 
-            $loan->deadline_status = match (true) {
+            $detail->deadline_status = match (true) {
                 $daysLeft < 0 => 'Overdue',
                 $daysLeft <= 3 => 'danger',
                 $daysLeft <= 7 => 'warning',
                 default => 'safe'
             };
 
-            return $loan;
+            $detail->loan_code = $detail->loan?->loan_code;
+
+            return $detail;
         });
 
         return $loans;
@@ -159,15 +202,23 @@ class DashboardRepositories implements DashboardInterfaceRepositories
     {
         $authUser = auth()->user();
         $query = ReturnBook::query()
-            ->with(['book' => function ($q) {
-                $q->withAvg('reviews', 'rating');
-            }, 'loan', 'fine', 'book.publisher', 'book.language', 'book.authors', 'book.categories'])
-            ->where('return_books.user_id', $authUser->id)
+            ->select('return_books.*')
+            ->with([
+                'loanDetail:id,loan_id,book_id,loan_date,due_date',
+                'loanDetail.book' => fn($q) => $q->withAvg('reviews', 'rating'),
+                'loanDetail.book.publisher',
+                'loanDetail.book.language',
+                'loanDetail.book.authors',
+                'loanDetail.book.categories',
+                'loanDetail.loan:id,loan_code,user_id',
+                'fine',
+            ])
+            ->whereHas('loanDetail.loan', fn($q) => $q->where('user_id', $authUser->id))
             ->whereNot('return_books.status', ReturnBookStatus::CHECKED);
 
         // Category filter
         if (!empty($filters['category']) && $filters['category'] !== 'All Categories') {
-            $query->whereHas('book.categories', function ($q) use ($filters) {
+            $query->whereHas('loanDetail.book.categories', function ($q) use ($filters) {
                 $q->where('name', $filters['category']);
             });
         }
@@ -176,33 +227,35 @@ class DashboardRepositories implements DashboardInterfaceRepositories
         if (!empty($filters['dateRange']) && $filters['dateRange'] !== 'All Time') {
             $now = Carbon::now();
             if ($filters['dateRange'] === 'Last 7 Days') {
-                $query->where('return_date', '>=', $now->copy()->subDays(7));
+                $query->where('return_books.return_date', '>=', $now->copy()->subDays(7));
             } elseif ($filters['dateRange'] === 'Last 30 Days') {
-                $query->where('return_date', '>=', $now->copy()->subDays(30));
+                $query->where('return_books.return_date', '>=', $now->copy()->subDays(30));
             } elseif ($filters['dateRange'] === 'Last 3 Months') {
-                $query->where('return_date', '>=', $now->copy()->subMonths(3));
+                $query->where('return_books.return_date', '>=', $now->copy()->subMonths(3));
             }
         }
 
         // Sorting
         $sortBy = $filters['sortBy'] ?? 'Due Date';
         if ($sortBy === 'Title') {
-            $query->leftJoin('books', 'return_books.book_id', '=', 'books.id')
+            $query->leftJoin('loan_details', 'return_books.loan_user_id', '=', 'loan_details.id')
+                ->leftJoin('books', 'loan_details.book_id', '=', 'books.id')
                 ->orderBy('books.title', 'asc')
                 ->select('return_books.*');
         } elseif ($sortBy === 'Author') {
-            $query->addSelect([
-                'first_author_name' => Author::select('name')
-                    ->join('author_of_books', 'authors.id', '=', 'author_of_books.author_id')
-                    ->whereColumn('author_of_books.book_id', 'return_books.book_id')
-                    ->limit(1)
-            ])->orderBy('first_author_name', 'asc');
+            $query->leftJoin('loan_details as ld_author', 'return_books.loan_user_id', '=', 'ld_author.id')
+                ->addSelect([
+                    'first_author_name' => Author::select('name')
+                        ->join('author_of_books', 'authors.id', '=', 'author_of_books.author_id')
+                        ->whereColumn('author_of_books.book_id', 'ld_author.book_id')
+                        ->limit(1)
+                ])->orderBy('first_author_name', 'asc');
         } elseif ($sortBy === 'Borrow Date') {
-            $query->leftJoin('loans', 'return_books.loan_id', '=', 'loans.id')
-                ->orderBy('loans.loan_date', 'desc')
+            $query->leftJoin('loan_details as ld_borrow', 'return_books.loan_user_id', '=', 'ld_borrow.id')
+                ->orderBy('ld_borrow.loan_date', 'desc')
                 ->select('return_books.*');
         } else {
-            $query->orderBy('return_date', 'desc');
+            $query->orderBy('return_books.return_date', 'desc');
         }
 
         $returnBooks = $query->paginate($perPage, ['*'], 'return_books_page', $page);
@@ -217,6 +270,16 @@ class DashboardRepositories implements DashboardInterfaceRepositories
 
             $returnBook->fine_amount = $returnBook->fine?->total_fee;
             $returnBook->payment_status = $returnBook->fine?->payment_status;
+
+            // 🔥 Flatten ke top-level supaya frontend tetap kompatibel
+            $detail = $returnBook->loanDetail;
+            $returnBook->book = $detail?->book;
+            $returnBook->loan = $detail ? [
+                'id' => $detail->loan?->id,
+                'loan_code' => $detail->loan?->loan_code,
+                'loan_date' => $detail->loan_date,
+                'due_date' => $detail->due_date,
+            ] : null;
 
             return $returnBook;
         });

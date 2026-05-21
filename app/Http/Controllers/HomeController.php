@@ -3,40 +3,41 @@
 namespace App\Http\Controllers;
 
 use App\Services\HomeServices;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class HomeController extends Controller
 {
-    protected $homeController;
+    protected HomeServices $homeController;
+
     public function __construct(HomeServices $homeServices)
     {
         $this->homeController = $homeServices;
     }
+
     public function index(Request $request)
     {
-        $filters = $request->all();
-        $bookPage = (int) $request->get('books_page', 1);
-        $bookLoad = (int) $request->get('books_load', 10);
-        $categoryPage = (int) $request->get('categories_page', 1);
-        $categoryLoad = (int) $request->get('categories_load', 10);
-        $infoPage = (int) $request->get('informations_page', 1);
-        $infoLoad = (int) $request->get('informations_load', 10);
+        $filters      = $request->all();
+        $bookPage     = (int) $request->query('books_page', 1);
+        $bookLoad     = (int) $request->query('books_load', 10);
+        $categoryPage = (int) $request->query('categories_page', 1);
+        $categoryLoad = (int) $request->query('categories_load', 10);
+        $infoPage     = (int) $request->query('informations_page', 1);
+        $infoLoad     = (int) $request->query('informations_load', 10);
 
-        $booksPaginator = $this->homeController->getBooksRaw($filters, $bookLoad, $bookPage);
-        $categoriesPaginator = $this->homeController->getCategoriesRaw($filters, $categoryLoad, $categoryPage);
+        $booksPaginator        = $this->homeController->getBooksRaw($filters, $bookLoad, $bookPage);
+        $categoriesPaginator   = $this->homeController->getCategoriesRaw($filters, $categoryLoad, $categoryPage);
         $informationsPaginator = $this->homeController->getInformationsRaw($filters, $infoLoad, $infoPage);
 
         return Inertia::render('home', [
             'data' => [
-                'books' => $this->homeController->transformBooks($booksPaginator),
-                'categories' => $this->homeController->transformCategories($categoriesPaginator),
-                'informations' => $this->homeController->transformInformations($informationsPaginator),
-                'count_of_all_books' => $this->homeController->getAllCountOfBooks(),
+                'books'                => $this->homeController->transformBooks($booksPaginator),
+                'categories'           => $this->homeController->transformCategories($categoriesPaginator),
+                'informations'         => $this->homeController->transformInformations($informationsPaginator),
+                'count_of_all_books'   => $this->homeController->getAllCountOfBooks(),
                 'count_of_all_authors' => $this->homeController->getAllCountOfAuthors(),
-                'count_of_all_users' => $this->homeController->getAllCountOfUsers(),
-                'charts' => $this->homeController->getCharts(),
+                'count_of_all_users'   => $this->homeController->getAllCountOfUsers(),
+                'charts'               => $this->homeController->getCharts(),
             ],
             'state' => [
                 'books' => [
@@ -49,10 +50,10 @@ class HomeController extends Controller
                 ],
                 'informations' => [
                     'page' => $infoPage,
-                    'load' => $infoLoad
+                    'load' => $infoLoad,
                 ],
                 'search' => $request->search ?? '',
-            ]
+            ],
         ]);
     }
 }

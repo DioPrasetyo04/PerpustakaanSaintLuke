@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Http;
 
 class WhatsAppService
 {
-    public function sendReminder($phone, $loan, $diff)
+    public function sendReminder($phone, $loanDetail, $diff)
     {
         // =====================
         // STATUS + ICON
@@ -22,13 +22,17 @@ class WhatsAppService
         $status = $statusData['text'];
         $statusIcon = $statusData['icon'];
 
-        $loanDate = Carbon::parse($loan->loan_date)->format('d M Y');
-        $dueDate = Carbon::parse($loan->due_date)->format('d M Y');
+        $loanDate = Carbon::parse($loanDetail->loan_date)->format('d M Y');
+        $dueDate = Carbon::parse($loanDetail->due_date)->format('d M Y');
 
-        $cover = $loan->book->cover ? config('app.url') . '/srorage/' . $loan->book->cover : null;
+        $book = $loanDetail->book;
+        $user = $loanDetail->loan?->user;
+
+        $cover = $book?->cover ? config('app.url') . '/storage/' . $book->cover : null;
 
         $message = $this->formatMessage(
-            $loan,
+            $user,
+            $book,
             $loanDate,
             $dueDate,
             $status,
@@ -44,15 +48,19 @@ class WhatsAppService
         ]);
     }
 
-    private function formatMessage($loan, $loanDate, $dueDate, $status, $statusIcon)
+    private function formatMessage($user, $book, $loanDate, $dueDate, $status, $statusIcon)
     {
+        $userName = $user?->name ?? 'Peminjam';
+        $bookTitle = $book?->title ?? '-';
+        $bookSlug = $book?->slug ?? '';
+
         return "📚 *Reminder E-Library Santo Lukas 📚*\n\n"
-            . "Halo {$loan->user->name} 👋\n\n"
-            . "📖 Book Title: *{$loan->book->title}*\n\n"
+            . "Halo {$userName} 👋\n\n"
+            . "📖 Book Title: *{$bookTitle}*\n\n"
             . "📅 Tanggal Pinjam: *{$loanDate}*\n"
             . "📅 Jatuh Tempo: *{$dueDate}*\n\n"
             . "⏰ {$statusIcon} *Sisa Waktu: {$status}*\n\n"
             . "*⚠️ Peringatan Segera kembalikan buku yang anda pinjam untuk menghindari denda*\n\n"
-            . "🔗 Link URL Website: " . config('app.url') . "/assets/book/{$loan->book->slug}";
+            . "🔗 Link URL Website: " . config('app.url') . "/assets/book/{$bookSlug}";
     }
 }

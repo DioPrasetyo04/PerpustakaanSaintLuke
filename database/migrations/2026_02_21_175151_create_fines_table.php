@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('fines', function (Blueprint $table) {
             $table->id();
             $table->foreignId('return_book_id')->constrained('return_books', 'id')->cascadeOnUpdate()->cascadeOnDelete();
-            $table->decimal('late_fee', 8, 2)->default(0);
+            $table->decimal('late_fee', 8, 3)->default(0);
             $table->decimal('other_fee', 8, 2)->default(0);
             $table->decimal('total_fee', 8, 2)->default(0);
             $table->date('fine_date')->nullable();

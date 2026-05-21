@@ -67,6 +67,15 @@ class ReturnBook extends Model
         return $this->hasOne(ReturnBookCheck::class, 'return_book_id');
     }
 
+    public function getUserAttribute(): ?User
+    {
+        $loan = $this->relationLoaded('loan') ? $this->loan : $this->loan()->first();
+        if ($loan) {
+            return $loan->relationLoaded('user') ? $loan->user : $loan->user()->first();
+        }
+        return $this->loanDetail?->loan?->user;
+    }
+
     public function review(): HasOne
     {
         return $this->hasOne(ReviewBook::class, 'return_book_id');
