@@ -51,13 +51,16 @@ const AnnouncementsSection = ({ informations }: FeaturedInformationProps) => {
                         />
                     ))}
                 </div>
-                <Pagination
-                    page={informations.meta.current_page}
-                    total={informations.meta.total}
-                    perPage={informations.meta.per_page}
-                    onPageChange={onPageChange}
-                    onPerPageChange={onPerPageChange}
-                />
+                {informations.data.length > 0 ||
+                    (informations.meta.last_page > 1 && (
+                        <Pagination
+                            page={informations.meta.current_page}
+                            total={informations.meta.total}
+                            perPage={informations.meta.per_page}
+                            onPageChange={onPageChange}
+                            onPerPageChange={onPerPageChange}
+                        />
+                    ))}
 
                 <div className="mt-8 text-center">
                     <Link href="/informations">

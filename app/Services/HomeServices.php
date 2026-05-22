@@ -38,9 +38,9 @@ class HomeServices
         return $this->homeServices->getCountOfAllBooks();
     }
 
-    public function getAllCountOfAuthors(): int
+    public function getAllCountOfVisitors(): int
     {
-        return $this->homeServices->getCountOfAllAuthors();
+        return $this->homeServices->getCountOfAllVisitors();
     }
 
     public function getAllCountOfUsers(): int
@@ -68,7 +68,7 @@ class HomeServices
     public function getCharts(): array
     {
         return [
-            'borrow_chart' => $this->homeServices->getBorrowChart(),
+            'visitor_chart' => $this->homeServices->getVisitChart(),
             'book_chart' => $this->homeServices->getBookChart(),
             'category_chart' => $this->homeServices->getCategoryPieChart(),
             'member_chart' => $this->homeServices->getMemberChart(),

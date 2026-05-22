@@ -31,6 +31,7 @@ class Book extends Model
         'isbn',
         'synopsis',
         'number_of_pages',
+        'location_book',
         'status',
         'cover',
         'price',

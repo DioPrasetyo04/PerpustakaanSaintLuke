@@ -35,7 +35,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->maxContentWidth('full')
             ->brandName('E-Library Santo Lukas')
-            ->brandLogo(fn () => view('filament.brand'))
+            ->brandLogo(fn() => view('filament.brand'))
             ->brandLogoHeight('2.75rem')
             ->login()
             ->registration(Register::class)
@@ -46,15 +46,19 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->renderHook(
                 'panels::head.end',
-                fn () => '<style>' . file_get_contents(resource_path('css/filament/admin/custom.css')) . '</style>',
+                fn() => '<style>' . file_get_contents(resource_path('css/filament/admin/custom.css')) . '</style>',
             )
             ->renderHook(
                 'panels::user-menu.before',
-                fn () => view('filament.partials.user-menu-card'),
+                fn() => view('filament.partials.user-menu-card'),
             )
             ->renderHook(
                 'panels::body.end',
-                fn () => $this->resolveAnnouncementView(),
+                fn() => $this->resolveAnnouncementView(),
+            )
+            ->renderHook(
+                'panels::body.end',
+                fn() => $this->resolveLibraryStatusBadge(),
             )
             ->navigationGroups([
                 NavigationGroup::make('Katalog Buku'),
@@ -120,6 +124,38 @@ class AdminPanelProvider extends PanelProvider
                 'close_time'  => substr($record->close_time, 0, 5),
                 'days'        => $record->days instanceof Days ? $record->days->value : $record->days,
                 'is_open'     => $isOpen,
+            ])->render();
+
+            return new \Illuminate\Support\HtmlString($html);
+        } catch (\Throwable) {
+            return new \Illuminate\Support\HtmlString('');
+        }
+    }
+
+    private function resolveLibraryStatusBadge(): \Illuminate\Support\HtmlString
+    {
+        try {
+            $today = Days::today();
+
+            $record = Announcement::query()
+                ->where('days', $today->value)
+                ->where('is_active', true)
+                ->withoutTrashed()
+                ->first();
+
+            if (!$record) {
+                return new \Illuminate\Support\HtmlString('');
+            }
+
+            $now       = Carbon::now();
+            $openTime  = Carbon::today()->setTimeFromTimeString($record->open_time);
+            $closeTime = Carbon::today()->setTimeFromTimeString($record->close_time);
+            $isOpen    = $now->between($openTime, $closeTime);
+
+            $html = view('filament.partials.library-status-badge', [
+                'open_time'  => substr($record->open_time, 0, 5),
+                'close_time' => substr($record->close_time, 0, 5),
+                'is_open'    => $isOpen,
             ])->render();
 
             return new \Illuminate\Support\HtmlString($html);

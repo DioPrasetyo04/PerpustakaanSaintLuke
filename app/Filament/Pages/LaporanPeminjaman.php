@@ -43,6 +43,7 @@ class LaporanPeminjaman extends Page implements HasForms
             'mode'  => 'monthly',
             'year'  => (string) now()->year,
             'month' => (string) now()->month,
+            'week'  => '1',
             'judul' => 'LAPORAN PEMINJAMAN BUKU PERPUSTAKAAN SAINT LUKE',
             'nomor' => '001/LAP-PJM/' . now()->format('m') . '/' . now()->format('Y'),
             'kota'  => 'Jakarta',
@@ -67,7 +68,7 @@ class LaporanPeminjaman extends Page implements HasForms
                         ->live()
                         ->columnSpan(
                             fn(\Filament\Schemas\Components\Utilities\Get $get) =>
-                            $get('mode') !== 'daily' ? 2 : 1
+                            in_array($get('mode'), ['daily', 'daily_week', 'weekly_month'], true) ? 1 : 2
                         ),
 
                     Select::make('year')
@@ -85,7 +86,16 @@ class LaporanPeminjaman extends Page implements HasForms
                         ->default((string) now()->month)
                         ->required()
                         ->live()
-                        ->visible(fn(\Filament\Schemas\Components\Utilities\Get $get) => $get('mode') === 'daily'),
+                        ->visible(fn(\Filament\Schemas\Components\Utilities\Get $get) => in_array($get('mode'), ['daily', 'daily_week', 'weekly_month'], true)),
+
+                    Select::make('week')
+                        ->label('Minggu')
+                        ->native(false)
+                        ->options(fn(\Filament\Schemas\Components\Utilities\Get $get) => $this->weekOptions((int) $get('year'), (int) $get('month')))
+                        ->default('1')
+                        ->required()
+                        ->live()
+                        ->visible(fn(\Filament\Schemas\Components\Utilities\Get $get) => $get('mode') === 'daily_week'),
                 ]),
 
                 Grid::make(2)->schema([
@@ -115,12 +125,13 @@ class LaporanPeminjaman extends Page implements HasForms
         $mode  = $state['mode']  ?? 'monthly';
         $year  = (int) ($state['year']  ?? now()->year);
         $month = (int) ($state['month'] ?? now()->month);
+        $week  = (int) ($state['week']  ?? 1);
 
         $period = $this->buildPeriodBuckets($mode, $year, $month, function ($start, $end) {
             return LoanDetail::query()
                 ->whereBetween('loan_date', [$start, $end])
                 ->count();
-        });
+        }, $week);
 
         $rows = LoanDetail::query()
             ->with(['book', 'loan.user'])

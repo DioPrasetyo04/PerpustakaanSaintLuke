@@ -1,6 +1,6 @@
-export type BorrowChartItem = {
+export type VisitorChartItem = {
     bulan: string;
-    loans: number;
+    visits: number;
 };
 
 export type BookChartItem = {

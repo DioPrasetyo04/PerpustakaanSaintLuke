@@ -24,6 +24,7 @@ return new class extends Migration
             $table->text('isbn')->nullable();
             $table->text('synopsis')->nullable();
             $table->unsignedBigInteger('number_of_pages')->nullable();
+            $table->string('location_book')->nullable();
             $table->string('status')->default(BookStatus::AVAILABLE->value);
             $table->string('cover')->nullable();
             $table->unsignedBigInteger('price')->nullable();

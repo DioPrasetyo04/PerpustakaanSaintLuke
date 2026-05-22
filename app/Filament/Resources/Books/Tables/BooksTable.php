@@ -27,6 +27,14 @@ class BooksTable
             ->columns([
                 ImageColumn::make('cover')->label('Cover')->circular()->imageSize(50)->disk('public'),
                 TextColumn::make('book_code')->label('Book Code')->searchable()->sortable()->copyable(),
+                TextColumn::make('location_book')
+                    ->label('Lokasi Buku')
+                    ->badge()
+                    ->color('gray')
+                    ->icon('heroicon-s-map-pin')
+                    ->placeholder('Belum diatur')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('title')->label('Title')->searchable()->sortable()->limit(40)->tooltip(fn($state) => $state),
                 TextColumn::make('slug')->label('Slug')->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('addedBy.name')->label('Added By')->searchable()->sortable(),

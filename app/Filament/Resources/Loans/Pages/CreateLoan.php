@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Loans\Pages;
 
+use App\Filament\Resources\Loans\Concerns\InteractsWithMemberScan;
 use App\Filament\Resources\Loans\LoanResource;
 use App\Models\FineSettings;
 use App\Models\Loan;
@@ -11,6 +12,8 @@ use Illuminate\Validation\ValidationException;
 
 class CreateLoan extends CreateRecord
 {
+    use InteractsWithMemberScan;
+
     protected static string $resource = LoanResource::class;
 
     protected function mutateFormDataBeforeCreate(array $data): array

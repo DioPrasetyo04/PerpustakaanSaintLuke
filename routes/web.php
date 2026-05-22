@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\MemberCardController;
 use App\Http\Controllers\Admin\UserApprovalController;
 use App\Http\Controllers\AssetController;
 use App\Http\Controllers\DashboardController;
@@ -13,6 +14,7 @@ use App\Http\Controllers\LoanController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\ReturnBookController;
+use App\Http\Controllers\VisitFormController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
 use Inertia\Inertia;
@@ -55,6 +57,18 @@ Route::controller(ResourceController::class)->group(function () {
 Route::controller(InformationController::class)->group(function () {
     Route::get('/informations', 'index')->name('announcements.index');
     Route::get('/information/detail/{slug}', 'detail')->name('announcement.detail');
+});
+
+// Kiosk publik pencatatan kunjungan perpustakaan (scan kartu / cari user / isi manual).
+Route::controller(VisitFormController::class)->group(function () {
+    Route::get('/visit', 'create')->name('visit.create');
+    Route::post('/visit', 'store')->name('visit.store');
+
+    Route::middleware('throttle:30,1')->group(function () {
+        Route::get('/visit/search-users', 'searchUsers')->name('visit.search-users');
+        Route::get('/visit/user/{user}', 'lookupUser')->name('visit.lookup-user');
+        Route::post('/visit/scan', 'scan')->name('visit.scan');
+    });
 });
 
 Route::controller(PaymentController::class)->group(function () {
@@ -113,6 +127,11 @@ Route::middleware('signed')->prefix('admin/users')->name('admin.users.')->group(
     Route::get('/{user}/reject', [UserApprovalController::class, 'reject'])
         ->withTrashed()
         ->name('reject');
+});
+
+Route::middleware('auth')->prefix('admin/users')->name('admin.users.')->group(function () {
+    Route::get('/{user}/member-card/download', [MemberCardController::class, 'download'])
+        ->name('member-card.download');
 });
 
 require __DIR__ . '/auth.php';

@@ -7,7 +7,7 @@
     <x-slot name="summary">
         <div class="period-box">
             <div><strong>Periode</strong>: {{ $report['periodLabel'] }} — {{ $report['periodRange'] }}</div>
-            <div><strong>Tipe</strong>: {{ ucfirst($report['mode']) }}</div>
+            <div><strong>Tipe</strong>: {{ $report['modeLabel'] ?? ucfirst($report['mode']) }}</div>
             <div><strong>Total Kunjungan</strong>: {{ $report['totalVisits'] }} pengunjung</div>
         </div>
     </x-slot>
@@ -45,15 +45,17 @@
                         $avatarSrc = $user->avatar;
                     }
                     if (! $avatarSrc) {
-                        $avatarSrc = 'https://ui-avatars.com/api/?name=' . urlencode($user?->name ?? 'U') . '&background=random&color=fff';
+                        $avatarSrc = 'https://ui-avatars.com/api/?name=' . urlencode($v->name ?: ($user?->name ?? 'U')) . '&background=random&color=fff';
                     }
+                    $visitorName  = $v->name ?: ($user?->name ?? '-');
+                    $visitorEmail = $user?->email ?: '—';
                     $typeLabel = $v->type === 'other' ? ($v->type_other ?: 'Lainnya') : ($v->type ?: '-');
                 @endphp
                 <tr>
                     <td class="no">{{ $i + 1 }}</td>
                     <td class="center"><img class="avatar" src="{{ $avatarSrc }}" alt=""></td>
-                    <td>{{ $user?->name ?? '-' }}</td>
-                    <td>{{ $user?->email ?? '-' }}</td>
+                    <td>{{ $visitorName }}</td>
+                    <td>{{ $visitorEmail }}</td>
                     <td class="center">{{ $v->visit_date->copy()->setTimezone('Asia/Jakarta')->translatedFormat('d M Y') }}</td>
                     <td class="center">{{ $v->visit_date->copy()->setTimezone('Asia/Jakarta')->format('H:i') }}</td>
                     <td class="center"><span class="badge">{{ $typeLabel }}</span></td>

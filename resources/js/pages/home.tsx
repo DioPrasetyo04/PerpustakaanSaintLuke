@@ -14,9 +14,9 @@ const home = () => {
             <HeroSection />
             <Stats
                 dataCountBooks={data.count_of_all_books}
-                dataCountAuthors={data.count_of_all_authors}
+                dataCountVisitors={data.count_of_all_visitors}
                 dataCountUsers={data.count_of_all_users}
-                borrowData={data.charts.borrow_chart}
+                visitorData={data.charts.visitor_chart}
                 bookData={data.charts.book_chart}
                 categoryData={data.charts.category_chart}
                 memberData={data.charts.member_chart}

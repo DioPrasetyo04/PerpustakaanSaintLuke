@@ -7,6 +7,7 @@ import { LanguageProvider } from './context/LanguageContext';
 import Navbar from './components/Layouts/Navbar/Navbar';
 import { Footer } from './components/Layouts/Footer/Footer';
 import AnnouncementModal from './components/component/Announcement/AnnouncementModal';
+import LibraryStatusBadge from './components/component/LibraryStatusBadge/LibraryStatusBadge';
 import type { PageProps, AnnouncementProps } from './types';
 import axios from 'axios';
 
@@ -41,6 +42,7 @@ createInertiaApp({
             <StrictMode>
                 <LanguageProvider>
                     <AnnouncementModal announcement={announcement} />
+                    <LibraryStatusBadge initialAnnouncement={announcement} />
                     <Navbar initialAuth={initialAuth} />
                     <div className="pt-20">
                         <App {...props} />

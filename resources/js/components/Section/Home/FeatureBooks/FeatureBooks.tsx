@@ -1,12 +1,9 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import SectionHeader from '@/components/ui/SectionHeaderVariants';
 import { useLanguage } from '@/hooks/useLanguage';
 import { featureBookHeaderHome } from '@/data/data';
 import BookCard from '@/components/component/Card/BookCard';
 import Pagination from '@/components/component/Home/Pagination/Pagination';
 import { FeaturedBookProps } from '@/types/HomePage/FeaturedHome';
-import { router } from '@inertiajs/react';
 import { useQueryParams } from '@/hooks/useQueryParams';
 
 const FeatureBooks = ({ books }: FeaturedBookProps) => {
@@ -34,14 +31,17 @@ const FeatureBooks = ({ books }: FeaturedBookProps) => {
                         <BookCard key={book.id} {...book} />
                     ))}
                 </div>
-                
-                <Pagination
-                    page={books.meta.current_page}
-                    total={books.meta.total}
-                    perPage={books.meta.per_page}
-                    onPageChange={onPageChange}
-                    onPerPageChange={onPerPageChange}
-                />
+
+                {books.data.length > 0 ||
+                    (books.meta.last_page > 1 && (
+                        <Pagination
+                            page={books.meta.current_page}
+                            total={books.meta.total}
+                            perPage={books.meta.per_page}
+                            onPageChange={onPageChange}
+                            onPerPageChange={onPerPageChange}
+                        />
+                    ))}
             </div>
         </section>
     );
