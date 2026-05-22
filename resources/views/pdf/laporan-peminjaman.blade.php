@@ -7,7 +7,7 @@
     <x-slot name="summary">
         <div class="period-box">
             <div><strong>Periode</strong>: {{ $report['periodLabel'] }} — {{ $report['periodRange'] }}</div>
-            <div><strong>Tipe</strong>: {{ ucfirst($report['mode']) }}</div>
+            <div><strong>Tipe</strong>: {{ $report['modeLabel'] ?? ucfirst($report['mode']) }}</div>
             <div><strong>Total Peminjaman</strong>: {{ $report['total'] }} transaksi buku</div>
             <div><strong>Sedang Dipinjam</strong>: {{ $report['borrowed'] }} buku</div>
             <div><strong>Sudah Dikembalikan</strong>: {{ $report['returned'] }} buku</div>

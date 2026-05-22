@@ -40,6 +40,8 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Has
         'is_approved',
         'approved_at',
         'approved_by',
+        'member_card_issued_at',
+        'member_card_issued_by',
     ];
 
     protected $hidden = [
@@ -57,6 +59,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Has
             'two_factor_confirmed_at' => 'datetime',
             'is_approved' => 'boolean',
             'approved_at' => 'datetime',
+            'member_card_issued_at' => 'datetime',
         ];
     }
 
@@ -87,6 +90,59 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Has
             'approved_by' => $approver?->id,
             'email_verified_at' => $this->email_verified_at ?? now(),
         ])->save();
+    }
+
+    public function memberCardIssuer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'member_card_issued_by');
+    }
+
+    /**
+     * Apakah user sudah memiliki kartu anggota yang diterbitkan.
+     */
+    public function hasMemberCard(): bool
+    {
+        return ! is_null($this->member_card_issued_at);
+    }
+
+    /**
+     * Nomor anggota = username (sesuai ketentuan kartu).
+     */
+    public function getMemberNumberAttribute(): ?string
+    {
+        return $this->username;
+    }
+
+    /**
+     * Terbitkan kartu anggota (idempotent — tidak menimpa tanggal terbit awal).
+     */
+    public function issueMemberCard(?User $by = null): void
+    {
+        if ($this->hasMemberCard()) {
+            return;
+        }
+
+        $this->forceFill([
+            'member_card_issued_at' => now(),
+            'member_card_issued_by' => $by?->id,
+        ])->save();
+    }
+
+    /**
+     * Cari user berdasarkan nilai barcode/QR kartu (= username).
+     */
+    public static function findByMemberBarcode(string $value): ?self
+    {
+        // Bersihkan karakter kontrol/whitespace yang kadang ditambahkan scanner (Enter, Tab, dll).
+        $value = trim((string) preg_replace('/[\x00-\x1F\x7F]/u', '', $value));
+
+        if ($value === '') {
+            return null;
+        }
+
+        return static::query()
+            ->whereRaw('LOWER(username) = ?', [mb_strtolower($value)])
+            ->first();
     }
 
     public function loans(): HasMany

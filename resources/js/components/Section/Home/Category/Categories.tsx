@@ -77,13 +77,16 @@ const Categories = ({ categories }: FeaturedCategoriesProps) => {
                         />
                     ))}
                 </div>
-                <Pagination
-                    page={categories.meta.current_page}
-                    total={categories.meta.total}
-                    perPage={categories.meta.per_page}
-                    onPageChange={onPageChange}
-                    onPerPageChange={onPerPageChange}
-                />
+                {categories.data.length > 0 ||
+                    (categories.meta.last_page > 1 && (
+                        <Pagination
+                            page={categories.meta.current_page}
+                            total={categories.meta.total}
+                            perPage={categories.meta.per_page}
+                            onPageChange={onPageChange}
+                            onPerPageChange={onPerPageChange}
+                        />
+                    ))}
             </div>
         </section>
     );

@@ -21,7 +21,25 @@
       "PowerShell(Set-Location \"c:\\\\laragon\\\\www\\\\perpustakaan-saint-luke\"; php artisan tinker --execute=\"use Spatie\\\\Permission\\\\Models\\\\Role; \\\\$admin = Role::findByName\\('admin','web'\\); \\\\$manager = Role::findByName\\('manager','web'\\); \\\\$writer = Role::findByName\\('writer','web'\\); echo 'admin: ' . \\\\$admin->permissions\\(\\)->where\\('name','like','%Laporan%'\\)->count\\(\\) . PHP_EOL; echo 'manager: ' . \\\\$manager->permissions\\(\\)->where\\('name','like','%Laporan%'\\)->count\\(\\) . PHP_EOL; echo 'writer: ' . \\\\$writer->permissions\\(\\)->where\\('name','like','%Laporan%'\\)->count\\(\\) . PHP_EOL;\" 2>&1)",
       "PowerShell(php artisan shield:generate --page=LaporanBuku 2>&1)",
       "PowerShell(php artisan shield:generate --page=LaporanBuku --panel=admin 2>&1; Write-Host \"EXIT: $LASTEXITCODE\")",
-      "PowerShell(php artisan tinker --no-interaction --execute=\"use Spatie\\\\Permission\\\\Models\\\\Permission; use Spatie\\\\Permission\\\\Models\\\\Role; \\\\$perm = Permission::where\\('name', 'LIKE', '%LaporanBuku%'\\)->get\\(\\); echo \\\\$perm->pluck\\('name'\\)->implode\\(', '\\);\" 2>&1)"
+      "PowerShell(php artisan tinker --no-interaction --execute=\"use Spatie\\\\Permission\\\\Models\\\\Permission; use Spatie\\\\Permission\\\\Models\\\\Role; \\\\$perm = Permission::where\\('name', 'LIKE', '%LaporanBuku%'\\)->get\\(\\); echo \\\\$perm->pluck\\('name'\\)->implode\\(', '\\);\" 2>&1)",
+      "Bash(composer install *)",
+      "Bash(php -l app/Models/User.php)",
+      "Bash(php -l app/Filament/Resources/Loans/Concerns/InteractsWithMemberScan.php)",
+      "PowerShell(& php artisan tinker _widget_smoke_test.php)",
+      "PowerShell(\"deleted\")",
+      "Bash(php -l app/Filament/Resources/Visits/Concerns/InteractsWithVisitScan.php)",
+      "Bash(ls resources/js/pages)",
+      "Bash(ls resources/js/Pages)",
+      "Bash(node -e \"console.log\\(JSON.stringify\\(require\\('./package.json'\\).scripts,null,2\\)\\)\")",
+      "Bash(echo \"exit: $?\")",
+      "Bash(npx eslint *)",
+      "Bash(node -e \"const p=require\\('./package.json'\\);const d={...p.dependencies,...p.devDependencies};['react-router','motion','sonner'].forEach\\(k=>console.log\\(k, d[k]||'NOT INSTALLED'\\)\\)\")",
+      "Bash(Get-ChildItem -Path \"c:\\\\laragon\\\\www\\\\perpustakaan-saint-luke\\\\resources\\\\views\" -Recurse)",
+      "Bash(Select-Object FullName, Name)",
+      "Bash(Get-ChildItem -Path \"c:\\\\laragon\\\\www\\\\perpustakaan-saint-luke\\\\app\\\\Http\\\\\" -Name \"Kernel.php\")",
+      "Bash(Get-ChildItem -Path \"c:\\\\laragon\\\\www\\\\perpustakaan-saint-luke\" -Recurse -Force)",
+      "Bash(Select-Object -First 30)",
+      "Bash(Format-Table FullName)"
     ],
     "additionalDirectories": [
       "c:\\laragon\\www\\perpustakaan-saint-luke"

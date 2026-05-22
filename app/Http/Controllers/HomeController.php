@@ -35,7 +35,7 @@ class HomeController extends Controller
                 'categories'           => $this->homeController->transformCategories($categoriesPaginator),
                 'informations'         => $this->homeController->transformInformations($informationsPaginator),
                 'count_of_all_books'   => $this->homeController->getAllCountOfBooks(),
-                'count_of_all_authors' => $this->homeController->getAllCountOfAuthors(),
+                'count_of_all_visitors' => $this->homeController->getAllCountOfVisitors(),
                 'count_of_all_users'   => $this->homeController->getAllCountOfUsers(),
                 'charts'               => $this->homeController->getCharts(),
             ],

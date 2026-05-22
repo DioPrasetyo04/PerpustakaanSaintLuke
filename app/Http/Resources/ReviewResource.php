@@ -31,8 +31,8 @@ class ReviewResource extends JsonResource
             $data['book'] = BookResource::make($this->book)->resolve();
         }
 
-        if ($this->relationLoaded('user') && $this->user) {
-            $data['user'] = UserResource::make($this->user)->resolve();
+        if ($this->relationLoaded('loanDetail') && $this->loanDetail?->relationLoaded('user') && $this->loanDetail->user) {
+            $data['user'] = UserResource::make($this->loanDetail->user)->resolve();
         }
 
         return $data;

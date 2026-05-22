@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
 import {
-    BookOpen,
     Library,
     Users,
     BarChart2,
@@ -34,7 +33,7 @@ import { useLanguage } from '@/hooks/useLanguage';
 import StatCard from '@/components/component/Home/Stats/StatCard';
 import {
     BookChartItem,
-    BorrowChartItem,
+    VisitorChartItem,
     CategoryChartItem,
     MemberChartItem,
 } from '@/types/HomePage/HomeType';
@@ -105,9 +104,9 @@ function ChartCard({
 
 type StatsProps = {
     dataCountBooks: number;
-    dataCountAuthors: number;
+    dataCountVisitors: number;
     dataCountUsers: number;
-    borrowData: BorrowChartItem[];
+    visitorData: VisitorChartItem[];
     categoryData: CategoryChartItem[];
     bookData: BookChartItem[];
     memberData: MemberChartItem[];
@@ -115,9 +114,9 @@ type StatsProps = {
 // ─── Main Component ───────────────────────────────────────────────────────────
 const Stats = ({
     dataCountBooks,
-    dataCountAuthors,
+    dataCountVisitors,
     dataCountUsers,
-    borrowData,
+    visitorData,
     bookData,
     categoryData,
     memberData,
@@ -138,8 +137,8 @@ const Stats = ({
         buku: { label: 'Buku', color: '#D4AF37' },
     } satisfies ChartConfig;
 
-    const borrowConfig = {
-        peminjaman: { label: 'Peminjaman', color: '#D4AF37' },
+    const visitorConfig = {
+        pengunjung: { label: 'Pengunjung', color: '#D4AF37' },
     } satisfies ChartConfig;
 
     const memberConfig = {
@@ -157,11 +156,11 @@ const Stats = ({
             delay: 0,
         },
         {
-            icon: BookOpen,
-            target: dataCountAuthors,
+            icon: Users,
+            target: dataCountVisitors,
             suffix: '+',
-            label: 'Total Penulis',
-            desc: 'Penulis dari berbagai genre',
+            label: 'Total Pengunjung',
+            desc: 'Pengunjung perpustakaan',
             color: '#f0d57a',
             bg: 'bg-[#f0d57a]/20',
             delay: 0.12,
@@ -237,19 +236,19 @@ const Stats = ({
                                 className="space-y-6"
                             >
                                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                                    {/* Bar Chart Loans */}
+                                    {/* Bar Chart Visitors */}
                                     <ChartCard
                                         icon={BarChart2}
-                                        title="Data Peminjaman"
-                                        subtitle="Distribusi Data Peminjaman Per Bulan Selama 12 Bulan Terakhir"
+                                        title="Data Pengunjung"
+                                        subtitle="Distribusi Data Pengunjung Per Bulan Selama 12 Bulan Terakhir"
                                     >
                                         <ChartContainer
-                                            config={borrowConfig}
+                                            config={visitorConfig}
                                             className="h-56 w-full"
                                         >
                                             <BarChart
                                                 accessibilityLayer
-                                                data={borrowData}
+                                                data={visitorData}
                                                 barSize={22}
                                             >
                                                 <CartesianGrid
@@ -282,7 +281,7 @@ const Stats = ({
                                                     }
                                                 />
                                                 <Bar
-                                                    dataKey="loans"
+                                                    dataKey="visits"
                                                     fill="#D4AF37"
                                                     radius={[6, 6, 0, 0]}
                                                 />

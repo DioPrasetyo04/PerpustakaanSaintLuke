@@ -7,13 +7,16 @@ use Carbon\Carbon;
 trait BuildsLaporan
 {
     /**
-     * Build the period buckets based on mode (daily/weekly/monthly).
-     * For 'daily' the buckets are days in a selected month.
-     * For 'weekly' the buckets are weeks of the selected year.
-     * For 'monthly' the buckets are 12 months of the selected year.
+     * Build the period buckets based on mode.
+     *   - 'monthly'      : 12 months of the selected year.
+     *   - 'weekly'       : weeks of the selected year.
+     *   - 'weekly_month' : weeks within the selected month.
+     *   - 'daily'        : days in the selected month.
+     *   - 'daily_week'   : 7 days of the selected week (within the selected month).
      *
      * @return array{
      *   mode:string,
+     *   modeLabel:string,
      *   buckets: array<int, array{label:string, range:string, start:Carbon, end:Carbon, value:int|float}>,
      *   rangeStart:Carbon,
      *   rangeEnd:Carbon,
@@ -21,11 +24,12 @@ trait BuildsLaporan
      *   periodRange:string,
      * }
      */
-    public function buildPeriodBuckets(string $mode, int $year, ?int $month, callable $counter): array
+    public function buildPeriodBuckets(string $mode, int $year, ?int $month, callable $counter, ?int $week = null): array
     {
-        $mode = in_array($mode, ['daily', 'weekly', 'monthly'], true) ? $mode : 'monthly';
+        $mode = in_array($mode, ['daily', 'daily_week', 'weekly', 'weekly_month', 'monthly'], true) ? $mode : 'monthly';
         $year  = (int) ($year ?: now()->year);
         $month = (int) ($month ?: now()->month);
+        $week  = (int) ($week ?: 1);
 
         $buckets = [];
 
@@ -43,6 +47,7 @@ trait BuildsLaporan
                     'value' => $counter($start, $end),
                 ];
             }
+            $modeLabel   = 'Bulanan';
             $periodLabel = 'Bulanan ' . $year;
             $periodRange = '01 Jan ' . $year . ' - 31 Des ' . $year;
         } elseif ($mode === 'weekly') {
@@ -65,8 +70,68 @@ trait BuildsLaporan
                 $cursor->addWeek();
                 $i++;
             }
+            $modeLabel   = 'Mingguan';
             $periodLabel = 'Mingguan ' . $year;
             $periodRange = '01 Jan ' . $year . ' - 31 Des ' . $year;
+        } elseif ($mode === 'weekly_month') {
+            $monthStart = Carbon::create($year, $month, 1)->startOfMonth();
+            $monthEnd   = $monthStart->copy()->endOfMonth();
+            $rangeStart = $monthStart->copy();
+            $rangeEnd   = $monthEnd->copy();
+            $cursor = $monthStart->copy()->startOfWeek();
+            $i = 1;
+            while ($cursor->lte($monthEnd)) {
+                $start = $cursor->copy();
+                $end   = $cursor->copy()->endOfWeek();
+                if ($start->lt($monthStart)) $start = $monthStart->copy();
+                if ($end->gt($monthEnd))     $end   = $monthEnd->copy();
+                $buckets[] = [
+                    'label' => 'M' . $i,
+                    'range' => $start->format('d M') . ' - ' . $end->format('d M'),
+                    'start' => $start,
+                    'end'   => $end,
+                    'value' => $counter($start, $end),
+                ];
+                $cursor->addWeek();
+                $i++;
+            }
+            $modeLabel   = 'Mingguan per Bulan';
+            $periodLabel = 'Mingguan ' . $monthStart->translatedFormat('F Y');
+            $periodRange = $monthStart->format('d M Y') . ' - ' . $monthEnd->format('d M Y');
+        } elseif ($mode === 'daily_week') {
+            $monthStart = Carbon::create($year, $month, 1)->startOfMonth();
+            $monthEnd   = $monthStart->copy()->endOfMonth();
+
+            // Enumerate the (full Mon–Sun) weeks that touch the month, then pick week #$week.
+            $weekStarts = [];
+            $cursor = $monthStart->copy()->startOfWeek();
+            while ($cursor->lte($monthEnd)) {
+                $weekStarts[] = $cursor->copy();
+                $cursor->addWeek();
+            }
+            $idx = max(0, min($week - 1, count($weekStarts) - 1));
+            $weekStart = $weekStarts[$idx];
+
+            $rangeStart = $weekStart->copy()->startOfDay();
+            $rangeEnd   = $weekStart->copy()->endOfWeek()->endOfDay();
+
+            $dayNamesId = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min']; // Mon..Sun (ISO)
+            $day = $weekStart->copy();
+            for ($d = 0; $d < 7; $d++) {
+                $start = $day->copy()->startOfDay();
+                $end   = $day->copy()->endOfDay();
+                $buckets[] = [
+                    'label' => $dayNamesId[$start->dayOfWeekIso - 1] ?? $start->format('D'),
+                    'range' => $start->format('d M'),
+                    'start' => $start,
+                    'end'   => $end,
+                    'value' => $counter($start, $end),
+                ];
+                $day->addDay();
+            }
+            $modeLabel   = 'Harian per Minggu';
+            $periodLabel = 'Harian Minggu ke-' . ($idx + 1) . ' ' . $monthStart->translatedFormat('F Y');
+            $periodRange = $rangeStart->format('d M Y') . ' - ' . $rangeEnd->format('d M Y');
         } else { // daily
             $base = Carbon::create($year, $month, 1);
             $rangeStart = $base->copy()->startOfMonth();
@@ -84,12 +149,14 @@ trait BuildsLaporan
                 ];
                 $cursor->addDay();
             }
+            $modeLabel   = 'Harian';
             $periodLabel = 'Harian ' . $base->translatedFormat('F Y');
             $periodRange = $rangeStart->format('d M Y') . ' - ' . $rangeEnd->format('d M Y');
         }
 
         return [
             'mode'        => $mode,
+            'modeLabel'   => $modeLabel,
             'buckets'     => $buckets,
             'rangeStart'  => $rangeStart,
             'rangeEnd'    => $rangeEnd,
@@ -159,10 +226,38 @@ trait BuildsLaporan
     public function laporanModeOptions(): array
     {
         return [
-            'daily'   => 'Harian (per hari dalam 1 bulan)',
-            'weekly'  => 'Mingguan (per minggu dalam 1 tahun)',
-            'monthly' => 'Bulanan (per bulan dalam 1 tahun)',
+            'daily'        => 'Harian (per hari dalam 1 bulan)',
+            'daily_week'   => 'Harian (per hari dalam 1 minggu)',
+            'weekly'       => 'Mingguan (per minggu dalam 1 tahun)',
+            'weekly_month' => 'Mingguan (per minggu dalam 1 bulan)',
+            'monthly'      => 'Bulanan (per bulan dalam 1 tahun)',
         ];
+    }
+
+    /**
+     * Week options for the selected month, used by the 'daily_week' mode.
+     * Each option is a full Mon–Sun week that touches the month.
+     */
+    public function weekOptions(?int $year, ?int $month): array
+    {
+        $year  = (int) ($year ?: now()->year);
+        $month = (int) ($month ?: now()->month);
+
+        $monthStart = Carbon::create($year, $month, 1)->startOfMonth();
+        $monthEnd   = $monthStart->copy()->endOfMonth();
+
+        $opts = [];
+        $cursor = $monthStart->copy()->startOfWeek();
+        $i = 1;
+        while ($cursor->lte($monthEnd)) {
+            $start = $cursor->copy();
+            $end   = $cursor->copy()->endOfWeek();
+            $opts[$i] = 'Minggu ke-' . $i . ' (' . $start->format('d M') . ' – ' . $end->format('d M') . ')';
+            $cursor->addWeek();
+            $i++;
+        }
+
+        return $opts;
     }
 
     /** Year options for last 5 years up to current. */

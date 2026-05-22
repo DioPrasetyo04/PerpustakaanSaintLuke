@@ -4,14 +4,12 @@ namespace App\Repositories;
 
 use App\Enums\BookStatus;
 use App\Enums\PublishedBooks;
-use App\Enums\ReturnBookStatus;
 use App\Interface\HomeInterfaceRepositories;
-use App\Models\Author;
 use App\Models\Book;
 use App\Models\Category;
 use App\Models\Information;
-use App\Models\Loan;
 use App\Models\User;
+use App\Models\Visit;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class HomeRepositories implements HomeInterfaceRepositories
@@ -126,9 +124,9 @@ class HomeRepositories implements HomeInterfaceRepositories
         return Book::query()->where('is_published', PublishedBooks::PUBLISH->value)->count();
     }
 
-    public function getCountOfAllAuthors(): int
+    public function getCountOfAllVisitors(): int
     {
-        return Author::query()->whereNotNull('verified_at')->count();
+        return Visit::query()->count();
     }
 
     public function getCountOfAllUserVerified(): int
@@ -136,17 +134,15 @@ class HomeRepositories implements HomeInterfaceRepositories
         return User::query()->whereNotNull('email_verified_at')->count();
     }
 
-    public function getBorrowChart(): array
+    public function getVisitChart(): array
     {
-        $data = Loan::query()
-            ->join('return_books', 'return_books.loan_id', '=', 'loans.id')
-            ->where('return_books.status', ReturnBookStatus::RETURNED->value)
-            ->selectRaw('DATE_FORMAT(return_books.return_date, "%Y-%m") as ym, COUNT(*) as total')
+        $data = Visit::query()
+            ->selectRaw('DATE_FORMAT(visit_date, "%Y-%m") as ym, COUNT(*) as total')
             ->groupBy('ym')
             ->pluck('total', 'ym')
             ->toArray();
 
-        return formatLast12Months($data, 'loans');
+        return formatLast12Months($data, 'visits');
     }
 
     public function getBookChart(): array

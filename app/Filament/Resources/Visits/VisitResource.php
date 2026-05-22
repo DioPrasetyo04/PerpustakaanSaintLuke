@@ -47,6 +47,23 @@ class VisitResource extends Resource
         return [];
     }
 
+    /**
+     * Normalisasi data kunjungan sebelum disimpan (dipakai CreateVisit & EditVisit).
+     * - Alamat kosong → "-".
+     * - Bila tingkat (type) kosong tapi Status (type_other) terisi → type = "other"
+     *   agar badge "Tingkat" pada tabel menampilkan nilai Status.
+     */
+    public static function normalizeVisitData(array $data): array
+    {
+        $data['address'] = filled($data['address'] ?? null) ? $data['address'] : '-';
+
+        if (blank($data['type'] ?? null) && filled($data['type_other'] ?? null)) {
+            $data['type'] = 'other';
+        }
+
+        return $data;
+    }
+
     public static function getPages(): array
     {
         return [

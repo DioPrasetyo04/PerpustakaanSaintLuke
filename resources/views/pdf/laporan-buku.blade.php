@@ -7,7 +7,7 @@
     <x-slot name="summary">
         <div class="period-box">
             <div><strong>Periode</strong>: {{ $report['periodLabel'] }} — {{ $report['periodRange'] }}</div>
-            <div><strong>Tipe</strong>: {{ ucfirst($report['mode']) }}</div>
+            <div><strong>Tipe</strong>: {{ $report['modeLabel'] ?? ucfirst($report['mode']) }}</div>
             <div><strong>Total Buku Ditambahkan</strong>: {{ $report['total'] }} judul</div>
             @foreach ($report['byStatus'] as $status => $count)
                 <div><strong>{{ ucfirst($status) }}</strong>: {{ $count }} buku</div>

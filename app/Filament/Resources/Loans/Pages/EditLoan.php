@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Loans\Pages;
 
+use App\Filament\Resources\Loans\Concerns\InteractsWithMemberScan;
 use App\Filament\Resources\Loans\LoanResource;
 use App\Models\FineSettings;
 use App\Models\Loan;
@@ -13,6 +14,8 @@ use Illuminate\Validation\ValidationException;
 
 class EditLoan extends EditRecord
 {
+    use InteractsWithMemberScan;
+
     protected static string $resource = LoanResource::class;
 
     /** @var array<int> */

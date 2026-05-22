@@ -14,11 +14,11 @@ interface HomeInterfaceRepositories
 
     public function getCountOfAllBooks(): int;
 
-    public function getCountOfAllAuthors(): int;
+    public function getCountOfAllVisitors(): int;
 
     public function getCountOfAllUserVerified(): int;
 
-    public function getBorrowChart(): array;
+    public function getVisitChart(): array;
     public function getBookChart(): array;
     public function getCategoryPieChart(): array;
     public function getMemberChart(): array;

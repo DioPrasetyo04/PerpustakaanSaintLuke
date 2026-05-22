@@ -7,6 +7,7 @@ use App\Enums\LoanStatus;
 use App\Models\FineSettings;
 use App\Models\Loan;
 use App\Models\User;
+use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
@@ -30,8 +31,20 @@ class LoanForm
         return $schema
             ->components([
                 Section::make('Informasi Peminjaman')
-                    ->description('Pilih peminjam. Tanggal pinjam & jatuh tempo dicatat per buku di bagian bawah.')
+                    ->description('Pilih peminjam atau scan kartu anggota. Tanggal pinjam & jatuh tempo dicatat per buku di bagian bawah.')
                     ->icon(Heroicon::OutlinedUser)
+                    ->headerActions([
+                        Action::make('scanCard')
+                            ->label('Scan Kartu Anggota')
+                            ->icon('heroicon-o-qr-code')
+                            ->color('success')
+                            ->modalHeading('Scan Kartu Anggota')
+                            ->modalDescription('Gunakan scanner USB, ketik nomor anggota, atau kamera untuk memilih peminjam tanpa dropdown.')
+                            ->modalIcon('heroicon-o-qr-code')
+                            ->modalContent(fn() => view('filament.loan.scanner', ['wireMethod' => 'applyScannedMember']))
+                            ->modalSubmitAction(false)
+                            ->modalCancelActionLabel('Tutup'),
+                    ])
                     ->schema([
                         Grid::make(2)->schema([
                             Select::make('user_id')
@@ -45,6 +58,7 @@ class LoanForm
                                 ->searchable(['name', 'username', 'email', 'phone', 'address', 'date_of_birth'])
                                 ->preload()
                                 ->live()
+                                ->default(fn() => request()->integer('user_id') ?: null)
                                 ->afterStateUpdated(function (Set $set, $state) {
                                     $set('loan_code', filled($state)
                                         ? generateUniqueCode('Loan', Loan::class, 'loan_code')
@@ -64,6 +78,9 @@ class LoanForm
                                 ->readOnly()
                                 ->disabled()
                                 ->dehydrated()
+                                ->default(fn() => request()->integer('user_id')
+                                    ? generateUniqueCode('Loan', Loan::class, 'loan_code')
+                                    : null)
                                 ->columnSpanFull(),
 
                             Hidden::make('status')->default(LoanStatus::LOANED->value),

@@ -60,7 +60,7 @@ class BookRepositories implements BookInterfaceRepositories
                 'language:id,language,photo',
             ])
             ->withAvg('reviews as avg_rating', 'rating')
-            ->whereHas('loan')
+            ->whereHas('loanDetails')
             ->whereHas('reviews', fn($review) => $review->where('rating', '>=', 3.5))
             ->where('is_published', PublishedBooks::PUBLISH->value)
             ->orderByDesc('avg_rating')
@@ -73,14 +73,15 @@ class BookRepositories implements BookInterfaceRepositories
     {
         return ReviewBook::query()->select([
             'id',
-            'user_id',
+            'loan_user_id',
+            'return_book_id',
             'rating',
             'comment',
-            'created_at'
+            'created_at',
         ])
             ->whereHas('book', fn($q) => $q->where('slug', $slug))
             ->with([
-                'user:id,name,email,username,avatar'
+                'loanDetail.user:users.id,name,email,username,avatar',
             ])
             ->when(
                 ($filters['field'] ?? null) && ($filters['direction'] ?? null),

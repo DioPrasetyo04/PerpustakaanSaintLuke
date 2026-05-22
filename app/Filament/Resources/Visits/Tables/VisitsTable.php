@@ -26,18 +26,26 @@ class VisitsTable
                     ->disk('public')
                     ->imageSize(45)
                     ->circular()
-                    ->defaultImageUrl(fn($record) => 'https://ui-avatars.com/api/?name=' . urlencode($record->user?->name ?? 'U') . '&background=random&color=fff'),
+                    ->defaultImageUrl(fn($record) => 'https://ui-avatars.com/api/?name=' . urlencode($record->name ?: ($record->user?->name ?? 'U')) . '&background=random&color=fff'),
 
-                TextColumn::make('user.name')
-                    ->label('Nama Pengguna')
+                TextColumn::make('name')
+                    ->label('Nama Pengunjung')
+                    ->description(fn($record) => $record->user_id ? 'Terdaftar' : 'Tamu')
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('user.email')
                     ->label('Email')
+                    ->placeholder('—')
                     ->searchable()
                     ->copyable()
                     ->toggleable(),
+
+                TextColumn::make('address')
+                    ->label('Alamat')
+                    ->limit(30)
+                    ->toggleable()
+                    ->wrap(),
 
                 IconColumn::make('user.email_verified_at')
                     ->label('Verifikasi')

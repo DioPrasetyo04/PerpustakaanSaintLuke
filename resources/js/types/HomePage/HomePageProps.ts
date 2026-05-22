@@ -1,6 +1,6 @@
 import type {
     BookChartItem,
-    BorrowChartItem,
+    VisitorChartItem,
     CategoryChartItem,
     MemberChartItem,
 } from './HomeType';
@@ -15,10 +15,10 @@ export type HomePageProps = {
         categories: Paginated<CategoryProps>;
         informations: Paginated<InformationProps>;
         count_of_all_books: number;
-        count_of_all_authors: number;
+        count_of_all_visitors: number;
         count_of_all_users: number;
         charts: {
-            borrow_chart: BorrowChartItem[];
+            visitor_chart: VisitorChartItem[];
             book_chart: BookChartItem[];
             category_chart: CategoryChartItem[];
             member_chart: MemberChartItem[];
