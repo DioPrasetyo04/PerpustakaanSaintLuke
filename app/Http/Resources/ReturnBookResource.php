@@ -31,7 +31,7 @@ class ReturnBookResource extends JsonResource
             'book_id' => $this->when((bool) $book, fn() => $book?->id),
             'user_id' => $this->when((bool) $user, fn() => $user?->id),
             'return_date' => $this->when(isset($this->return_date), $this->return_date ? Carbon::parse($this->return_date)->format('d F Y') : null),
-            'status' => $this->when(isset($this->status), $this->status),
+            'status' => $this->when(isset($this->status), $this->status instanceof \BackedEnum ? $this->status->value : $this->status),
             'return_status_label' => $this->when(
                 isset($this->return_status_label),
                 fn() => $this->return_status_label
@@ -54,7 +54,7 @@ class ReturnBookResource extends JsonResource
 
             'payment_status' => $this->when(
                 isset($this->payment_status),
-                fn() => $this->payment_status
+                fn() => $this->payment_status instanceof \BackedEnum ? $this->payment_status->value : $this->payment_status
             ),
         ];
 

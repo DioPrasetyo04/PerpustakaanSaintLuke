@@ -9,6 +9,7 @@ use App\Models\ReturnBook;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Midtrans\Config;
 use Midtrans\Snap;
 use Inertia\Inertia;
@@ -23,7 +24,9 @@ class PaymentController extends Controller
         Config::$isSanitized = config('midtrans.is_sanitized');
         Config::$is3ds = config('midtrans.is_3ds');
 
-        $fine = Fine::with('user')->findOrFail($request->fine_id);
+        $fine = Fine::with('returnBook.loanDetail.loan.user')->findOrFail($request->fine_id);
+
+        $this->authorizeFineOwner($fine);
 
         $orderId = 'FINE-' . $fine->id . '-' . time();
 
@@ -249,25 +252,72 @@ class PaymentController extends Controller
     //     return response()->json(['message' => 'OK'], 200);
     // }
 
-    public function handlePending()
+    public function handlePending(Request $request)
     {
-        return Inertia::render('payment/pending');
-        // If the transaction status is anything else, update the fine status to 'error'
+        return Inertia::render('payment/pending', [
+            'fine' => $this->resolveFineProps($request),
+        ]);
     }
 
-    public function handleSuccess()
+    public function handleSuccess(Request $request)
     {
-        return Inertia::render('payment/success');
-        // Save the fine
+        return Inertia::render('payment/success', [
+            'fine' => $this->resolveFineProps($request),
+        ]);
     }
 
-    public function handleFailed()
+    public function handleFailed(Request $request)
     {
-        return Inertia::render('payment/failed');
+        return Inertia::render('payment/failed', [
+            'fine' => $this->resolveFineProps($request),
+        ]);
     }
 
-    public function handleError()
+    public function handleCancel(Request $request)
     {
-        return Inertia::render('payment/error');
+        return Inertia::render('payment/cancel', [
+            'fine' => $this->resolveFineProps($request),
+        ]);
+    }
+
+    public function handleError(Request $request)
+    {
+        return Inertia::render('payment/error', [
+            'fine' => $this->resolveFineProps($request),
+            'message' => $request->string('message')->toString() ?: null,
+        ]);
+    }
+
+    private function authorizeFineOwner(Fine $fine): void
+    {
+        $ownerId = $fine->returnBook?->loanDetail?->loan?->user_id;
+
+        abort_unless($ownerId === auth()->id(), 403);
+    }
+
+    private function resolveFineProps(Request $request): ?array
+    {
+        $fineId = $request->input('fine_id');
+
+        if (! $fineId) {
+            return null;
+        }
+
+        $fine = Fine::with('returnBook.loanDetail.book.categories', 'returnBook.loanDetail.loan')
+            ->find($fineId);
+
+        if (! $fine || $fine->returnBook?->loanDetail?->loan?->user_id !== auth()->id()) {
+            return null;
+        }
+
+        $book = $fine->returnBook?->loanDetail?->book;
+
+        return [
+            'id' => (string) $fine->id,
+            'book_title' => $book?->title,
+            'category' => $book?->categories->first()?->name,
+            'cover_url' => $book?->cover ? Storage::url($book->cover) : null,
+            'amount' => (float) $fine->total_fee,
+        ];
     }
 }

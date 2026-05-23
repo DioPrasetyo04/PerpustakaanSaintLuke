@@ -11,6 +11,10 @@ export type AnnouncementProps = {
     days: string;
 };
 
+export type FlashProps = {
+    access_denied?: 'expired' | 'unauthorized';
+};
+
 export type PageProps<
     T extends Record<string, unknown> = Record<string, unknown>,
 > = T & {
@@ -18,4 +22,6 @@ export type PageProps<
         user: import('./auth').User;
     };
     announcement: AnnouncementProps | null;
+    flash: FlashProps | null;
+    csrfToken: string;
 };

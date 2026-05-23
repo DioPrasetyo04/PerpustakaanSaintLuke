@@ -839,7 +839,7 @@ export default function ProfilePage() {
                                     Manage your password and account security
                                 </p>
                             </div>
-                            <Link href={route('user-password.edit')}>
+                            <Link href={route('password-update.edit')}>
                                 <Button className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white shadow-lg gap-2">
                                     <Lock className="h-4 w-4" />
                                     Update Password

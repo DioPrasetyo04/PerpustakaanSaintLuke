@@ -50,7 +50,7 @@ class LoanService
         ];
     }
 
-    public function postDataLoanUserAuth(array $data)
+    public function postDataLoanUserAuth(array $data): Loan
     {
         $auth = auth()->user();
 
@@ -60,23 +60,25 @@ class LoanService
 
         try {
             return DB::transaction(function () use ($auth, $data, $duration) {
+                $detailData = [
+                    'book_id'   => $data['book_id'],
+                    'loan_date' => now(),
+                    'due_date'  => now()->addDays($duration),
+                ];
 
-                $loan = $this->loanService->createLoan(
+                $existingLoan = Loan::getActiveLoan($auth->id);
+
+                if ($existingLoan) {
+                    return $this->loanService->addDetailToLoan($existingLoan, $detailData);
+                }
+
+                return $this->loanService->createLoan(
                     [
-                        'user_id' => $auth->id,
+                        'user_id'   => $auth->id,
                         'loan_code' => generateUniqueCode('Loan', Loan::class, 'loan_code'),
                     ],
-                    [
-                        'book_id' => $data['book_id'],
-                        'loan_date' => now(),
-                        'due_date' => now()->addDays($duration),
-                    ]
+                    $detailData
                 );
-
-                Loan::substractionStock($data['book_id']);
-                Loan::addLoanStock($data['book_id']);
-
-                return $loan;
             });
         } catch (Throwable $th) {
             throw $th;
@@ -102,32 +104,27 @@ class LoanService
     }
     private function validateLoan(int $userId, int $bookId)
     {
-        // 🔥 RULE 1 (WAJIB DULU)
-        if (Loan::hasUserActiveLoan($userId)) {
-            throw new BusinessException("loan.only_one_active", 400, ['limit' => 1]);
-        }
-
-        // 🔥 RULE 2 (OPTIONAL SEBENARNYA)
+        // RULE 1: Buku yang sama tidak boleh dipinjam dua kali sebelum dikembalikan
         if (Loan::hasActiveLoan($userId, $bookId)) {
             throw new BusinessException("loan.same_book_active");
         }
 
-        // 🔥 RULE 3 (DENDA)
+        // RULE 2: Tidak boleh meminjam jika masih ada denda yang belum dibayar
         if (Fine::hasUnpaidFine($userId)) {
             throw new BusinessException("loan.has_unpaid_fine");
         }
 
-        // 🔥 RULE 4 (STOK)
+        // RULE 3: Stok buku harus tersedia
         if (!Loan::checkStock($bookId)) {
             throw new BusinessException("loan.stock_empty");
         }
 
-        // 🔥 RULE 5 (VERIFIED)
+        // RULE 4: Akun pengguna harus sudah terverifikasi
         if (!Loan::checkUserVerified($userId)) {
             throw new BusinessException("loan.user_not_verified", 403);
         }
 
-        // 🔥 RULE 6 (SETTING)
+        // RULE 5: Pengaturan denda/peminjaman harus sudah dikonfigurasi
         if (!FineSettings::checkSettings()) {
             throw new BusinessException("loan.settings_not_configured", 500);
         }

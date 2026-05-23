@@ -17,7 +17,7 @@ type FineProp = {
     amount: number;
 };
 
-export default function PaymentFailed() {
+export default function PaymentCancel() {
     const { fine } = usePage<{ fine: FineProp | null }>().props;
     const [isRetrying, setIsRetrying] = useState(false);
 
@@ -48,7 +48,7 @@ export default function PaymentFailed() {
                             transition={{ delay: 0.2 }}
                             className="mb-3 font-['Poppins'] text-3xl font-bold text-gray-900 sm:text-4xl"
                         >
-                            Payment Failed
+                            Payment Cancelled
                         </motion.h1>
 
                         <motion.p
@@ -57,7 +57,7 @@ export default function PaymentFailed() {
                             transition={{ delay: 0.3 }}
                             className="text-lg text-gray-600"
                         >
-                            Your payment could not be completed
+                            Your payment was not completed
                         </motion.p>
                     </motion.div>
 
@@ -103,7 +103,7 @@ export default function PaymentFailed() {
                                         <span className="text-gray-600">Status:</span>
                                         <Badge className="bg-red-500">
                                             <XCircle className="mr-1 h-3 w-3" />
-                                            Payment Failed
+                                            Payment Cancelled
                                         </Badge>
                                     </div>
 
@@ -135,9 +135,9 @@ export default function PaymentFailed() {
                                             Why did this happen?
                                         </h3>
                                         <ul className="space-y-1 text-sm text-gray-700">
-                                            <li>• Your payment was declined by the provider</li>
-                                            <li>• Insufficient balance or limit on the account</li>
+                                            <li>• You closed the payment window before completing the transaction</li>
                                             <li>• The payment session may have expired</li>
+                                            <li>• You may have clicked the cancel button</li>
                                         </ul>
                                     </div>
                                 </div>

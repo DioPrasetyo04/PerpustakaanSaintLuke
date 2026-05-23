@@ -14,7 +14,7 @@ import { useLanguage } from '@/hooks/useLanguage';
 
 export default function Confirmation() {
     const { data } = usePage<any>().props;
-    const { book, loan, late_fee, total_fee, late_days } = data;
+    const { book, loan, late_fee, total_fee, late_days, has_review } = data;
     const {language} = useLanguage();
 
     const [isValidated, setIsValidated] = useState(false);
@@ -52,16 +52,53 @@ export default function Confirmation() {
         daysLeftColor = 'text-green-600';
     }
 
+    const submitReturn = (withRating: boolean) => {
+        setIsSubmitting(true);
+
+        const payload: Record<string, unknown> = {
+            slug: book.slug,
+            loan_code: loan.loan_code,
+            condition: 'Baik',
+        };
+
+        if (withRating) {
+            payload.rating = rating;
+            payload.comment = reviewMessage;
+        }
+
+        router.post(`/return/book/${book.slug}`, payload, {
+            onSuccess: () => {
+                setNotification({
+                    type: 'success',
+                    message: 'Book returned successfully! Thank you for your feedback.',
+                });
+            },
+            onError: (errors: Record<string, string>) => {
+                setIsSubmitting(false);
+                setNotification({
+                    type: 'error',
+                    message: errors.message || 'Failed to return the book',
+                });
+            },
+            onFinish: () => {
+                setIsSubmitting(false);
+            },
+        });
+    };
+
     const handleConfirmReturn = () => {
         if (!isValidated) {
             setNotification({
                 type: 'error',
-                message:
-                    'Please validate the return data by checking the checkbox',
+                message: 'Please validate the return data by checking the checkbox',
             });
             return;
         }
-        setShowRatingForm(true);
+        if (has_review) {
+            submitReturn(false);
+        } else {
+            setShowRatingForm(true);
+        }
     };
 
     const handleSubmitRating = () => {
@@ -72,38 +109,7 @@ export default function Confirmation() {
             });
             return;
         }
-
-        setIsSubmitting(true);
-
-        router.post(
-            `/return/book/${book.slug}`,
-            {
-                slug: book.slug,
-                loan_code: loan.loan_code,
-                condition: 'Baik',
-                rating: rating,
-                comment: reviewMessage,
-            },
-            {
-                onSuccess: () => {
-                    setNotification({
-                        type: 'success',
-                        message:
-                            'Book returned successfully! Thank you for your feedback.',
-                    });
-                },
-                onError: (errors: any) => {
-                    setIsSubmitting(false);
-                    setNotification({
-                        type: 'error',
-                        message: errors.message || 'Failed to return the book',
-                    });
-                },
-                onFinish: () => {
-                    setIsSubmitting(false);
-                },
-            },
-        );
+        submitReturn(true);
     };
 
     const authorNames =

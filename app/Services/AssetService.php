@@ -29,7 +29,7 @@ class AssetService
         $convertable = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'];
 
         // 🔥 double security (optional tapi recommended)
-        if ($bookAssets->loan->isEmpty()) {
+        if ($bookAssets->loanDetails->isEmpty()) {
             throw new AuthorizationException('You do not have access to this book');
         }
 

@@ -39,7 +39,10 @@
       "Bash(Get-ChildItem -Path \"c:\\\\laragon\\\\www\\\\perpustakaan-saint-luke\\\\app\\\\Http\\\\\" -Name \"Kernel.php\")",
       "Bash(Get-ChildItem -Path \"c:\\\\laragon\\\\www\\\\perpustakaan-saint-luke\" -Recurse -Force)",
       "Bash(Select-Object -First 30)",
-      "Bash(Format-Table FullName)"
+      "Bash(Format-Table FullName)",
+      "Bash(Get-ChildItem -Path \"c:\\\\laragon\\\\www\\\\perpustakaan-saint-luke\\\\app\\\\Console\\\\Commands\" -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object Name)",
+      "Bash(Get-ChildItem -Path \"c:\\\\laragon\\\\www\\\\perpustakaan-saint-luke\" -Directory)"
     ],
     "additionalDirectories": [
       "c:\\laragon\\www\\perpustakaan-saint-luke"

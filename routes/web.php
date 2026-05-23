@@ -14,6 +14,7 @@ use App\Http\Controllers\LoanController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\ReturnBookController;
+use App\Http\Controllers\UpdatePasswordController;
 use App\Http\Controllers\VisitFormController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
@@ -114,6 +115,10 @@ Route::middleware('auth')->group(function () {
 
             Route::get('/dashboard/return/{returnBookCode}', 'detail')->name('return.detail');
         });
+    });
+
+    Route::controller(ReturnBookController::class)->group(function () {
+        Route::post('/return/{returnBookCode}/review', 'storeReview')->name('return.review.store');
     });
 });
 
