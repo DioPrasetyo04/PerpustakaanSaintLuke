@@ -33,6 +33,7 @@ import ConfirmDialog from '@/components/component/Notification/ConfirmDialog';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useSearch } from '@/hooks/useSearch';
 import { Paginated } from '@/types/pagination';
+import { payFine } from '@/lib/midtrans';
 
 type TabId = 'bookmarks' | 'loans' | 'returns' | 'fines';
 
@@ -363,9 +364,7 @@ export default function HistoryPage() {
     ]);
 
     const handlePayFine = (fineId: string) => {
-        alert(
-            `Processing payment for fine #${fineId}. Redirecting to Midtrans payment gateway...`,
-        );
+        payFine(fineId);
     };
 
     // Bookmark delete flow: open ConfirmDialog → router.delete → Notification

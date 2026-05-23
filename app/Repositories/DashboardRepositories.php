@@ -82,7 +82,7 @@ class DashboardRepositories implements DashboardInterfaceRepositories
 
         $results = ReturnBook::query()
             ->selectRaw('DATE(return_date) as return_date, COUNT(*) as total')
-            ->where('user_id', $authUser->id)
+            ->whereHas('loanDetail.loan', fn($q) => $q->where('user_id', $authUser->id))
             ->whereBetween('return_date', [$startDate, $endDate])
             ->groupBy(DB::raw('DATE(return_date)'))
             ->orderBy('return_date')
@@ -100,7 +100,7 @@ class DashboardRepositories implements DashboardInterfaceRepositories
 
         $results = Fine::query()
             ->selectRaw('DATE(fine_date) as fine_date, SUM(total_fee) as total')
-            ->where('user_id', $authUser->id)
+            ->whereHas('returnBook.loanDetail.loan', fn($q) => $q->where('user_id', $authUser->id))
             ->whereBetween('fine_date', [$startDate, $endDate])
             ->groupBy(DB::raw('DATE(fine_date)'))
             ->orderBy('fine_date')
@@ -180,9 +180,14 @@ class DashboardRepositories implements DashboardInterfaceRepositories
         $loans = $query->paginate($perPage, ['*'], 'loans_page', $page);
 
         $loans->getCollection()->transform(function ($detail) {
-            $daysLeft = now()->diffInDays($detail->due_date, false);
+            $now = now();
 
-            $detail->days_left = $daysLeft;
+            $daysLeft = $now->diffInDays($detail->due_date, false);
+
+            $diff = $now->diff($detail->due_date);
+            $detail->days_left = (int) $diff->days;
+            $detail->hours_left = (int) $diff->h;
+            $detail->minutes_left = (int) $diff->i;
 
             $detail->deadline_status = match (true) {
                 $daysLeft < 0 => 'Overdue',

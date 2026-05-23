@@ -25,6 +25,8 @@ export type LoanBook = {
     loan_date: string;
     due_date: string;
     days_left: number;
+    hours_left: number;
+    minutes_left: number;
     deadline_status: 'Overdue' | 'danger' | 'warning' | 'safe';
     book: {
         id: number;

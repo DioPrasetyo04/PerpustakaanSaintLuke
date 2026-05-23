@@ -9,7 +9,7 @@ import type { NavItem } from '@/types';
 import { edit as editAppearance } from '@/routes/appearance';
 import { edit } from '@/routes/profile';
 import { show } from '@/routes/two-factor';
-import { edit as editPassword } from '@/routes/user-password';
+import editPassword from '@/routes/password';
 
 const sidebarNavItems: NavItem[] = [
     {

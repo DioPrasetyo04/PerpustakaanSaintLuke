@@ -14,6 +14,7 @@ use App\Interface\LoanInterfaceRepositories;
 use App\Interface\ProfileInterfaceRepositories;
 use App\Interface\ResourceInterfaceRepositories;
 use App\Interface\ReturnBookInterfaceRepositories;
+use App\Interface\UpdatePasswordInterfaceRepositories;
 use App\Repositories\AssetRepositories;
 use App\Repositories\BookRepositories;
 use App\Repositories\BookmarkRepositories;
@@ -26,6 +27,7 @@ use App\Repositories\LoanRepositories;
 use App\Repositories\ProfileRepositories;
 use App\Repositories\ResourceRepositories;
 use App\Repositories\ReturnBookRepositories;
+use App\Repositories\UpdatePasswordRepositories;
 use Carbon\CarbonImmutable;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
@@ -51,6 +53,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(HistoryInterfaceRepositories::class, HistoryRepositories::class);
         $this->app->bind(BookmarkInterfaceRepositories::class, BookmarkRepositories::class);
         $this->app->bind(ProfileInterfaceRepositories::class, ProfileRepositories::class);
+        $this->app->bind(UpdatePasswordInterfaceRepositories::class, UpdatePasswordRepositories::class);
     }
 
     public function boot(): void

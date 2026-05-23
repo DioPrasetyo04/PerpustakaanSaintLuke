@@ -24,7 +24,12 @@ class FineResource extends JsonResource
             'total_fee' => $this->when(isset($this->total_fee), $this->total_fee),
             'fine_date' => $this->when(isset($this->fine_date), $this->fine_date ? Carbon::parse($this->fine_date)->format('d F Y') : null),
             'payment_method' => $this->when(isset($this->payment_method), $this->payment_method),
-            'payment_status' => $this->when(isset($this->payment_status), PaymentStatus::from($this->payment_status)->value),
+            'payment_status' => $this->when(
+                isset($this->payment_status),
+                fn() => $this->payment_status instanceof PaymentStatus
+                    ? $this->payment_status->value
+                    : PaymentStatus::from($this->payment_status)->value
+            ),
             'order_id' => $this->when(isset($this->order_id), $this->order_id),
         ];
 

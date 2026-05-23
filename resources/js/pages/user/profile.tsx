@@ -278,7 +278,10 @@ export function ProfilePage() {
                                     Manage your password and account security
                                 </p>
                             </div>
-                            <Link href={'/update-password'}>
+                            <Link
+                                href={route('password-update.edit')}
+                                className="ml-auto"
+                            >
                                 <Button className="gap-2 bg-gradient-to-r from-primary to-secondary text-white shadow-lg hover:from-primary/90 hover:to-secondary/90">
                                     <Lock className="h-4 w-4" />
                                     Update Password

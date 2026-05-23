@@ -19,8 +19,8 @@ class LoanResource extends JsonResource
             ? $this->loanDetails->first()
             : null;
 
-        $loanDate = $primaryDetail?->loan_date;
-        $dueDate = $primaryDetail?->due_date;
+        $loanDate = $primaryDetail?->loan_date ?? $this->loan_date;
+        $dueDate  = $primaryDetail?->due_date  ?? $this->due_date;
         $book = $primaryDetail?->book ?? ($this->relationLoaded('book') ? $this->book : null);
 
         $data = [
@@ -41,6 +41,16 @@ class LoanResource extends JsonResource
             'days_left' => $this->when(
                 isset($this->days_left),
                 fn() => $this->days_left
+            ),
+
+            'hours_left' => $this->when(
+                isset($this->hours_left),
+                fn() => $this->hours_left
+            ),
+
+            'minutes_left' => $this->when(
+                isset($this->minutes_left),
+                fn() => $this->minutes_left
             ),
 
             'deadline_status' => $this->when(

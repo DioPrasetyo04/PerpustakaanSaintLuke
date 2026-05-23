@@ -181,7 +181,7 @@ if (!function_exists('paginateResource')) {
     {
         return [
             'data' => collect($paginator->items())->map(function ($item) use ($resource) {
-                return (new $resource($item))->toArray(request());
+                return (new $resource($item))->resolve();
             })->toArray(),
             'meta' => [
                 'current_page' => $paginator->currentPage(),

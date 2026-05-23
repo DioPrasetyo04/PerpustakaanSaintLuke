@@ -36,7 +36,7 @@ class LoanRepositories implements LoanInterfaceRepositories
             ->firstOrFail();
     }
 
-    public function createLoan(array $loanData, array $detailData)
+    public function createLoan(array $loanData, array $detailData): Loan
     {
         return DB::transaction(function () use ($loanData, $detailData) {
             $loan = Loan::create($loanData);
@@ -44,6 +44,13 @@ class LoanRepositories implements LoanInterfaceRepositories
 
             return $loan->load('loanDetails.book');
         });
+    }
+
+    public function addDetailToLoan(Loan $loan, array $detailData): Loan
+    {
+        $loan->loanDetails()->create($detailData);
+
+        return $loan->load('loanDetails.book');
     }
 
     public function getLoansByUser(int $userId, array $filters, int $perPage, int $page)

@@ -10,7 +10,7 @@ export function toUrl(url: NonNullable<InertiaLinkProps['href']>): string {
     return typeof url === 'string' ? url : url.url;
 }
 
-export const formattedDate = (value: string | undefined, language: string) => {
+export const formattedDate = (value: string | number, language: string) => {
     const date = new Date(value ?? '');
     return date.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', {
         year: 'numeric',

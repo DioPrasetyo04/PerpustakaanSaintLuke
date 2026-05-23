@@ -71,13 +71,24 @@ class Loan extends Model
             ->exists();
     }
 
+    public static function getActiveLoan(int $userId): ?self
+    {
+        return self::query()
+            ->where('user_id', $userId)
+            ->whereHas('loanDetails', fn($q) => $q->whereDoesntHave('returnBook'))
+            ->latest()
+            ->first();
+    }
+
     public static function hasActiveLoanBySlug(int $userId, string $slug): bool
     {
         return self::query()
             ->where('user_id', $userId)
-            ->whereHas('loanDetails', fn($q) => $q
-                ->whereDoesntHave('returnBook')
-                ->whereHas('book', fn($b) => $b->where('slug', $slug))
+            ->whereHas(
+                'loanDetails',
+                fn($q) => $q
+                    ->whereDoesntHave('returnBook')
+                    ->whereHas('book', fn($b) => $b->where('slug', $slug))
             )
             ->exists();
     }

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\BookCondition;
 use App\Enums\DiscountType;
+use App\Enums\LoanBookStatus;
 use App\Enums\PaymentStatus;
 use App\Enums\ReturnBookStatus;
 use App\Exceptions\BusinessException;
@@ -15,7 +16,7 @@ use App\Interface\ReturnBookInterfaceRepositories;
 use App\Models\Fine;
 use App\Models\FineSettings;
 use App\Models\ReturnBook;
-use App\Models\ReturnBookCheck;
+use App\Models\ReviewBook;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -59,6 +60,7 @@ class ReturnBookService
             'late_days' => $lateDays,
             'late_fee' => $lateFee,
             'total_fee' => $lateFee,
+            'has_review' => ReviewBook::where('loan_user_id', $loanDetail->id)->exists(),
         ];
     }
 
@@ -123,12 +125,6 @@ class ReturnBookService
                 'notes' => $notes
             ]);
 
-            match ($condition) {
-                BookCondition::GOOD->value => ReturnBookCheck::addReturnStock($loanDetail->book_id),
-                BookCondition::DAMAGED->value => ReturnBookCheck::addDamagedStock($loanDetail->book_id),
-                BookCondition::LOST->value => ReturnBookCheck::addLostStock($loanDetail->book_id),
-            };
-
             if ($totalFee > 0) {
                 $this->returnBookService->createFinePayment([
                     'return_book_id' => $returnBook->id,
@@ -139,6 +135,11 @@ class ReturnBookService
                     'payment_status' => PaymentStatus::PENDING->value,
                 ]);
             }
+
+            $loanDetail->update(['status' => LoanBookStatus::RETURNED]);
+
+            $loan->recomputeStatus();
+
             return $returnBook;
         });
     }
@@ -156,13 +157,22 @@ class ReturnBookService
         return $detail;
     }
 
-    public function createReviewBook(array $data)
+    public function storeReview(string $returnBookCode, array $data, int $userId): void
     {
+        $return = ReturnBook::query()
+            ->where('return_book_code', $returnBookCode)
+            ->whereHas('loanDetail.loan', fn($q) => $q->where('user_id', $userId))
+            ->firstOrFail();
+
+        if (ReviewBook::where('loan_user_id', $return->loan_user_id)->exists()) {
+            throw new BusinessException('review.already_exists', 400);
+        }
+
         $this->returnBookService->createReviewBook([
-            'user_id' => $data['user_id'],
-            'book_id' => $data['book_id'],
-            'rating' => $data['rating'],
-            'comment' => $data['comment'] ?? null,
+            'loan_user_id'   => $return->loan_user_id,
+            'return_book_id' => $return->id,
+            'rating'         => $data['rating'],
+            'comment'        => $data['comment'] ?? null,
         ]);
     }
 

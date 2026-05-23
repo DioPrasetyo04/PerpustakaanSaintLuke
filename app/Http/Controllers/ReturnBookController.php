@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\BusinessException;
 use App\Http\Requests\ReturnBookRequest;
 use App\Services\ReturnBookService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -35,6 +37,18 @@ class ReturnBookController extends Controller
             $slug
         );
 
+        if (!empty($validated['rating'])) {
+            try {
+                $this->returnController->storeReview(
+                    $return->return_book_code,
+                    ['rating' => $validated['rating'], 'comment' => $validated['comment'] ?? null],
+                    auth()->id()
+                );
+            } catch (BusinessException) {
+                // Already reviewed — skip silently so return still succeeds
+            }
+        }
+
         return redirect()
             ->route('home', $return->return_book_code)
             ->with('success', 'data.success');
@@ -53,5 +67,17 @@ class ReturnBookController extends Controller
     public function index()
     {
         return Inertia::render('book/return/Index');
+    }
+
+    public function storeReview(Request $request, string $returnBookCode): JsonResponse
+    {
+        $data = $request->validate([
+            'rating'  => ['required', 'numeric', 'min:1', 'max:5'],
+            'comment' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $this->returnController->storeReview($returnBookCode, $data, auth()->id());
+
+        return response()->json(['message' => 'review.success']);
     }
 }

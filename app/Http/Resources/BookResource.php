@@ -60,12 +60,16 @@ class BookResource extends JsonResource
             $data['publisher'] = PublisherResource::make($this->publisher)->resolve();
         }
 
-        if ($this->relationLoaded('authors') && $this->authors->isNotEmpty()) {
-            $data['authors'] = AuthorResource::collection($this->authors)->resolve();
+        if ($this->relationLoaded('authors')) {
+            $data['authors'] = $this->authors->isNotEmpty()
+                ? AuthorResource::collection($this->authors)->resolve()
+                : [];
         }
 
-        if ($this->relationLoaded('categories') && $this->categories->isNotEmpty()) {
-            $data['categories'] = CategoryResource::collection($this->categories)->resolve();
+        if ($this->relationLoaded('categories')) {
+            $data['categories'] = $this->categories->isNotEmpty()
+                ? CategoryResource::collection($this->categories)->resolve()
+                : [];
         }
 
         if ($this->relationLoaded('addedBy') && $this->addedBy) {

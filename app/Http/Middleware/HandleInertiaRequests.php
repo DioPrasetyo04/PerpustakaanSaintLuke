@@ -24,6 +24,10 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'announcement' => $this->getTodayAnnouncement(),
+            'flash' => [
+                'access_denied' => fn () => $request->session()->get('access_denied'),
+            ],
+            'csrfToken' => fn () => $request->session()->token(),
         ];
     }
 

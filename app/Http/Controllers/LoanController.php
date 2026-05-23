@@ -63,9 +63,11 @@ class LoanController extends Controller
 
         $loan = $this->loanController->postDataLoanUserAuth($data);
 
+        $newDetail = $loan->loanDetails->firstWhere('book_id', $data['book_id']);
+
         return response()->json([
             'message' => 'loan.success',
-            'slug' => $loan->book->slug,
+            'slug'    => $newDetail?->book?->slug,
         ]);
     }
 }
