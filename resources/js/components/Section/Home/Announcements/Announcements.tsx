@@ -1,16 +1,15 @@
 import { Link } from '@inertiajs/react';
 import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Megaphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { ImageWithFallback } from '@/components/common/ImageWithFallback';
-import { announcementsData, announcementsHeaderHome } from '@/data/data';
+import { announcementsHeaderHome } from '@/data/data';
 import { useLanguage } from '@/hooks/useLanguage';
-import { useState } from 'react';
-import { FeaturedInformationProps } from '@/types/HomePage/FeaturedHome';
 import { useQueryParams } from '@/hooks/useQueryParams';
 import { AnnouncementCard } from '@/components/component/Card/AnnouncementCard';
+import Carousel from '@/components/common/Carousel';
 import Pagination from '@/components/component/Home/Pagination/Pagination';
+import type { FeaturedInformationProps } from '@/types/HomePage/FeaturedHome';
+import type { InformationProps } from '@/types/DataTypes/InformationProps';
 
 const AnnouncementsSection = ({ informations }: FeaturedInformationProps) => {
     const { language } = useLanguage();
@@ -20,51 +19,72 @@ const AnnouncementsSection = ({ informations }: FeaturedInformationProps) => {
             : announcementsHeaderHome.en;
 
     const { createPagination } = useQueryParams();
-
     const { onPageChange, onPerPageChange } = createPagination(
         'informations',
         informations.meta.per_page,
     );
+
     return (
-        <section className="bg-gray-50 py-16">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="theme-transition relative overflow-hidden bg-background py-20">
+            <div className="pointer-events-none absolute top-1/2 left-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand/5 blur-3xl" />
+
+            <div className="relative container mx-auto px-4 sm:px-6 lg:px-8">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     className="mb-12 text-center"
                 >
-                    <h2 className="mb-4 font-['Poppins'] text-3xl font-bold text-gray-900 sm:text-4xl">
+                    <span className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-brand/20 bg-brand/10 px-3 py-1 text-xs font-semibold tracking-wide text-brand uppercase">
+                        <Megaphone className="h-3.5 w-3.5" />
+                        {language === 'id' ? 'Kabar Terbaru' : 'Latest News'}
+                    </span>
+                    <h2 className="font-poppins text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
                         {header.title}
                     </h2>
-                    <p className="mx-auto max-w-2xl text-gray-600">
+                    <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
                         {header.description}
                     </p>
                 </motion.div>
 
-                <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {informations.data.map((information, index) => (
-                        <AnnouncementCard
-                            key={information.id}
-                            {...information}
-                            index={index}
-                        />
-                    ))}
-                </div>
-                {informations.data.length > 0 ||
-                    (informations.meta.last_page > 1 && (
-                        <Pagination
-                            page={informations.meta.current_page}
-                            total={informations.meta.total}
-                            perPage={informations.meta.per_page}
-                            onPageChange={onPageChange}
-                            onPerPageChange={onPerPageChange}
-                        />
-                    ))}
+                {informations.data.length > 0 ? (
+                    <Carousel<InformationProps>
+                        items={informations.data}
+                        getKey={(info) => info.id}
+                        ariaLabel={header.title}
+                        autoplay={5000}
+                        renderItem={(info) => <AnnouncementCard {...info} />}
+                        breakpoints={{
+                            0: { slidesPerView: 1.1 },
+                            640: { slidesPerView: 2 },
+                            1024: { slidesPerView: 3 },
+                        }}
+                    />
+                ) : (
+                    <p className="py-12 text-center text-muted-foreground">
+                        {language === 'id'
+                            ? 'Belum ada pengumuman.'
+                            : 'No announcements yet.'}
+                    </p>
+                )}
 
-                <div className="mt-8 text-center">
+                {informations.meta.last_page > 1 && (
+                    <Pagination
+                        page={informations.meta.current_page}
+                        total={informations.meta.total}
+                        perPage={informations.meta.per_page}
+                        onPageChange={onPageChange}
+                        onPerPageChange={onPerPageChange}
+                    />
+                )}
+
+                <div className="mt-10 text-center">
                     <Link href="/informations">
-                        <Button size="lg" variant="outline" className="group">
+                        <Button
+                            size="lg"
+                            variant="outline"
+                            className="group rounded-full border-brand/30 text-foreground transition-all duration-300 hover:border-brand hover:bg-brand/5 hover:text-brand"
+                        >
                             {language === 'id'
                                 ? 'Lihat Semua Pengumuman'
                                 : 'View All Announcements'}

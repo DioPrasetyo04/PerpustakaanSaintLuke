@@ -1,15 +1,14 @@
-import React from 'react';
-
 import { motion } from 'framer-motion';
+import { HelpCircle } from 'lucide-react';
 
-type FAQHeaderSection = {
+type FAQHeaderSectionProps = {
     data: {
         title: string;
         subtitle: string;
     };
 };
 
-const FAQHeaderSection = ({ data }: FAQHeaderSection) => {
+const FAQHeaderSection = ({ data }: FAQHeaderSectionProps) => {
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -17,10 +16,16 @@ const FAQHeaderSection = ({ data }: FAQHeaderSection) => {
             viewport={{ once: true }}
             className="mb-12 text-center"
         >
-            <h2 className="mb-4 font-['Poppins'] text-3xl font-bold text-gray-900 sm:text-4xl">
+            <span className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-brand/20 bg-brand/10 px-3 py-1 text-xs font-semibold tracking-wide text-brand uppercase">
+                <HelpCircle className="h-3.5 w-3.5" />
+                FAQ
+            </span>
+            <h2 className="font-poppins text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
                 {data.title}
             </h2>
-            <p className="mx-auto max-w-2xl text-gray-600">{data.subtitle}</p>
+            <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+                {data.subtitle}
+            </p>
         </motion.div>
     );
 };

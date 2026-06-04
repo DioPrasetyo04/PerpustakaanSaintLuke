@@ -50,19 +50,17 @@ class AuthorForm
                                         ->label('Phone')
                                         ->defaultCountry('id')
                                         ->separateDialCode()
-                                        ->showFlags()
-                                        ->required(),
+                                        ->showFlags(),
                                     Select::make('gender')
                                         ->label('Gender')
                                         ->options(UserGender::optionViews())
                                         ->allowHtml()
                                         ->getOptionLabelUsing(fn($value) => UserGender::from($value)->html())
-                                        ->searchable()
-                                        ->required(),
-                                    Select::make('nationality')->label('Country')->options(countryOptions())->allowHtml()->searchable()->required(),
+                                        ->searchable(),
+                                    Select::make('nationality')->label('Country')->options(countryOptions())->allowHtml()->searchable(),
                                     DatePicker::make('verified_at')->label('Tanggal Verifikasi')->displayFormat('d F Y'),
                                     RichEditor::make('bio')->label('biography')->maxLength(255)->columnSpanFull(),
-                                    FileUpload::make('avatar')->label('Photo')->acceptedFileTypes(['jpg', 'jpeg', 'png', 'webp', 'gif'])->image()->disk('public')->visibility('public')->directory('authors')->required()->columnSpanFull(),
+                                    FileUpload::make('avatar')->label('Photo')->acceptedFileTypes(['jpg', 'jpeg', 'png', 'webp', 'gif'])->image()->disk('public')->visibility('public')->directory('authors')->columnSpanFull(),
                                 ]),
                             ]),
                         ]),
@@ -78,14 +76,12 @@ class AuthorForm
                                         ->allowHtml()
                                         ->getOptionLabelUsing(fn($value) => SocialMedia::from($value)->html())
                                         ->searchable()
-                                        ->required()
                                         ->native(false)
                                         ->columnSpan(1),
 
                                     TextInput::make('url')
                                         ->label('URL')
                                         ->url()
-                                        ->required()
                                         ->columnSpan(1),
 
                                     TextInput::make('username')

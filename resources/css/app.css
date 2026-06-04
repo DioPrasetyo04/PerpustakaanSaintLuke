@@ -57,6 +57,13 @@
     --color-chart-4: var(--chart-4);
     --color-chart-5: var(--chart-5);
 
+    /* Brand (gold) + futuristic indigo/violet accents */
+    --color-brand: var(--brand);
+    --color-brand-foreground: var(--brand-foreground);
+    --color-brand-soft: var(--brand-soft);
+    --color-accent-indigo: var(--accent-indigo);
+    --color-accent-violet: var(--accent-violet);
+
     --color-sidebar: var(--sidebar);
     --color-sidebar-foreground: var(--sidebar-foreground);
     --color-sidebar-primary: var(--sidebar-primary);
@@ -94,6 +101,14 @@
     --chart-4: oklch(0.828 0.189 84.429);
     --chart-5: oklch(0.769 0.188 70.08);
     --radius: 0.625rem;
+    /* Brand gold ~ #C8A45C / #D4AF37 */
+    --brand: oklch(0.74 0.097 84);
+    /* Dark espresso text reads cleanly on solid gold (no gradient needed) */
+    --brand-foreground: oklch(0.28 0.035 75);
+    --brand-soft: oklch(0.93 0.05 86);
+    /* Futuristic accents ~ indigo #6366F1 / violet #8B5CF6 */
+    --accent-indigo: oklch(0.585 0.222 277);
+    --accent-violet: oklch(0.62 0.21 293);
     --sidebar: oklch(0.985 0 0);
     --sidebar-foreground: oklch(0.145 0 0);
     --sidebar-primary: oklch(0.205 0 0);
@@ -107,7 +122,8 @@
 .dark {
     --background: oklch(0.145 0 0);
     --foreground: oklch(0.985 0 0);
-    --card: oklch(0.145 0 0);
+    /* Elevated card surface so cards stand out from the background in dark mode */
+    --card: oklch(0.205 0 0);
     --card-foreground: oklch(0.985 0 0);
     --popover: oklch(0.145 0 0);
     --popover-foreground: oklch(0.985 0 0);
@@ -129,6 +145,12 @@
     --chart-3: oklch(0.769 0.188 70.08);
     --chart-4: oklch(0.627 0.265 303.9);
     --chart-5: oklch(0.645 0.246 16.439);
+    /* Brighter gold + accents for dark surfaces */
+    --brand: oklch(0.81 0.11 86);
+    --brand-foreground: oklch(0.16 0.02 86);
+    --brand-soft: oklch(0.33 0.06 86);
+    --accent-indigo: oklch(0.66 0.2 277);
+    --accent-violet: oklch(0.7 0.18 293);
     --sidebar: oklch(0.205 0 0);
     --sidebar-foreground: oklch(0.985 0 0);
     --sidebar-primary: oklch(0.985 0 0);
@@ -147,4 +169,63 @@
     body {
         @apply bg-background text-foreground;
     }
+}
+
+@layer utilities {
+    /* Smooth color crossfade when toggling light/dark. Applied to section
+       wrappers (not `*`) to avoid global repaint jank. */
+    .theme-transition {
+        transition:
+            background-color 0.3s ease,
+            border-color 0.3s ease,
+            color 0.3s ease;
+    }
+
+    /* Light glassmorphism surface, adaptive to dark mode */
+    .glass {
+        background-color: color-mix(in oklab, var(--card) 70%, transparent);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+    }
+
+    /* Subtle floating motion for hero accents */
+    .animate-float {
+        animation: float 6s ease-in-out infinite;
+    }
+    .animate-float-slow {
+        animation: float 9s ease-in-out infinite;
+    }
+}
+
+@keyframes float {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-14px);
+    }
+}
+
+/* Modern, dark-adaptive Swiper navigation + pagination */
+.swiper {
+    padding-bottom: 0.25rem;
+}
+.swiper-pagination-bullet {
+    background-color: color-mix(in oklab, var(--brand) 55%, transparent);
+    opacity: 0.6;
+    transition:
+        width 0.3s ease,
+        opacity 0.3s ease,
+        background-color 0.3s ease;
+}
+.swiper-pagination-bullet-active {
+    width: 1.5rem;
+    border-radius: 9999px;
+    opacity: 1;
+    background-image: linear-gradient(
+        90deg,
+        var(--brand),
+        var(--accent-indigo)
+    );
 }

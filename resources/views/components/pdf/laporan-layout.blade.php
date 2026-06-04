@@ -1,6 +1,6 @@
 @props(['title' => 'Laporan', 'report' => [], 'chartImage' => null, 'chartTitle' => null])
 @php
-    $logoPath = public_path('assets/logos/Saint-Luke.jpg');
+    $logoPath = public_path('assets/logos/Saint-Luke.png');
     $logoExists = file_exists($logoPath);
     $headerTitle  = $report['state']['judul'] ?? $title;
     $headerNomor  = $report['state']['nomor'] ?? '-';

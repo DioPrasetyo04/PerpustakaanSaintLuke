@@ -242,7 +242,7 @@ export function VisitFormCard({
                             <div className="flex flex-col items-center gap-2 text-center">
                                 <div className="flex flex-row items-center gap-2 p-2">
                                     <img
-                                        src="/assets/logos/Saint-Luke.jpg"
+                                        src="/assets/logos/Saint-Luke.png"
                                         alt="Logo Santo Lukas"
                                         className="h-12 w-12 rounded-full object-cover"
                                     />

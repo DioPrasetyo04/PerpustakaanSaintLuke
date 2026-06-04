@@ -59,7 +59,7 @@ class MemberCardService
      */
     public static function logoDataUri(): ?string
     {
-        $path = public_path('assets/logos/Saint-Luke.jpg');
+        $path = public_path('assets/logos/Saint-Luke.png');
 
         if (! is_file($path)) {
             return null;
@@ -104,7 +104,7 @@ class MemberCardService
 
         $initials = collect($parts)
             ->take(2)
-            ->map(fn ($p) => mb_strtoupper(mb_substr($p, 0, 1)))
+            ->map(fn($p) => mb_strtoupper(mb_substr($p, 0, 1)))
             ->implode('');
 
         return $initials !== '' ? $initials : '?';

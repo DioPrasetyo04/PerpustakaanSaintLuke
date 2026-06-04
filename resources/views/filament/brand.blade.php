@@ -14,7 +14,7 @@
 </style>
 <div style="display:flex;align-items:center;gap:10px;padding:2px 0;">
     <img
-        src="{{ asset('assets/logos/Saint-Luke.jpg') }}"
+        src="{{ asset('assets/logos/Saint-Luke.png') }}"
         alt="Saint Luke"
         style="height:46px;width:46px;min-width:36px;border-radius:50%;object-fit:contain;flex-shrink:0;"
     >

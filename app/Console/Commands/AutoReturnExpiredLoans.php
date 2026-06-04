@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\LoanType;
 use App\Models\LoanDetail;
 use App\Services\DigitalAutoReturnService;
 use Carbon\Carbon;
@@ -18,6 +19,7 @@ class AutoReturnExpiredLoans extends Command
 
         $expiredDetails = LoanDetail::query()
             ->whereDoesntHave('returnBook')
+            ->where('loan_type', LoanType::DIGITAL->value)
             ->where('due_date', '<', Carbon::today())
             ->get();
 

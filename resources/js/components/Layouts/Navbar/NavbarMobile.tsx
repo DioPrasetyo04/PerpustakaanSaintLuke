@@ -6,7 +6,7 @@ import type { NavbarMobileProps } from '@/types/navbar';
 import { cn } from '@/lib/utils';
 import { ButtonVariants } from '@/components/ui/button3D';
 import { useLanguage } from '@/hooks/useLanguage';
-import { useTheme } from 'next-themes';
+import { useAppearance } from '@/hooks/use-appearance';
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
     dashboard: LayoutDashboard,
@@ -27,7 +27,8 @@ const NavbarMobile = ({
     language,
 }: NavbarMobileProps) => {
     const { setLanguage } = useLanguage();
-    const { theme, setTheme } = useTheme();
+    const { resolvedAppearance, updateAppearance } = useAppearance();
+    const isDark = resolvedAppearance === 'dark';
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
     const handleClose = () => setIsMenuOpen(false);
@@ -44,7 +45,7 @@ const NavbarMobile = ({
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                    className="overflow-hidden border-t border-gray-100 bg-white/95 backdrop-blur-xl lg:hidden"
+                    className="theme-transition overflow-hidden border-t border-border bg-background/95 backdrop-blur-xl lg:hidden"
                 >
                     <div className="container mx-auto flex flex-col gap-1 px-4 py-4">
                         {/* Nav Items */}
@@ -72,7 +73,7 @@ const NavbarMobile = ({
                                             }
                                             className={cn(
                                                 'flex w-full items-center justify-between px-5',
-                                                active && 'bg-[#C8A45C]/20',
+                                                active && 'bg-brand/15 text-brand',
                                             )}
                                         >
                                             {label}
@@ -107,7 +108,7 @@ const NavbarMobile = ({
                                                     }}
                                                     className="overflow-hidden"
                                                 >
-                                                    <div className="mt-1 ml-4 flex flex-col gap-1 border-l-2 border-[#C8A45C]/30 pl-3">
+                                                    <div className="mt-1 ml-4 flex flex-col gap-1 border-l-2 border-brand/30 pl-3">
                                                         {item.menu?.map(
                                                             (sub) => (
                                                                 <Link
@@ -123,7 +124,7 @@ const NavbarMobile = ({
                                                                     <ButtonVariants
                                                                         variant="navItem"
                                                                         size="sm"
-                                                                        className="w-full justify-start border-none text-gray-400 shadow-none hover:bg-white/5"
+                                                                        className="w-full justify-start border-none text-muted-foreground shadow-none hover:bg-muted"
                                                                     >
                                                                         {language ===
                                                                         'id'
@@ -158,7 +159,7 @@ const NavbarMobile = ({
                                         data-state={active ? 'open' : 'closed'}
                                         className={cn(
                                             'w-full justify-start px-5',
-                                            active && 'bg-[#C8A45C]/20',
+                                            active && 'bg-brand/15 text-brand',
                                         )}
                                     >
                                         {label}
@@ -168,35 +169,42 @@ const NavbarMobile = ({
                         })}
 
                         {/* Divider */}
-                        <div className="my-2 h-px bg-gray-100" />
+                        <div className="my-2 h-px bg-border" />
 
                         {/* Toggles */}
                         <div className="flex items-center justify-between px-3 py-2">
-                            <span className="text-left text-sm font-medium text-gray-600">
-                                Setelan
+                            <span className="text-left text-sm font-medium text-muted-foreground">
+                                {language === 'id' ? 'Setelan' : 'Settings'}
                             </span>
                             <div className="flex items-center gap-2">
                                 <button
+                                    type="button"
+                                    aria-label={
+                                        isDark
+                                            ? 'Switch to light mode'
+                                            : 'Switch to dark mode'
+                                    }
                                     onClick={() =>
-                                        setTheme(
-                                            theme === 'dark' ? 'light' : 'dark',
+                                        updateAppearance(
+                                            isDark ? 'light' : 'dark',
                                         )
                                     }
-                                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-600 transition-colors hover:bg-gray-50"
+                                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-foreground/70 transition-colors hover:border-brand/40 hover:text-brand"
                                 >
-                                    {theme === 'dark' ? (
+                                    {isDark ? (
                                         <Sun className="h-4 w-4" />
                                     ) : (
                                         <Moon className="h-4 w-4" />
                                     )}
                                 </button>
                                 <button
+                                    type="button"
                                     onClick={() =>
                                         setLanguage(
                                             language === 'id' ? 'en' : 'id',
                                         )
                                     }
-                                    className="flex h-9 items-center justify-center gap-1.5 rounded-lg border border-gray-200 px-3 text-sm font-bold text-gray-600 transition-colors hover:bg-gray-50"
+                                    className="flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border px-3 text-sm font-bold text-foreground/70 transition-colors hover:border-brand/40 hover:text-brand"
                                 >
                                     <span className="text-base leading-none">
                                         {language === 'id' ? '🇮🇩' : '🇬🇧'}
@@ -209,7 +217,7 @@ const NavbarMobile = ({
                         </div>
 
                         {/* Divider */}
-                        <div className="my-2 h-px bg-gray-100" />
+                        <div className="my-2 h-px bg-border" />
 
                         {/* Auth Section */}
                         {isAuthenticated && profileAuth ? (
@@ -219,10 +227,10 @@ const NavbarMobile = ({
                                     <img
                                         src={profileAuth.photo}
                                         alt={profileAuth.name}
-                                        className="h-10 w-10 rounded-full object-cover ring-2 ring-[#C8A45C]/50"
+                                        className="h-10 w-10 rounded-full object-cover ring-2 ring-brand/50"
                                     />
                                     <div>
-                                        <p className="text-sm font-semibold text-gray-800">
+                                        <p className="text-sm font-semibold text-foreground">
                                             {profileAuth.name}
                                         </p>
                                     </div>
@@ -241,7 +249,7 @@ const NavbarMobile = ({
                                         return (
                                             <div
                                                 key={item.id}
-                                                className="border-t border-gray-100 pt-1"
+                                                className="border-t border-border pt-1"
                                             >
                                                 <Link
                                                     href={item.href}
