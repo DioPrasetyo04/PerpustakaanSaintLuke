@@ -1,41 +1,53 @@
 import { ImageWithFallback } from '@/components/common/ImageWithFallback';
-import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { CategoryProps } from '@/types/DataTypes/CategoryProps';
-import { Link, router } from '@inertiajs/react';
+import type { CategoryProps } from '@/types/DataTypes/CategoryProps';
+import { useLanguage } from '@/hooks/useLanguage';
+import { Link } from '@inertiajs/react';
 import { motion } from 'framer-motion';
-import React from 'react';
-import { route } from 'ziggy-js';
+import { ArrowUpRight } from 'lucide-react';
 
 export const CategoriesCard = ({
     name,
-    slug,
     icon,
     count_of_books,
-    language,
     href,
 }: CategoryProps) => {
+    const { language } = useLanguage();
+
     return (
         <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
+            initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.5 }}
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ y: -6 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+            className="h-full"
         >
-            <Link href={href ?? '#'}>
-                <Card className="cursor-pointer p-6 text-center transition-shadow hover:shadow-lg">
-                    <div className="mb-3 flex items-center text-4xl">
+            <Link href={href ?? '#'} className="block h-full">
+                <Card className="group theme-transition relative h-full items-center gap-3 overflow-hidden rounded-2xl border border-gray-200/80 bg-card p-6 text-center shadow-sm transition-all duration-300 hover:border-brand/50 hover:shadow-xl hover:shadow-brand/10 dark:border-white/10">
+                    {/* subtle hover glow */}
+                    <div className="pointer-events-none absolute -top-10 -right-10 h-24 w-24 rounded-full bg-brand/20 opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100" />
+
+                    <span className="absolute top-3 right-3 text-muted-foreground opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100 group-hover:text-brand">
+                        <ArrowUpRight className="h-4 w-4" />
+                    </span>
+
+                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand/10 ring-1 ring-brand/15 transition-transform duration-300 group-hover:scale-110">
                         <ImageWithFallback
                             src={icon}
                             alt={name}
-                            className="h-10 w-10 object-cover object-center"
+                            loading="lazy"
+                            className="h-8 w-8 object-contain"
                         />
                     </div>
-                    <h3 className="mb-2 font-semibold text-gray-900">{name}</h3>
-                    <Badge className={'bg-gray-100 text-gray-700'}>
-                        {count_of_books} {language === 'id' ? 'buku' : 'books'}
-                    </Badge>
+
+                    <h3 className="line-clamp-2 font-poppins text-sm font-semibold text-foreground transition-colors group-hover:text-brand">
+                        {name}
+                    </h3>
+
+                    <span className="rounded-full bg-secondary px-3 py-0.5 text-xs font-medium text-secondary-foreground">
+                        {count_of_books ?? 0} {language === 'id' ? 'buku' : 'books'}
+                    </span>
                 </Card>
             </Link>
         </motion.div>

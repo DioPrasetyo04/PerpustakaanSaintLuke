@@ -1,14 +1,14 @@
-import { Link, router } from '@inertiajs/react';
 import { motion } from 'framer-motion';
-import { categoriesHeaderHome, CategoriesData } from '@/data/data';
+import { LayoutGrid } from 'lucide-react';
+import { route } from 'ziggy-js';
+import { categoriesHeaderHome } from '@/data/data';
 import { useLanguage } from '@/hooks/useLanguage';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { FeaturedCategoriesProps } from '@/types/HomePage/FeaturedHome';
 import { CategoriesCard } from '@/components/component/Card/CategoriesCard';
+import Carousel from '@/components/common/Carousel';
 import Pagination from '@/components/component/Home/Pagination/Pagination';
 import { useQueryParams } from '@/hooks/useQueryParams';
-import { route } from 'ziggy-js';
+import type { FeaturedCategoriesProps } from '@/types/HomePage/FeaturedHome';
+import type { CategoryProps } from '@/types/DataTypes/CategoryProps';
 
 const Categories = ({ categories }: FeaturedCategoriesProps) => {
     const { language } = useLanguage();
@@ -16,77 +16,70 @@ const Categories = ({ categories }: FeaturedCategoriesProps) => {
         language === 'id' ? categoriesHeaderHome.id : categoriesHeaderHome.en;
 
     const { createPagination } = useQueryParams();
-
     const { onPageChange, onPerPageChange } = createPagination(
         'categories',
         categories.meta.per_page,
     );
+
     return (
-        <section className="bg-white py-16">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="theme-transition relative overflow-hidden bg-muted/40 py-20 dark:bg-white/2">
+            <div className="relative container mx-auto px-4 sm:px-6 lg:px-8">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     className="mb-12 text-center"
                 >
-                    <h2 className="mb-4 font-['Poppins'] text-3xl font-bold text-gray-900 sm:text-4xl">
+                    <span className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-brand/20 bg-brand/10 px-3 py-1 text-xs font-semibold tracking-wide text-brand uppercase">
+                        <LayoutGrid className="h-3.5 w-3.5" />
+                        {language === 'id' ? 'Jelajahi' : 'Explore'}
+                    </span>
+                    <h2 className="font-poppins text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
                         {text.title}
                     </h2>
-                    <p className="mx-auto max-w-2xl text-gray-600">
+                    <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
                         {text.description}
                     </p>
                 </motion.div>
 
-                <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
-                    {categories.data.map((category) => (
-                        // <motion.div
-                        //     key={category.id}
-                        //     initial={{ opacity: 0, scale: 0.8 }}
-                        //     whileInView={{ opacity: 1, scale: 1 }}
-                        //     viewport={{ once: true }}
-                        //     transition={{ delay: index * 0.1 }}
-                        //     whileHover={{ scale: 1.05 }}
-                        // >
-                        //     <Link href="/categories">
-                        //         <Card className="cursor-pointer p-6 text-center transition-shadow hover:shadow-lg">
-                        //             <div className="mb-3 text-4xl">
-                        //                 {category?.icon}
-                        //             </div>
-                        //             <h3 className="mb-2 font-semibold text-gray-900">
-                        //                 {category.name}
-                        //             </h3>
-                        //             {/* <Badge
-                        //                 className={
-                        //                     category.color ||
-                        //                     'bg-gray-100 text-gray-700'
-                        //                 }
-                        //             >
-                        //                 {category.count_book}{' '}
-                        //                 {language === 'id' ? 'buku' : 'books'}
-                        //             </Badge> */}
-                        //         </Card>
-                        //     </Link>
-                        // </motion.div>
-                        <CategoriesCard
-                            key={category.id}
-                            {...category}
-                            href={route('catalog.category.books', {
-                                slug: category.slug,
-                            })}
-                        />
-                    ))}
-                </div>
-                {categories.data.length > 0 ||
-                    (categories.meta.last_page > 1 && (
-                        <Pagination
-                            page={categories.meta.current_page}
-                            total={categories.meta.total}
-                            perPage={categories.meta.per_page}
-                            onPageChange={onPageChange}
-                            onPerPageChange={onPerPageChange}
-                        />
-                    ))}
+                {categories.data.length > 0 ? (
+                    <Carousel<CategoryProps>
+                        items={categories.data}
+                        getKey={(category) => category.id}
+                        ariaLabel={text.title}
+                        spaceBetween={16}
+                        renderItem={(category) => (
+                            <CategoriesCard
+                                {...category}
+                                href={route('catalog.category.books', {
+                                    slug: category.slug,
+                                })}
+                            />
+                        )}
+                        breakpoints={{
+                            0: { slidesPerView: 2.2 },
+                            480: { slidesPerView: 3 },
+                            768: { slidesPerView: 4 },
+                            1024: { slidesPerView: 6 },
+                        }}
+                    />
+                ) : (
+                    <p className="py-12 text-center text-muted-foreground">
+                        {language === 'id'
+                            ? 'Belum ada kategori.'
+                            : 'No categories yet.'}
+                    </p>
+                )}
+
+                {categories.meta.last_page > 1 && (
+                    <Pagination
+                        page={categories.meta.current_page}
+                        total={categories.meta.total}
+                        perPage={categories.meta.per_page}
+                        onPageChange={onPageChange}
+                        onPerPageChange={onPerPageChange}
+                    />
+                )}
             </div>
         </section>
     );

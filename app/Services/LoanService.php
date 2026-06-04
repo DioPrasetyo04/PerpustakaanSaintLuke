@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\LoanType;
 use App\Exceptions\BusinessException;
 use App\Http\Resources\BookResource;
 use App\Http\Resources\FineSettingsResource;
@@ -64,6 +65,7 @@ class LoanService
                     'book_id'   => $data['book_id'],
                     'loan_date' => now(),
                     'due_date'  => now()->addDays($duration),
+                    'loan_type' => LoanType::DIGITAL->value,
                 ];
 
                 $existingLoan = Loan::getActiveLoan($auth->id);

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\LoanBookStatus;
+use App\Enums\LoanType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -20,15 +21,17 @@ class LoanDetail extends Model
     protected $fillable = [
         'loan_id',
         'book_id',
-    'loan_date',
+        'loan_date',
         'due_date',
         'status',
+        'loan_type',
     ];
 
     protected $casts = [
         'loan_date' => 'date',
         'due_date' => 'date',
         'status' => LoanBookStatus::class,
+        'loan_type' => LoanType::class,
     ];
 
     public function loan(): BelongsTo

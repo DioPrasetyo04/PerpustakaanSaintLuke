@@ -1,0 +1,5 @@
+# Laravel Scheduler — picu schedule:run tiap menit.
+# Path: sesuaikan /var/www/perpustakaan-saint-luke dengan lokasi project Anda.
+# Pasang via: crontab -e (lalu paste baris di bawah)
+
+* * * * * cd /var/www/perpustakaan-saint-luke && php artisan schedule:run >> /dev/null 2>&1

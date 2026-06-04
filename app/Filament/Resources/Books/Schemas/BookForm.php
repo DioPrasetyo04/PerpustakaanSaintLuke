@@ -219,17 +219,15 @@ class BookForm
                                                             ->label('Phone')
                                                             ->defaultCountry('id')
                                                             ->separateDialCode()
-                                                            ->showFlags()
-                                                            ->required(),
+                                                            ->showFlags(),
                                                         Select::make('gender')
                                                             ->label('Gender')
                                                             ->options(UserGender::optionViews())
                                                             ->allowHtml()
                                                             ->getOptionLabelUsing(fn($value) => UserGender::from($value)->html())
-                                                            ->searchable()
-                                                            ->required(),
-                                                        DatePicker::make('date_of_birth')->label('Date Of Birth')->required(),
-                                                        Select::make('nationality')->label('Country')->options(countryOptions())->allowHtml()->searchable()->required(),
+                                                            ->searchable(),
+                                                        DatePicker::make('date_of_birth')->label('Date Of Birth'),
+                                                        Select::make('nationality')->label('Country')->options(countryOptions())->allowHtml()->searchable(),
                                                         RichEditor::make('bio')->label('Biography'),
                                                         DatePicker::make('verified_at')->label('Verified At')->displayFormat('Y-m-d'),
                                                         FileUpload::make('avatar')->image()->maxSize(2048)->directory('authors')->disk('public')->visibility('public')->columnSpanFull(),
@@ -245,7 +243,6 @@ class BookForm
                                                             ->allowHtml()
                                                             ->getOptionLabelUsing(fn($value) => SocialMedia::from($value)->html())
                                                             ->searchable()
-                                                            ->required()
                                                             ->native(false)
                                                             ->columnSpan(1),
 
@@ -433,6 +430,16 @@ class BookForm
                                             return $publisher->id;
                                         })
                                         ->createOptionModalHeading('Create Publisher Form'),
+                                    TextInput::make('classification_number')
+                                        ->label('Classification Number')
+                                        ->maxLength(255)
+                                        ->placeholder('e.g. 813.54')
+                                        ->columnSpan(1),
+                                    TextInput::make('volume')
+                                        ->label('Jilid')
+                                        ->maxLength(255)
+                                        ->placeholder('e.g. 1')
+                                        ->columnSpan(1),
                                     Select::make('status')
                                         ->label('Status')
                                         ->options(BookStatus::optionViews())
@@ -442,104 +449,103 @@ class BookForm
                                         ->searchable()
                                         ->default(BookStatus::AVAILABLE->value)
                                         ->columnSpan(1),
-                                    Grid::make(2)->schema([
-                                        Select::make('types')
-                                            ->label('Types')
-                                            ->relationship('types', 'type')
-                                            ->getOptionLabelFromRecordUsing(function ($record) {
-                                                $iconUrl = $record->icon ? asset('storage/' . $record->icon) : null;
-                                                $typeEnum = BookType::tryFrom($record->type);
+                                    Select::make('types')
+                                        ->label('Types')
+                                        ->relationship('types', 'type')
+                                        ->getOptionLabelFromRecordUsing(function ($record) {
+                                            $iconUrl = $record->icon ? asset('storage/' . $record->icon) : null;
+                                            $typeEnum = BookType::tryFrom($record->type);
 
-                                                $iconHtml = $iconUrl
-                                                    ? '<img src="' . $iconUrl . '" style="width:18px;height:18px;border-radius:3px;object-fit:cover" alt="' . e($record->type) . '">'
-                                                    : ($typeEnum?->icon() ?? '');
+                                            $iconHtml = $iconUrl
+                                                ? '<img src="' . $iconUrl . '" style="width:18px;height:18px;border-radius:3px;object-fit:cover" alt="' . e($record->type) . '">'
+                                                : ($typeEnum?->icon() ?? '');
 
-                                                $color = $typeEnum?->color() ?? '#374151';
-                                                $label = $typeEnum?->label() ?? ucfirst((string) $record->type);
+                                            $color = $typeEnum?->color() ?? '#374151';
+                                            $label = $typeEnum?->label() ?? ucfirst((string) $record->type);
 
-                                                return new HtmlString(
-                                                    '<span style="display:inline-flex;align-items:center;gap:6px;">'
-                                                        . $iconHtml
-                                                        . '<span style="color:' . $color . ';font-weight:500;text-transform:capitalize;">' . e($label) . '</span>'
-                                                        . '</span>'
-                                                );
-                                            })
-                                            ->allowHtml()
-                                            ->multiple()
-                                            ->preload()
-                                            ->searchable()
-                                            ->required()
-                                            ->columnSpan(1)
-                                            ->createOptionForm([
-                                                Section::make('Type Information')
-                                                    ->description('Choose the type enum and upload its icon.')
-                                                    ->schema([
-                                                        Grid::make(2)->schema([
-                                                            Select::make('type')
-                                                                ->label('Type')
-                                                                ->options(BookType::options())
-                                                                ->allowHtml()
-                                                                ->getOptionLabelUsing(fn($value) => BookType::from($value)->html())
-                                                                ->native(false)
-                                                                ->searchable()
-                                                                ->unique(table: 'types', column: 'type', ignoreRecord: true)
-                                                                ->required()
-                                                                ->columnSpan(1),
-                                                            FileUpload::make('icon')
-                                                                ->label('Icon')
-                                                                ->image()
-                                                                ->maxSize(1024)
-                                                                ->directory('types/icons')
-                                                                ->disk('public')
-                                                                ->visibility('public')
-                                                                ->imageResizeMode('cover')
-                                                                ->columnSpan(1),
-                                                        ]),
-                                                    ])->columnSpanFull(),
-                                            ])
-                                            ->createOptionUsing(function (array $data) {
-                                                $type = Type::firstOrCreate(
-                                                    ['type' => $data['type']],
-                                                    ['icon' => $data['icon'] ?? null]
-                                                );
+                                            return new HtmlString(
+                                                '<span style="display:inline-flex;align-items:center;gap:6px;">'
+                                                    . $iconHtml
+                                                    . '<span style="color:' . $color . ';font-weight:500;text-transform:capitalize;">' . e($label) . '</span>'
+                                                    . '</span>'
+                                            );
+                                        })
+                                        ->allowHtml()
+                                        ->multiple()
+                                        ->preload()
+                                        ->searchable()
+                                        ->required()
+                                        ->columnSpan(1)
+                                        ->createOptionForm([
+                                            Section::make('Type Information')
+                                                ->description('Choose the type enum and upload its icon.')
+                                                ->schema([
+                                                    Grid::make(2)->schema([
+                                                        Select::make('type')
+                                                            ->label('Type')
+                                                            ->options(BookType::options())
+                                                            ->allowHtml()
+                                                            ->getOptionLabelUsing(fn($value) => BookType::from($value)->html())
+                                                            ->native(false)
+                                                            ->searchable()
+                                                            ->unique(table: 'types', column: 'type', ignoreRecord: true)
+                                                            ->required()
+                                                            ->columnSpan(1),
+                                                        FileUpload::make('icon')
+                                                            ->label('Icon')
+                                                            ->image()
+                                                            ->maxSize(1024)
+                                                            ->directory('types/icons')
+                                                            ->disk('public')
+                                                            ->visibility('public')
+                                                            ->imageResizeMode('cover')
+                                                            ->columnSpan(1),
+                                                    ]),
+                                                ])->columnSpanFull(),
+                                        ])
+                                        ->createOptionUsing(function (array $data) {
+                                            $type = Type::firstOrCreate(
+                                                ['type' => $data['type']],
+                                                ['icon' => $data['icon'] ?? null]
+                                            );
 
-                                                return $type->id;
-                                            })
-                                            ->createOptionModalHeading('Create Type Form'),
-                                        Select::make('language_id')
-                                            ->label('Language')
-                                            ->relationship('language', 'language')
-                                            ->getOptionLabelFromRecordUsing(function ($record) {
-                                                $flagUrl = $record->photo ? asset('storage/' . $record->photo) : null;
+                                            return $type->id;
+                                        })
+                                        ->createOptionModalHeading('Create Type Form'),
+                                    Select::make('language_id')
+                                        ->label('Language')
+                                        ->relationship('language', 'language')
+                                        ->getOptionLabelFromRecordUsing(function ($record) {
+                                            $flagUrl = $record->photo ? asset('storage/' . $record->photo) : null;
 
-                                                return
-                                                    "<div style='display:flex;align-items:center;gap:6px'>
+                                            return
+                                                "<div style='display:flex;align-items:center;gap:6px'>
                                                 " . ($flagUrl ? "<img src='{$flagUrl}' width='20' height='15' style='border-radius:3px' />" : "") . "
                                                 <span>{$record->language}</span>
                                                 </div>";
-                                            })
-                                            ->allowHtml()
-                                            ->searchable()
-                                            ->preload()
-                                            ->required()
-                                            ->createOptionForm([
-                                                Section::make('language')->schema([
-                                                    TextInput::make('language')->maxLength(255)->live()->afterStateUpdated(function (Set $set, $state) {
-                                                        if (filled($state)) {
-                                                            $set('code', generateUniqueCode($state, Language::class, 'code'));
-                                                        } else {
-                                                            $set('code', null);
-                                                        }
-                                                    })->required()->columnSpan(1),
-                                                    TextInput::make('code')->maxLength(255)->unique(ignoreRecord: true)->readOnly()->disabled()->dehydrated(),
-                                                    FileUpload::make('photo')->image()->maxSize(2048)->directory('languages')->disk('public')->visibility('public')->columnSpanFull(),
+                                        })
+                                        ->allowHtml()
+                                        ->searchable()
+                                        ->preload()
+                                        ->required()
+                                        ->createOptionForm([
+                                            Section::make('language')->schema([
+                                                TextInput::make('language')->maxLength(255)->live()->afterStateUpdated(function (Set $set, $state) {
+                                                    if (filled($state)) {
+                                                        $set('code', generateUniqueCode($state, Language::class, 'code'));
+                                                    } else {
+                                                        $set('code', null);
+                                                    }
+                                                })->required()->columnSpan(1),
+                                                TextInput::make('code')->maxLength(255)->unique(ignoreRecord: true)->readOnly()->disabled()->dehydrated(),
+                                                FileUpload::make('photo')->image()->maxSize(2048)->directory('languages')->disk('public')->visibility('public')->columnSpanFull(),
+
                                                 ])->label('Create Language'),
-                                            ])
-                                            ->createOptionUsing(function (array $data) {
-                                                $language = Language::firstOrCreate($data);
-                                                return $language->id;
-                                            }),
-                                    ])->columnSpanFull(),
+                                        ])
+                                        ->createOptionUsing(function (array $data) {
+                                            $language = Language::firstOrCreate($data);
+                                            return $language->id;
+                                        }),
                                     FileUpload::make('cover')->image()->disk('public')->directory('books/cover')->maxSize(2048)->columnSpanFull(),
                                     ToggleButtons::make('is_published')->options(PublishedBooks::options())->default(PublishedBooks::PUBLISH->value)->colors([
                                         'Published' => 'success',

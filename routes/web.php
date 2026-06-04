@@ -60,6 +60,13 @@ Route::controller(InformationController::class)->group(function () {
     Route::get('/information/detail/{slug}', 'detail')->name('announcement.detail');
 });
 
+Route::prefix('about')->name('about.')->group(function () {
+    Route::get('/profile', fn () => Inertia::render('about/ProfilePage'))->name('profile');
+    Route::get('/vision-mission', fn () => Inertia::render('about/VisionMissionPage'))->name('vision-mission');
+    Route::get('/contact', fn () => Inertia::render('about/ContactPage'))->name('contact');
+    Route::get('/organization-structure', fn () => Inertia::render('about/OrganizationStructurePage'))->name('organization-structure');
+});
+
 // Kiosk publik pencatatan kunjungan perpustakaan (scan kartu / cari user / isi manual).
 Route::controller(VisitFormController::class)->group(function () {
     Route::get('/visit', 'create')->name('visit.create');

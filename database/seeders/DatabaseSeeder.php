@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RolePermissionSeeder::class,
             StaffUsersSeeder::class,
+            // LoanSeeder::class, // Aktifkan saat testing fitur reminder/auto-return; jalankan via: php artisan db:seed --class=LoanSeeder
         ]);
     }
 }

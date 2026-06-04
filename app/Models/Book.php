@@ -32,6 +32,8 @@ class Book extends Model
         'synopsis',
         'number_of_pages',
         'location_book',
+        'classification_number',
+        'volume',
         'status',
         'cover',
         'price',

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->date('loan_date');
             $table->date('due_date');
             $table->enum('status', LoanBookStatus::cases())->default(LoanBookStatus::BORROWED->value);
+            $table->unique(['loan_id', 'book_id']);
         });
     }
 

@@ -76,8 +76,8 @@ const Navbar = ({ initialAuth }: { initialAuth?: any }) => {
                     mobileMenuOpen ? 'z-30' : 'z-50'
                 } ${
                     isScrolled
-                        ? 'border-b border-[#E5E7EB]/50 bg-white p-7 shadow-lg backdrop-blur-xl'
-                        : 'bg-tranparent p-5'
+                        ? 'border-b border-border bg-background/80 p-7 shadow-lg backdrop-blur-xl'
+                        : 'bg-transparent p-5'
                 }`}
             >
                 <div className="container mx-auto max-w-full px-4 sm:px-6 lg:px-8">
@@ -110,7 +110,7 @@ const Navbar = ({ initialAuth }: { initialAuth?: any }) => {
                             }
                             className={`rounded-lg p-2 transition-colors lg:hidden ${
                                 isScrolled
-                                    ? 'text-gray-700 hover:bg-gray-100'
+                                    ? 'text-foreground hover:bg-muted'
                                     : 'text-white hover:bg-white/10'
                             }`}
                             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

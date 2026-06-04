@@ -12,8 +12,8 @@ Artisan::command('inspire', function () {
 
 Schedule::call(function () {
     app(SendLoanReminder::class)->handle();
-})->dailyAt('08:00');
+})->hourly();
 
 Schedule::call(function () {
     app(AutoReturnExpiredLoans::class)->handle();
-})->dailyAt('00:01');
+})->hourly();

@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Loans\Schemas;
 
 use App\Enums\LoanBookStatus;
 use App\Enums\LoanStatus;
+use App\Enums\LoanType;
 use App\Models\FineSettings;
 use App\Models\Loan;
 use App\Models\User;
@@ -123,6 +124,7 @@ class LoanForm
                                 ]),
 
                                 Hidden::make('status')->default(LoanBookStatus::BORROWED->value),
+                                Hidden::make('loan_type')->default(LoanType::PHYSICAL->value),
                             ])
                             ->itemLabel(fn(array $state): ?string => isset($state['book_id'])
                                 ? (\App\Models\Book::query()->whereKey($state['book_id'])->value('title') ?? 'Buku Baru')

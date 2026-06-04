@@ -1,19 +1,14 @@
-import React, { useState } from 'react';
 import { Link } from '@inertiajs/react';
-import { ChevronDown } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Moon, Sun } from 'lucide-react';
 import type { NavbarDesktopProps } from '@/types/navbar';
-import type { NavItem } from '@/types/navbar';
 import { cn } from '@/lib/utils';
 import { DropdownMenuItem } from './DropdownMenuItem';
 import { DropdownMenuProfile } from './DropdownMenuProfile';
-import { useLanguage } from '@/hooks/useLanguage';
-import { useTheme } from 'next-themes';
-import { Moon, Sun } from 'lucide-react';
+import { useAppearance } from '@/hooks/use-appearance';
 import { ButtonVariants } from '@/components/ui/button3D';
 import DropdownMenuLanguage from './DropdownMenuLanguage';
 
-// ─── NavbarDesktop ─────────────────────────────────────────────────────────────
 const NavbarDesktop = ({
     navItems,
     navAuthItems,
@@ -23,11 +18,12 @@ const NavbarDesktop = ({
     activeSection,
     language,
 }: NavbarDesktopProps) => {
-    const { theme, setTheme } = useTheme();
+    const { resolvedAppearance, updateAppearance } = useAppearance();
+    const isDark = resolvedAppearance === 'dark';
 
     return (
         <section className="hidden w-full items-center justify-between gap-4 lg:flex">
-            {/* Nav Items (Flex centered, shrinks gracefully) */}
+            {/* Nav Items */}
             <div className="flex flex-1 items-center justify-center gap-1 lg:gap-1.5">
                 {navItems.map((item) => {
                     const label =
@@ -52,12 +48,12 @@ const NavbarDesktop = ({
                                 size="sm"
                                 data-state={isActive ? 'open' : 'closed'}
                                 className={cn(
-                                    'px-4',
+                                    'px-4 transition-colors',
                                     isScrolled
-                                        ? 'text-gray-200 hover:text-white'
+                                        ? 'text-foreground/70 hover:text-foreground'
                                         : 'text-white/90 hover:text-white',
                                     isActive &&
-                                        'bg-[#C8A45C]/30 text-white shadow-[0_0px_0_0_transparent]',
+                                        'bg-brand/15 text-brand hover:text-brand',
                                 )}
                             >
                                 {label}
@@ -71,21 +67,43 @@ const NavbarDesktop = ({
             <div className="flex shrink-0 items-center justify-center gap-2">
                 {/* Theme Toggle */}
                 <button
+                    type="button"
+                    aria-label={
+                        isDark ? 'Switch to light mode' : 'Switch to dark mode'
+                    }
                     onClick={() =>
-                        setTheme(theme === 'dark' ? 'light' : 'dark')
+                        updateAppearance(isDark ? 'light' : 'dark')
                     }
                     className={cn(
-                        'flex h-9 w-9 items-center justify-center rounded-full transition-colors',
+                        'flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border transition-all duration-300 hover:scale-105',
                         isScrolled
-                            ? 'text-gray-600 hover:bg-gray-100'
-                            : 'text-white/90 hover:bg-white/10',
+                            ? 'border-border text-foreground/70 hover:border-brand/40 hover:text-brand'
+                            : 'border-white/20 text-white/90 hover:border-white/40 hover:text-white',
                     )}
                 >
-                    {theme === 'dark' ? (
-                        <Sun className="h-4 w-4" />
-                    ) : (
-                        <Moon className="h-4 w-4" />
-                    )}
+                    <AnimatePresence mode="wait" initial={false}>
+                        {isDark ? (
+                            <motion.span
+                                key="sun"
+                                initial={{ rotate: -90, opacity: 0 }}
+                                animate={{ rotate: 0, opacity: 1 }}
+                                exit={{ rotate: 90, opacity: 0 }}
+                                transition={{ duration: 0.25 }}
+                            >
+                                <Sun className="h-4 w-4" />
+                            </motion.span>
+                        ) : (
+                            <motion.span
+                                key="moon"
+                                initial={{ rotate: 90, opacity: 0 }}
+                                animate={{ rotate: 0, opacity: 1 }}
+                                exit={{ rotate: -90, opacity: 0 }}
+                                transition={{ duration: 0.25 }}
+                            >
+                                <Moon className="h-4 w-4" />
+                            </motion.span>
+                        )}
+                    </AnimatePresence>
                 </button>
 
                 {/* Language Toggle */}

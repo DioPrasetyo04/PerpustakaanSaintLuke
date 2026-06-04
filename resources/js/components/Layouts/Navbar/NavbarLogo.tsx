@@ -21,7 +21,7 @@ const NavbarLogo = ({ scrollToSection }: NavbarLogoProps) => {
                 >
                     <div className="bg-cover bg-center p-5">
                         <img
-                            src="/assets/logos/Saint-Luke.jpg"
+                            src="/assets/logos/Saint-Luke.png"
                             alt="logo saint luke"
                             className="h-15 w-15 rounded-full object-cover object-center p-0"
                         />

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('username')->unique()->index('username_unique_author');
             $table->string('phone', 20)->nullable();
-            $table->enum('gender', UserGender::options())->default(UserGender::MALE->value);
+            $table->enum('gender', UserGender::options())->default(UserGender::MALE->value)->nullable();
             $table->date('date_of_birth')->nullable();
             $table->string('nationality')->nullable();
             $table->string('avatar')->nullable();

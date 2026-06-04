@@ -50,6 +50,15 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (BusinessException $e, Request $request) {
+            if ($request->header('X-Inertia')) {
+                return back()->withErrors([
+                    'business' => $e->getMessage(),
+                ])->with('businessError', [
+                    'message' => $e->getMessage(),
+                    'context' => $e->context(),
+                ]);
+            }
+
             return response()->json([
                 'message' => $e->getMessage(),
                 'context' => $e->context(),

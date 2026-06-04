@@ -1,5 +1,4 @@
 import { PaginationProps } from '@/types/pagination';
-import React from 'react';
 import PaginationSelect from './PaginationSelect';
 import PaginationButtons from './PaginationButtons';
 
@@ -12,30 +11,19 @@ const Pagination = ({
 }: PaginationProps) => {
     const totalPages = Math.ceil(total / perPage);
 
-    const start = (page - 1) * perPage + 1;
+    const start = total === 0 ? 0 : (page - 1) * perPage + 1;
     const end = Math.min(page * perPage, total);
+
     return (
-        <div className="mt-10 flex flex-col gap-4 border-t pt-6 md:flex-row md:items-center md:justify-between">
-            {/* showing text */}
-            <div className="flex flex-col items-center gap-3 p-3">
-                <p className="text-sm text-gray-600">
-                    Showing <span className="font-semibold">{start}</span> to
-                    <span className="font-semibold">{end}</span> of{' '}
-                    <span className="font-semibold">{total}</span> results
-                </p>
-                {/* featured get data pagination */}
-                {/* <p className="text-sm text-gray-600">
-                    Showing <span className="font-semibold">{start}</span> to
-                    <span className="font-semibold">{end}</span> of{' '}
-                    <span className="font-semibold">{total}</span> results
-                </p> */}
-            </div>
+        <div className="mt-12 flex flex-col gap-4 border-t border-gray-200 pt-6 md:flex-row md:items-center md:justify-between dark:border-white/10">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+                Showing <span className="font-semibold text-gray-800 dark:text-gray-200">{start}</span> to{' '}
+                <span className="font-semibold text-gray-800 dark:text-gray-200">{end}</span> of{' '}
+                <span className="font-semibold text-gray-800 dark:text-gray-200">{total}</span> results
+            </p>
 
-            <div className="flex items-center gap-6">
-                {/* rows per page */}
+            <div className="flex flex-wrap items-center justify-between gap-4 sm:justify-end sm:gap-6">
                 <PaginationSelect value={perPage} onChange={onPerPageChange} />
-
-                {/* buttons */}
                 <PaginationButtons
                     page={page}
                     totalPages={totalPages}

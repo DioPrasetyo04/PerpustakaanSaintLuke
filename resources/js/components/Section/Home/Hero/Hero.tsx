@@ -4,42 +4,39 @@ import { router } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 import { useLanguage } from '@/hooks/useLanguage';
 import { contentHero, slidesHero } from '@/data/data';
-import { MdOutlineMenuBook } from 'react-icons/md';
-import { FaSearch } from 'react-icons/fa';
-import { ButtonVariants } from '@/components/ui/button3D';
+import { BookOpen, Search, Loader2, ChevronDown } from 'lucide-react';
 
 const HeroSection = () => {
     const [currentSlide, setCurrentSlide] = useState(0);
     const [searchInput, setSearchInput] = useState('');
+    const [submitting, setSubmitting] = useState(false);
     const { language } = useLanguage();
 
     const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const keyword = searchInput.trim();
-        router.get(
-            route('resource'),
-            keyword ? { search: keyword } : {},
-            { preserveScroll: false },
-        );
+        router.get(route('resource'), keyword ? { search: keyword } : {}, {
+            preserveScroll: false,
+            onStart: () => setSubmitting(true),
+            onFinish: () => setSubmitting(false),
+        });
     };
 
     useEffect(() => {
         const interval = setInterval(() => {
             setCurrentSlide((prev) => (prev + 1) % slidesHero.length);
         }, 5000);
-
         return () => clearInterval(interval);
     }, []);
 
     const content = language === 'id' ? contentHero.id : contentHero.en;
+
     return (
-        <section
+        <header
             id="home"
             className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden pt-20"
         >
-            <div className="absolute inset-0 z-[1] bg-gradient-to-b from-black/70 via-black/50 to-black/70"></div>
-            <div className="bg-gradient absolute inset-0 z-[1] bg-gradient-to-r from-black/30 via-transparent to-black/30"></div>
-
+            {/* Background slide carousel */}
             <AnimatePresence mode="wait">
                 <motion.div
                     key={currentSlide}
@@ -47,7 +44,7 @@ const HeroSection = () => {
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
-                    className="absolute inset-0 h-full w-full bg-cover bg-center"
+                    className="absolute inset-0 h-full w-full"
                 >
                     <img
                         src={slidesHero[currentSlide]}
@@ -56,144 +53,121 @@ const HeroSection = () => {
                     />
                 </motion.div>
             </AnimatePresence>
-            <div className="absolute right-8 bottom-8 z-10 flex gap-4">
+
+            {/* Cinematic overlays: dark vignette + subtle warm gold tint */}
+            <div className="absolute inset-0 z-1 bg-linear-to-b from-black/70 via-black/55 to-black/80" />
+            <div className="absolute inset-0 z-1 bg-linear-to-tr from-brand/15 via-transparent to-transparent" />
+
+            {/* Floating decorative blobs */}
+            <div className="animate-float absolute top-1/4 left-10 z-1 h-40 w-40 rounded-full bg-brand/15 blur-3xl" />
+            <div className="animate-float-slow absolute right-12 bottom-1/4 z-1 h-52 w-52 rounded-full bg-amber-300/10 blur-3xl" />
+
+            {/* Slide indicators */}
+            <div className="absolute right-8 bottom-8 z-20 flex gap-3">
                 {slidesHero.map((_, index) => (
                     <motion.button
                         key={index}
+                        aria-label={`Go to slide ${index + 1}`}
                         onClick={() => setCurrentSlide(index)}
-                        className={`h-1.5 rounded-full transition-all duration-500 ${currentSlide === index ? 'w-12 bg-[#C8A45C]' : 'w-8 bg-white/40 hover:bg-white/50'}`}
+                        className={`h-1.5 rounded-full transition-all duration-500 ${
+                            currentSlide === index
+                                ? 'w-12 bg-brand'
+                                : 'w-8 bg-white/40 hover:bg-white/60'
+                        }`}
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.95 }}
-                    ></motion.button>
+                    />
                 ))}
             </div>
 
-            <div className="relative z-10 mx-auto max-w-7xl px-4 py-12 text-center sm:px-6 lg:px-8">
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 1, ease: [0.22, 1, 0.3, 1] }}
-                    className="space-y-10"
+            {/* Content */}
+            <div className="relative z-10 mx-auto flex max-w-4xl flex-col items-center px-4 py-12 text-center sm:px-6 lg:px-8">
+                <motion.span
+                    initial={{ opacity: 0, y: 24 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                    className="mb-7 inline-flex items-center gap-2 rounded-full border border-brand/40 bg-white/10 px-4 py-1.5 text-xs font-semibold tracking-widest text-brand uppercase shadow-lg backdrop-blur-md"
                 >
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{
-                            delay: 0.2,
-                            duration: 0.8,
-                            ease: [0.22, 1, 0.36, 1],
-                        }}
-                        className="inline-block"
-                    >
-                        <div className="group relative">
-                            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-[#C8A45C] to-[#D4AF37] opacity-50 blur-lg transition-opacity duration-500 group-hover:opacity-75"></div>
-                            <div className="relative inset-0 flex flex-row items-center gap-3 rounded-full bg-gradient-to-r from-[#C8A45C] to-[#D4AF37] px-3 py-2 shadow-[0_8px_0_0_rgba(200,164,92,0.4)]">
-                                <MdOutlineMenuBook className="h-6 w-6 object-cover" />
-                                <span className="relative text-xs font-semibold tracking-wider text-[#C8A45C] uppercase">
-                                    {content.badge}
-                                </span>
-                            </div>
-                        </div>
-                    </motion.div>
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{
-                            delay: 0.4,
-                            duration: 0.8,
-                            ease: [0.22, 1, 0.36, 1],
-                        }}
-                        className="space-y-6"
-                    >
-                        <h1
-                            className="mb-6 text-6xl tracking-tight text-white sm:text-7xl lg:text-6xl"
-                            style={{ fontFamily: 'Playfair Display, serif' }}
-                        >
-                            <motion.span
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.5, duration: 0.8 }}
-                                className="mb-2 block text-[#C8A45C]"
-                            >
-                                {content.title}
-                            </motion.span>
-                            <motion.span
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.6, duration: 0.8 }}
-                                className="block"
-                            >
-                                {content.subtitle}
-                            </motion.span>
-                        </h1>
-                        <motion.p
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.7, duration: 0.8 }}
-                            className="mx-auto max-w-3xl text-lg leading-relaxed font-light text-white/95 md:text-xl lg:text-3xl"
-                        >
-                            {content.description}
-                        </motion.p>
-                    </motion.div>
-                </motion.div>
-            </div>
-            <div className="relative z-10 mx-auto max-w-[2000px] rounded-full bg-white px-4 py-2 sm:px-3 lg:px-2">
-                <label
-                    htmlFor="search"
-                    className="flex flex-row items-center justify-between justify-center gap-1"
+                    <BookOpen className="h-4 w-4" />
+                    {content.badge}
+                </motion.span>
+
+                <motion.h1
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                    className="font-poppins text-4xl font-bold tracking-tight text-white drop-shadow-2xl sm:text-6xl lg:text-7xl"
                 >
-                    <div className="object-cover object-center p-2">
-                        <FaSearch className="h-6 w-6 text-white" />
-                    </div>
-                    <form
-                        onSubmit={handleSearchSubmit}
-                        className="flex gap-2 px-2 py-2"
-                    >
+                    <span className="block text-brand">{content.title}</span>
+                    <span className="mt-2 block">{content.subtitle}</span>
+                </motion.h1>
+
+                <motion.p
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6, duration: 0.8 }}
+                    className="mx-auto mt-6 max-w-2xl text-base leading-relaxed font-light text-white/90 sm:text-lg lg:text-xl"
+                >
+                    {content.description}
+                </motion.p>
+
+                {/* Glass search */}
+                <motion.form
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.8, duration: 0.8 }}
+                    onSubmit={handleSearchSubmit}
+                    role="search"
+                    className="mt-10 w-full max-w-xl"
+                >
+                    <div className="group flex items-center gap-2 rounded-full border border-white/20 bg-white/10 p-2 pl-5 shadow-2xl backdrop-blur-xl transition-all duration-300 focus-within:border-brand/60 focus-within:bg-white/15 focus-within:ring-4 focus-within:ring-brand/20">
+                        <Search className="h-5 w-5 shrink-0 text-white/70 transition-colors group-focus-within:text-brand" />
                         <input
                             type="text"
-                            placeholder={
-                                language === 'id'
-                                    ? 'Cari Sesuatu...'
-                                    : 'Search Anyway...'
-                            }
                             id="search"
                             name="search"
                             value={searchInput}
                             onChange={(e) => setSearchInput(e.target.value)}
-                            className="rounded-full px-5 py-2 text-gray-800"
+                            placeholder={
+                                language === 'id'
+                                    ? 'Cari buku, penulis, atau kategori...'
+                                    : 'Search books, authors, or categories...'
+                            }
+                            className="min-w-0 flex-1 bg-transparent text-sm text-white placeholder:text-white/60 focus:outline-none sm:text-base"
                         />
-                        <ButtonVariants
-                            variant={'default'}
-                            size={'sm'}
+                        <button
                             type="submit"
+                            disabled={submitting}
+                            className="inline-flex shrink-0 items-center gap-2 rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-brand-foreground shadow-lg shadow-black/20 transition-all duration-300 hover:scale-105 hover:bg-brand/90 disabled:cursor-not-allowed disabled:opacity-70"
                         >
-                            Submit
-                        </ButtonVariants>
-                    </form>
-                </label>
+                            {submitting ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                                <Search className="h-4 w-4 sm:hidden" />
+                            )}
+                            <span className="hidden sm:inline">
+                                {language === 'id' ? 'Cari' : 'Search'}
+                            </span>
+                        </button>
+                    </div>
+                </motion.form>
             </div>
-            {/* Premium Scroll Indicator */}
+
+            {/* Scroll indicator */}
             <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
                 transition={{ delay: 1.5, duration: 1 }}
-                className="absolute bottom-5 left-1/2 z-10 -translate-x-1/2"
+                className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2"
             >
                 <motion.div
-                    animate={{ y: [0, 12, 0] }}
-                    transition={{
-                        duration: 2.5,
-                        repeat: Infinity,
-                        ease: 'easeInOut',
-                    }}
-                    className="flex flex-col items-center gap-2"
+                    animate={{ y: [0, 10, 0] }}
+                    transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                    className="flex flex-col items-center gap-1.5"
                 >
-                    <div className="flex h-10 w-6 items-start justify-center rounded-full border-2 border-white/40 p-1.5">
+                    <div className="flex h-9 w-5.5 items-start justify-center rounded-full border-2 border-white/40 p-1.5">
                         <motion.div
-                            animate={{
-                                y: [0, 16, 0],
-                                opacity: [1, 0, 1],
-                            }}
+                            animate={{ y: [0, 14, 0], opacity: [1, 0, 1] }}
                             transition={{
                                 duration: 2.5,
                                 repeat: Infinity,
@@ -202,19 +176,10 @@ const HeroSection = () => {
                             className="h-1.5 w-1.5 rounded-full bg-white"
                         />
                     </div>
-                    <span className="text-xs font-medium tracking-wider text-white/60 uppercase">
-                        {language === 'id' ? 'Gulir' : 'Scroll'}
-                    </span>
+                    <ChevronDown className="h-4 w-4 text-white/60" />
                 </motion.div>
             </motion.div>
-
-            {/* Decorative Elements */}
-            <div className="absolute top-1/4 left-10 h-32 w-32 animate-pulse rounded-full bg-[#C8A45C]/10 blur-3xl"></div>
-            <div
-                className="absolute right-10 bottom-1/4 h-40 w-40 animate-pulse rounded-full bg-[#C8A45C]/10 blur-3xl"
-                style={{ animationDelay: '1s' }}
-            ></div>
-        </section>
+        </header>
     );
 };
 

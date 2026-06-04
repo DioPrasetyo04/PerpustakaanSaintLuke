@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\LoanType;
 use App\Exceptions\BusinessException;
 use App\Models\Loan;
 use App\Models\LoanDetail;
@@ -41,7 +42,12 @@ class EnsureUserHasActiveLoan
         if ($activeLoanDetail) {
             // Loan aktif ada — cek apakah due_date sudah lewat
             if (Carbon::parse($activeLoanDetail->due_date)->lt(Carbon::today())) {
-                app(DigitalAutoReturnService::class)->autoReturn($activeLoanDetail);
+                // Hanya loan digital yang di-auto-return (revoke akses + tanpa fine).
+                // Loan fisik / legacy (null) hanya diblokir aksesnya; admin yang akan
+                // manual-return + apply fine fisik melalui Filament.
+                if ($activeLoanDetail->loan_type === LoanType::DIGITAL) {
+                    app(DigitalAutoReturnService::class)->autoReturn($activeLoanDetail);
+                }
                 return redirect()->route('book.detail', ['slug' => $slug])
                     ->with('access_denied', 'expired');
             }

@@ -4,6 +4,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import '../css/app.css';
 import { LanguageProvider } from './context/LanguageContext';
+import { initializeTheme } from './hooks/use-appearance';
 import Navbar from './components/Layouts/Navbar/Navbar';
 import { Footer } from './components/Layouts/Footer/Footer';
 import AnnouncementModal from './components/component/Announcement/AnnouncementModal';
@@ -32,6 +33,9 @@ router.on('navigate', (event) => {
 });
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+
+// Apply the persisted light/dark theme (.dark class) before the app renders.
+initializeTheme();
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),

@@ -1,16 +1,20 @@
 import { useCountUp } from '@/hooks/useCountUp';
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
+import { TrendingDown, TrendingUp } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-type StatCard = {
+type StatCardProps = {
     icon: React.ElementType;
     target: number;
     suffix: string;
     label: string;
     desc: string;
-    color: string;
-    bg: string;
     delay: number;
+    /** Tailwind classes for the icon halo, e.g. "bg-brand/15 text-brand" */
+    iconClass: string;
+    /** Percentage change vs previous period; null hides the badge */
+    trend?: number | null;
 };
 
 function StatCard({
@@ -19,13 +23,16 @@ function StatCard({
     suffix,
     label,
     desc,
-    color,
-    bg,
     delay,
-}: StatCard) {
+    iconClass,
+    trend,
+}: StatCardProps) {
     const ref = useRef<HTMLDivElement>(null);
     const inView = useInView(ref, { once: true, margin: '-60px' });
     const count = useCountUp({ target, duration: 1600, start: inView });
+
+    const hasTrend = trend !== null && trend !== undefined && isFinite(trend);
+    const isUp = (trend ?? 0) >= 0;
 
     return (
         <motion.div
@@ -33,25 +40,47 @@ function StatCard({
             initial={{ opacity: 0, y: 36 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] }}
-            className="flex cursor-default flex-col items-center gap-4 rounded-2xl border border-white/30 bg-white/15 p-8 text-center shadow-[0_6px_0_0_rgba(0,0,0,0.25),0_10px_24px_rgba(0,0,0,0.18)] backdrop-blur-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_8px_0_0_rgba(0,0,0,0.3),0_14px_28px_rgba(0,0,0,0.22)] active:translate-y-[5px] active:shadow-[0_1px_0_0_rgba(0,0,0,0.2),0_2px_4px_rgba(0,0,0,0.1)]"
+            className="theme-transition group relative flex flex-col items-start gap-4 overflow-hidden rounded-2xl border border-border bg-card/70 p-7 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-brand/40 hover:shadow-xl hover:shadow-brand/10"
         >
-            {/* Icon circle */}
-            <div
-                className={`flex h-16 w-16 items-center justify-center rounded-full ${bg} shadow-[0_3px_0_0_rgba(0,0,0,0.2)]`}
-            >
-                <Icon style={{ color }} className="h-8 w-8" />
+            <div className="pointer-events-none absolute -top-8 -right-8 h-24 w-24 rounded-full bg-brand/10 blur-2xl transition-opacity duration-500 group-hover:opacity-100" />
+
+            <div className="flex w-full items-start justify-between">
+                <div
+                    className={cn(
+                        'flex h-14 w-14 items-center justify-center rounded-2xl ring-1 ring-inset ring-current/10',
+                        iconClass,
+                    )}
+                >
+                    <Icon className="h-7 w-7" />
+                </div>
+
+                {hasTrend && (
+                    <span
+                        className={cn(
+                            'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold',
+                            isUp
+                                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                                : 'bg-rose-500/10 text-rose-600 dark:text-rose-400',
+                        )}
+                    >
+                        {isUp ? (
+                            <TrendingUp className="h-3.5 w-3.5" />
+                        ) : (
+                            <TrendingDown className="h-3.5 w-3.5" />
+                        )}
+                        {Math.abs(trend as number).toFixed(1)}%
+                    </span>
+                )}
             </div>
 
-            {/* Counting number */}
-            <div className="text-5xl font-extrabold text-white tabular-nums drop-shadow-md">
+            <div className="font-poppins text-4xl font-extrabold tracking-tight text-foreground tabular-nums">
                 {count}
                 {suffix}
             </div>
 
-            {/* Labels */}
             <div>
-                <div className="font-semibold text-white">{label}</div>
-                <div className="mt-0.5 text-xs text-white/60">{desc}</div>
+                <div className="font-semibold text-foreground">{label}</div>
+                <div className="mt-0.5 text-sm text-muted-foreground">{desc}</div>
             </div>
         </motion.div>
     );
