@@ -24,7 +24,7 @@ export const CategoriesCard = ({
             className="h-full"
         >
             <Link href={href ?? '#'} className="block h-full">
-                <Card className="group theme-transition relative h-full items-center gap-3 overflow-hidden rounded-2xl border border-gray-200/80 bg-card p-6 text-center shadow-sm transition-all duration-300 hover:border-brand/50 hover:shadow-xl hover:shadow-brand/10 dark:border-white/10">
+                <Card className="group theme-transition relative h-full items-center gap-3 overflow-hidden rounded-2xl border bg-card p-6 text-center shadow-sm transition-all duration-300 hover:border-brand/50 hover:shadow-xl hover:shadow-brand/10">
                     {/* subtle hover glow */}
                     <div className="pointer-events-none absolute -top-10 -right-10 h-24 w-24 rounded-full bg-brand/20 opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100" />
 
@@ -41,7 +41,7 @@ export const CategoriesCard = ({
                         />
                     </div>
 
-                    <h3 className="line-clamp-2 font-poppins text-sm font-semibold text-foreground transition-colors group-hover:text-brand">
+                    <h3 className="line-clamp-2 font-display text-sm font-semibold text-foreground transition-colors group-hover:text-brand">
                         {name}
                     </h3>
 

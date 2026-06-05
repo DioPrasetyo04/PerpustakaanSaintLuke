@@ -128,7 +128,7 @@ export default function Confirm() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 py-8">
+        <div className="min-h-screen bg-background py-8">
             <div className="container mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
                 <Link href={`/book/detail/${book.slug}`}>
                     <Button variant="ghost" className="mb-6 gap-2">
@@ -142,13 +142,13 @@ export default function Confirm() {
                     animate={{ opacity: 1, y: 0 }}
                 >
                     <Card className="p-8">
-                        <h1 className="mb-6 font-['Poppins'] text-2xl font-bold text-gray-900">
+                        <h1 className="mb-6 font-display text-2xl font-bold text-foreground">
                             Borrow Book
                         </h1>
 
                         {/* Book Summary */}
-                        <div className="mb-6 flex gap-4 rounded-lg bg-gray-50 p-4">
-                            <div className="h-28 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200">
+                        <div className="mb-6 flex gap-4 rounded-lg bg-background p-4">
+                            <div className="h-28 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-muted">
                                 <ImageWithFallback
                                     src={book.cover}
                                     alt={book.title}
@@ -156,7 +156,7 @@ export default function Confirm() {
                                 />
                             </div>
                             <div>
-                                <h3 className="mb-1 font-semibold text-gray-900">
+                                <h3 className="mb-1 font-semibold text-foreground">
                                     {book.title}
                                 </h3>
                                 <div className="flex flex-1 items-center gap-3 p-2">
@@ -169,7 +169,7 @@ export default function Confirm() {
                                                 className="h-8 w-8 rounded-full object-cover object-center"
                                                 src={author?.avatar}
                                             />
-                                            <p className="text-sm text-gray-600">
+                                            <p className="text-sm text-muted-foreground">
                                                 {author?.name}
                                             </p>
                                         </div>
@@ -189,14 +189,14 @@ export default function Confirm() {
                         </div>
 
                         {/* Due Date Info */}
-                        <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
+                        <div className="mb-6 rounded-lg border border-cobalt-lt bg-cobalt-50 p-4">
                             <div className="flex items-start gap-3">
-                                <Calendar className="mt-0.5 h-5 w-5 text-blue-600" />
+                                <Calendar className="mt-0.5 h-5 w-5 text-cobalt-dk" />
                                 <div>
-                                    <p className="mb-1 font-medium text-blue-900">
+                                    <p className="mb-1 font-medium text-ink">
                                         Due Date
                                     </p>
-                                    <p className="text-sm text-blue-700">
+                                    <p className="text-sm text-cobalt-dk">
                                         {loanPreview.due_date}
                                     </p>
                                 </div>
@@ -204,11 +204,11 @@ export default function Confirm() {
                         </div>
 
                         {/* Terms */}
-                        <div className="mb-6 rounded-lg bg-gray-50 p-4">
-                            <h4 className="mb-2 font-medium text-gray-900">
+                        <div className="mb-6 rounded-lg bg-background p-4">
+                            <h4 className="mb-2 font-medium text-foreground">
                                 Borrowing Terms
                             </h4>
-                            <ul className="list-disc space-y-1 pl-3 text-justify text-sm text-gray-600">
+                            <ul className="list-disc space-y-1 pl-3 text-justify text-sm text-muted-foreground">
                                 <li>
                                     Return the book on or before the due date
                                 </li>

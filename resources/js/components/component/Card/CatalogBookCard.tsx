@@ -39,10 +39,10 @@ export function CatalogBookCard({
             whileHover={{ y: -8, transition: { duration: 0.2 } }}
             className="group"
         >
-            <div className="flex h-full flex-col overflow-hidden rounded-xl bg-white shadow-md transition-shadow duration-300 hover:shadow-xl">
+            <div className="flex h-full flex-col overflow-hidden rounded-xl bg-card shadow-md transition-shadow duration-300 hover:shadow-xl">
                 <Link
                     href={`/book/${id}`}
-                    className="relative aspect-[3/4] overflow-hidden bg-gray-100"
+                    className="relative aspect-[3/4] overflow-hidden bg-muted"
                 >
                     <ImageWithFallback
                         src={coverUrl}
@@ -77,19 +77,19 @@ export function CatalogBookCard({
                         {isBookmarked ? (
                             <BookmarkCheck className="h-4 w-4 fill-accent text-accent" />
                         ) : (
-                            <Bookmark className="h-4 w-4 text-gray-600" />
+                            <Bookmark className="h-4 w-4 text-muted-foreground" />
                         )}
                     </button>
                 </Link>
 
                 <div className="flex flex-1 flex-col p-4">
                     <Link href={`/book/${id}`}>
-                        <h3 className="mb-1 line-clamp-2 font-['Poppins'] font-semibold text-gray-900 transition-colors group-hover:text-primary">
+                        <h3 className="mb-1 line-clamp-2 font-display font-semibold text-foreground transition-colors group-hover:text-primary">
                             {title}
                         </h3>
                     </Link>
 
-                    <p className="mb-2 text-sm text-gray-600">{author}</p>
+                    <p className="mb-2 text-sm text-muted-foreground">{author}</p>
 
                     <div className="mb-3 flex items-center gap-2">
                         <Badge variant="outline" className="text-xs">
@@ -99,7 +99,7 @@ export function CatalogBookCard({
 
                     <div className="mb-4 flex items-center gap-1">
                         <Star className="h-4 w-4 fill-accent text-accent" />
-                        <span className="text-sm font-medium text-gray-700">
+                        <span className="text-sm font-medium text-foreground">
                             {rating}
                         </span>
                     </div>

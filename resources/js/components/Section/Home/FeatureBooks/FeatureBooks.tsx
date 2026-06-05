@@ -24,7 +24,7 @@ const FeatureBooks = ({ books }: FeaturedBookProps) => {
         <section className="theme-transition relative overflow-hidden bg-background py-20">
             {/* decorative glow */}
             <div className="pointer-events-none absolute top-0 -left-32 h-72 w-72 rounded-full bg-brand/10 blur-3xl dark:bg-brand/5" />
-            <div className="pointer-events-none absolute -right-32 bottom-0 h-72 w-72 rounded-full bg-amber-200/10 blur-3xl dark:bg-brand/5" />
+            <div className="pointer-events-none absolute -right-32 bottom-0 h-72 w-72 rounded-full bg-brass-lt/10 blur-3xl dark:bg-brand/5" />
 
             <div className="relative container mx-auto px-4 sm:px-6 lg:px-8">
                 <motion.div
@@ -33,11 +33,11 @@ const FeatureBooks = ({ books }: FeaturedBookProps) => {
                     viewport={{ once: true }}
                     className="mb-12 text-center"
                 >
-                    <span className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-brand/20 bg-brand/10 px-3 py-1 text-xs font-semibold tracking-wide text-brand uppercase">
+                    <span className="mb-4 inline-flex items-center gap-2 font-mono text-[11px] font-semibold uppercase tracking-editorial text-cobalt dark:text-cobalt-lt">
                         <Sparkles className="h-3.5 w-3.5" />
                         {language === 'id' ? 'Pilihan Terbaik' : 'Top Picks'}
                     </span>
-                    <h2 className="font-poppins text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                    <h2 className="font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
                         {text.title}
                     </h2>
                     <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">

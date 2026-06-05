@@ -58,9 +58,9 @@ function Carousel<T>({
 
     const navButton =
         'flex h-11 w-11 items-center justify-center rounded-full border border-black/5 ' +
-        'bg-white/80 text-gray-700 shadow-lg shadow-black/5 backdrop-blur-md transition-all duration-300 ' +
+        'bg-white/80 text-foreground shadow-lg shadow-black/5 backdrop-blur-md transition-all duration-300 ' +
         'hover:scale-110 hover:bg-white hover:text-brand ' +
-        'dark:border-white/10 dark:bg-white/10 dark:text-gray-200 dark:hover:bg-white/20 dark:hover:text-brand ' +
+        'dark:border-white/10 dark:bg-white/10 dark:text-foreground dark:hover:bg-white/20 dark:hover:text-brand ' +
         'disabled:cursor-not-allowed disabled:opacity-0';
 
     return (

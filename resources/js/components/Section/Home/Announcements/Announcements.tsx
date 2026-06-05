@@ -35,11 +35,11 @@ const AnnouncementsSection = ({ informations }: FeaturedInformationProps) => {
                     viewport={{ once: true }}
                     className="mb-12 text-center"
                 >
-                    <span className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-brand/20 bg-brand/10 px-3 py-1 text-xs font-semibold tracking-wide text-brand uppercase">
+                    <span className="mb-4 inline-flex items-center gap-2 font-mono text-[11px] font-semibold uppercase tracking-editorial text-cobalt dark:text-cobalt-lt">
                         <Megaphone className="h-3.5 w-3.5" />
                         {language === 'id' ? 'Kabar Terbaru' : 'Latest News'}
                     </span>
-                    <h2 className="font-poppins text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                    <h2 className="font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
                         {header.title}
                     </h2>
                     <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">

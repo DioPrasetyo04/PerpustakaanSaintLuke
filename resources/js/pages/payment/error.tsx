@@ -52,7 +52,7 @@ export default function PaymentError() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2 }}
-                            className="mb-3 font-['Poppins'] text-3xl font-bold text-gray-900 sm:text-4xl"
+                            className="mb-3 font-display text-3xl font-bold text-foreground sm:text-4xl"
                         >
                             Payment Error
                         </motion.h1>
@@ -61,7 +61,7 @@ export default function PaymentError() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3 }}
-                            className="text-lg text-gray-600"
+                            className="text-lg text-muted-foreground"
                         >
                             We encountered a problem processing your payment
                         </motion.p>
@@ -76,22 +76,22 @@ export default function PaymentError() {
                             <div className="mb-4 flex items-start gap-3">
                                 <AlertTriangle className="mt-1 h-6 w-6 flex-shrink-0 text-orange-600" />
                                 <div>
-                                    <h2 className="mb-2 font-['Poppins'] text-xl font-bold text-gray-900">
+                                    <h2 className="mb-2 font-display text-xl font-bold text-foreground">
                                         Error Details
                                     </h2>
-                                    <p className="text-gray-700">{errorMessage}</p>
+                                    <p className="text-foreground">{errorMessage}</p>
                                 </div>
                             </div>
                         </Card>
 
                         {fine && (
-                            <Card className="mb-6 border-2 border-gray-200 p-6 shadow-xl">
-                                <h3 className="mb-4 font-['Poppins'] text-lg font-bold text-gray-900">
+                            <Card className="mb-6 border-2 border-border p-6 shadow-xl">
+                                <h3 className="mb-4 font-display text-lg font-bold text-foreground">
                                     Payment Information
                                 </h3>
 
-                                <div className="mb-6 flex gap-4 border-b border-gray-200 pb-6">
-                                    <div className="h-28 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                                <div className="mb-6 flex gap-4 border-b border-border pb-6">
+                                    <div className="h-28 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-muted">
                                         <ImageWithFallback
                                             src={fine.cover_url ?? undefined}
                                             alt={fine.book_title ?? ''}
@@ -99,7 +99,7 @@ export default function PaymentError() {
                                         />
                                     </div>
                                     <div className="flex-1">
-                                        <h3 className="mb-2 font-semibold text-gray-900">
+                                        <h3 className="mb-2 font-semibold text-foreground">
                                             {fine.book_title}
                                         </h3>
                                         {fine.category && (
@@ -107,7 +107,7 @@ export default function PaymentError() {
                                                 {fine.category}
                                             </Badge>
                                         )}
-                                        <p className="text-sm text-gray-600">
+                                        <p className="text-sm text-muted-foreground">
                                             Fine ID: {fine.id}
                                         </p>
                                     </div>
@@ -115,7 +115,7 @@ export default function PaymentError() {
 
                                 <div className="mb-6 space-y-4">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-gray-600">Status:</span>
+                                        <span className="text-muted-foreground">Status:</span>
                                         <Badge className="bg-orange-500">
                                             <AlertTriangle className="mr-1 h-3 w-3" />
                                             Payment Error
@@ -123,8 +123,8 @@ export default function PaymentError() {
                                     </div>
 
                                     <div className="flex items-center justify-between">
-                                        <span className="text-gray-600">Fine ID:</span>
-                                        <span className="font-medium text-gray-900">
+                                        <span className="text-muted-foreground">Fine ID:</span>
+                                        <span className="font-medium text-foreground">
                                             {fine.id}
                                         </span>
                                     </div>
@@ -132,7 +132,7 @@ export default function PaymentError() {
 
                                 <div className="rounded-xl border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-red-50 p-6">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-lg font-medium text-gray-900">
+                                        <span className="text-lg font-medium text-foreground">
                                             Amount Due:
                                         </span>
                                         <span className="text-3xl font-bold text-orange-600">
@@ -143,25 +143,25 @@ export default function PaymentError() {
                             </Card>
                         )}
 
-                        <Card className="mb-6 border-blue-200 bg-blue-50 p-6">
-                            <h3 className="mb-3 font-semibold text-gray-900">
+                        <Card className="mb-6 border-cobalt-lt bg-cobalt-50 p-6">
+                            <h3 className="mb-3 font-semibold text-foreground">
                                 Common Causes:
                             </h3>
-                            <ul className="space-y-2 text-sm text-gray-700">
+                            <ul className="space-y-2 text-sm text-foreground">
                                 <li className="flex items-start gap-2">
-                                    <span className="font-bold text-blue-600">•</span>
+                                    <span className="font-bold text-cobalt-dk">•</span>
                                     <span>Server is temporarily unavailable or experiencing high traffic</span>
                                 </li>
                                 <li className="flex items-start gap-2">
-                                    <span className="font-bold text-blue-600">•</span>
+                                    <span className="font-bold text-cobalt-dk">•</span>
                                     <span>Payment gateway connection timeout</span>
                                 </li>
                                 <li className="flex items-start gap-2">
-                                    <span className="font-bold text-blue-600">•</span>
+                                    <span className="font-bold text-cobalt-dk">•</span>
                                     <span>Network connectivity issues</span>
                                 </li>
                                 <li className="flex items-start gap-2">
-                                    <span className="font-bold text-blue-600">•</span>
+                                    <span className="font-bold text-cobalt-dk">•</span>
                                     <span>Temporary service maintenance</span>
                                 </li>
                             </ul>
@@ -197,21 +197,21 @@ export default function PaymentError() {
                             </Link>
                         </div>
 
-                        <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-blue-50 p-6">
-                            <h3 className="mb-4 text-center font-semibold text-gray-900">
+                        <Card className="border-brass-lt bg-gradient-to-br from-brass-50 to-cobalt-50 p-6">
+                            <h3 className="mb-4 text-center font-semibold text-foreground">
                                 Still having issues?
                             </h3>
                             <div className="space-y-3">
                                 <div className="flex items-center justify-center gap-3 text-sm">
                                     <Mail className="h-4 w-4 text-primary" />
-                                    <span className="text-gray-700">support@library.com</span>
+                                    <span className="text-foreground">support@library.com</span>
                                 </div>
                                 <div className="flex items-center justify-center gap-3 text-sm">
                                     <Phone className="h-4 w-4 text-primary" />
-                                    <span className="text-gray-700">+62 812 3456 7890</span>
+                                    <span className="text-foreground">+62 812 3456 7890</span>
                                 </div>
                             </div>
-                            <p className="mt-4 text-center text-xs text-gray-600">
+                            <p className="mt-4 text-center text-xs text-muted-foreground">
                                 Our support team is available to assist you
                             </p>
                         </Card>

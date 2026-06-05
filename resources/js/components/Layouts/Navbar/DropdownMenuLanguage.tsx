@@ -71,11 +71,11 @@ const DropdownMenuLanguage = ({ isScrolled }: { isScrolled: boolean }) => {
                 className={cn(
                     'flex items-center gap-2 rounded-full px-3 py-1.5 transition-all duration-200',
                     isScrolled
-                        ? 'text-gray-600 hover:bg-gray-100'
+                        ? 'text-muted-foreground hover:bg-muted'
                         : 'text-white/90 hover:bg-white/10 hover:text-white',
                     isOpen &&
                         (isScrolled
-                            ? 'bg-gray-100'
+                            ? 'bg-muted'
                             : 'bg-white/10 text-white'),
                 )}
             >
@@ -99,7 +99,7 @@ const DropdownMenuLanguage = ({ isScrolled }: { isScrolled: boolean }) => {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 8, scale: 0.97 }}
                         transition={{ duration: 0.18, ease: 'easeOut' }}
-                        className="absolute top-full right-0 mt-2 min-w-[120px] overflow-hidden rounded-xl border border-[#E5E7EB]/60 bg-white shadow-xl backdrop-blur-xl"
+                        className="absolute top-full right-0 mt-2 min-w-[120px] overflow-hidden rounded-xl border border-[#E5E7EB]/60 bg-card shadow-xl backdrop-blur-xl"
                     >
                         {languageItems.map((lang) => {
                             const isCurrent =
@@ -115,7 +115,7 @@ const DropdownMenuLanguage = ({ isScrolled }: { isScrolled: boolean }) => {
                                         'flex w-full items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-[#C8A45C]/10 hover:text-[#C8A45C]',
                                         isCurrent
                                             ? 'bg-[#C8A45C]/5 font-semibold text-[#C8A45C]'
-                                            : 'text-gray-600',
+                                            : 'text-muted-foreground',
                                     )}
                                 >
                                     {getFlag(lang.language)}

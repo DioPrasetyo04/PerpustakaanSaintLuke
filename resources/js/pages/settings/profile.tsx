@@ -348,14 +348,14 @@ export default function ProfilePage() {
     );
 
     return (
-        <div className="min-h-screen bg-gray-50 py-8">
+        <div className="min-h-screen bg-background py-8">
             <Head title="My Profile" />
             <div className="container mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                 >
-                    <h1 className="font-['Poppins'] text-3xl font-bold text-gray-900 mb-8">
+                    <h1 className="font-display text-3xl font-bold text-foreground mb-8">
                         My Profile
                     </h1>
 
@@ -396,16 +396,16 @@ export default function ProfilePage() {
                                     )}
                                 </motion.div>
 
-                                <h2 className="text-xl font-semibold text-gray-900 mb-1">
+                                <h2 className="text-xl font-semibold text-foreground mb-1">
                                     {profile.name}
                                 </h2>
-                                <p className="text-gray-600 mb-4">
+                                <p className="text-muted-foreground mb-4">
                                     Library Member
                                 </p>
 
-                                <div className="bg-gray-50 rounded-lg p-3 text-sm">
-                                    <p className="text-gray-500">Member Since</p>
-                                    <p className="font-medium text-gray-900">
+                                <div className="bg-background rounded-lg p-3 text-sm">
+                                    <p className="text-muted-foreground">Member Since</p>
+                                    <p className="font-medium text-foreground">
                                         {formatLongDate(profile.created_at)}
                                     </p>
                                 </div>
@@ -416,7 +416,7 @@ export default function ProfilePage() {
                         <Card className="p-6 lg:col-span-2">
                             <form onSubmit={submitProfile}>
                                 <div className="flex items-center justify-between mb-6">
-                                    <h3 className="text-xl font-semibold text-gray-900">
+                                    <h3 className="text-xl font-semibold text-foreground">
                                         Profile Information
                                     </h3>
                                     {!isEditing ? (
@@ -581,11 +581,11 @@ export default function ProfilePage() {
                     <Card className="p-6 mt-6">
                         <div className="flex flex-col gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between">
                             <div>
-                                <h3 className="text-xl font-semibold text-gray-900 mb-1 flex items-center gap-2">
+                                <h3 className="text-xl font-semibold text-foreground mb-1 flex items-center gap-2">
                                     <Share2 className="h-5 w-5 text-primary" />
                                     Social Media
                                 </h3>
-                                <p className="text-sm text-gray-600">
+                                <p className="text-sm text-muted-foreground">
                                     Tambahkan akun social media Anda agar mudah
                                     dihubungi.
                                 </p>
@@ -746,8 +746,8 @@ export default function ProfilePage() {
 
                         {profile.socialmedia.length === 0 ? (
                             <div className="text-center py-10 border border-dashed rounded-xl">
-                                <Globe className="h-10 w-10 mx-auto text-gray-300 mb-2" />
-                                <p className="text-gray-600">
+                                <Globe className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
+                                <p className="text-muted-foreground">
                                     Belum ada social media yang ditambahkan.
                                 </p>
                             </div>
@@ -756,7 +756,7 @@ export default function ProfilePage() {
                                 {profile.socialmedia.map((item) => (
                                     <div
                                         key={item.id}
-                                        className="flex items-start gap-3 rounded-xl border bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
+                                        className="flex items-start gap-3 rounded-xl border bg-card p-4 shadow-sm hover:shadow-md transition-shadow"
                                     >
                                         <div
                                             className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full"
@@ -776,7 +776,7 @@ export default function ProfilePage() {
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2 mb-1">
-                                                <h4 className="font-semibold text-gray-900">
+                                                <h4 className="font-semibold text-foreground">
                                                     {item.platform_label}
                                                 </h4>
                                                 <Badge
@@ -795,7 +795,7 @@ export default function ProfilePage() {
                                                 {item.url}
                                             </a>
                                             {item.username && (
-                                                <p className="text-xs text-gray-500 mt-1">
+                                                <p className="text-xs text-muted-foreground mt-1">
                                                     @{item.username}
                                                 </p>
                                             )}
@@ -828,14 +828,14 @@ export default function ProfilePage() {
                     </Card>
 
                     {/* Password card */}
-                    <Card className="p-6 mt-6 bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-primary/20">
+                    <Card className="p-6 mt-6 bg-gradient-to-br from-blue-50 to-brass-50 border-2 border-primary/20">
                         <div className="flex items-center justify-between mb-6">
                             <div>
-                                <h3 className="text-xl font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                                <h3 className="text-xl font-semibold text-foreground mb-2 flex items-center gap-2">
                                     <Lock className="h-6 w-6 text-primary" />
                                     Security Settings
                                 </h3>
-                                <p className="text-gray-600 text-sm">
+                                <p className="text-muted-foreground text-sm">
                                     Manage your password and account security
                                 </p>
                             </div>
@@ -930,10 +930,10 @@ function Field({
     return (
         <div>
             <Label className="flex items-center gap-2 mb-2">
-                <Icon className="h-4 w-4 text-gray-400" />
+                <Icon className="h-4 w-4 text-muted-foreground" />
                 {label}
             </Label>
-            {editing ? children : <p className="text-gray-900 pl-6">{value}</p>}
+            {editing ? children : <p className="text-foreground pl-6">{value}</p>}
             {error && editing && (
                 <p className="mt-1 text-xs text-red-600">{error}</p>
             )}

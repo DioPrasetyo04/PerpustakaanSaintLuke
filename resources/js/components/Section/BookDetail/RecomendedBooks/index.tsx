@@ -1,8 +1,8 @@
 import BookCard from '@/components/component/Card/BookCard';
 import Pagination from '@/components/component/Home/Pagination/Pagination';
 import { useQueryParams } from '@/hooks/useQueryParams';
-import { BookProps } from '@/types/DataTypes/BooksProps';
-import { Paginated } from '@/types/pagination';
+import type { BookProps } from '@/types/DataTypes/BooksProps';
+import type { Paginated } from '@/types/pagination';
 import React from 'react';
 
 type SectionRecomendedBooks = {
@@ -22,7 +22,7 @@ function SectionRecomended({
     );
     return (
         <div className="mb-12">
-            <h2 className="mb-6 font-['Poppins'] text-2xl font-bold text-gray-900 sm:text-3xl">
+            <h2 className="mb-6 font-display text-2xl font-bold text-foreground sm:text-3xl">
                 {headerSection}
             </h2>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">

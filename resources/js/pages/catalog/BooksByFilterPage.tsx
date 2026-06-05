@@ -107,7 +107,7 @@ const BooksByFilterPage = () => {
 
     return (
         <>
-            <div className="min-h-screen bg-gray-50 py-8">
+            <div className="min-h-screen bg-background py-12">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Header */}
                     <motion.div
@@ -139,18 +139,18 @@ const BooksByFilterPage = () => {
                                 <Icon className="h-12 w-12 text-primary" />
                             </div>
                             <div>
-                                <h1 className="font-['Poppins'] text-3xl font-bold text-gray-900 sm:text-4xl">
+                                <h1 className="font-display text-3xl font-bold text-foreground sm:text-4xl">
                                     {titleMap[type]} Books
                                 </h1>
-                                <p className="text-gray-600">
+                                <p className="text-muted-foreground">
                                     {books.meta.total} books found
                                 </p>
                             </div>
                         </div>
                     </motion.div>
-                    <div className="mb-6 rounded-xl bg-white p-4 shadow-sm">
+                    <div className="mb-6 rounded-xl bg-card border border-border p-4 shadow-soft">
                         <div className="relative">
-                            <Search className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                            <Search className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                             <Input
                                 placeholder={
                                     language === 'id'

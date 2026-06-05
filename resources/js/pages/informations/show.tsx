@@ -14,7 +14,7 @@ export default function show() {
     const { language } = useLanguage();
     const { detailInfo } = usePage<{ detailInfo: InformationProps }>().props;
     return (
-        <div className="min-h-screen bg-gray-50 py-8">
+        <div className="min-h-screen bg-background py-8">
             <div className="container mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
                 {/* Back Button */}
                 <motion.div
@@ -38,7 +38,7 @@ export default function show() {
                 >
                     <Card className="overflow-hidden">
                         {/* Hero Image */}
-                        <div className="relative aspect-[21/9] overflow-hidden bg-gray-100">
+                        <div className="relative aspect-[21/9] overflow-hidden bg-muted">
                             <ImageWithFallback
                                 src={detailInfo.image}
                                 alt={detailInfo.name}
@@ -48,12 +48,12 @@ export default function show() {
                             <div className="absolute right-6 bottom-6 left-6">
                                 <Badge
                                     className={
-                                        'mb-3 bg-purple-200 text-purple-700'
+                                        'mb-3 bg-brass-lt text-brass'
                                     }
                                 >
                                     {detailInfo.category.name}
                                 </Badge>
-                                <h1 className="mb-2 font-['Poppins'] text-3xl font-bold text-white sm:text-4xl">
+                                <h1 className="mb-2 font-display text-3xl font-bold text-white sm:text-4xl">
                                     {detailInfo.name}
                                 </h1>
                                 <div className="flex items-center gap-2 text-white/90">
@@ -72,7 +72,7 @@ export default function show() {
                         <div className="p-8 sm:p-12">
                             {/* Description */}
                             <div className="prose prose-lg mb-8 max-w-none">
-                                <p className="border-l-4 border-primary pl-6 text-xl leading-relaxed text-gray-700 italic">
+                                <p className="border-l-4 border-primary pl-6 text-xl leading-relaxed text-foreground italic">
                                     {detailInfo.description}
                                 </p>
                             </div>

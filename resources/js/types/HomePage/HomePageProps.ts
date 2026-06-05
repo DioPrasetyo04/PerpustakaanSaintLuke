@@ -9,11 +9,42 @@ import type { BookProps } from '../DataTypes/BooksProps';
 import type { CategoryProps } from '../DataTypes/CategoryProps';
 import type { InformationProps } from '../DataTypes/InformationProps';
 
+export type LiveActivity = {
+    id: number;
+    name: string;
+    status: 'borrowed' | 'returned';
+    title: string;
+    slug: string | null;
+    cover: string | null;
+    date: string | null;
+};
+
+export type FeaturedPublisher = {
+    id: number;
+    name: string;
+    slug: string;
+    logo: string | null;
+    books_count: number;
+};
+
+export type Testimonial = {
+    id: number;
+    name: string;
+    slug: string;
+    role: string | null;
+    description: string | null;
+    video_url: string | null;
+    thumbnail_url: string | null;
+};
+
 export type HomePageProps = {
     data: {
         books: Paginated<BookProps>;
         categories: Paginated<CategoryProps>;
         informations: Paginated<InformationProps>;
+        live_activities: LiveActivity[];
+        publishers: FeaturedPublisher[];
+        testimonials: Testimonial[];
         count_of_all_books: number;
         count_of_all_visitors: number;
         count_of_all_users: number;

@@ -5,7 +5,7 @@ import React from 'react'
 
 export const headerVariants = cva(
   [
-    "font-poppins",
+    "font-display",
     "tracking-tight",
     "transition-all duration-300",
     "select-none"
@@ -28,16 +28,16 @@ export const headerVariants = cva(
 
       color: {
         default:
-          "text-gray-900",
+          "text-foreground",
 
         muted:
-          "text-gray-600",
+          "text-muted-foreground",
 
         white:
           "text-white",
 
         primary:
-          "text-indigo-600",
+          "text-cobalt-dk",
       },
 
       hover: {
@@ -48,10 +48,10 @@ export const headerVariants = cva(
         lift: "hover:-translate-y-1 hover:scale-[1.02]",
 
         glow:
-          "hover:text-indigo-600",
+          "hover:text-cobalt-dk",
 
         underline:
-          "relative after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-indigo-600 after:transition-all hover:after:w-full",
+          "relative after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-cobalt-dk after:transition-all hover:after:w-full",
       },
 
       weight: {

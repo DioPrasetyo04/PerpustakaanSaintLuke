@@ -29,7 +29,7 @@ export const AnnouncementCard = ({
             className="h-full"
         >
             <Link href={`/information/detail/${slug}`} className="block h-full">
-                <Card className="group theme-transition flex h-full flex-col gap-0 overflow-hidden rounded-2xl border border-gray-200/80 bg-card p-0 shadow-sm transition-all duration-300 hover:border-brand/60 hover:shadow-2xl hover:shadow-brand/10 dark:border-white/10">
+                <Card className="group theme-transition flex h-full flex-col gap-0 overflow-hidden rounded-2xl border bg-card p-0 shadow-sm transition-all duration-300 hover:border-brand/60 hover:shadow-2xl hover:shadow-brand/10">
                     <div className="relative aspect-video overflow-hidden bg-muted">
                         <ImageWithFallback
                             src={image}
@@ -51,7 +51,7 @@ export const AnnouncementCard = ({
                             {formattedDate(created_at ?? '', language)}
                         </div>
 
-                        <h3 className="mb-2 line-clamp-2 font-poppins text-lg font-semibold text-foreground transition-colors group-hover:text-brand">
+                        <h3 className="mb-2 line-clamp-2 font-display text-lg font-semibold text-foreground transition-colors group-hover:text-brand">
                             {name}
                         </h3>
 

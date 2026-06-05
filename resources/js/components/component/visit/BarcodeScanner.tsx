@@ -85,8 +85,8 @@ const resultMeta: Record<
     },
     already: {
         icon: Clock,
-        ring: 'text-amber-600 bg-amber-50',
-        text: 'text-amber-700',
+        ring: 'text-brass bg-brass-50',
+        text: 'text-brass',
         title: 'Sudah Tercatat Hari Ini',
     },
     rejected: {

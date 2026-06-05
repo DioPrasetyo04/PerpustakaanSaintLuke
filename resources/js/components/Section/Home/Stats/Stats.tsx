@@ -204,9 +204,9 @@ const Stats = ({
     ];
 
     return (
-        <section className="theme-transition relative overflow-hidden border-y border-border bg-linear-to-b from-amber-50/60 via-background to-background py-20 dark:from-background dark:via-background dark:to-background">
+        <section className="theme-transition relative overflow-hidden border-y border-border bg-linear-to-b from-brass-50/60 via-background to-background py-20 dark:from-background dark:via-background dark:to-background">
             <div className="pointer-events-none absolute -top-24 left-1/4 h-72 w-72 rounded-full bg-brand/10 blur-3xl" />
-            <div className="pointer-events-none absolute -bottom-24 right-1/4 h-72 w-72 rounded-full bg-amber-200/10 blur-3xl dark:bg-brand/5" />
+            <div className="pointer-events-none absolute -bottom-24 right-1/4 h-72 w-72 rounded-full bg-brass-lt/10 blur-3xl dark:bg-brand/5" />
 
             <div className="relative container mx-auto px-4 sm:px-6 lg:px-8">
                 <motion.div
@@ -215,7 +215,7 @@ const Stats = ({
                     viewport={{ once: true }}
                     className="mb-12 text-center"
                 >
-                    <h2 className="font-poppins text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                    <h2 className="font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
                         {text.title}
                     </h2>
                     <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">

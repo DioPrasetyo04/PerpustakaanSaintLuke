@@ -79,10 +79,10 @@ export default function assets() {
     const getAssetColor = (type: FileType) => {
         const colors = {
             pdf: 'bg-red-100 text-red-600',
-            video: 'bg-purple-100 text-purple-600',
+            video: 'bg-brass-50 text-brass',
             audio: 'bg-green-100 text-green-600',
             excel: 'bg-emerald-100 text-emerald-600',
-            word: 'bg-blue-100 text-blue-600',
+            word: 'bg-cobalt-50 text-cobalt-dk',
             image: 'bg-pink-100 text-pink-600',
         };
         return colors[type];
@@ -95,11 +95,11 @@ export default function assets() {
             return (
                 <div className="flex h-[500px] items-center justify-center">
                     <div className="text-center">
-                        <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
+                        <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-cobalt border-t-transparent"></div>
                         <p className="text-lg font-semibold">
                             Converting to PDF...
                         </p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-muted-foreground">
                             Please wait a moment
                         </p>
                     </div>
@@ -174,7 +174,7 @@ export default function assets() {
         );
     };
     return (
-        <div className="min-h-screen bg-gray-50 py-8">
+        <div className="min-h-screen bg-background py-8">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="mb-6 flex items-center justify-between">
@@ -185,7 +185,7 @@ export default function assets() {
                         </Button>
                     </Link>
 
-                    <Badge className="bg-blue-500">
+                    <Badge className="bg-cobalt">
                         Borrowed until{' '}
                         {formattedDate(
                             book.loan?.map((l) => l.due_date)[0],
@@ -204,7 +204,7 @@ export default function assets() {
                         <div className="flex items-center justify-between gap-4 p-3">
                             {/* LEFT SIDE (TITLE + AUTHOR) */}
                             <div className="flex flex-col gap-y-3 p-3">
-                                <h1 className="font-['Poppins'] text-2xl font-bold text-gray-900 sm:text-3xl">
+                                <h1 className="font-display text-2xl font-bold text-foreground sm:text-3xl">
                                     {book.title}
                                 </h1>
 
@@ -219,7 +219,7 @@ export default function assets() {
                                                 alt={author.name}
                                                 className="h-8 w-8 rounded-full object-cover"
                                             />
-                                            <p className="text-sm text-gray-600">
+                                            <p className="text-sm text-muted-foreground">
                                                 {author.name}
                                             </p>
                                         </div>
@@ -267,7 +267,7 @@ export default function assets() {
                         className="lg:col-span-1"
                     >
                         <Card className="p-6">
-                            <h3 className="mb-4 font-semibold text-gray-900">
+                            <h3 className="mb-4 font-semibold text-foreground">
                                 Available Files
                             </h3>
 
@@ -282,7 +282,7 @@ export default function assets() {
                                             className={`w-full rounded-lg p-3 text-left transition-all ${
                                                 selectedAsset?.id === asset.id
                                                     ? 'bg-primary text-white shadow-md'
-                                                    : 'bg-gray-50 hover:bg-gray-100'
+                                                    : 'bg-background hover:bg-muted'
                                             }`}
                                         >
                                             <div className="flex items-center gap-3">
@@ -295,7 +295,7 @@ export default function assets() {
                                                 </div>
                                                 <div className="min-w-0 flex-1">
                                                     <p
-                                                        className={`truncate text-sm font-medium ${selectedAsset?.id === asset.id ? 'text-white' : 'text-gray-900'}`}
+                                                        className={`truncate text-sm font-medium ${selectedAsset?.id === asset.id ? 'text-white' : 'text-foreground'}`}
                                                     >
                                                         {asset.file_type.toUpperCase()}
                                                     </p>
@@ -320,10 +320,10 @@ export default function assets() {
                             </div>
 
                             <div className="mt-6 border-t pt-6">
-                                <p className="mb-2 text-sm text-gray-600">
+                                <p className="mb-2 text-sm text-muted-foreground">
                                     Total Files
                                 </p>
-                                <p className="text-2xl font-bold text-gray-900">
+                                <p className="text-2xl font-bold text-foreground">
                                     {totalAssets}
                                 </p>
                             </div>

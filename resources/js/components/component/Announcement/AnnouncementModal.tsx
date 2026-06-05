@@ -95,7 +95,7 @@ export default function AnnouncementModal({ announcement }: Props) {
             onClick={dismiss}
         >
             <div
-                className={`relative w-full max-w-md rounded-2xl overflow-hidden shadow-2xl bg-white dark:bg-gray-900 transition-all duration-300 ${
+                className={`relative w-full max-w-md rounded-2xl overflow-hidden shadow-2xl bg-card dark:bg-card transition-all duration-300 ${
                     animating ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-4'
                 }`}
                 onClick={(e) => e.stopPropagation()}
@@ -103,10 +103,10 @@ export default function AnnouncementModal({ announcement }: Props) {
                 {/* Close Button */}
                 <button
                     onClick={dismiss}
-                    className="absolute top-3 right-3 z-10 rounded-full p-1.5 bg-gray-100/80 dark:bg-gray-700/80 hover:bg-gray-200 dark:hover:bg-gray-600 transition"
+                    className="absolute top-3 right-3 z-10 rounded-full p-1.5 bg-muted/80 dark:bg-secondary/80 hover:bg-muted dark:hover:bg-secondary transition"
                     aria-label="Tutup"
                 >
-                    <svg className="w-4 h-4 text-gray-600 dark:text-gray-200" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 text-muted-foreground dark:text-foreground" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
@@ -125,7 +125,7 @@ export default function AnnouncementModal({ announcement }: Props) {
                 {/* Content */}
                 <div className="px-6 py-5 space-y-4">
                     {/* Title */}
-                    <h2 className="text-xl font-bold text-center text-gray-900 dark:text-white font-['Poppins']">
+                    <h2 className="text-xl font-bold text-center text-foreground dark:text-white font-display">
                         {announcement.title}
                     </h2>
 
@@ -160,7 +160,7 @@ export default function AnnouncementModal({ announcement }: Props) {
                             >
                                 {countdown.isOpen ? 'Perpustakaan Buka' : 'Perpustakaan Tutup'}
                             </span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                            <span className="text-xs text-muted-foreground dark:text-muted-foreground">
                                 ({announcement.open_time} – {announcement.close_time})
                             </span>
                         </div>
@@ -169,7 +169,7 @@ export default function AnnouncementModal({ announcement }: Props) {
                     {/* Description */}
                     {announcement.description && (
                         <div
-                            className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed text-center [&_*]:max-w-none"
+                            className="text-sm text-muted-foreground dark:text-muted-foreground leading-relaxed text-center [&_*]:max-w-none"
                             dangerouslySetInnerHTML={{ __html: announcement.description }}
                         />
                     )}
@@ -177,7 +177,7 @@ export default function AnnouncementModal({ announcement }: Props) {
                     {/* Mengerti Button */}
                     <button
                         onClick={dismiss}
-                        className="w-full py-2.5 rounded-xl text-sm font-semibold text-white transition bg-gray-800 hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600"
+                        className="w-full py-2.5 rounded-xl text-sm font-semibold text-white transition bg-primary hover:bg-primary/90 dark:bg-secondary dark:hover:bg-secondary"
                     >
                         Mengerti
                     </button>

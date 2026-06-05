@@ -20,7 +20,7 @@ const FAQHeaderSection = ({ data }: FAQHeaderSectionProps) => {
                 <HelpCircle className="h-3.5 w-3.5" />
                 FAQ
             </span>
-            <h2 className="font-poppins text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            <h2 className="font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
                 {data.title}
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">

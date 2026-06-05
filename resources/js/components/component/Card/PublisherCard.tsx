@@ -40,13 +40,13 @@ export const PublisherCard = ({
                     <ImageWithFallback
                         src={logo}
                         alt={name}
-                        className="h-16 w-16 rounded-lg border-2 border-gray-200 object-cover"
+                        className="h-16 w-16 rounded-lg border-2 border-border object-cover"
                     />
                     <div className="flex-1">
-                        <h3 className="mb-1 font-['Poppins'] text-lg font-bold text-gray-900">
+                        <h3 className="mb-1 font-display text-lg font-bold text-foreground">
                             {name}
                         </h3>
-                        <p className="mb-3 flex w-full items-center text-sm text-gray-600">
+                        <p className="mb-3 flex w-full items-center text-sm text-muted-foreground">
                             <MdLocationCity className="h-7 w-7" />
                             {address}
                         </p>

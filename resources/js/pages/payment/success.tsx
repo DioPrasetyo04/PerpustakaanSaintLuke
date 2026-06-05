@@ -29,7 +29,7 @@ export default function PaymentSuccess() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 py-12">
+        <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-cobalt-50 py-12">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="mx-auto max-w-2xl">
                     <motion.div
@@ -46,7 +46,7 @@ export default function PaymentSuccess() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2 }}
-                            className="mb-3 font-['Poppins'] text-3xl font-bold text-gray-900 sm:text-4xl"
+                            className="mb-3 font-display text-3xl font-bold text-foreground sm:text-4xl"
                         >
                             Payment Successful!
                         </motion.h1>
@@ -55,7 +55,7 @@ export default function PaymentSuccess() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3 }}
-                            className="text-lg text-gray-600"
+                            className="text-lg text-muted-foreground"
                         >
                             Your payment has been processed successfully
                         </motion.p>
@@ -70,13 +70,13 @@ export default function PaymentSuccess() {
                             <Card className="mb-6 border-2 border-green-100 p-6 shadow-xl">
                                 <div className="mb-6 flex items-center gap-2">
                                     <Receipt className="h-5 w-5 text-primary" />
-                                    <h2 className="font-['Poppins'] text-xl font-bold text-gray-900">
+                                    <h2 className="font-display text-xl font-bold text-foreground">
                                         Payment Receipt
                                     </h2>
                                 </div>
 
-                                <div className="mb-6 flex gap-4 border-b border-gray-200 pb-6">
-                                    <div className="h-28 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                                <div className="mb-6 flex gap-4 border-b border-border pb-6">
+                                    <div className="h-28 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-muted">
                                         <ImageWithFallback
                                             src={fine.cover_url ?? undefined}
                                             alt={fine.book_title ?? ''}
@@ -84,7 +84,7 @@ export default function PaymentSuccess() {
                                         />
                                     </div>
                                     <div className="flex-1">
-                                        <h3 className="mb-2 font-semibold text-gray-900">
+                                        <h3 className="mb-2 font-semibold text-foreground">
                                             {fine.book_title}
                                         </h3>
                                         {fine.category && (
@@ -92,7 +92,7 @@ export default function PaymentSuccess() {
                                                 {fine.category}
                                             </Badge>
                                         )}
-                                        <p className="text-sm text-gray-600">
+                                        <p className="text-sm text-muted-foreground">
                                             Fine ID: {fine.id}
                                         </p>
                                     </div>
@@ -100,27 +100,27 @@ export default function PaymentSuccess() {
 
                                 <div className="mb-6 space-y-4">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-gray-600">
+                                        <span className="text-muted-foreground">
                                             Transaction Date:
                                         </span>
-                                        <div className="flex items-center gap-2 text-gray-900">
+                                        <div className="flex items-center gap-2 text-foreground">
                                             <Calendar className="h-4 w-4" />
                                             <span>{new Date().toLocaleString()}</span>
                                         </div>
                                     </div>
 
                                     <div className="flex items-center justify-between">
-                                        <span className="text-gray-600">
+                                        <span className="text-muted-foreground">
                                             Payment Method:
                                         </span>
-                                        <div className="flex items-center gap-2 text-gray-900">
+                                        <div className="flex items-center gap-2 text-foreground">
                                             <CreditCard className="h-4 w-4" />
                                             <span>Midtrans Gateway</span>
                                         </div>
                                     </div>
 
                                     <div className="flex items-center justify-between">
-                                        <span className="text-gray-600">Status:</span>
+                                        <span className="text-muted-foreground">Status:</span>
                                         <Badge className="bg-green-500">
                                             <CheckCircle className="mr-1 h-3 w-3" />
                                             Paid
@@ -128,9 +128,9 @@ export default function PaymentSuccess() {
                                     </div>
                                 </div>
 
-                                <div className="rounded-xl border-2 border-green-200 bg-gradient-to-br from-green-50 to-blue-50 p-6">
+                                <div className="rounded-xl border-2 border-green-200 bg-gradient-to-br from-green-50 to-cobalt-50 p-6">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-lg font-medium text-gray-900">
+                                        <span className="text-lg font-medium text-foreground">
                                             Amount Paid:
                                         </span>
                                         <span className="text-3xl font-bold text-green-600">
@@ -171,7 +171,7 @@ export default function PaymentSuccess() {
                         </motion.div>
                     ) : (
                         <Card className="p-8 text-center">
-                            <p className="mb-4 text-gray-600">
+                            <p className="mb-4 text-muted-foreground">
                                 No payment information available
                             </p>
                             <Link href="/history?tab=fines">

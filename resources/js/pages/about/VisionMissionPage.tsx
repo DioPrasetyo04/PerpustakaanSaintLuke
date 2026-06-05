@@ -1,446 +1,162 @@
 import { motion } from 'framer-motion';
-import { Target } from 'lucide-react';
-import { Card } from '@/components/ui/card';
 import { useLanguage } from '@/hooks/useLanguage';
+
+const fadeUp = {
+    initial: { opacity: 0, y: 18 },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true, margin: '-60px' },
+};
+
+function SectionLabel({ num, label }: { num: string; label: string }) {
+    return (
+        <div className="flex items-center gap-3">
+            <span className="section-num text-xl tabnum">{num}</span>
+            <span className="tracking-editorial font-mono text-[11px] font-semibold uppercase text-foreground/70">
+                {label}
+            </span>
+            <span className="h-px flex-1 bg-line dark:bg-night-line" />
+        </div>
+    );
+}
 
 const content = {
     id: {
-        hero: {
-            title: 'Visi & Misi',
-            subtitle: 'Komitmen kami terhadap keunggulan akademis dan pembelajaran seumur hidup',
-        },
-        guiding: {
-            heading: 'Memandu Masa Depan Kami',
-        },
-        vision: {
-            title: 'Visi Kami',
-            description:
-                'Menjadi perpustakaan akademis terkemuka yang memberdayakan individu melalui akses pengetahuan, mendorong inovasi, berpikir kritis, dan pembelajaran seumur hidup di era digital.',
-            futureTitle: 'Kami membayangkan masa depan di mana:',
-            futureItems: [
-                'Pengetahuan dapat diakses oleh semua orang, di mana saja',
-                'Belajar menjadi perjalanan seumur hidup',
-                'Teknologi dan tradisi bekerja secara harmonis',
-                'Komunitas berkembang melalui pengetahuan bersama',
-            ],
-        },
-        mission: {
-            title: 'Misi Kami',
-            description:
-                'Kami berkomitmen untuk memberikan layanan perpustakaan yang luar biasa yang mendukung kesuksesan akademis dan pertumbuhan pribadi. Misi kami mencakup:',
-            items: [
-                {
-                    title: 'Keunggulan Sumber Daya',
-                    desc: 'Menyediakan akses komprehensif ke beragam sumber daya informasi',
-                },
-                {
-                    title: 'Dukungan Akademis',
-                    desc: 'Mendukung keunggulan akademis melalui layanan perpustakaan yang inovatif',
-                },
-                {
-                    title: 'Literasi Informasi',
-                    desc: 'Menumbuhkan literasi informasi dan pengembangan keterampilan penelitian',
-                },
-                {
-                    title: 'Lingkungan Inklusif',
-                    desc: 'Menciptakan lingkungan belajar yang inklusif bagi semua pengguna',
-                },
-                {
-                    title: 'Integrasi Teknologi',
-                    desc: 'Memanfaatkan teknologi untuk meningkatkan aksesibilitas dan pengalaman pengguna',
-                },
-            ],
-        },
-        coreValues: {
-            title: 'Nilai Inti Kami',
-            items: [
-                {
-                    icon: '🎯',
-                    title: 'Keunggulan',
-                    description: 'Kami berusaha mencapai standar tertinggi dalam segala hal yang kami lakukan',
-                    color: 'from-blue-500 to-blue-600',
-                },
-                {
-                    icon: '🤝',
-                    title: 'Kolaborasi',
-                    description: 'Kami bekerja sama untuk mencapai tujuan bersama dan mendukung komunitas kami',
-                    color: 'from-green-500 to-green-600',
-                },
-                {
-                    icon: '💡',
-                    title: 'Inovasi',
-                    description: 'Kami merangkul ide dan teknologi baru untuk meningkatkan layanan kami',
-                    color: 'from-purple-500 to-purple-600',
-                },
-                {
-                    icon: '🌟',
-                    title: 'Integritas',
-                    description: 'Kami bertindak dengan kejujuran, transparansi, dan tanggung jawab etis',
-                    color: 'from-amber-500 to-amber-600',
-                },
-                {
-                    icon: '🌍',
-                    title: 'Inklusivitas',
-                    description: 'Kami menyambut dan menghormati semua anggota komunitas kami yang beragam',
-                    color: 'from-red-500 to-red-600',
-                },
-                {
-                    icon: '📖',
-                    title: 'Pembelajaran',
-                    description: 'Kami mendorong pembelajaran berkelanjutan dan rasa ingin tahu intelektual',
-                    color: 'from-indigo-500 to-indigo-600',
-                },
-            ],
-        },
-        strategic: {
-            title: 'Tujuan Strategis 2024–2028',
-            items: [
-                {
-                    title: 'Perluas Koleksi Digital',
-                    desc: 'Tingkatkan e-resources sebesar 50% dan perbaiki aksesibilitas digital',
-                },
-                {
-                    title: 'Tingkatkan Pengalaman Pengguna',
-                    desc: 'Implementasikan pencarian bertenaga AI dan rekomendasi yang dipersonalisasi',
-                },
-                {
-                    title: 'Perkuat Kemitraan',
-                    desc: 'Bangun kolaborasi dengan institusi akademis di seluruh dunia',
-                },
-                {
-                    title: 'Kembangkan Program Pembelajaran',
-                    desc: 'Buat lokakarya dan pelatihan untuk penelitian dan literasi digital',
-                },
-                {
-                    title: 'Modernisasi Infrastruktur',
-                    desc: 'Tingkatkan fasilitas dan terapkan praktik berkelanjutan',
-                },
-                {
-                    title: 'Dorong Inovasi',
-                    desc: 'Dukung inisiatif penelitian dan beasiswa kreatif',
-                },
-            ],
-        },
+        eyebrow: 'Tentang Yayasan',
+        title: 'Visi & Misi',
+        visiLabel: 'Visi',
+        misiLabel: 'Misi',
+        visionPre: 'Menjadi ',
+        visionEm: 'rumah baca terbaik',
+        visionPost:
+            ' di lingkungan sekolah Yayasan Santo Lukas — tempat di mana setiap siswa, dari SD hingga SMA, menemukan setidaknya satu buku yang ',
+        visionEm2: 'mengubah cara mereka melihat dunia',
+        missions: [
+            { num: 'I', t: 'Menyediakan koleksi yang berkualitas', b: 'Setiap judul yang masuk ke rak kami dipilih oleh pustakawan dan diuji nilainya — bukan oleh algoritma, bukan oleh tren musiman, tapi oleh pembaca yang membaca lebih dulu sebelum merekomendasikan.' },
+            { num: 'II', t: 'Menumbuhkan budaya literasi sejak dini', b: 'Klub baca rutin, lomba resensi, jam bercerita untuk SD, dan diskusi sastra untuk SMA — semuanya dirancang agar membaca menjadi kebiasaan, bukan kewajiban.' },
+            { num: 'III', t: 'Mengajarkan literasi digital yang sehat', b: 'Membantu siswa membedakan sumber yang tepercaya, menulis kutipan dengan etis, dan menggunakan teknologi sebagai alat — bukan sebagai pengganti pikiran.' },
+            { num: 'IV', t: 'Menjadi ruang sunyi yang menyambut', b: 'Perpustakaan harus tetap menjadi tempat yang tenang, terang, dan ramah untuk berpikir — apapun yang terjadi di luar sana.' },
+        ],
+        closing: '"Membaca adalah cara paling tenang untuk mengubah hati. Dan hati yang berubah, mengubah segala yang lain."',
+        closingBy: 'Motto Yayasan Santo Lukas',
     },
     en: {
-        hero: {
-            title: 'Vision & Mission',
-            subtitle: 'Our commitment to academic excellence and lifelong learning',
-        },
-        guiding: {
-            heading: 'Guiding Our Future',
-        },
-        vision: {
-            title: 'Our Vision',
-            description:
-                'To be a leading academic library that empowers individuals through access to knowledge, fostering innovation, critical thinking, and lifelong learning in the digital age.',
-            futureTitle: 'We envision a future where:',
-            futureItems: [
-                'Knowledge is accessible to everyone, everywhere',
-                'Learning becomes a lifelong journey',
-                'Technology and tradition work in harmony',
-                'Communities thrive through shared knowledge',
-            ],
-        },
-        mission: {
-            title: 'Our Mission',
-            description:
-                'We are committed to providing exceptional library services that support academic success and personal growth. Our mission encompasses:',
-            items: [
-                {
-                    title: 'Resource Excellence',
-                    desc: 'Provide comprehensive access to diverse information resources',
-                },
-                {
-                    title: 'Academic Support',
-                    desc: 'Support academic excellence through innovative library services',
-                },
-                {
-                    title: 'Information Literacy',
-                    desc: 'Foster information literacy and research skills development',
-                },
-                {
-                    title: 'Inclusive Environment',
-                    desc: 'Create an inclusive learning environment for all users',
-                },
-                {
-                    title: 'Technology Integration',
-                    desc: 'Leverage technology to enhance library accessibility and user experience',
-                },
-            ],
-        },
-        coreValues: {
-            title: 'Our Core Values',
-            items: [
-                {
-                    icon: '🎯',
-                    title: 'Excellence',
-                    description: 'We strive for the highest standards in everything we do',
-                    color: 'from-blue-500 to-blue-600',
-                },
-                {
-                    icon: '🤝',
-                    title: 'Collaboration',
-                    description: 'We work together to achieve common goals and support our community',
-                    color: 'from-green-500 to-green-600',
-                },
-                {
-                    icon: '💡',
-                    title: 'Innovation',
-                    description: 'We embrace new ideas and technologies to improve our services',
-                    color: 'from-purple-500 to-purple-600',
-                },
-                {
-                    icon: '🌟',
-                    title: 'Integrity',
-                    description: 'We act with honesty, transparency, and ethical responsibility',
-                    color: 'from-amber-500 to-amber-600',
-                },
-                {
-                    icon: '🌍',
-                    title: 'Inclusivity',
-                    description: 'We welcome and respect all members of our diverse community',
-                    color: 'from-red-500 to-red-600',
-                },
-                {
-                    icon: '📖',
-                    title: 'Learning',
-                    description: 'We promote continuous learning and intellectual curiosity',
-                    color: 'from-indigo-500 to-indigo-600',
-                },
-            ],
-        },
-        strategic: {
-            title: 'Strategic Goals 2024–2028',
-            items: [
-                {
-                    title: 'Expand Digital Collections',
-                    desc: 'Increase e-resources by 50% and improve digital accessibility',
-                },
-                {
-                    title: 'Enhance User Experience',
-                    desc: 'Implement AI-powered search and personalized recommendations',
-                },
-                {
-                    title: 'Strengthen Partnerships',
-                    desc: 'Build collaborations with academic institutions worldwide',
-                },
-                {
-                    title: 'Develop Learning Programs',
-                    desc: 'Create workshops and training for research and digital literacy',
-                },
-                {
-                    title: 'Modernize Infrastructure',
-                    desc: 'Upgrade facilities and implement sustainable practices',
-                },
-                {
-                    title: 'Foster Innovation',
-                    desc: 'Support research initiatives and creative scholarship',
-                },
-            ],
-        },
+        eyebrow: 'About the Foundation',
+        title: 'Vision & Mission',
+        visiLabel: 'Vision',
+        misiLabel: 'Mission',
+        visionPre: 'To be the ',
+        visionEm: 'finest reading home',
+        visionPost:
+            ' within the Saint Luke Foundation schools — a place where every student, from primary to senior high, finds at least one book that ',
+        visionEm2: 'changes how they see the world',
+        missions: [
+            { num: 'I', t: 'Provide a quality collection', b: 'Every title on our shelves is chosen by librarians and tested for value — not by an algorithm, not by seasonal trends, but by readers who read first before recommending.' },
+            { num: 'II', t: 'Grow a literacy culture early', b: 'Regular book clubs, review contests, story hours for primary grades, and literary discussions for high school — all designed to make reading a habit, not an obligation.' },
+            { num: 'III', t: 'Teach healthy digital literacy', b: 'Helping students tell trustworthy sources apart, cite ethically, and use technology as a tool — not a replacement for thought.' },
+            { num: 'IV', t: 'Be a quiet, welcoming space', b: 'A library must remain a calm, bright, friendly place to think — whatever happens out there.' },
+        ],
+        closing: '"Reading is the quietest way to change a heart. And a changed heart changes everything else."',
+        closingBy: 'Saint Luke Foundation Motto',
     },
 };
 
-const badgeColors = ['bg-brand', 'bg-secondary', 'bg-accent'];
-
 function VisionMissionPage() {
     const { language } = useLanguage();
-    const t = content[language as 'id' | 'en'] ?? content.en;
+    const t = content[language] ?? content.id;
 
     return (
-        <div className="min-h-screen bg-background">
-            {/* Hero Section */}
-            <motion.section
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="bg-gradient-to-r from-brand to-blue-500 py-20 text-white"
-            >
-                <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2 }}
-                        className="text-center"
-                    >
-                        <h1 className="mb-4 font-['Poppins'] text-4xl font-bold sm:text-5xl lg:text-6xl">
-                            {t.hero.title}
-                        </h1>
-                        <p className="mx-auto max-w-3xl text-xl text-blue-100">
-                            {t.hero.subtitle}
-                        </p>
-                    </motion.div>
-                </div>
-            </motion.section>
+        <section className="bg-background pb-24">
+            <div className="mx-auto max-w-5xl px-6 pt-16 lg:px-10">
+                <motion.span
+                    {...fadeUp}
+                    className="tracking-editorial inline-flex items-center gap-2 rounded-full bg-cobalt-50 px-3 py-1 text-[11px] font-semibold uppercase text-cobalt dark:bg-cobalt/15 dark:text-cobalt-lt"
+                >
+                    <span className="h-1.5 w-1.5 rounded-full bg-cobalt dark:bg-cobalt-lt" />
+                    {t.eyebrow}
+                </motion.span>
+                <motion.h1
+                    {...fadeUp}
+                    transition={{ delay: 0.05 }}
+                    className="mt-5 font-display text-4xl text-foreground lg:text-6xl"
+                    style={{ textWrap: 'balance' }}
+                >
+                    {t.title}
+                </motion.h1>
 
-            {/* Vision & Mission Content */}
-            <section className="py-16">
-                <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                    {/* Section Header */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        className="mb-12"
-                    >
-                        <div className="mb-4 flex items-center gap-3">
-                            <div className="rounded-xl bg-secondary/10 p-3">
-                                <Target className="h-8 w-8 text-secondary" />
-                            </div>
-                            <h2 className="font-['Poppins'] text-3xl font-bold text-foreground sm:text-4xl">
-                                {t.guiding.heading}
-                            </h2>
-                        </div>
-                        <div className="mb-8 h-1 w-24 rounded-full bg-gradient-to-r from-secondary to-accent" />
-                    </motion.div>
-
-                    {/* Vision + Mission Cards */}
-                    <div className="mb-12 grid grid-cols-1 gap-8 lg:grid-cols-2">
-                        {/* Vision */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.2 }}
-                        >
-                            <Card className="h-full border-t-4 border-brand p-8">
-                                <div className="mb-6 flex items-center gap-3">
-                                    <div className="rounded-full bg-brand/10 p-3">
-                                        <Target className="h-6 w-6 text-brand" />
-                                    </div>
-                                    <h3 className="font-['Poppins'] text-2xl font-bold text-foreground">
-                                        {t.vision.title}
-                                    </h3>
-                                </div>
-                                <p className="mb-6 text-lg leading-relaxed text-muted-foreground">
-                                    {t.vision.description}
-                                </p>
-                                <div className="rounded-lg bg-brand/5 p-6">
-                                    <h4 className="mb-3 font-semibold text-foreground">
-                                        {t.vision.futureTitle}
-                                    </h4>
-                                    <ul className="space-y-2 text-muted-foreground">
-                                        {t.vision.futureItems.map((item, i) => (
-                                            <li key={i} className="flex items-start gap-2">
-                                                <span className="mt-1 text-brand">•</span>
-                                                <span>{item}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            </Card>
-                        </motion.div>
-
-                        {/* Mission */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.3 }}
-                        >
-                            <Card className="h-full border-t-4 border-secondary p-8">
-                                <div className="mb-6 flex items-center gap-3">
-                                    <div className="rounded-full bg-secondary/10 p-3">
-                                        <Target className="h-6 w-6 text-secondary" />
-                                    </div>
-                                    <h3 className="font-['Poppins'] text-2xl font-bold text-foreground">
-                                        {t.mission.title}
-                                    </h3>
-                                </div>
-                                <p className="mb-6 leading-relaxed text-muted-foreground">
-                                    {t.mission.description}
-                                </p>
-                                <ul className="space-y-4">
-                                    {t.mission.items.map((item, i) => (
-                                        <li
-                                            key={i}
-                                            className="flex items-start gap-3 rounded-lg bg-secondary/5 p-4"
-                                        >
-                                            <span className="mt-1 text-xl font-bold text-secondary">
-                                                {i + 1}
-                                            </span>
-                                            <div>
-                                                <strong className="text-foreground">{item.title}</strong>
-                                                <p className="mt-1 text-sm text-muted-foreground">{item.desc}</p>
-                                            </div>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </Card>
-                        </motion.div>
+                {/* Visi */}
+                <div className="mt-20 grid grid-cols-12 gap-8">
+                    <div className="col-span-12 lg:col-span-3">
+                        <SectionLabel num="I" label={t.visiLabel} />
                     </div>
-
-                    {/* Core Values */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.4 }}
-                        className="mb-12"
-                    >
-                        <h3 className="mb-6 text-center font-['Poppins'] text-2xl font-bold text-foreground">
-                            {t.coreValues.title}
-                        </h3>
-                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                            {t.coreValues.items.map((value, index) => (
-                                <motion.div
-                                    key={value.title}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    viewport={{ once: true }}
-                                    transition={{ delay: 0.1 * index }}
-                                >
-                                    <Card className="h-full p-6 transition-shadow hover:shadow-xl">
-                                        <div
-                                            className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r ${value.color} text-3xl`}
-                                        >
-                                            {value.icon}
-                                        </div>
-                                        <h4 className="mb-2 text-center font-['Poppins'] font-bold text-foreground">
-                                            {value.title}
-                                        </h4>
-                                        <p className="text-center text-sm text-muted-foreground">
-                                            {value.description}
-                                        </p>
-                                    </Card>
-                                </motion.div>
-                            ))}
+                    <motion.div {...fadeUp} className="col-span-12 lg:col-span-9">
+                        <div
+                            className="font-display text-3xl leading-[1.15] text-foreground lg:text-5xl"
+                            style={{ textWrap: 'balance' }}
+                        >
+                            {t.visionPre}
+                            <em className="text-cobalt not-italic dark:text-cobalt-lt">
+                                {t.visionEm}
+                            </em>
+                            {t.visionPost}
+                            <em className="italic">{t.visionEm2}</em>.
                         </div>
                     </motion.div>
-
-                    {/* Strategic Goals */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.5 }}
-                    >
-                        <Card className="bg-gradient-to-br from-brand/5 to-secondary/5 p-8">
-                            <h3 className="mb-6 text-center font-['Poppins'] text-2xl font-bold text-foreground">
-                                {t.strategic.title}
-                            </h3>
-                            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                                {t.strategic.items.map((goal, i) => (
-                                    <div key={i} className="flex items-start gap-3">
-                                        <div
-                                            className={`${badgeColors[i % badgeColors.length]} flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full font-bold text-white`}
-                                        >
-                                            {i + 1}
-                                        </div>
-                                        <div>
-                                            <h4 className="mb-1 font-semibold text-foreground">
-                                                {goal.title}
-                                            </h4>
-                                            <p className="text-sm text-muted-foreground">{goal.desc}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </Card>
-                    </motion.div>
                 </div>
-            </section>
-        </div>
+
+                {/* Misi */}
+                <div className="mt-24 grid grid-cols-12 gap-8">
+                    <div className="col-span-12 lg:col-span-3">
+                        <SectionLabel num="II" label={t.misiLabel} />
+                    </div>
+                    <div className="col-span-12 space-y-px lg:col-span-9">
+                        {t.missions.map((m, i) => (
+                            <motion.div
+                                key={m.num}
+                                {...fadeUp}
+                                transition={{ delay: i * 0.08 }}
+                                className="hairline grid grid-cols-12 gap-6 border-t py-8"
+                            >
+                                <div className="col-span-2 lg:col-span-1">
+                                    <div className="font-display text-5xl text-cobalt italic dark:text-cobalt-lt">
+                                        {m.num}
+                                    </div>
+                                </div>
+                                <div className="col-span-10 lg:col-span-11">
+                                    <h3
+                                        className="font-display text-2xl leading-snug text-foreground"
+                                        style={{ textWrap: 'balance' }}
+                                    >
+                                        {m.t}
+                                    </h3>
+                                    <p
+                                        className="mt-3 max-w-2xl text-lg leading-[1.7] text-foreground/80"
+                                        style={{ textWrap: 'pretty' }}
+                                    >
+                                        {m.b}
+                                    </p>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Closing */}
+                <motion.div
+                    {...fadeUp}
+                    className="hairline mt-24 border-t pt-12 text-center"
+                >
+                    <div
+                        className="mx-auto max-w-3xl font-quote text-2xl leading-snug text-foreground italic lg:text-3xl"
+                        style={{ textWrap: 'balance' }}
+                    >
+                        {t.closing}
+                    </div>
+                    <div className="tracking-editorial mt-4 font-mono text-[10px] uppercase text-muted-foreground">
+                        {t.closingBy}
+                    </div>
+                </motion.div>
+            </div>
+        </section>
     );
 }
 

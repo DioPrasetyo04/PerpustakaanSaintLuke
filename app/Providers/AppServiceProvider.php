@@ -11,9 +11,11 @@ use App\Interface\HistoryInterfaceRepositories;
 use App\Interface\HomeInterfaceRepositories;
 use App\Interface\InformationRepositoriesInterface;
 use App\Interface\LoanInterfaceRepositories;
+use App\Interface\OnlineResourceInterfaceRepositories;
 use App\Interface\ProfileInterfaceRepositories;
 use App\Interface\ResourceInterfaceRepositories;
 use App\Interface\ReturnBookInterfaceRepositories;
+use App\Interface\TestimonialInterfaceRepositories;
 use App\Interface\UpdatePasswordInterfaceRepositories;
 use App\Repositories\AssetRepositories;
 use App\Repositories\BookRepositories;
@@ -24,9 +26,11 @@ use App\Repositories\HistoryRepositories;
 use App\Repositories\HomeRepositories;
 use App\Repositories\InformationRepositories;
 use App\Repositories\LoanRepositories;
+use App\Repositories\OnlineResourceRepositories;
 use App\Repositories\ProfileRepositories;
 use App\Repositories\ResourceRepositories;
 use App\Repositories\ReturnBookRepositories;
+use App\Repositories\TestimonialRepositories;
 use App\Repositories\UpdatePasswordRepositories;
 use Carbon\CarbonImmutable;
 use Filament\Support\Assets\Js;
@@ -44,6 +48,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(HomeInterfaceRepositories::class, HomeRepositories::class);
         $this->app->bind(CatalogInterfaceRepositories::class, CatalogRepositories::class);
         $this->app->bind(ResourceInterfaceRepositories::class, ResourceRepositories::class);
+        $this->app->bind(OnlineResourceInterfaceRepositories::class, OnlineResourceRepositories::class);
         $this->app->bind(BookInterfaceRepositories::class, BookRepositories::class);
         $this->app->bind(InformationRepositoriesInterface::class, InformationRepositories::class);
         $this->app->bind(LoanInterfaceRepositories::class, LoanRepositories::class);
@@ -54,6 +59,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(BookmarkInterfaceRepositories::class, BookmarkRepositories::class);
         $this->app->bind(ProfileInterfaceRepositories::class, ProfileRepositories::class);
         $this->app->bind(UpdatePasswordInterfaceRepositories::class, UpdatePasswordRepositories::class);
+        $this->app->bind(TestimonialInterfaceRepositories::class, TestimonialRepositories::class);
     }
 
     public function boot(): void

@@ -58,7 +58,7 @@ export default function UpdatePassword() {
 
     if (showSuccess) {
         return (
-            <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-8">
+            <div className="flex min-h-screen items-center justify-center bg-background px-4 py-8">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -78,10 +78,10 @@ export default function UpdatePassword() {
                                 <CheckCircle className="h-16 w-16 text-green-600" />
                             </div>
                         </motion.div>
-                        <h2 className="mb-4 font-['Poppins'] text-3xl font-bold text-gray-900">
+                        <h2 className="mb-4 font-display text-3xl font-bold text-foreground">
                             Password Updated Successfully!
                         </h2>
-                        <p className="mb-6 text-lg text-gray-600">
+                        <p className="mb-6 text-lg text-muted-foreground">
                             Your password has been changed successfully. You
                             will be redirected to your profile.
                         </p>
@@ -98,7 +98,7 @@ export default function UpdatePassword() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 px-4 py-8">
+        <div className="min-h-screen bg-background px-4 py-8">
             <div className="container mx-auto max-w-2xl">
                 <Link href="/settings">
                     <Button variant="ghost" className="mb-6 gap-2">
@@ -116,7 +116,7 @@ export default function UpdatePassword() {
                         <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm">
                             <Lock className="h-10 w-10 text-white" />
                         </div>
-                        <h1 className="mb-2 font-['Poppins'] text-3xl font-black text-white sm:text-4xl">
+                        <h1 className="mb-2 font-display text-3xl font-black text-white sm:text-4xl">
                             Update Password
                         </h1>
                         <p className="text-lg text-white/90">
@@ -135,11 +135,11 @@ export default function UpdatePassword() {
                         <form onSubmit={handleSubmit} className="space-y-6">
                             {/* Current Password */}
                             <div>
-                                <label className="mb-2 block text-sm font-semibold text-gray-700">
+                                <label className="mb-2 block text-sm font-semibold text-foreground">
                                     Current Password
                                 </label>
                                 <div className="relative">
-                                    <Lock className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                                    <Lock className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                                     <input
                                         type={showCurrent ? 'text' : 'password'}
                                         value={data.current_password}
@@ -152,7 +152,7 @@ export default function UpdatePassword() {
                                         className={`w-full rounded-lg border py-3 pr-12 pl-10 focus:ring-2 focus:outline-none ${
                                             errors.current_password
                                                 ? 'border-red-500 focus:ring-red-500'
-                                                : 'border-gray-300 focus:ring-primary'
+                                                : 'border-input focus:ring-primary'
                                         }`}
                                         placeholder="Enter your current password"
                                     />
@@ -161,7 +161,7 @@ export default function UpdatePassword() {
                                         onClick={() =>
                                             setShowCurrent(!showCurrent)
                                         }
-                                        className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                        className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground"
                                     >
                                         {showCurrent ? (
                                             <EyeOff className="h-5 w-5" />
@@ -180,11 +180,11 @@ export default function UpdatePassword() {
 
                             {/* New Password */}
                             <div>
-                                <label className="mb-2 block text-sm font-semibold text-gray-700">
+                                <label className="mb-2 block text-sm font-semibold text-foreground">
                                     New Password
                                 </label>
                                 <div className="relative">
-                                    <Lock className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                                    <Lock className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                                     <input
                                         type={showNew ? 'text' : 'password'}
                                         value={data.password}
@@ -194,14 +194,14 @@ export default function UpdatePassword() {
                                         className={`w-full rounded-lg border py-3 pr-12 pl-10 focus:ring-2 focus:outline-none ${
                                             errors.password
                                                 ? 'border-red-500 focus:ring-red-500'
-                                                : 'border-gray-300 focus:ring-primary'
+                                                : 'border-input focus:ring-primary'
                                         }`}
                                         placeholder="Enter your new password"
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowNew(!showNew)}
-                                        className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                        className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground"
                                     >
                                         {showNew ? (
                                             <EyeOff className="h-5 w-5" />
@@ -215,7 +215,7 @@ export default function UpdatePassword() {
                                 {data.password && (
                                     <div className="mt-3">
                                         <div className="mb-2 flex items-center justify-between">
-                                            <span className="text-sm font-medium text-gray-700">
+                                            <span className="text-sm font-medium text-foreground">
                                                 Password Strength:
                                             </span>
                                             <span
@@ -235,7 +235,7 @@ export default function UpdatePassword() {
                                                 {passwordStrength.label}
                                             </span>
                                         </div>
-                                        <div className="h-2 w-full rounded-full bg-gray-200">
+                                        <div className="h-2 w-full rounded-full bg-muted">
                                             <div
                                                 className={`h-2 rounded-full transition-all duration-300 ${passwordStrength.color}`}
                                                 style={{
@@ -255,37 +255,37 @@ export default function UpdatePassword() {
 
                                 {/* Password Requirements */}
                                 <div className="mt-3 rounded-lg border border-blue-200 bg-blue-50 p-4">
-                                    <p className="mb-2 text-sm font-semibold text-gray-700">
+                                    <p className="mb-2 text-sm font-semibold text-foreground">
                                         Password must contain:
                                     </p>
-                                    <ul className="space-y-1 text-sm text-gray-600">
+                                    <ul className="space-y-1 text-sm text-muted-foreground">
                                         <li className="flex items-center gap-2">
                                             <div
-                                                className={`h-2 w-2 rounded-full ${data.password.length >= 8 ? 'bg-green-500' : 'bg-gray-300'}`}
+                                                className={`h-2 w-2 rounded-full ${data.password.length >= 8 ? 'bg-green-500' : 'bg-muted'}`}
                                             />
                                             At least 8 characters
                                         </li>
                                         <li className="flex items-center gap-2">
                                             <div
-                                                className={`h-2 w-2 rounded-full ${/[A-Z]/.test(data.password) ? 'bg-green-500' : 'bg-gray-300'}`}
+                                                className={`h-2 w-2 rounded-full ${/[A-Z]/.test(data.password) ? 'bg-green-500' : 'bg-muted'}`}
                                             />
                                             One uppercase letter
                                         </li>
                                         <li className="flex items-center gap-2">
                                             <div
-                                                className={`h-2 w-2 rounded-full ${/[a-z]/.test(data.password) ? 'bg-green-500' : 'bg-gray-300'}`}
+                                                className={`h-2 w-2 rounded-full ${/[a-z]/.test(data.password) ? 'bg-green-500' : 'bg-muted'}`}
                                             />
                                             One lowercase letter
                                         </li>
                                         <li className="flex items-center gap-2">
                                             <div
-                                                className={`h-2 w-2 rounded-full ${/[0-9]/.test(data.password) ? 'bg-green-500' : 'bg-gray-300'}`}
+                                                className={`h-2 w-2 rounded-full ${/[0-9]/.test(data.password) ? 'bg-green-500' : 'bg-muted'}`}
                                             />
                                             One number
                                         </li>
                                         <li className="flex items-center gap-2">
                                             <div
-                                                className={`h-2 w-2 rounded-full ${/[!@#$%^&*(),.?":{}|<>]/.test(data.password) ? 'bg-green-500' : 'bg-gray-300'}`}
+                                                className={`h-2 w-2 rounded-full ${/[!@#$%^&*(),.?":{}|<>]/.test(data.password) ? 'bg-green-500' : 'bg-muted'}`}
                                             />
                                             One special character
                                         </li>
@@ -295,11 +295,11 @@ export default function UpdatePassword() {
 
                             {/* Confirm New Password */}
                             <div>
-                                <label className="mb-2 block text-sm font-semibold text-gray-700">
+                                <label className="mb-2 block text-sm font-semibold text-foreground">
                                     Confirm New Password
                                 </label>
                                 <div className="relative">
-                                    <Lock className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                                    <Lock className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                                     <input
                                         type={showConfirm ? 'text' : 'password'}
                                         value={data.password_confirmation}
@@ -312,7 +312,7 @@ export default function UpdatePassword() {
                                         className={`w-full rounded-lg border py-3 pr-12 pl-10 focus:ring-2 focus:outline-none ${
                                             errors.password_confirmation
                                                 ? 'border-red-500 focus:ring-red-500'
-                                                : 'border-gray-300 focus:ring-primary'
+                                                : 'border-input focus:ring-primary'
                                         }`}
                                         placeholder="Confirm your new password"
                                     />
@@ -321,7 +321,7 @@ export default function UpdatePassword() {
                                         onClick={() =>
                                             setShowConfirm(!showConfirm)
                                         }
-                                        className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                        className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground"
                                     >
                                         {showConfirm ? (
                                             <EyeOff className="h-5 w-5" />
@@ -391,11 +391,11 @@ export default function UpdatePassword() {
                     className="mt-8"
                 >
                     <Card className="border-2 border-yellow-200 bg-gradient-to-br from-yellow-50 to-orange-50 p-6">
-                        <h3 className="mb-3 flex items-center gap-2 font-semibold text-gray-900">
+                        <h3 className="mb-3 flex items-center gap-2 font-semibold text-foreground">
                             <AlertCircle className="h-5 w-5 text-yellow-600" />
                             Security Tips
                         </h3>
-                        <ul className="space-y-2 text-sm text-gray-700">
+                        <ul className="space-y-2 text-sm text-foreground">
                             <li className="flex items-start gap-2">
                                 <span className="mt-0.5 text-yellow-600">
                                     •

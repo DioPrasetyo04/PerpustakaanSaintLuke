@@ -29,10 +29,12 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Has
         'name',
         'username',
         'email',
+        'google_id',
         'email_verified_at',
         'password',
         'phone',
         'avatar',
+        'avatar_url',
         'date_of_birth',
         'address',
         'type',
@@ -65,7 +67,27 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Has
 
     public function getFilamentAvatarUrl(): ?string
     {
-        return $this->avatar ? asset('storage/' . $this->avatar) : null;
+        if ($this->avatar) {
+            return asset('storage/' . $this->avatar);
+        }
+
+        return $this->avatar_url ?: null;
+    }
+
+    /**
+     * Kirim notifikasi verifikasi email dengan template branded Saint Luke.
+     */
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new \App\Notifications\Auth\VerifyEmailNotification());
+    }
+
+    /**
+     * Kirim notifikasi tautan reset password dengan template branded Saint Luke.
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new \App\Notifications\Auth\ResetPasswordNotification($token));
     }
 
     public function canAccessPanel(Panel $panel): bool

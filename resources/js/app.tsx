@@ -58,7 +58,7 @@ createInertiaApp({
                     <LibraryStatusBadge initialAnnouncement={announcement} />
                     <AccessDeniedModal initialFlash={flash} />
                     <Navbar initialAuth={initialAuth} />
-                    <div className="pt-20">
+                    <div className="flex-1">
                         <App {...props} />
                     </div>
                     <Footer />

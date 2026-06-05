@@ -46,7 +46,7 @@ export default function PaymentCancel() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2 }}
-                            className="mb-3 font-['Poppins'] text-3xl font-bold text-gray-900 sm:text-4xl"
+                            className="mb-3 font-display text-3xl font-bold text-foreground sm:text-4xl"
                         >
                             Payment Cancelled
                         </motion.h1>
@@ -55,7 +55,7 @@ export default function PaymentCancel() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3 }}
-                            className="text-lg text-gray-600"
+                            className="text-lg text-muted-foreground"
                         >
                             Your payment was not completed
                         </motion.p>
@@ -70,13 +70,13 @@ export default function PaymentCancel() {
                             <Card className="mb-6 border-2 border-red-100 p-6 shadow-xl">
                                 <div className="mb-6 flex items-center gap-2">
                                     <AlertTriangle className="h-5 w-5 text-red-600" />
-                                    <h2 className="font-['Poppins'] text-xl font-bold text-gray-900">
+                                    <h2 className="font-display text-xl font-bold text-foreground">
                                         Payment Details
                                     </h2>
                                 </div>
 
-                                <div className="mb-6 flex gap-4 border-b border-gray-200 pb-6">
-                                    <div className="h-28 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                                <div className="mb-6 flex gap-4 border-b border-border pb-6">
+                                    <div className="h-28 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-muted">
                                         <ImageWithFallback
                                             src={fine.cover_url ?? undefined}
                                             alt={fine.book_title ?? ''}
@@ -84,7 +84,7 @@ export default function PaymentCancel() {
                                         />
                                     </div>
                                     <div className="flex-1">
-                                        <h3 className="mb-2 font-semibold text-gray-900">
+                                        <h3 className="mb-2 font-semibold text-foreground">
                                             {fine.book_title}
                                         </h3>
                                         {fine.category && (
@@ -92,7 +92,7 @@ export default function PaymentCancel() {
                                                 {fine.category}
                                             </Badge>
                                         )}
-                                        <p className="text-sm text-gray-600">
+                                        <p className="text-sm text-muted-foreground">
                                             Fine ID: {fine.id}
                                         </p>
                                     </div>
@@ -100,7 +100,7 @@ export default function PaymentCancel() {
 
                                 <div className="mb-6 space-y-4">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-gray-600">Status:</span>
+                                        <span className="text-muted-foreground">Status:</span>
                                         <Badge className="bg-red-500">
                                             <XCircle className="mr-1 h-3 w-3" />
                                             Payment Cancelled
@@ -108,8 +108,8 @@ export default function PaymentCancel() {
                                     </div>
 
                                     <div className="flex items-center justify-between">
-                                        <span className="text-gray-600">Fine ID:</span>
-                                        <span className="font-medium text-gray-900">
+                                        <span className="text-muted-foreground">Fine ID:</span>
+                                        <span className="font-medium text-foreground">
                                             {fine.id}
                                         </span>
                                     </div>
@@ -117,7 +117,7 @@ export default function PaymentCancel() {
 
                                 <div className="rounded-xl border-2 border-red-200 bg-gradient-to-br from-red-50 to-orange-50 p-6">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-lg font-medium text-gray-900">
+                                        <span className="text-lg font-medium text-foreground">
                                             Amount Due:
                                         </span>
                                         <span className="text-3xl font-bold text-red-600">
@@ -131,10 +131,10 @@ export default function PaymentCancel() {
                                 <div className="flex gap-3">
                                     <AlertTriangle className="mt-1 h-6 w-6 flex-shrink-0 text-yellow-600" />
                                     <div>
-                                        <h3 className="mb-2 font-semibold text-gray-900">
+                                        <h3 className="mb-2 font-semibold text-foreground">
                                             Why did this happen?
                                         </h3>
-                                        <ul className="space-y-1 text-sm text-gray-700">
+                                        <ul className="space-y-1 text-sm text-foreground">
                                             <li>• You closed the payment window before completing the transaction</li>
                                             <li>• The payment session may have expired</li>
                                             <li>• You may have clicked the cancel button</li>
@@ -171,8 +171,8 @@ export default function PaymentCancel() {
                                 </Link>
                             </div>
 
-                            <div className="mt-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
-                                <p className="text-center text-sm text-blue-800">
+                            <div className="mt-6 rounded-lg border border-cobalt-lt bg-cobalt-50 p-4">
+                                <p className="text-center text-sm text-cobalt-dk">
                                     Need help? Contact our support team at
                                     support@library.com
                                 </p>
@@ -180,7 +180,7 @@ export default function PaymentCancel() {
                         </motion.div>
                     ) : (
                         <Card className="p-8 text-center">
-                            <p className="mb-4 text-gray-600">
+                            <p className="mb-4 text-muted-foreground">
                                 No payment information available
                             </p>
                             <Link href="/history?tab=fines">

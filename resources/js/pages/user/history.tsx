@@ -413,7 +413,7 @@ export default function HistoryPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 py-8">
+        <div className="min-h-screen bg-background py-8">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -421,17 +421,20 @@ export default function HistoryPage() {
                 >
                     {/* Header */}
                     <div className="mb-8">
-                        <h1 className="font-['Poppins'] text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
+                        <div className="tracking-editorial mb-2 font-mono text-[10px] uppercase text-cobalt dark:text-cobalt-lt">
+                            Riwayat · History
+                        </div>
+                        <h1 className="font-display text-3xl sm:text-4xl font-bold text-foreground mb-2">
                             My History
                         </h1>
-                        <p className="text-gray-600">
+                        <p className="text-muted-foreground">
                             View your bookmarks, loans, returns, and fines
                             history
                         </p>
                     </div>
 
                     {/* Tabs */}
-                    <div className="mb-6 bg-white rounded-xl shadow-sm p-2">
+                    <div className="hairline mb-6 bg-card rounded-xl2 border shadow-soft p-2">
                         <div className="flex flex-wrap gap-2">
                             {TAB_CONFIG.map((tab) => {
                                 const Icon = tab.icon;
@@ -442,8 +445,8 @@ export default function HistoryPage() {
                                         onClick={() => switchTab(tab.id)}
                                         className={`flex items-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-medium transition-all ${
                                             isActive
-                                                ? 'bg-gradient-to-r from-primary to-secondary text-white shadow-lg'
-                                                : 'text-gray-600 hover:bg-gray-100'
+                                                ? 'bg-gradient-to-r from-cobalt to-cobalt-dk text-white shadow-lg'
+                                                : 'text-muted-foreground hover:bg-muted'
                                         }`}
                                     >
                                         <Icon className="h-5 w-5" />
@@ -463,7 +466,7 @@ export default function HistoryPage() {
                     <Card className="p-4 mb-6">
                         <div className="flex flex-col sm:flex-row gap-4">
                             <div className="flex-1 relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <Input
                                     placeholder="Search books or authors..."
                                     value={tabPayload.search}
@@ -515,7 +518,7 @@ export default function HistoryPage() {
 
                     {/* Results info */}
                     <div className="mb-4">
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-muted-foreground">
                             Showing {tabPayload.meta.from ?? 0}-{tabPayload.meta.to ?? 0} of{' '}
                             {tabPayload.meta.total} records
                         </p>
@@ -540,10 +543,10 @@ export default function HistoryPage() {
                     {tabPayload.meta.total === 0 && (
                         <div className="text-center py-16">
                             <div className="text-6xl mb-4">📚</div>
-                            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                            <h3 className="text-xl font-semibold text-foreground mb-2">
                                 No records found
                             </h3>
-                            <p className="text-gray-600">
+                            <p className="text-muted-foreground">
                                 Try adjusting your search or filters
                             </p>
                         </div>
@@ -599,7 +602,7 @@ const BookCell = ({
     cover: string | null;
 }) => (
     <div className="flex items-center gap-3">
-        <div className="w-12 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
+        <div className="w-12 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-muted">
             <ImageWithFallback
                 src={cover ?? undefined}
                 alt={title}
@@ -607,26 +610,26 @@ const BookCell = ({
             />
         </div>
         <div>
-            <p className="font-medium text-gray-900">{title}</p>
-            <p className="text-sm text-gray-600">{author}</p>
+            <p className="font-medium text-foreground">{title}</p>
+            <p className="text-sm text-muted-foreground">{author}</p>
         </div>
     </div>
 );
 
 const Th = ({ children }: { children: React.ReactNode }) => (
-    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
+    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
         {children}
     </th>
 );
 
 const Td = ({ children }: { children: React.ReactNode }) => (
-    <td className="px-4 py-3 align-middle text-sm text-gray-700">{children}</td>
+    <td className="px-4 py-3 align-middle text-sm text-foreground">{children}</td>
 );
 
 const TableWrap = ({ children }: { children: React.ReactNode }) => (
     <Card className="overflow-hidden">
         <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
+            <table className="min-w-full divide-y divide-border">
                 {children}
             </table>
         </div>
@@ -643,7 +646,7 @@ function BookmarksTable({
     if (items.length === 0) return null;
     return (
         <TableWrap>
-            <thead className="bg-gray-50">
+            <thead className="bg-background">
                 <tr>
                     <Th>Book</Th>
                     <Th>Category</Th>
@@ -653,14 +656,14 @@ function BookmarksTable({
                     <Th>Actions</Th>
                 </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 bg-white">
+            <tbody className="divide-y divide-border bg-card">
                 {items.map((item, index) => (
                     <motion.tr
                         key={item.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.05 }}
-                        className="hover:bg-gray-50"
+                        className="hover:bg-background"
                     >
                         <Td>
                             <BookCell
@@ -718,7 +721,7 @@ function LoansTable({ items }: { items: LoanItem[] }) {
     if (items.length === 0) return null;
     return (
         <TableWrap>
-            <thead className="bg-gray-50">
+            <thead className="bg-background">
                 <tr>
                     <Th>Book</Th>
                     <Th>Borrow Date</Th>
@@ -726,14 +729,14 @@ function LoansTable({ items }: { items: LoanItem[] }) {
                     <Th>Status</Th>
                 </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 bg-white">
+            <tbody className="divide-y divide-border bg-card">
                 {items.map((item, index) => (
                     <motion.tr
                         key={item.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.05 }}
-                        className="hover:bg-gray-50"
+                        className="hover:bg-background"
                     >
                         <Td>
                             <BookCell
@@ -766,7 +769,7 @@ function ReturnsTable({ items }: { items: ReturnItem[] }) {
     if (items.length === 0) return null;
     return (
         <TableWrap>
-            <thead className="bg-gray-50">
+            <thead className="bg-background">
                 <tr>
                     <Th>Book</Th>
                     <Th>Borrow Date</Th>
@@ -775,14 +778,14 @@ function ReturnsTable({ items }: { items: ReturnItem[] }) {
                     <Th>Status</Th>
                 </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 bg-white">
+            <tbody className="divide-y divide-border bg-card">
                 {items.map((item, index) => (
                     <motion.tr
                         key={item.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.05 }}
-                        className="hover:bg-gray-50"
+                        className="hover:bg-background"
                     >
                         <Td>
                             <BookCell
@@ -828,7 +831,7 @@ function FinesTable({
     if (items.length === 0) return null;
     return (
         <TableWrap>
-            <thead className="bg-gray-50">
+            <thead className="bg-background">
                 <tr>
                     <Th>Book</Th>
                     <Th>Due Date</Th>
@@ -838,14 +841,14 @@ function FinesTable({
                     <Th>Actions</Th>
                 </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 bg-white">
+            <tbody className="divide-y divide-border bg-card">
                 {items.map((item, index) => (
                     <motion.tr
                         key={item.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.05 }}
-                        className="hover:bg-gray-50"
+                        className="hover:bg-background"
                     >
                         <Td>
                             <BookCell
@@ -861,7 +864,7 @@ function FinesTable({
                             </Badge>
                         </Td>
                         <Td>
-                            <span className="font-semibold text-gray-900">
+                            <span className="font-semibold text-foreground">
                                 Rp {item.fine_amount.toLocaleString('id-ID')}
                             </span>
                         </Td>

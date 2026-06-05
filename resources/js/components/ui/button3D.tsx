@@ -31,7 +31,7 @@ export const buttonVariants = cva(
                 ],
                 ghost: [
                     // Light/glassy version matching off-state or Image 1 container
-                    'bg-white/90 text-gray-800 backdrop-blur-md',
+                    'bg-white/90 text-foreground backdrop-blur-md',
                     'shadow-[0_4px_0_0_#D1D5DB,0_6px_10px_rgba(0,0,0,0.05)]',
                     'hover:bg-white',
                     'hover:-translate-y-[1px]',

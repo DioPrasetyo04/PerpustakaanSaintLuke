@@ -63,7 +63,7 @@ export const DropdownMenuItem = ({
                             <Link
                                 key={sub.id}
                                 href={sub.href}
-                                className="block px-4 py-2 text-sm text-gray-600 transition-colors hover:bg-[#C8A45C]/10 hover:text-[#C8A45C]"
+                                className="block px-4 py-2 text-sm text-muted-foreground transition-colors hover:bg-[#C8A45C]/10 hover:text-[#C8A45C]"
                             >
                                 {language === 'id'
                                     ? sub.label.id

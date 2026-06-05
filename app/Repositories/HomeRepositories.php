@@ -8,9 +8,12 @@ use App\Interface\HomeInterfaceRepositories;
 use App\Models\Book;
 use App\Models\Category;
 use App\Models\Information;
+use App\Models\LoanDetail;
+use App\Models\Publisher;
 use App\Models\User;
 use App\Models\Visit;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Storage;
 
 class HomeRepositories implements HomeInterfaceRepositories
 {
@@ -117,6 +120,64 @@ class HomeRepositories implements HomeInterfaceRepositories
                 });
             })
             ->paginate($perPage, ['*'], 'information_page', $page);
+    }
+
+    public function getLiveLoanActivities(int $limit = 16): array
+    {
+        return LoanDetail::query()
+            ->select(['id', 'loan_id', 'book_id', 'loan_date', 'status'])
+            ->with([
+                'book:id,title,slug,cover',
+                'loan:id,user_id',
+                'loan.user:id,name',
+            ])
+            ->whereHas('book')
+            ->whereHas('loan.user')
+            ->orderByDesc('loan_date')
+            ->orderByDesc('id')
+            ->limit($limit)
+            ->get()
+            ->map(function (LoanDetail $detail) {
+                // Privasi: hanya nama depan yang ditampilkan di ticker publik.
+                $fullName = $detail->loan?->user?->name ?? 'Anggota';
+                $firstName = trim(explode(' ', trim($fullName))[0]) ?: 'Anggota';
+
+                return [
+                    'id' => $detail->id,
+                    'name' => $firstName,
+                    'status' => $detail->status?->value ?? 'borrowed',
+                    'title' => $detail->book?->title,
+                    'slug' => $detail->book?->slug,
+                    'cover' => $detail->book?->cover,
+                    'date' => optional($detail->loan_date)->toISOString(),
+                ];
+            })
+            ->filter(fn ($activity) => ! empty($activity['title']))
+            ->values()
+            ->toArray();
+    }
+
+    public function getFeaturedPublishers(int $limit = 12): array
+    {
+        return Publisher::query()
+            ->select(['id', 'name', 'slug', 'address', 'logo'])
+            ->where('is_active', true)
+            ->withCount(['books as books_count' => function ($q) {
+                $q->where('is_published', PublishedBooks::PUBLISH->value);
+            }])
+            ->orderByDesc('books_count')
+            ->orderBy('name')
+            ->limit($limit)
+            ->get()
+            ->map(fn ($publisher) => [
+                'id' => $publisher->id,
+                'name' => $publisher->name,
+                'slug' => $publisher->slug,
+                'logo' => $publisher->logo ? Storage::url($publisher->logo) : null,
+                'books_count' => (int) $publisher->books_count,
+            ])
+            ->values()
+            ->toArray();
     }
 
     public function getCountOfAllBooks(): int
