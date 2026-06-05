@@ -1,10 +1,7 @@
 import { motion } from 'framer-motion';
 import { Link } from '@inertiajs/react';
-import { Star } from 'lucide-react';
+import { Star, ArrowRight } from 'lucide-react';
 import { cn, formattedRating } from '@/lib/utils';
-import { Card } from '../../ui/card';
-import { Badge } from '../../ui/badge';
-import { Button } from '../../ui/button';
 import { ImageWithFallback } from '@/components/common/ImageWithFallback';
 import BookmarkButton from '@/components/common/BookmarkButton';
 import type { BookProps, BookStatus } from '@/types/DataTypes/BooksProps';
@@ -14,15 +11,15 @@ type BookCardProps = BookProps & {
     isBookmarked?: boolean;
 };
 
-const statusVariant: Record<
-    BookStatus,
-    'available' | 'unavailale' | 'loan' | 'lost' | 'damaged'
-> = {
-    Tersedia: 'available',
-    'Tidak Tersedia': 'unavailale',
-    Dipinjam: 'loan',
-    Hilang: 'lost',
-    Rusak: 'damaged',
+/* availability chip tone per status (prototype TypeChip vibe) */
+const statusTone: Record<BookStatus, string> = {
+    Tersedia:
+        'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
+    'Tidak Tersedia':
+        'bg-muted text-muted-foreground',
+    Dipinjam: 'bg-brass-50 text-brass dark:bg-brass/15 dark:text-brass-lt',
+    Hilang: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300',
+    Rusak: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200',
 };
 
 const BookCard = ({
@@ -33,18 +30,22 @@ const BookCard = ({
     authors,
     categories,
     publisher,
-    synopsis,
     avg_rating,
     isBookmarked = false,
 }: BookCardProps) => {
     const { language } = useLanguage();
     const isAvailable = status === 'Tersedia';
+    const category = categories?.[0];
+    const author = authors?.[0];
+    const rating = formattedRating(avg_rating) ?? '0';
+    const popular = Number(avg_rating) >= 4.5;
 
     const labels = {
-        author: language === 'id' ? 'Penulis' : 'Author',
-        category: language === 'id' ? 'Kategori' : 'Categories',
-        publisher: language === 'id' ? 'Penerbit' : 'Publisher',
-        detail: language === 'id' ? 'Lihat Detail Buku' : 'View Book Detail',
+        available: language === 'id' ? 'Tersedia' : 'Available',
+        queue: language === 'id' ? 'Antri' : 'Queue',
+        view: language === 'id' ? 'Lihat' : 'View',
+        popular: language === 'id' ? 'Populer' : 'Popular',
+        out: language === 'id' ? 'Habis' : 'Out',
     };
 
     return (
@@ -52,42 +53,51 @@ const BookCard = ({
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-50px' }}
-            whileHover={{ y: -8 }}
             transition={{ type: 'spring', stiffness: 300, damping: 24 }}
             className="h-full"
         >
-            <Link
-                href={isAvailable ? `/book/detail/${slug}` : ''}
-                onClick={(e) => {
-                    if (!isAvailable) e.preventDefault();
-                }}
-                className={cn('block h-full', !isAvailable && 'pointer-events-none')}
-                tabIndex={isAvailable ? undefined : -1}
-            >
-                <Card
-                    className={cn(
-                        'group theme-transition flex h-full flex-col gap-0 overflow-hidden rounded-2xl border border-gray-200/80 bg-card p-0 shadow-sm transition-all duration-300 hover:border-brand/60 hover:shadow-2xl hover:shadow-brand/10 dark:border-white/10',
-                        !isAvailable && 'opacity-70',
-                    )}
-                >
-                    {/* Thumbnail */}
-                    <div className="relative aspect-[3/4] overflow-hidden bg-muted">
-                        <ImageWithFallback
-                            src={cover}
-                            alt={title}
-                            loading="lazy"
-                            className="block h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                        />
-                        <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+            <Link href={`/book/detail/${slug}`} className="group block h-full">
+                <div className="prod-card flex h-full flex-col overflow-hidden rounded-xl2 border border-border bg-card shadow-soft transition-all duration-300 group-hover:border-cobalt/40 group-hover:shadow-lift">
+                    {/* Image area — 3D tilting book */}
+                    <div className="relative flex justify-center bg-paper-2/50 px-4 pt-6 pb-8 dark:bg-night-3/40">
+                        <div className="dot-grid pointer-events-none absolute inset-0 opacity-40" />
+                        <div className="book3d-stage relative w-full">
+                            <div className="book3d-tilt aspect-[3/4] w-full">
+                                <div className="book3d-face spine-shadow h-full w-full overflow-hidden rounded-l-sm rounded-r-md">
+                                    <ImageWithFallback
+                                        src={cover}
+                                        alt={title}
+                                        loading="lazy"
+                                        className="h-full w-full object-cover"
+                                    />
+                                    <div className="book3d-sheen" />
+                                </div>
+                            </div>
+                        </div>
 
-                        <Badge
-                            variant={statusVariant[status]}
-                            className="absolute top-3 left-3 z-10 rounded-full px-2.5 py-1 shadow-lg"
+                        {/* badges top-left */}
+                        <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5">
+                            {popular && (
+                                <span className="tracking-editorial inline-flex items-center gap-1 rounded-full bg-brass px-2 py-0.5 text-[10px] font-bold uppercase text-white shadow-sm">
+                                    <Star className="h-2.5 w-2.5 fill-current" />
+                                    {labels.popular}
+                                </span>
+                            )}
+                            {!isAvailable && (
+                                <span className="tracking-editorial inline-flex items-center rounded-full bg-ink/85 px-2 py-0.5 text-[10px] font-bold uppercase text-paper shadow-sm dark:bg-paper/90 dark:text-ink">
+                                    {labels.out}
+                                </span>
+                            )}
+                        </div>
+
+                        {/* bookmark top-right */}
+                        <div
+                            className="absolute top-3 right-3 z-10"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                            }}
                         >
-                            {status}
-                        </Badge>
-
-                        <div className="absolute top-3 right-3 z-10">
                             <BookmarkButton
                                 slug={slug}
                                 title={title}
@@ -96,112 +106,72 @@ const BookCard = ({
                         </div>
                     </div>
 
-                    {/* Body */}
-                    <div className="flex flex-1 flex-col p-4">
-                        <div className="mb-2 flex items-start justify-between gap-2">
-                            <h3 className="line-clamp-2 font-poppins font-semibold text-foreground transition-colors group-hover:text-brand">
-                                {title}
-                            </h3>
-                            <span className="flex shrink-0 items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-600 dark:bg-amber-500/10 dark:text-amber-400">
-                                <Star className="h-3.5 w-3.5 fill-current" />
-                                {formattedRating(avg_rating) ?? 0}
+                    {/* Meta */}
+                    <div className="flex flex-1 flex-col p-4 pt-3.5">
+                        <div className="mb-2 flex items-center justify-between gap-2">
+                            <span className="tracking-editorial truncate font-mono text-[10px] uppercase text-cobalt dark:text-cobalt-lt">
+                                {category?.name}
+                            </span>
+                            <span
+                                className={cn(
+                                    'tracking-editorial shrink-0 rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase',
+                                    statusTone[status],
+                                )}
+                            >
+                                {status}
                             </span>
                         </div>
 
-                        {synopsis && (
-                            <p className="mb-3 line-clamp-2 text-sm text-muted-foreground">
-                                {synopsis}
-                            </p>
-                        )}
+                        <h3 className="line-clamp-2 font-display text-[16px] leading-snug font-semibold text-foreground transition-colors group-hover:text-cobalt dark:group-hover:text-cobalt-lt">
+                            {title}
+                        </h3>
 
-                        {/* Author */}
-                        {authors?.length > 0 && (
-                            <div className="mb-3">
-                                <p className="mb-1.5 text-[0.7rem] font-semibold tracking-wide text-muted-foreground uppercase">
-                                    {labels.author}
-                                </p>
-                                <div className="flex flex-wrap items-center gap-1.5">
-                                    {authors.map((author) => (
-                                        <span
-                                            key={author.id}
-                                            className="flex items-center gap-1.5 rounded-full bg-secondary py-0.5 pr-2.5 pl-0.5 text-xs font-medium text-secondary-foreground"
-                                        >
-                                            <ImageWithFallback
-                                                src={author.avatar}
-                                                alt={author.name}
-                                                loading="lazy"
-                                                className="h-5 w-5 rounded-full object-cover"
-                                            />
-                                            {author.name}
-                                        </span>
-                                    ))}
-                                </div>
+                        {author?.name && (
+                            <div className="mt-1 line-clamp-1 text-xs text-muted-foreground">
+                                {author.name}
                             </div>
                         )}
 
-                        {/* Categories */}
-                        {categories?.length > 0 && (
-                            <div className="mb-3">
-                                <p className="mb-1.5 text-[0.7rem] font-semibold tracking-wide text-muted-foreground uppercase">
-                                    {labels.category}
-                                </p>
-                                <div className="flex flex-wrap items-center gap-1.5">
-                                    {categories.map((category) => (
-                                        <Badge
-                                            key={category.id}
-                                            variant="outline"
-                                            className="gap-1 rounded-full border-brand/30 text-[0.7rem] text-foreground/80"
-                                        >
-                                            {category.icon && (
-                                                <img
-                                                    src={category.icon}
-                                                    alt=""
-                                                    aria-hidden
-                                                    loading="lazy"
-                                                    className="h-3.5 w-3.5"
-                                                />
-                                            )}
-                                            {category.name}
-                                        </Badge>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Publisher */}
-                        {publisher?.name && (
-                            <div className="mb-4">
-                                <p className="mb-1.5 text-[0.7rem] font-semibold tracking-wide text-muted-foreground uppercase">
-                                    {labels.publisher}
-                                </p>
-                                <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary py-0.5 pr-2.5 pl-0.5 text-xs font-medium text-secondary-foreground">
-                                    <ImageWithFallback
-                                        src={publisher.logo}
-                                        alt={publisher.name}
-                                        loading="lazy"
-                                        className="h-5 w-5 rounded-full object-cover"
-                                    />
+                        <div className="mt-3 flex items-center justify-between gap-2 text-xs">
+                            <span className="inline-flex shrink-0 items-center gap-1 text-brass-lt">
+                                <Star className="h-3 w-3 fill-current" />
+                                <span className="font-semibold tabnum text-foreground">
+                                    {rating}
+                                </span>
+                            </span>
+                            {publisher?.name && (
+                                <span className="truncate text-muted-foreground">
                                     {publisher.name}
                                 </span>
-                            </div>
-                        )}
+                            )}
+                        </div>
 
-                        {/* CTA */}
-                        <div className="mt-auto pt-1">
-                            <Button
+                        <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
+                            <span
                                 className={cn(
-                                    'w-full rounded-xl transition-colors duration-300',
+                                    'inline-flex items-center gap-1.5 text-[11px] font-medium',
                                     isAvailable
-                                        ? 'bg-brand text-brand-foreground shadow-sm hover:bg-brand/90'
-                                        : 'cursor-not-allowed bg-muted text-muted-foreground',
+                                        ? 'text-emerald-600 dark:text-emerald-400'
+                                        : 'text-muted-foreground',
                                 )}
-                                disabled={!isAvailable}
                             >
-                                {isAvailable ? labels.detail : status}
-                            </Button>
+                                <span
+                                    className={cn(
+                                        'h-1.5 w-1.5 rounded-full',
+                                        isAvailable
+                                            ? 'bg-emerald-500'
+                                            : 'bg-muted-foreground',
+                                    )}
+                                />
+                                {isAvailable ? labels.available : labels.queue}
+                            </span>
+                            <span className="tracking-editorial inline-flex translate-x-1 items-center gap-1 text-[11px] font-semibold uppercase text-cobalt opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100 dark:text-cobalt-lt">
+                                {labels.view}
+                                <ArrowRight className="h-3 w-3" />
+                            </span>
                         </div>
                     </div>
-                </Card>
+                </div>
             </Link>
         </motion.article>
     );

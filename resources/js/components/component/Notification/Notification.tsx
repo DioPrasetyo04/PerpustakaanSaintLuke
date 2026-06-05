@@ -31,7 +31,7 @@ export default function Notification({ notification, onClose }: Props) {
                         exit={{ scale: 0.8, opacity: 0 }}
                         transition={{ type: 'spring', stiffness: 300, damping: 24 }}
                         onClick={(e) => e.stopPropagation()}
-                        className="w-full max-w-sm rounded-2xl bg-white p-8 text-center shadow-2xl dark:bg-gray-900"
+                        className="w-full max-w-sm rounded-2xl bg-card p-8 text-center shadow-2xl dark:bg-card"
                     >
                         <div
                             className={`mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full ${
@@ -45,11 +45,11 @@ export default function Notification({ notification, onClose }: Props) {
                             )}
                         </div>
 
-                        <h3 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
+                        <h3 className="mb-2 text-2xl font-bold text-foreground dark:text-white">
                             {isSuccess ? 'Success' : 'Error'}
                         </h3>
 
-                        <p className="text-gray-600 dark:text-gray-300">{notification.message}</p>
+                        <p className="text-muted-foreground dark:text-muted-foreground">{notification.message}</p>
                     </motion.div>
                 </motion.div>
             )}

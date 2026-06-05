@@ -8,6 +8,8 @@ import { Link } from '@inertiajs/react';
 import Checkbox from './Checkbox';
 import InputError from './InputError';
 import { ImageWithFallback } from './common/ImageWithFallback';
+import { GoogleButton } from './common/GoogleButton';
+import { FieldSeparator } from './ui/field';
 import { useLanguage } from '@/hooks/useLanguage';
 import { AuthDataPage } from '@/data/data';
 import { Alert, AlertDescription } from './ui/alert';
@@ -108,7 +110,7 @@ export const LoginForm = ({
                                     {canResetPassword && (
                                         <Link
                                             href={route('password.request')}
-                                            className="ml-auto inline-block text-sm text-blue-500 underline"
+                                            className="ml-auto inline-block text-sm text-cobalt underline hover:text-cobalt-dk dark:text-cobalt-lt"
                                         >
                                             Lupa Password
                                         </Link>
@@ -159,6 +161,20 @@ export const LoginForm = ({
                                     Login
                                 </Button>
                             </Field>
+                            <FieldSeparator>
+                                {language === 'id'
+                                    ? 'atau lanjut dengan'
+                                    : 'or continue with'}
+                            </FieldSeparator>
+                            <GoogleButton />
+                            <FieldDescription className="text-center">
+                                {language === 'id'
+                                    ? 'Belum punya akun? '
+                                    : "Don't have an account? "}
+                                <Link href={route('register')}>
+                                    {language === 'id' ? 'Daftar' : 'Sign Up'}
+                                </Link>
+                            </FieldDescription>
                         </FieldGroup>
                     </form>
                 </CardContent>

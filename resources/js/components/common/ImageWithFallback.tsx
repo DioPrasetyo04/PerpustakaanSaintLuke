@@ -19,7 +19,7 @@ export function ImageWithFallback({
         return (
             <div
                 className={cn(
-                    'inline-block bg-gray-100 text-center',
+                    'inline-block bg-muted text-center',
                     className,
                 )}
                 style={style}

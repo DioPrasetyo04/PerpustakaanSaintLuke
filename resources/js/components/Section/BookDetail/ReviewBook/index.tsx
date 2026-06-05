@@ -3,12 +3,12 @@ import React from 'react';
 
 export default function SectionReviewBook() {
     return (
-        <Card className="border-4 border-primary/30 bg-gradient-to-br from-indigo-50 via-blue-50 to-purple-50 p-6 shadow-2xl sm:p-10">
+        <Card className="border-4 border-primary/30 bg-gradient-to-br from-cobalt-50 via-blue-50 to-brass-50 p-6 shadow-2xl sm:p-10">
             {/* Header Section */}
             <div className="mb-8 rounded-2xl bg-gradient-to-r from-primary to-secondary p-6 shadow-xl">
                 <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
                     <div className="text-center sm:text-left">
-                        <h2 className="mb-2 font-['Poppins'] text-3xl font-black text-white drop-shadow-lg sm:text-4xl">
+                        <h2 className="mb-2 font-display text-3xl font-black text-white drop-shadow-lg sm:text-4xl">
                             📝 User Reviews ({reviews.data.length})
                         </h2>
                         <p className="text-lg text-white/90">
@@ -19,7 +19,7 @@ export default function SectionReviewBook() {
                         <Badge className="bg-accent px-6 py-3 text-xl text-white shadow-lg">
                             ⭐ {book.rating} Average
                         </Badge>
-                        <Button className="bg-white font-bold text-primary shadow-lg hover:bg-gray-100">
+                        <Button className="bg-white font-bold text-primary shadow-lg hover:bg-muted">
                             <Star className="mr-2 h-4 w-4 fill-accent text-accent" />
                             Sort by Rating
                         </Button>
@@ -43,7 +43,7 @@ export default function SectionReviewBook() {
                         transition={{
                             delay: index * 0.15,
                         }}
-                        className="transform rounded-2xl border-2 border-primary/10 bg-white p-6 shadow-xl transition-all duration-300 hover:scale-[1.02] hover:border-primary/30 hover:shadow-2xl sm:p-8"
+                        className="transform rounded-2xl border-2 border-primary/10 bg-card p-6 shadow-xl transition-all duration-300 hover:scale-[1.02] hover:border-primary/30 hover:shadow-2xl sm:p-8"
                     >
                         <div className="flex gap-6">
                             {/* Reviewer Avatar with Badge */}
@@ -76,13 +76,13 @@ export default function SectionReviewBook() {
                                 <div className="mb-4 rounded-xl bg-gradient-to-r from-primary/5 to-secondary/5 p-4">
                                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                         <div className="flex-1">
-                                            <h3 className="mb-1 flex items-center gap-2 font-['Poppins'] text-xl font-black text-gray-900 sm:text-2xl">
+                                            <h3 className="mb-1 flex items-center gap-2 font-display text-xl font-black text-foreground sm:text-2xl">
                                                 {review.userName}
                                                 <span className="text-green-500">
                                                     ✓
                                                 </span>
                                             </h3>
-                                            <p className="text-sm font-medium text-gray-600">
+                                            <p className="text-sm font-medium text-muted-foreground">
                                                 📧 {review.userEmail}
                                             </p>
                                         </div>
@@ -94,7 +94,7 @@ export default function SectionReviewBook() {
                                                         className={`h-6 w-6 ${
                                                             i < review.rating
                                                                 ? 'fill-accent text-accent drop-shadow-md'
-                                                                : 'text-gray-300'
+                                                                : 'text-muted-foreground'
                                                         }`}
                                                     />
                                                 ))}
@@ -103,7 +103,7 @@ export default function SectionReviewBook() {
                                                     .0
                                                 </span>
                                             </div>
-                                            <p className="inline-block rounded-full bg-gray-100 px-3 py-1 text-sm font-semibold text-gray-500">
+                                            <p className="inline-block rounded-full bg-muted px-3 py-1 text-sm font-semibold text-muted-foreground">
                                                 🕐 {review.date}
                                             </p>
                                         </div>
@@ -111,8 +111,8 @@ export default function SectionReviewBook() {
                                 </div>
 
                                 {/* Review Comment */}
-                                <div className="mb-4 rounded-xl border-l-4 border-primary bg-gradient-to-br from-gray-50 to-blue-50 p-5 shadow-md">
-                                    <p className="text-base leading-relaxed font-medium text-gray-800 italic sm:text-lg">
+                                <div className="mb-4 rounded-xl border-l-4 border-primary bg-gradient-to-br from-cobalt-50 to-brass-50 p-5 shadow-md">
+                                    <p className="text-base leading-relaxed font-medium text-foreground italic sm:text-lg">
                                         "{review.comment}"
                                     </p>
                                 </div>
@@ -164,7 +164,7 @@ export default function SectionReviewBook() {
 
             {/* Load More Section */}
             <div className="mt-10 border-t-4 border-dashed border-primary/30 pt-8 text-center">
-                <p className="mb-4 text-lg font-semibold text-gray-600">
+                <p className="mb-4 text-lg font-semibold text-muted-foreground">
                     Want to see more reviews?
                 </p>
                 <Button className="transform bg-gradient-to-r from-primary to-secondary px-10 py-6 text-lg font-bold text-white shadow-xl transition-all hover:scale-105 hover:from-primary/90 hover:to-secondary/90 hover:shadow-2xl">

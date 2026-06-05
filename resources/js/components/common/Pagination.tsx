@@ -47,7 +47,7 @@ export function Pagination({
                         1
                     </Button>
                     {currentPage > 4 && (
-                        <span className="text-gray-400">...</span>
+                        <span className="text-muted-foreground">...</span>
                     )}
                 </>
             )}
@@ -67,7 +67,7 @@ export function Pagination({
             {currentPage < totalPages - 2 && totalPages > 5 && (
                 <>
                     {currentPage < totalPages - 3 && (
-                        <span className="text-gray-400">...</span>
+                        <span className="text-muted-foreground">...</span>
                     )}
                     <Button
                         variant={

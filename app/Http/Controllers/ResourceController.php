@@ -2,73 +2,33 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\BookStatus;
-use App\Models\Author;
-use App\Models\Category;
-use App\Models\Publisher;
-use App\Services\ResourceServices;
+use App\Enums\OnlineResourceType;
+use App\Services\OnlineResourceServices;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class ResourceController extends Controller
 {
-    protected $resourcesController;
+    protected $onlineResourceServices;
 
-    public function __construct(ResourceServices $resourceServices)
+    public function __construct(OnlineResourceServices $onlineResourceServices)
     {
-        $this->resourcesController = $resourceServices;
+        $this->onlineResourceServices = $onlineResourceServices;
     }
+
     public function index(Request $request)
     {
-        $filters = $request->only([
-            'search',
-            'categories',
-            'authors',
-            'publisher',
-            'availability',
-            'field',
-            'direction',
-        ]);
-        $resourcePage = (int) $request->get('resources_page', 1);
-        $resourceLoad = (int) $request->get('resources_load', 10);
-        $resourcePaginator = $this->resourcesController->getAllDataRaw($filters, $resourceLoad, $resourcePage);
-        // dd([
-        //     $this->resourcesController->transformBooksData($resourcePaginator)
-        // ]);
+        $filters = $request->only(['search', 'type']);
+
+        $resources = $this->onlineResourceServices->getActiveResourcesRaw($filters);
+
         return Inertia::render('EResources/ResourcesPage', [
-            'resources' => $this->resourcesController->transformBooksData($resourcePaginator),
-            'filters' => $filters,
-            'statusOptions' => BookStatus::options(),
-            'authorsOptions' => Author::select(['id', 'name'])
-                ->get()
-                ->map(function ($author) {
-                    return [
-                        'id' => $author->id,
-                        'name' => $author->name,
-                        'avatar' => $author->avatar,
-                    ];
-                }),
-            'categoriesOptions' => Category::select(['id', 'name'])
-                ->get()
-                ->map(function ($category) {
-                    return [
-                        'id' => $category->id,
-                        'name' => $category->name,
-                        'icon' => $category->icon
-                    ];
-                }),
-            'publishersOptions' => Publisher::select(['id', 'name', 'logo'])
-                ->get()
-                ->map(function ($publisher) {
-                    return [
-                        'id' => $publisher->id,
-                        'name' => $publisher->name,
-                        'logo' => $publisher->logo
-                            ? Storage::url($publisher->logo)
-                            : null,
-                    ];
-                }),
+            'resources' => $this->onlineResourceServices->transformResources($resources),
+            'filters' => [
+                'search' => $filters['search'] ?? '',
+                'type' => $filters['type'] ?? 'Semua',
+            ],
+            'typeOptions' => array_values(OnlineResourceType::options()),
         ]);
     }
 }

@@ -43,7 +43,7 @@ export function FAQAccordionList({ faqs }: FAQAccordionListProps) {
                             >
                                 <h3
                                     className={cn(
-                                        'font-poppins text-base font-semibold transition-colors sm:text-lg',
+                                        'font-display text-base font-semibold transition-colors sm:text-lg',
                                         isOpen
                                             ? 'text-brand'
                                             : 'text-foreground group-hover:text-brand',

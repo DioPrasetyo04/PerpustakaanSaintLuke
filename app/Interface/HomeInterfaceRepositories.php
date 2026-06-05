@@ -12,6 +12,10 @@ interface HomeInterfaceRepositories
 
     public function getAllInformationsHomePage(array $filters, int $perPage, int $page): LengthAwarePaginator;
 
+    public function getLiveLoanActivities(int $limit): array;
+
+    public function getFeaturedPublishers(int $limit): array;
+
     public function getCountOfAllBooks(): int;
 
     public function getCountOfAllVisitors(): int;

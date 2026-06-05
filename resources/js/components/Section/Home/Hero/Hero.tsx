@@ -1,184 +1,324 @@
-import React, { useEffect, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import React, { useEffect, useRef, useState } from 'react';
 import { router } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 import { useLanguage } from '@/hooks/useLanguage';
-import { contentHero, slidesHero } from '@/data/data';
-import { BookOpen, Search, Loader2, ChevronDown } from 'lucide-react';
+import { slidesHero } from '@/data/data';
+import { Search, ArrowRight, Loader2, ChevronUp } from 'lucide-react';
+import Carousel from '@/components/common/Carousel';
+import BookCard from '@/components/component/Card/BookCard';
+import type { BookProps } from '@/types/DataTypes/BooksProps';
 
-const HeroSection = () => {
-    const [currentSlide, setCurrentSlide] = useState(0);
+const content = {
+    id: {
+        eyebrow: 'Perpustakaan Digital · Yayasan Santo Lukas',
+        h1a: 'Ruang baca digital',
+        h1b: 'yang ',
+        h1em: 'terlengkap',
+        h1c: ' &',
+        h1d: 'terpercaya.',
+        lead1: 'Jelajahi ',
+        leadStrong: '12.480+ koleksi',
+        lead2: ' — sastra, sains, sejarah, hingga jurnal akademik. Cari, pinjam, dan kelola bacaanmu dalam satu portal untuk siswa Santo Lukas.',
+        placeholder: 'Cari judul, penulis, ISBN, atau topik…',
+        search: 'Cari',
+        trending: 'Trending',
+        librarianPick: 'Pilihan Pustakawan',
+        available: 'Tersedia kini',
+        availableSub: 'Koleksi siap dipinjam',
+        showcase: 'Koleksi Unggulan',
+        swipeUp: 'Geser ke atas',
+        stats: [
+            { v: '12.480+', l: 'Koleksi buku' },
+            { v: '1.856', l: 'Anggota aktif' },
+            { v: '58 thn', l: 'Melayani' },
+        ],
+    },
+    en: {
+        eyebrow: 'Digital Library · Saint Luke Foundation',
+        h1a: 'A digital reading space',
+        h1b: "that's ",
+        h1em: 'complete',
+        h1c: ' &',
+        h1d: 'trusted.',
+        lead1: 'Explore ',
+        leadStrong: '12,480+ collections',
+        lead2: ' — literature, science, history, and academic journals. Search, borrow, and manage your reading in one portal for Saint Luke students.',
+        placeholder: 'Search title, author, ISBN, or topic…',
+        search: 'Search',
+        trending: 'Trending',
+        librarianPick: "Librarian's Pick",
+        available: 'Available now',
+        availableSub: 'Ready to borrow',
+        showcase: 'Featured Collection',
+        swipeUp: 'Swipe up',
+        stats: [
+            { v: '12,480+', l: 'Book collections' },
+            { v: '1,856', l: 'Active members' },
+            { v: '58 yrs', l: 'Of service' },
+        ],
+    },
+};
+
+const trendingTerms = [
+    'Pramoedya',
+    'Filosofi Teras',
+    'Atomic Habits',
+    'Sapiens',
+    'Laskar Pelangi',
+];
+
+type HeroSectionProps = {
+    books?: BookProps[];
+};
+
+const HeroSection = ({ books = [] }: HeroSectionProps) => {
+    const { language } = useLanguage();
+    const t = language === 'id' ? content.id : content.en;
     const [searchInput, setSearchInput] = useState('');
     const [submitting, setSubmitting] = useState(false);
-    const { language } = useLanguage();
+    const secRef = useRef<HTMLElement>(null);
 
-    const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        const keyword = searchInput.trim();
-        router.get(route('resource'), keyword ? { search: keyword } : {}, {
+    const showcaseBooks = books.slice(0, 8);
+
+    // Background slideshow (hero1 → hero2 → hero3)
+    const [bgIndex, setBgIndex] = useState(0);
+    useEffect(() => {
+        if (slidesHero.length <= 1) return;
+        const id = setInterval(() => {
+            setBgIndex((i) => (i + 1) % slidesHero.length);
+        }, 6000);
+        return () => clearInterval(id);
+    }, []);
+
+    const scrollToNext = () => {
+        secRef.current?.nextElementSibling?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+        });
+    };
+
+    const goSearch = (keyword: string) => {
+        const kw = keyword.trim();
+        // Pencarian hero mengarah ke Katalog Buku (data buku), bukan halaman Sumber.
+        router.get(route('catalog.books'), kw ? { search: kw } : {}, {
             preserveScroll: false,
             onStart: () => setSubmitting(true),
             onFinish: () => setSubmitting(false),
         });
     };
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setCurrentSlide((prev) => (prev + 1) % slidesHero.length);
-        }, 5000);
-        return () => clearInterval(interval);
-    }, []);
+    const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        goSearch(searchInput);
+    };
 
-    const content = language === 'id' ? contentHero.id : contentHero.en;
+    const onMove = (e: React.MouseEvent<HTMLElement>) => {
+        const el = secRef.current;
+        if (!el) return;
+        const r = el.getBoundingClientRect();
+        el.style.setProperty(
+            '--mx',
+            `${((e.clientX - r.left) / r.width) * 100}%`,
+        );
+        el.style.setProperty(
+            '--my',
+            `${((e.clientY - r.top) / r.height) * 100}%`,
+        );
+    };
 
     return (
         <header
             id="home"
-            className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden pt-20"
+            ref={secRef}
+            onMouseMove={onMove}
+            className="relative overflow-hidden"
         >
-            {/* Background slide carousel */}
-            <AnimatePresence mode="wait">
-                <motion.div
-                    key={currentSlide}
-                    initial={{ opacity: 0, scale: 1.1 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
-                    className="absolute inset-0 h-full w-full"
-                >
+            {/* Background slideshow (hero1 → hero2 → hero3) */}
+            <div className="pointer-events-none absolute inset-0">
+                {slidesHero.map((src, i) => (
                     <img
-                        src={slidesHero[currentSlide]}
-                        alt={`Hero ${currentSlide + 1}`}
-                        className="h-full w-full object-cover object-center"
-                    />
-                </motion.div>
-            </AnimatePresence>
-
-            {/* Cinematic overlays: dark vignette + subtle warm gold tint */}
-            <div className="absolute inset-0 z-1 bg-linear-to-b from-black/70 via-black/55 to-black/80" />
-            <div className="absolute inset-0 z-1 bg-linear-to-tr from-brand/15 via-transparent to-transparent" />
-
-            {/* Floating decorative blobs */}
-            <div className="animate-float absolute top-1/4 left-10 z-1 h-40 w-40 rounded-full bg-brand/15 blur-3xl" />
-            <div className="animate-float-slow absolute right-12 bottom-1/4 z-1 h-52 w-52 rounded-full bg-amber-300/10 blur-3xl" />
-
-            {/* Slide indicators */}
-            <div className="absolute right-8 bottom-8 z-20 flex gap-3">
-                {slidesHero.map((_, index) => (
-                    <motion.button
-                        key={index}
-                        aria-label={`Go to slide ${index + 1}`}
-                        onClick={() => setCurrentSlide(index)}
-                        className={`h-1.5 rounded-full transition-all duration-500 ${
-                            currentSlide === index
-                                ? 'w-12 bg-brand'
-                                : 'w-8 bg-white/40 hover:bg-white/60'
+                        key={src}
+                        src={src}
+                        alt=""
+                        aria-hidden
+                        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[1200ms] ease-in-out ${
+                            i === bgIndex
+                                ? 'opacity-100 dark:opacity-90'
+                                : 'opacity-0'
                         }`}
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
                     />
                 ))}
+                {/* directional scrims — protect the text on the left, let the image stay vivid on the right */}
+                <div className="absolute inset-0 bg-gradient-to-r from-background via-background/75 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/85 via-background/10 to-background/30" />
             </div>
 
-            {/* Content */}
-            <div className="relative z-10 mx-auto flex max-w-4xl flex-col items-center px-4 py-12 text-center sm:px-6 lg:px-8">
-                <motion.span
-                    initial={{ opacity: 0, y: 24 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                    className="mb-7 inline-flex items-center gap-2 rounded-full border border-brand/40 bg-white/10 px-4 py-1.5 text-xs font-semibold tracking-widest text-brand uppercase shadow-lg backdrop-blur-md"
-                >
-                    <BookOpen className="h-4 w-4" />
-                    {content.badge}
-                </motion.span>
+            <div className="cursor-glow pointer-events-none absolute inset-0" />
+            <div className="hero-mesh pointer-events-none absolute inset-0" />
+            <div
+                className="dot-grid pointer-events-none absolute inset-0 opacity-50"
+                style={{
+                    maskImage:
+                        'linear-gradient(to bottom, black, transparent 70%)',
+                }}
+            />
 
-                <motion.h1
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                    className="font-poppins text-4xl font-bold tracking-tight text-white drop-shadow-2xl sm:text-6xl lg:text-7xl"
-                >
-                    <span className="block text-brand">{content.title}</span>
-                    <span className="mt-2 block">{content.subtitle}</span>
-                </motion.h1>
+            <div className="relative mx-auto max-w-7xl px-6 pt-14 pb-16 lg:px-10 lg:pt-20 lg:pb-24">
+                <div className="grid grid-cols-12 items-center gap-8 lg:gap-6">
+                    {/* LEFT */}
+                    <div className="col-span-12 lg:col-span-7">
+                        <div className="tracking-editorial inline-flex items-center gap-2 font-mono text-[11px] uppercase text-cobalt dark:text-cobalt-lt">
+                            <span className="h-1.5 w-1.5 rounded-full bg-cobalt dark:bg-cobalt-lt" />
+                            {t.eyebrow}
+                        </div>
 
-                <motion.p
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6, duration: 0.8 }}
-                    className="mx-auto mt-6 max-w-2xl text-base leading-relaxed font-light text-white/90 sm:text-lg lg:text-xl"
-                >
-                    {content.description}
-                </motion.p>
-
-                {/* Glass search */}
-                <motion.form
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.8, duration: 0.8 }}
-                    onSubmit={handleSearchSubmit}
-                    role="search"
-                    className="mt-10 w-full max-w-xl"
-                >
-                    <div className="group flex items-center gap-2 rounded-full border border-white/20 bg-white/10 p-2 pl-5 shadow-2xl backdrop-blur-xl transition-all duration-300 focus-within:border-brand/60 focus-within:bg-white/15 focus-within:ring-4 focus-within:ring-brand/20">
-                        <Search className="h-5 w-5 shrink-0 text-white/70 transition-colors group-focus-within:text-brand" />
-                        <input
-                            type="text"
-                            id="search"
-                            name="search"
-                            value={searchInput}
-                            onChange={(e) => setSearchInput(e.target.value)}
-                            placeholder={
-                                language === 'id'
-                                    ? 'Cari buku, penulis, atau kategori...'
-                                    : 'Search books, authors, or categories...'
-                            }
-                            className="min-w-0 flex-1 bg-transparent text-sm text-white placeholder:text-white/60 focus:outline-none sm:text-base"
-                        />
-                        <button
-                            type="submit"
-                            disabled={submitting}
-                            className="inline-flex shrink-0 items-center gap-2 rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-brand-foreground shadow-lg shadow-black/20 transition-all duration-300 hover:scale-105 hover:bg-brand/90 disabled:cursor-not-allowed disabled:opacity-70"
+                        <h1
+                            className="mt-6 font-display text-[44px] leading-[0.98] font-medium text-foreground sm:text-[60px] lg:text-[72px] xl:text-[80px]"
+                            style={{ textWrap: 'balance' }}
                         >
-                            {submitting ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                                <Search className="h-4 w-4 sm:hidden" />
-                            )}
-                            <span className="hidden sm:inline">
-                                {language === 'id' ? 'Cari' : 'Search'}
+                            <span className="block">{t.h1a}</span>
+                            <span className="block">
+                                {t.h1b}
+                                <em className="text-cobalt not-italic dark:text-cobalt-lt">
+                                    {t.h1em}
+                                </em>
+                                {t.h1c}
                             </span>
-                        </button>
-                    </div>
-                </motion.form>
-            </div>
+                            <span className="relative block">
+                                <span
+                                    className="hero-stroke absolute -top-1 left-0 hidden select-none lg:block"
+                                    aria-hidden="true"
+                                >
+                                    {t.h1d}
+                                </span>
+                                <span className="relative">{t.h1d}</span>
+                            </span>
+                        </h1>
 
-            {/* Scroll indicator */}
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1.5, duration: 1 }}
-                className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2"
-            >
-                <motion.div
-                    animate={{ y: [0, 10, 0] }}
-                    transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-                    className="flex flex-col items-center gap-1.5"
-                >
-                    <div className="flex h-9 w-5.5 items-start justify-center rounded-full border-2 border-white/40 p-1.5">
-                        <motion.div
-                            animate={{ y: [0, 14, 0], opacity: [1, 0, 1] }}
-                            transition={{
-                                duration: 2.5,
-                                repeat: Infinity,
-                                ease: 'easeInOut',
-                            }}
-                            className="h-1.5 w-1.5 rounded-full bg-white"
-                        />
+                        <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
+                            {t.lead1}
+                            <span className="font-semibold text-foreground">
+                                {t.leadStrong}
+                            </span>
+                            {t.lead2}
+                        </p>
+
+                        {/* Search */}
+                        <form
+                            onSubmit={handleSearchSubmit}
+                            role="search"
+                            className="hairline mt-8 flex max-w-2xl items-center gap-2 rounded-full border bg-card p-2 shadow-lift transition-colors focus-within:border-cobalt/50 dark:bg-night-2"
+                        >
+                            <Search className="ml-4 h-5 w-5 shrink-0 text-muted-foreground" />
+                            <input
+                                value={searchInput}
+                                onChange={(e) => setSearchInput(e.target.value)}
+                                placeholder={t.placeholder}
+                                aria-label={t.placeholder}
+                                className="min-w-0 flex-1 bg-transparent py-2 text-base text-foreground outline-none placeholder:text-muted-foreground"
+                            />
+                            <button
+                                type="submit"
+                                disabled={submitting}
+                                className="btn-press inline-flex shrink-0 items-center gap-2 rounded-full bg-cobalt px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-cobalt-dk disabled:opacity-70"
+                            >
+                                {submitting ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                    <>
+                                        <span className="hidden sm:inline">
+                                            {t.search}
+                                        </span>
+                                        <ArrowRight className="h-4 w-4" />
+                                    </>
+                                )}
+                            </button>
+                        </form>
+
+                        {/* Trending chips */}
+                        <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-muted-foreground">
+                            <span className="tracking-editorial font-mono uppercase">
+                                {t.trending}:
+                            </span>
+                            {trendingTerms.map((term) => (
+                                <button
+                                    key={term}
+                                    type="button"
+                                    onClick={() => goSearch(term)}
+                                    className="hairline rounded-full border px-3 py-1 transition-colors hover:border-cobalt/40 hover:text-cobalt dark:hover:text-cobalt-lt"
+                                >
+                                    {term}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Inline stats */}
+                        <div className="mt-8 flex items-center gap-8">
+                            {t.stats.map((s, i) => (
+                                <div key={i} className="flex items-center gap-8">
+                                    {i > 0 && (
+                                        <span className="h-10 w-px bg-line dark:bg-night-line" />
+                                    )}
+                                    <div>
+                                        <div className="font-display text-2xl tabnum text-foreground">
+                                            {s.v}
+                                        </div>
+                                        <div className="text-xs text-muted-foreground">
+                                            {s.l}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                    <ChevronDown className="h-4 w-4 text-white/60" />
-                </motion.div>
-            </motion.div>
+
+                    {/* RIGHT — auto-sliding book showcase */}
+                    <div className="relative col-span-12 lg:col-span-5">
+                        {showcaseBooks.length > 0 && (
+                            <div className="relative">
+                                <div className="pointer-events-none absolute -inset-6 -z-10 rounded-full bg-cobalt/10 blur-3xl" />
+
+                                <div className="tracking-editorial mb-3 flex items-center gap-2 font-mono text-[11px] uppercase text-cobalt dark:text-cobalt-lt">
+                                    <span className="h-1.5 w-1.5 rounded-full bg-cobalt dark:bg-cobalt-lt" />
+                                    {t.showcase}
+                                </div>
+
+                                <Carousel<BookProps>
+                                    items={showcaseBooks}
+                                    getKey={(book) => book.id}
+                                    ariaLabel={t.showcase}
+                                    autoplay={3000}
+                                    loop
+                                    spaceBetween={16}
+                                    renderItem={(book) => <BookCard {...book} />}
+                                    breakpoints={{
+                                        0: { slidesPerView: 1.3 },
+                                        480: { slidesPerView: 2.2 },
+                                        768: { slidesPerView: 3 },
+                                        1024: { slidesPerView: 1.5 },
+                                        1280: { slidesPerView: 1.7 },
+                                    }}
+                                />
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Swipe-up navigator */}
+                <button
+                    type="button"
+                    onClick={scrollToNext}
+                    aria-label={t.swipeUp}
+                    className="group absolute bottom-5 left-1/2 z-30 flex -translate-x-1/2 flex-col items-center gap-1.5 text-muted-foreground transition-colors hover:text-cobalt dark:hover:text-cobalt-lt"
+                >
+                    <span className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card/70 shadow-soft backdrop-blur-sm transition-transform group-hover:-translate-y-0.5">
+                        <ChevronUp className="h-4 w-4 animate-bounce" />
+                    </span>
+                    <span className="tracking-editorial font-mono text-[10px] uppercase">
+                        {t.swipeUp}
+                    </span>
+                </button>
+            </div>
         </header>
     );
 };

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\HomeServices;
+use App\Services\TestimonialServices;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -10,9 +11,12 @@ class HomeController extends Controller
 {
     protected HomeServices $homeController;
 
-    public function __construct(HomeServices $homeServices)
+    protected TestimonialServices $testimonialServices;
+
+    public function __construct(HomeServices $homeServices, TestimonialServices $testimonialServices)
     {
         $this->homeController = $homeServices;
+        $this->testimonialServices = $testimonialServices;
     }
 
     public function index(Request $request)
@@ -34,6 +38,9 @@ class HomeController extends Controller
                 'books'                => $this->homeController->transformBooks($booksPaginator),
                 'categories'           => $this->homeController->transformCategories($categoriesPaginator),
                 'informations'         => $this->homeController->transformInformations($informationsPaginator),
+                'live_activities'      => $this->homeController->getLiveActivities(),
+                'publishers'           => $this->homeController->getFeaturedPublishers(),
+                'testimonials'         => $this->testimonialServices->getTestimonials(),
                 'count_of_all_books'   => $this->homeController->getAllCountOfBooks(),
                 'count_of_all_visitors' => $this->homeController->getAllCountOfVisitors(),
                 'count_of_all_users'   => $this->homeController->getAllCountOfUsers(),

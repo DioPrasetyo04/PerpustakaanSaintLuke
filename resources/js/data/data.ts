@@ -1,4 +1,4 @@
-import { faqHeaderType, faqType } from '@/types/DataTypes/faqtype';
+import type { faqHeaderType, faqType } from '@/types/DataTypes/faqtype';
 import type {
     LanguageItem,
     NavAuth,
@@ -413,21 +413,25 @@ export const assetAccessDenied = {
     id: {
         expired: {
             title: 'Masa Akses Habis',
-            description: 'Masa aktif lihat akses buku sudah habis. Silahkan pinjam kembali untuk mengakses buku ini.',
+            description:
+                'Masa aktif lihat akses buku sudah habis. Silahkan pinjam kembali untuk mengakses buku ini.',
         },
         unauthorized: {
             title: 'Akses Tidak Diperbolehkan',
-            description: 'Anda tidak memiliki akses untuk membaca buku ini. Pinjam buku terlebih dahulu.',
+            description:
+                'Anda tidak memiliki akses untuk membaca buku ini. Pinjam buku terlebih dahulu.',
         },
     },
     en: {
         expired: {
             title: 'Access Expired',
-            description: 'Your book access period has ended. Please borrow the book again to regain access.',
+            description:
+                'Your book access period has ended. Please borrow the book again to regain access.',
         },
         unauthorized: {
             title: 'Access Not Allowed',
-            description: 'You do not have permission to access this book. Please borrow it first.',
+            description:
+                'You do not have permission to access this book. Please borrow it first.',
         },
     },
 };

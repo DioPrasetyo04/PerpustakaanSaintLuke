@@ -1,707 +1,323 @@
-import { ImageWithFallback } from '@/components/common/ImageWithFallback';
-import BookCard from '@/components/component/Card/BookCard';
-import Pagination from '@/components/component/Home/Pagination/Pagination';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-import { Skeleton } from '@/components/ui/skeleton';
-import { filtersHeaderPage } from '@/data/data';
-import { useLanguage } from '@/hooks/useLanguage';
-import type { ResourceFilterPageProps } from '@/types/ResourcePage/ResourceFilterPageProps';
-import { router, usePage } from '@inertiajs/react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { Filter, Search, X } from 'lucide-react';
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useRef, useState, type ComponentType } from 'react';
+import { router, usePage, Link } from '@inertiajs/react';
 import { route } from 'ziggy-js';
-export default function ResourcesPage() {
-    const { props, url } = usePage<ResourceFilterPageProps>();
-    const {
-        resources,
-        filters,
-        statusOptions,
-        authorsOptions,
-        categoriesOptions,
-        publishersOptions,
-    } = props;
+import { motion } from 'framer-motion';
+import {
+    Search,
+    Globe,
+    BookOpen,
+    Bookmark,
+    Play,
+    Video,
+    Library,
+    ExternalLink,
+    ArrowUpRight,
+    ArrowRight,
+    Compass,
+} from 'lucide-react';
+import { useDebounce } from '@/hooks/useDebounce';
+import { useLanguage } from '@/hooks/useLanguage';
+import { cn } from '@/lib/utils';
+import type { OnlineResourcePageProps } from '@/types/ResourcePage/OnlineResourcePageProps';
+
+const content = {
+    id: {
+        eyebrow: 'Sumber Daring',
+        h1a: 'E-book, jurnal & riset yang kami ',
+        h1em: 'percayai',
+        h1b: '.',
+        lead: 'Sumber daring terkurasi yang diakses lewat kredensial sekolah atau akses terbuka. Diperiksa pustakawan tiap awal semester.',
+        countSuffix: 'sumber',
+        countNote: 'Akses gratis untuk anggota',
+        placeholder: 'Cari sumber, topik, atau penyedia…',
+        all: 'Semua',
+        open: 'Buka',
+        empty: 'Tidak ada sumber yang cocok.',
+        emptyDesc: 'Coba ubah kata kunci atau pilih tipe lain.',
+        ctaTitle: 'Tidak menemukan sumber yang Anda cari?',
+        ctaDesc: 'Pustakawan dapat membantu mengakses jurnal berbayar lewat kemitraan antar-perpustakaan, atau merekomendasikan alternatif berkualitas.',
+        ctaButton: 'Hubungi Pustakawan',
+    },
+    en: {
+        eyebrow: 'Online Resources',
+        h1a: 'E-books, journals & research we ',
+        h1em: 'trust',
+        h1b: '.',
+        lead: 'Curated online resources accessed via school credentials or open access. Reviewed by librarians every semester.',
+        countSuffix: 'resources',
+        countNote: 'Free access for members',
+        placeholder: 'Search resources, topics, or providers…',
+        all: 'All',
+        open: 'Open',
+        empty: 'No matching resources.',
+        emptyDesc: 'Try a different keyword or pick another type.',
+        ctaTitle: "Can't find the resource you need?",
+        ctaDesc: 'Our librarians can help access paid journals through inter-library partnerships, or recommend quality alternatives.',
+        ctaButton: 'Contact a Librarian',
+    },
+};
+
+/* thumbnail palettes (self-contained colored headers, theme-agnostic) */
+const PALETTES = [
+    { bg: '#0F3D2E', accent: '#6FD7AC' },
+    { bg: '#11324F', accent: '#74B8F0' },
+    { bg: '#3A2B14', accent: '#E0B564' },
+    { bg: '#1E2440', accent: '#9AA6F2' },
+    { bg: '#3A1530', accent: '#F0A0C8' },
+    { bg: '#13322F', accent: '#67D6C6' },
+    { bg: '#2A1840', accent: '#C09BF0' },
+    { bg: '#402015', accent: '#F0A878' },
+];
+
+const ICONS: Record<string, ComponentType<{ className?: string }>> = {
+    'book-open': BookOpen,
+    bookmark: Bookmark,
+    play: Play,
+    search: Search,
+    globe: Globe,
+    video: Video,
+    library: Library,
+};
+
+const ResourcesPage = () => {
+    const { resources, filters, typeOptions } =
+        usePage<OnlineResourcePageProps>().props;
     const { language } = useLanguage();
+    const t = language === 'id' ? content.id : content.en;
 
-    const text =
-        language === 'id' ? filtersHeaderPage.id : filtersHeaderPage.en;
+    const [search, setSearch] = useState(filters.search || '');
+    const [type, setType] = useState(filters.type || 'Semua');
+    const debounceSearch = useDebounce(search, 400);
 
-    const getQuery = (url: string, key: string) => {
-        const params = new URLSearchParams(url.split('?')[1]);
-        return params.get(key);
-    };
-
-    const searchFromUrl = useMemo(() => {
-        return getQuery(url, 'search') || props.filters?.search || '';
-    }, [url]);
-
-    const [searchInput, setSearchInput] = useState(searchFromUrl);
-    // useEffect url
+    const firstRender = useRef(true);
     useEffect(() => {
-        setSearchInput(searchFromUrl);
-    }, [searchFromUrl]);
-
-    const [debouncedSearch, setDebouncedSearch] = useState(searchInput);
-
-    useEffect(() => {
-        const delay = setTimeout(() => {
-            setDebouncedSearch(searchInput);
-        }, 400); // delay 400ms
-
-        return () => clearTimeout(delay);
-    }, [searchInput]);
-
-    const [localFilters, setLocalFilters] = useState({
-        categories: filters?.categories || [],
-        authors: filters?.authors || [],
-        publishers: filters?.publishers || [],
-        availability: filters?.availability || '',
-    });
-
-    const [sortBy, setSortBy] = useState(filters?.field || 'title');
-
-    const getSortParams = (value: string) => {
-        switch (value) {
-            case 'title':
-                return { field: 'title', direction: 'asc' };
-            case 'categories':
-                return { field: 'name', direction: 'asc' };
-            case 'authors':
-                return { field: 'name', direction: 'asc' };
-            case 'publisher':
-                return { field: 'name', direction: 'asc' };
-            case 'publication_year':
-                return { field: 'publication_year', direction: 'desc' };
-            case 'rating':
-                return { field: 'avg_rating', direction: 'desc' };
-            default:
-                return { field: 'title', direction: 'asc' };
+        if (firstRender.current) {
+            firstRender.current = false;
+            return;
         }
-    };
-
-    useEffect(() => {
-        const sort = getSortParams(sortBy);
-        router.get(
-            '/resources',
-            {
-                search: debouncedSearch,
-                categories: localFilters.categories,
-                authors: localFilters.authors,
-                publishers: localFilters.publishers,
-                availability: localFilters.availability,
-                field: sort.field,
-                direction: sort.direction,
-            },
-            {
-                preserveState: true,
-                replace: true,
-            },
-        );
-    }, [debouncedSearch, localFilters, sortBy]);
-
-    // toogleFilter;
-    const toggleFilter = (type: keyof typeof localFilters, value: string) => {
-        setLocalFilters((prev) => {
-            const current = prev[type] as string[];
-            const updated = current.includes(value)
-                ? current.filter((item) => item !== value)
-                : [...current, value];
-            return { ...prev, [type]: updated };
-        });
-    };
-
-    const start = (resources.meta.current_page - 1) * resources.meta.per_page;
-    const end = start + resources.data.length;
-
-    const [showMobileFilters, setShowMobileFilters] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-
-    const onPageChange = (page: number) => {
         router.get(
             route('resource'),
-            {
-                search: debouncedSearch,
-                resources_page: page,
-                resources_load: resources.meta.per_page,
-            },
-            {
-                preserveState: true,
-                replace: true,
-            },
+            { search: debounceSearch || undefined, type },
+            { preserveState: true, preserveScroll: true, replace: true },
         );
-    };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [debounceSearch, type]);
 
-    const onPerPageChange = (perPage: number) => {
-        router.get(
-            route('resource'),
-            {
-                search: debouncedSearch,
-                resources_page: 1,
-                resources_load: perPage,
-            },
-            {
-                preserveState: true,
-                replace: true,
-            },
-        );
-    };
+    const chips = ['Semua', ...typeOptions];
+
     return (
-        <div className="min-h-screen bg-gray-50 py-8">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                {/* Header */}
+        <section className="mx-auto max-w-7xl px-6 pt-12 pb-24 lg:px-10">
+            {/* Header */}
+            <div className="grid grid-cols-12 items-end gap-8">
                 <motion.div
-                    initial={{ opacity: 0, y: -20 }}
+                    initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mb-8"
+                    className="col-span-12 lg:col-span-8"
                 >
-                    <h1 className="mb-2 font-['Poppins'] text-3xl font-bold text-gray-900 sm:text-4xl">
-                        {text?.title}
+                    <div className="tracking-editorial inline-flex items-center gap-2 font-mono text-[11px] uppercase text-cobalt dark:text-cobalt-lt">
+                        <span className="h-1.5 w-1.5 rounded-full bg-cobalt dark:bg-cobalt-lt" />
+                        {t.eyebrow}
+                    </div>
+                    <h1
+                        className="mt-4 font-display text-4xl leading-[1.03] font-medium text-foreground lg:text-6xl"
+                        style={{ textWrap: 'balance' }}
+                    >
+                        {t.h1a}
+                        <em className="text-cobalt not-italic dark:text-cobalt-lt">
+                            {t.h1em}
+                        </em>
+                        {t.h1b}
                     </h1>
-                    <p className="text-gray-600">{text?.description}</p>
-
-                    {/* Active Filters Display */}
-                    {localFilters.categories.length > 0 ||
-                        localFilters.authors.length > 0 ||
-                        localFilters.publishers.length > 0 ||
-                        (localFilters.availability.length > 0 && (
-                            <div className="mt-4 flex flex-wrap gap-2">
-                                <span className="text-sm text-gray-600">
-                                    Active filters:
-                                </span>
-                                {localFilters.categories.map((cat) => (
-                                    <Badge
-                                        key={cat}
-                                        variant="secondary"
-                                        className="bg-primary/10 text-primary"
-                                    >
-                                        Category: {cat}
-                                        <button
-                                            onClick={() =>
-                                                toggleFilter('categories', cat)
-                                            }
-                                            className="ml-2 hover:text-red-600"
-                                        >
-                                            <X className="h-3 w-3" />
-                                        </button>
-                                    </Badge>
-                                ))}
-                                {localFilters.authors.map((author) => (
-                                    <Badge
-                                        key={author}
-                                        variant="secondary"
-                                        className="bg-secondary/10 text-secondary"
-                                    >
-                                        Author: {author}
-                                        <button
-                                            onClick={() =>
-                                                toggleFilter('authors', author)
-                                            }
-                                            className="ml-2 hover:text-red-600"
-                                        >
-                                            <X className="h-3 w-3" />
-                                        </button>
-                                    </Badge>
-                                ))}
-                                {localFilters.publishers.map((pub) => (
-                                    <Badge
-                                        key={pub}
-                                        variant="secondary"
-                                        className="bg-amber-100 text-amber-700"
-                                    >
-                                        Publisher: {pub}
-                                        <button
-                                            onClick={() =>
-                                                toggleFilter('publishers', pub)
-                                            }
-                                            className="ml-2 hover:text-red-600"
-                                        >
-                                            <X className="h-3 w-3" />
-                                        </button>
-                                    </Badge>
-                                ))}
-                            </div>
-                        ))}
+                    <p className="mt-4 max-w-2xl text-muted-foreground">
+                        {t.lead}
+                    </p>
                 </motion.div>
 
-                <div className="flex flex-col gap-6 lg:flex-row">
-                    {/* Sidebar Filters - Desktop */}
-                    <div className="hidden w-72 flex-shrink-0 lg:block">
-                        <div className="sticky top-24 rounded-xl bg-white p-6 shadow-sm">
-                            <h3 className="mb-6 flex items-center gap-2 font-['Poppins'] text-lg font-bold text-gray-900">
-                                <Filter className="h-5 w-5" />
-                                Filters
-                            </h3>
-
-                            {/* Category Filter */}
-                            <div className="mb-6">
-                                <Label className="mb-3 block font-semibold text-gray-900">
-                                    Category
-                                </Label>
-                                <div className="custom-scrollbar max-h-64 space-y-2 overflow-y-auto pr-2">
-                                    {categoriesOptions?.map((category) => (
-                                        <div
-                                            key={category.id}
-                                            className={`flex items-center justify-between rounded-lg p-2 transition-colors ${
-                                                localFilters.categories.includes(
-                                                    category.name,
-                                                )
-                                                    ? 'bg-primary/5'
-                                                    : 'hover:bg-gray-50'
-                                            }`}
-                                        >
-                                            <div className="flex flex-1 items-center">
-                                                <Checkbox
-                                                    id={`cat-${category.name}`}
-                                                    checked={localFilters.categories.includes(
-                                                        category.name,
-                                                    )}
-                                                    onCheckedChange={() =>
-                                                        toggleFilter(
-                                                            'categories',
-                                                            category.name,
-                                                        )
-                                                    }
-                                                />
-                                                <label
-                                                    htmlFor={`cat-${category.name}`}
-                                                    className="ml-3 flex flex-1 cursor-pointer items-center gap-2 text-sm text-gray-700"
-                                                >
-                                                    <span className="text-lg">
-                                                        {category.icon}
-                                                    </span>
-                                                    <span>{category.name}</span>
-                                                </label>
-                                            </div>
-                                            <Badge
-                                                variant="outline"
-                                                className="text-xs"
-                                            >
-                                                {category.count_of_books}
-                                            </Badge>
-                                        </div>
-                                    ))}
-                                </div>
+                <motion.div
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="col-span-12 lg:col-span-4"
+                >
+                    <div className="hairline flex items-center gap-4 rounded-xl2 border bg-card p-5 shadow-soft dark:bg-night-2">
+                        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-cobalt text-white">
+                            <Globe className="h-6 w-6" />
+                        </div>
+                        <div>
+                            <div className="font-display text-2xl tabnum text-foreground">
+                                {resources.length} {t.countSuffix}
                             </div>
-
-                            {/* Author Filter */}
-                            <div className="mb-6">
-                                <Label className="mb-3 block font-semibold text-gray-900">
-                                    Author
-                                </Label>
-                                <Select
-                                    value={localFilters.authors[0] || 'all'}
-                                    onValueChange={(value) => {
-                                        setLocalFilters({
-                                            ...localFilters,
-                                            authors:
-                                                value === 'all' ? [] : [value],
-                                        });
-                                    }}
-                                >
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="All Authors" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">
-                                            All Authors
-                                        </SelectItem>
-                                        {authorsOptions?.map((author) => (
-                                            <SelectItem
-                                                key={author.id}
-                                                value={author.name}
-                                            >
-                                                {author.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                            <div className="text-xs text-muted-foreground">
+                                {t.countNote}
                             </div>
-
-                            {/* Publisher Filter */}
-                            <div className="mb-6">
-                                <Label className="mb-3 block font-semibold text-gray-900">
-                                    Publisher
-                                </Label>
-                                <div className="custom-scrollbar max-h-48 space-y-2 overflow-y-auto pr-2">
-                                    {publishersOptions?.map((publisher) => (
-                                        <div
-                                            key={publisher.id}
-                                            className="flex items-center gap-2 p-2"
-                                        >
-                                            <Checkbox
-                                                id={`pub-${publisher.id}`}
-                                                checked={localFilters.publishers.includes(
-                                                    publisher.name,
-                                                )}
-                                                onCheckedChange={() =>
-                                                    toggleFilter(
-                                                        'publishers',
-                                                        publisher.name,
-                                                    )
-                                                }
-                                            />
-                                            <ImageWithFallback
-                                                src={publisher.logo}
-                                                alt={publisher.name}
-                                                className="h-10 w-10 rounded-full object-cover object-center"
-                                            />
-                                            <span
-                                                className="text-md font-poppins"
-                                                font-semibold
-                                            >
-                                                {publisher.name}
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Availability Filter */}
-                            <div className="mb-6">
-                                <Label className="mb-3 block font-semibold text-gray-900">
-                                    Availability
-                                </Label>
-                                <Select
-                                    value={localFilters.availability || ''}
-                                    onValueChange={(value) =>
-                                        setLocalFilters({
-                                            ...localFilters,
-                                            availability:
-                                                value === 'all' ? '' : value,
-                                        })
-                                    }
-                                >
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="All Availability" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">
-                                            All Books
-                                        </SelectItem>
-                                        {Object.entries(
-                                            statusOptions || {},
-                                        ).map(([key, value]) => (
-                                            <SelectItem key={key} value={key}>
-                                                {value}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <Button
-                                variant="outline"
-                                className="w-full"
-                                onClick={() =>
-                                    setLocalFilters({
-                                        categories: [],
-                                        authors: [],
-                                        publishers: [],
-                                        availability: '',
-                                    })
-                                }
-                            >
-                                Clear Filters
-                            </Button>
                         </div>
                     </div>
+                </motion.div>
+            </div>
 
-                    {/* Main Content */}
-                    <div className="flex-1">
-                        {/* Search and Sort Bar */}
-                        <div className="mb-6 rounded-xl bg-white p-4 shadow-sm">
-                            <div className="flex flex-col gap-4 sm:flex-row">
-                                <div className="relative flex-1">
-                                    <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                                    <Input
-                                        placeholder={text.placeholder}
-                                        value={searchInput}
-                                        onChange={(e) =>
-                                            setSearchInput(e.target.value)
-                                        }
-                                        className="pl-10"
-                                    />
-                                </div>
+            {/* Search */}
+            <div className="hairline mt-8 flex items-center gap-3 rounded-full border bg-card px-5 shadow-soft transition-colors focus-within:border-cobalt dark:bg-night-2">
+                <Search className="h-5 w-5 shrink-0 text-muted-foreground" />
+                <input
+                    type="search"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder={t.placeholder}
+                    className="flex-1 bg-transparent py-3.5 text-base text-foreground outline-none placeholder:text-muted-foreground"
+                />
+            </div>
 
-                                <div className="flex gap-2">
-                                    <Select
-                                        value={sortBy}
-                                        onValueChange={setSortBy}
-                                    >
-                                        <SelectTrigger className="w-full sm:w-40">
-                                            <SelectValue placeholder="Sort by" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="title">
-                                                Title
-                                            </SelectItem>
-                                            <SelectItem value="author">
-                                                Author
-                                            </SelectItem>
-                                            <SelectItem value="publisher">
-                                                Publisher
-                                            </SelectItem>
-                                            <SelectItem value="categories">
-                                                Category
-                                            </SelectItem>
-                                            <SelectItem value="rating">
-                                                Rating
-                                            </SelectItem>
-                                            <SelectItem value="publication_year">
-                                                Publication Year
-                                            </SelectItem>
-                                        </SelectContent>
-                                    </Select>
-
-                                    <Button
-                                        variant="outline"
-                                        className="lg:hidden"
-                                        onClick={() =>
-                                            setShowMobileFilters(
-                                                !showMobileFilters,
-                                            )
-                                        }
-                                    >
-                                        <Filter className="mr-2 h-4 w-4" />
-                                        Filters
-                                    </Button>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Mobile Filters */}
-                        <AnimatePresence>
-                            {showMobileFilters && (
-                                <motion.div
-                                    initial={{ height: 0, opacity: 0 }}
-                                    animate={{ height: 'auto', opacity: 1 }}
-                                    exit={{ height: 0, opacity: 0 }}
-                                    className="mb-6 overflow-hidden rounded-xl bg-white p-6 shadow-sm lg:hidden"
-                                >
-                                    <div className="mb-4 flex items-center justify-between">
-                                        <h3 className="font-semibold text-gray-900">
-                                            Filters
-                                        </h3>
-                                        <button
-                                            onClick={() =>
-                                                setShowMobileFilters(false)
-                                            }
-                                        >
-                                            <X className="h-5 w-5" />
-                                        </button>
-                                    </div>
-
-                                    <div className="space-y-6">
-                                        {/* Mobile Category Filter */}
-                                        <div>
-                                            <Label className="mb-3 block font-semibold">
-                                                Category
-                                            </Label>
-                                            <div className="max-h-48 space-y-2 overflow-y-auto">
-                                                {categoriesOptions?.map(
-                                                    (category) => (
-                                                        <div
-                                                            key={category.id}
-                                                            className="flex items-center justify-between"
-                                                        >
-                                                            <div className="flex flex-1 items-center">
-                                                                <Checkbox
-                                                                    id={`cat-mobile-${category.id}`}
-                                                                    checked={localFilters.categories.includes(
-                                                                        category.name,
-                                                                    )}
-                                                                    onCheckedChange={() =>
-                                                                        toggleFilter(
-                                                                            'categories',
-                                                                            category.name,
-                                                                        )
-                                                                    }
-                                                                />
-                                                                <label
-                                                                    htmlFor={`cat-mobile-${category.id}`}
-                                                                    className="ml-3 flex cursor-pointer items-center gap-2 text-sm text-gray-700"
-                                                                >
-                                                                    <ImageWithFallback
-                                                                        src={
-                                                                            category.icon
-                                                                        }
-                                                                        alt={
-                                                                            category.name
-                                                                        }
-                                                                        className="h-10 w-10 rounded-full object-cover object-center"
-                                                                    />
-                                                                    <span
-                                                                        className="text-md font-poppins"
-                                                                        font-semibold
-                                                                    >
-                                                                        {
-                                                                            category.name
-                                                                        }
-                                                                    </span>
-                                                                </label>
-                                                            </div>
-                                                            <Badge
-                                                                variant="outline"
-                                                                className="text-xs"
-                                                            >
-                                                                {
-                                                                    category.count_of_books
-                                                                }
-                                                            </Badge>
-                                                        </div>
-                                                    ),
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {/* Mobile Author Filter */}
-                                        <div>
-                                            <Label className="mb-3 block font-semibold">
-                                                Author
-                                            </Label>
-                                            <Select
-                                                value={
-                                                    localFilters.authors[0] ||
-                                                    'all'
-                                                }
-                                                onValueChange={(value) => {
-                                                    setLocalFilters((prev) => ({
-                                                        ...prev,
-                                                        authors:
-                                                            value === 'all'
-                                                                ? []
-                                                                : [value],
-                                                    }));
-                                                }}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="All Authors" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="all">
-                                                        All Authors
-                                                    </SelectItem>
-                                                    {authorsOptions?.map(
-                                                        (author) => (
-                                                            <SelectItem
-                                                                key={author.id}
-                                                                value={
-                                                                    author.name
-                                                                }
-                                                            >
-                                                                {author.name}
-                                                            </SelectItem>
-                                                        ),
-                                                    )}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-
-                                        {/* Mobile Availability Filter */}
-                                        <div>
-                                            <Label className="mb-3 block font-semibold">
-                                                Availability
-                                            </Label>
-                                            <Select
-                                                value={
-                                                    localFilters.availability
-                                                }
-                                                onValueChange={(value) =>
-                                                    setLocalFilters({
-                                                        ...localFilters,
-                                                        availability: value,
-                                                    })
-                                                }
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="All Books" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="all">
-                                                        All Books
-                                                    </SelectItem>
-                                                    {Object.entries(
-                                                        statusOptions || {},
-                                                    ).map(([key, value]) => (
-                                                        <SelectItem
-                                                            key={key}
-                                                            value={key}
-                                                        >
-                                                            {value}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    </div>
-                                </motion.div>
+            {/* Type chips */}
+            <div className="mt-6 -mx-1 flex items-center gap-2 overflow-x-auto px-1 pb-2">
+                {chips.map((c) => {
+                    const active =
+                        type === c || (c === 'Semua' && type === 'Semua');
+                    return (
+                        <button
+                            key={c}
+                            type="button"
+                            onClick={() => setType(c)}
+                            className={cn(
+                                'shrink-0 rounded-full border px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors',
+                                active
+                                    ? 'border-cobalt bg-cobalt text-white'
+                                    : 'hairline text-foreground hover:border-cobalt/40',
                             )}
-                        </AnimatePresence>
+                        >
+                            {c === 'Semua' ? t.all : c}
+                        </button>
+                    );
+                })}
+            </div>
 
-                        {/* Results Count */}
-                        <div className="mb-4">
-                            <p className="text-sm text-gray-600">
-                                Showing {start + 1}-{end} of{' '}
-                                {resources.meta.total} books
-                            </p>
-                        </div>
-
-                        {/* Book Grid */}
-                        {isLoading ? (
-                            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                                {[...Array(12)].map((_, i) => (
-                                    <div key={i} className="space-y-3">
-                                        <Skeleton className="aspect-[3/4] w-full rounded-xl" />
-                                        <Skeleton className="h-4 w-3/4" />
-                                        <Skeleton className="h-4 w-1/2" />
+            {/* Grid */}
+            {resources.length > 0 ? (
+                <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+                    {resources.map((r, i) => {
+                        const p = PALETTES[r.palette % PALETTES.length];
+                        const Icon = ICONS[r.icon] ?? BookOpen;
+                        return (
+                            <motion.a
+                                key={r.id}
+                                href={r.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true, margin: '-40px' }}
+                                transition={{ delay: (i % 3) * 0.05 }}
+                                className="hairline group flex flex-col overflow-hidden rounded-xl2 border bg-card shadow-soft transition-all duration-300 hover:-translate-y-1 hover:border-cobalt/30 hover:shadow-lift dark:bg-night-2"
+                            >
+                                {/* thumbnail */}
+                                <div
+                                    className="relative h-36 overflow-hidden"
+                                    style={{ background: p.bg, color: p.accent }}
+                                >
+                                    <div className="dot-grid absolute inset-0 opacity-30" />
+                                    <div className="absolute top-4 left-4">
+                                        <span
+                                            className="tracking-editorial inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase"
+                                            style={{
+                                                background: p.accent,
+                                                color: p.bg,
+                                            }}
+                                        >
+                                            <Icon className="h-3 w-3" />
+                                            {r.type}
+                                        </span>
                                     </div>
-                                ))}
-                            </div>
-                        ) : resources.data.length > 0 ? (
-                            <>
-                                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                                    {resources.data.map((book) => (
-                                        <BookCard key={book.id} {...book} />
-                                    ))}
+                                    <div
+                                        className="absolute top-4 right-4 grid h-8 w-8 place-items-center rounded-full border transition-transform group-hover:scale-110"
+                                        style={{
+                                            borderColor: p.accent + '66',
+                                            color: p.accent,
+                                        }}
+                                    >
+                                        <ExternalLink className="h-3.5 w-3.5" />
+                                    </div>
+                                    {r.tag && (
+                                        <div
+                                            className="absolute inset-x-5 bottom-4 font-quote text-2xl leading-tight italic"
+                                            style={{ color: p.accent }}
+                                        >
+                                            {r.tag}
+                                        </div>
+                                    )}
                                 </div>
 
-                                {/* Pagination */}
-                                {resources.meta.total >
-                                    resources.meta.per_page && (
-                                    <Pagination
-                                        page={resources.meta.current_page}
-                                        total={resources.meta.total}
-                                        perPage={resources.meta.per_page}
-                                        onPageChange={onPageChange}
-                                        onPerPageChange={onPerPageChange}
-                                    />
-                                )}
-                            </>
-                        ) : (
-                            <div className="py-16 text-center">
-                                <div className="mb-4 text-6xl">📚</div>
-                                <h3 className="mb-2 text-xl font-semibold text-gray-900">
-                                    No books found
-                                </h3>
-                                <p className="text-gray-600">
-                                    Try adjusting your search or filters
-                                </p>
-                            </div>
-                        )}
+                                {/* body */}
+                                <div className="flex flex-1 flex-col p-5">
+                                    <h3
+                                        className="font-display text-lg leading-snug font-semibold text-foreground transition-colors group-hover:text-cobalt dark:group-hover:text-cobalt-lt"
+                                        style={{ textWrap: 'balance' }}
+                                    >
+                                        {r.title}
+                                    </h3>
+                                    {r.description && (
+                                        <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+                                            {r.description}
+                                        </p>
+                                    )}
+                                    <div className="mt-auto flex items-center justify-between pt-4">
+                                        {r.format && (
+                                            <span className="tracking-editorial inline-flex items-center gap-1.5 font-mono text-[11px] uppercase text-muted-foreground">
+                                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                                                {r.format}
+                                            </span>
+                                        )}
+                                        <span className="tracking-editorial inline-flex items-center gap-1 text-[12px] font-semibold uppercase text-cobalt transition-all group-hover:gap-2 dark:text-cobalt-lt">
+                                            {t.open}
+                                            <ArrowUpRight className="h-3.5 w-3.5" />
+                                        </span>
+                                    </div>
+                                </div>
+                            </motion.a>
+                        );
+                    })}
+                </div>
+            ) : (
+                <div className="mt-12 flex flex-col items-center gap-3 py-16 text-center">
+                    <div className="grid h-20 w-20 place-items-center rounded-full bg-cobalt-50 text-cobalt dark:bg-cobalt/10 dark:text-cobalt-lt">
+                        <Compass className="h-9 w-9" />
+                    </div>
+                    <h3 className="font-display text-2xl font-semibold text-foreground">
+                        {t.empty}
+                    </h3>
+                    <p className="max-w-md text-muted-foreground">
+                        {t.emptyDesc}
+                    </p>
+                </div>
+            )}
+
+            {/* CTA */}
+            <div className="relative mt-16 overflow-hidden rounded-4xl bg-cobalt p-8 text-white lg:p-12">
+                <div className="dot-grid absolute inset-0 opacity-20" />
+                <div className="absolute -top-16 -right-16 h-72 w-72 rounded-full bg-white/10 blur-2xl" />
+                <div className="relative grid grid-cols-12 items-center gap-8">
+                    <div className="col-span-12 lg:col-span-8">
+                        <h3
+                            className="font-display text-3xl leading-tight font-semibold lg:text-4xl"
+                            style={{ textWrap: 'balance' }}
+                        >
+                            {t.ctaTitle}
+                        </h3>
+                        <p className="mt-3 max-w-xl leading-relaxed text-white/80">
+                            {t.ctaDesc}
+                        </p>
+                    </div>
+                    <div className="col-span-12 lg:col-span-4 lg:text-right">
+                        <Link
+                            href={route('about.contact')}
+                            className="btn-press inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-cobalt transition-colors hover:bg-paper"
+                        >
+                            {t.ctaButton}
+                            <ArrowRight className="h-4 w-4" />
+                        </Link>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
     );
-}
+};
+
+export default ResourcesPage;

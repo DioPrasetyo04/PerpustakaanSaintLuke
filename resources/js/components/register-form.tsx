@@ -6,9 +6,11 @@ import {
     FieldDescription,
     FieldGroup,
     FieldLabel,
+    FieldSeparator,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { ImageWithFallback } from './common/ImageWithFallback';
+import { GoogleButton } from './common/GoogleButton';
 import { Link } from '@inertiajs/react';
 import type { ChangeEvent, FormEvent } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -174,9 +176,19 @@ export function RegisterForm({
                                     Register
                                 </Button>
                             </Field>
+                            <FieldSeparator>
+                                {language === 'id'
+                                    ? 'atau daftar dengan'
+                                    : 'or sign up with'}
+                            </FieldSeparator>
+                            <GoogleButton />
                             <FieldDescription className="text-center">
-                                Don&apos;t have an account?{' '}
-                                <Link href="/login">Sign In</Link>
+                                {language === 'id'
+                                    ? 'Sudah punya akun? '
+                                    : 'Already have an account? '}
+                                <Link href="/login">
+                                    {language === 'id' ? 'Masuk' : 'Sign In'}
+                                </Link>
                             </FieldDescription>
                         </FieldGroup>
                     </form>

@@ -3,8 +3,16 @@
 namespace App\Http\Controllers;
 
 
+use App\Enums\BookStatus;
+use App\Models\Asset;
+use App\Models\Author;
+use App\Models\Book;
+use App\Models\Category;
+use App\Models\Publisher;
+use App\Models\Type;
 use App\Services\CatalogService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class CatalogController extends Controller
@@ -25,9 +33,13 @@ class CatalogController extends Controller
     {
         $filters = $request->all();
         $bookPage = (int) $request->get('books_page', 1);
-        $bookLoad = (int) $request->get('books_load', 10);
+        $bookLoad = (int) $request->get('books_load', 12);
 
         $booksPaginator = $this->catalogController->getBooksRaw($filters, $bookLoad, $bookPage);
+
+        $yearBounds = Book::query()
+            ->selectRaw('MIN(publication_year) as min_year, MAX(publication_year) as max_year')
+            ->first();
 
         return Inertia::render('catalog/BooksPage', [
             'books' => $this->catalogController->transformBooks($booksPaginator),
@@ -35,7 +47,47 @@ class CatalogController extends Controller
                 'page' => $bookPage,
                 'load' => $bookLoad,
                 'search' => $request->search ?? '',
-            ]
+            ],
+            'filters' => [
+                'search' => $request->input('search', ''),
+                'categories' => (array) $request->input('categories', []),
+                'authors' => (array) $request->input('authors', []),
+                'publishers' => (array) $request->input('publishers', []),
+                'types' => (array) $request->input('types', []),
+                'attachments' => (array) $request->input('attachments', []),
+                'availability' => $request->input('availability', ''),
+                'yearMin' => $request->input('yearMin'),
+                'yearMax' => $request->input('yearMax'),
+                'field' => $request->input('field', ''),
+                'direction' => $request->input('direction', ''),
+            ],
+            'options' => [
+                'statusOptions' => BookStatus::options(),
+                'categories' => Category::query()
+                    ->select(['id', 'name', 'icon'])
+                    ->withCount('books as count_of_books')
+                    ->orderBy('name')
+                    ->get()
+                    ->map(fn($c) => [
+                        'id' => $c->id,
+                        'name' => $c->name,
+                        'icon' => $c->icon ? Storage::url($c->icon) : null,
+                        'count_of_books' => $c->count_of_books,
+                    ]),
+                'authors' => Author::query()->select(['id', 'name'])->orderBy('name')->get(),
+                'publishers' => Publisher::query()->select(['id', 'name', 'logo'])->orderBy('name')->get()
+                    ->map(fn($p) => [
+                        'id' => $p->id,
+                        'name' => $p->name,
+                        'logo' => $p->logo ? Storage::url($p->logo) : null,
+                    ]),
+                'types' => Type::query()->select(['id', 'type', 'icon'])->orderBy('type')->get(),
+                'attachments' => Asset::query()->select('type')->distinct()->orderBy('type')->pluck('type'),
+                'yearBounds' => [
+                    'min' => (int) ($yearBounds->min_year ?? 2000),
+                    'max' => (int) ($yearBounds->max_year ?? (int) date('Y')),
+                ],
+            ],
         ]);
     }
 

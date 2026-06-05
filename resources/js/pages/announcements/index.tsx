@@ -10,15 +10,15 @@ import { useLanguage } from '@/hooks/useLanguage';
 const getCategoryColor = (category: string) => {
     switch (category) {
         case 'Events':
-            return 'bg-purple-100 text-purple-700';
+            return 'bg-brass-50 text-brass';
         case 'New Resources':
             return 'bg-green-100 text-green-700';
         case 'Updates':
             return 'bg-blue-100 text-blue-700';
         case 'Notice':
-            return 'bg-amber-100 text-amber-700';
+            return 'bg-brass-50 text-brass';
         default:
-            return 'bg-gray-100 text-gray-700';
+            return 'bg-muted text-foreground';
     }
 };
 
@@ -39,17 +39,17 @@ export default function AnnouncementsPage() {
 
     return (
         <>
-            <div className="min-h-screen bg-gray-50 py-8">
+            <div className="min-h-screen bg-background py-8">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="mb-8"
                     >
-                        <h1 className="mb-2 font-['Poppins'] text-3xl font-bold text-gray-900 sm:text-4xl">
+                        <h1 className="mb-2 font-display text-3xl font-bold text-foreground sm:text-4xl">
                             {t.title}
                         </h1>
-                        <p className="text-gray-600">{t.subtitle}</p>
+                        <p className="text-muted-foreground">{t.subtitle}</p>
                     </motion.div>
 
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -63,7 +63,7 @@ export default function AnnouncementsPage() {
                             >
                                 <Card className="flex h-full flex-col overflow-hidden transition-shadow hover:shadow-xl">
                                     {/* Image */}
-                                    <div className="relative aspect-video overflow-hidden bg-gray-100">
+                                    <div className="relative aspect-video overflow-hidden bg-muted">
                                         <ImageWithFallback
                                             src={announcement.imageUrl}
                                             alt={
@@ -86,18 +86,18 @@ export default function AnnouncementsPage() {
 
                                     {/* Content */}
                                     <div className="flex flex-1 flex-col p-6">
-                                        <div className="mb-3 flex items-center gap-2 text-sm text-gray-500">
+                                        <div className="mb-3 flex items-center gap-2 text-sm text-muted-foreground">
                                             <Calendar className="h-4 w-4" />
                                             <span>{announcement.date}</span>
                                         </div>
 
-                                        <h3 className="mb-3 font-['Poppins'] text-xl font-semibold text-gray-900">
+                                        <h3 className="mb-3 font-display text-xl font-semibold text-foreground">
                                             {language === 'id'
                                                 ? announcement.title.id
                                                 : announcement.title.en}
                                         </h3>
 
-                                        <p className="mb-4 line-clamp-3 flex-1 text-gray-600">
+                                        <p className="mb-4 line-clamp-3 flex-1 text-muted-foreground">
                                             {language === 'id'
                                                 ? announcement.description.id
                                                 : announcement.description.en}

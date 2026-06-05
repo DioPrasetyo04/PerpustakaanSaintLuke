@@ -20,7 +20,7 @@ const badgeVariants = cva(
         available:
         "border-transparent bg-green-600 text-white [a&]:hover:bg-green-600/90 focus-visible:ring-green-600/20",
         unavailale:
-        "border-transparent bg-gray-600 text-white [a&]:hover:bg-gray-600/90 focus-visible:ring-gray-600/20",
+        "border-transparent bg-muted text-muted-foreground [a&]:hover:bg-muted/90 focus-visible:ring-muted/20",
         loan:
         "border-transparent bg-blue-600 text-white [a&]:hover:bg-blue-600/90 focus-visible:ring-blue-600/20",
         lost:

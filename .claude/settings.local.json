@@ -35,7 +35,8 @@
       "PowerShell(php artisan shield:generate --page=LaporanBuku --panel=admin --option=permissions --no-interaction 2>&1; Write-Host \"EXIT: $LASTEXITCODE\")",
       "PowerShell(php artisan tinker --no-interaction --execute=\"echo app\\('Spatie\\\\Permission\\\\Models\\\\Permission'\\)::where\\('name', 'LIKE', '%LaporanBuku%'\\)->pluck\\('name'\\)->implode\\(', '\\);\" 2>&1)",
       "PowerShell(php artisan tinker --no-interaction --execute=\"echo app\\('Spatie\\\\Permission\\\\Models\\\\Permission'\\)::where\\('name', 'View:LaporanKunjungan'\\)->first\\(\\)?->roles->pluck\\('name'\\)->implode\\(', '\\);\" 2>&1)",
-      "PowerShell(php artisan tinker --no-interaction 2>&1)"
+      "PowerShell(php artisan tinker --no-interaction 2>&1)",
+      "Bash(sort -t: -k2 -rn)"
     ]
   }
 }

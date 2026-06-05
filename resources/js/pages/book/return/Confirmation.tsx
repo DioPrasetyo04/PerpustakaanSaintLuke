@@ -116,7 +116,7 @@ export default function Confirmation() {
         book?.authors?.map((a: any) => a.name).join(', ') || 'Unknown Author';
 
     return (
-        <div className="min-h-screen bg-gray-50 py-8">
+        <div className="min-h-screen bg-background py-8">
             <div className="container mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
                 <Link href={`/dashboard/loans`}>
                     <Button variant="ghost" className="mb-6 gap-2">
@@ -130,15 +130,15 @@ export default function Confirmation() {
                     animate={{ opacity: 1, y: 0 }}
                 >
                     <Card className="p-8">
-                        <h1 className="mb-6 font-['Poppins'] text-2xl font-bold text-gray-900">
+                        <h1 className="mb-6 font-display text-2xl font-bold text-foreground">
                             Return Book
                         </h1>
 
                         {/* Book Info */}
                         <div className="mb-6">
                             <Label className="mb-3 block">Book to Return</Label>
-                            <div className="flex items-center gap-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
-                                <div className="h-20 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                            <div className="flex items-center gap-4 rounded-lg border border-border bg-background p-4">
+                                <div className="h-20 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-muted">
                                     <ImageWithFallback
                                         src={book?.cover}
                                         alt={book?.title}
@@ -146,13 +146,13 @@ export default function Confirmation() {
                                     />
                                 </div>
                                 <div className="flex-1">
-                                    <h3 className="font-semibold text-gray-900">
+                                    <h3 className="font-semibold text-foreground">
                                         {book?.title}
                                     </h3>
-                                    <p className="text-sm text-gray-600">
+                                    <p className="text-sm text-muted-foreground">
                                         {authorNames}
                                     </p>
-                                    <p className="mt-1 text-xs text-gray-500">
+                                    <p className="mt-1 text-xs text-muted-foreground">
                                         Due Date: {formattedDate(loan?.due_date, language)}
                                     </p>
                                 </div>
@@ -160,29 +160,29 @@ export default function Confirmation() {
                         </div>
 
                         {/* Return Summary */}
-                        <div className="mb-6 rounded-lg border border-blue-100 bg-blue-50 p-4">
-                            <h4 className="mb-3 font-medium text-gray-900">
+                        <div className="mb-6 rounded-lg border border-cobalt-50 bg-cobalt-50 p-4">
+                            <h4 className="mb-3 font-medium text-foreground">
                                 Return Summary
                             </h4>
                             <div className="space-y-2 text-sm">
                                 <div className="flex justify-between">
-                                    <span className="text-gray-600">
+                                    <span className="text-muted-foreground">
                                         Borrow Date:
                                     </span>
-                                    <span className="text-gray-900">
+                                    <span className="text-foreground">
                                         {formattedDate(loan?.loan_date, language)}
                                     </span>
                                 </div>
                                 <div className="flex justify-between">
-                                    <span className="text-gray-600">
+                                    <span className="text-muted-foreground">
                                         Due Date:
                                     </span>
-                                    <span className="text-gray-900">
+                                    <span className="text-foreground">
                                         {formattedDate(loan?.due_date, language)}
                                     </span>
                                 </div>
                                 <div className="flex justify-between">
-                                    <span className="text-gray-600">
+                                    <span className="text-muted-foreground">
                                         Status:
                                     </span>
                                     <span
@@ -191,8 +191,8 @@ export default function Confirmation() {
                                         {daysLeftText}
                                     </span>
                                 </div>
-                                <div className="flex justify-between border-t border-blue-200 pt-2">
-                                    <span className="font-medium text-gray-600">
+                                <div className="flex justify-between border-t border-cobalt-lt pt-2">
+                                    <span className="font-medium text-muted-foreground">
                                         Late Fee:
                                     </span>
                                     <span
@@ -209,7 +209,7 @@ export default function Confirmation() {
                         </div>
 
                         {/* Validation Checkbox */}
-                        <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4">
+                        <div className="mb-6 rounded-lg border border-brass-lt bg-brass-50 p-4">
                             <div className="flex items-start gap-3">
                                 <Checkbox
                                     id="validate"
@@ -222,11 +222,11 @@ export default function Confirmation() {
                                 <div className="flex-1">
                                     <label
                                         htmlFor="validate"
-                                        className="mb-1 block cursor-pointer font-medium text-gray-900"
+                                        className="mb-1 block cursor-pointer font-medium text-foreground"
                                     >
                                         Validate Return Data
                                     </label>
-                                    <p className="text-sm text-gray-600">
+                                    <p className="text-sm text-muted-foreground">
                                         I confirm that the book is in good
                                         condition and all borrowed materials are
                                         being returned.
@@ -279,11 +279,11 @@ export default function Confirmation() {
                                 className="fixed inset-0 z-50 flex items-center justify-center p-4"
                             >
                                 <Card className="w-full max-w-md p-6">
-                                    <h2 className="mb-4 font-['Poppins'] text-xl font-bold text-gray-900">
+                                    <h2 className="mb-4 font-display text-xl font-bold text-foreground">
                                         Rate Your Experience
                                     </h2>
 
-                                    <p className="mb-6 text-gray-600">
+                                    <p className="mb-6 text-muted-foreground">
                                         How would you rate "{book?.title}"?
                                     </p>
 
@@ -314,14 +314,14 @@ export default function Confirmation() {
                                                             (hoverRating ||
                                                                 rating)
                                                                 ? 'fill-yellow-400 text-yellow-400'
-                                                                : 'text-gray-300'
+                                                                : 'text-muted-foreground'
                                                         }`}
                                                     />
                                                 </button>
                                             ))}
                                         </div>
                                         {rating > 0 && (
-                                            <p className="text-center text-sm text-gray-600">
+                                            <p className="text-center text-sm text-muted-foreground">
                                                 {rating}{' '}
                                                 {rating === 1
                                                     ? 'star'

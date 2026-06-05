@@ -33,6 +33,16 @@ class HomeServices
         return $this->homeServices->getAllInformationsHomePage($filters, $perPage, $page);
     }
 
+    public function getLiveActivities(int $limit = 16): array
+    {
+        return $this->homeServices->getLiveLoanActivities($limit);
+    }
+
+    public function getFeaturedPublishers(int $limit = 12): array
+    {
+        return $this->homeServices->getFeaturedPublishers($limit);
+    }
+
     public function getAllCountOfBooks(): int
     {
         return $this->homeServices->getCountOfAllBooks();

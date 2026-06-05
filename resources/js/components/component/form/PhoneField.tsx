@@ -32,7 +32,7 @@ export default function PhoneField({
                 onChange={(val) => onChange(val)}
                 disabled={disabled}
                 containerClass="w-full"
-                buttonClass="!border !border-gray-300"
+                buttonClass="!border !border-input"
                 dropdownClass="!text-black"
                 inputClass="!w-full !h-10 !text-sm !rounded-md !border"
             />

@@ -18,7 +18,7 @@ const buildPages = (page: number, totalPages: number): (number | '…')[] => {
 };
 
 const arrowClass =
-    'flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 transition-all duration-300 hover:border-brand hover:text-brand disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:bg-white/5 dark:text-gray-300 dark:hover:border-brand dark:hover:text-brand';
+    'flex h-9 w-9 items-center justify-center rounded-full border border-border bg-white text-muted-foreground transition-all duration-300 hover:border-brand hover:text-brand disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:bg-white/5 dark:text-muted-foreground dark:hover:border-brand dark:hover:text-brand';
 
 const PaginationButtons = ({
     page,
@@ -46,7 +46,7 @@ const PaginationButtons = ({
                 p === '…' ? (
                     <span
                         key={`ellipsis-${i}`}
-                        className="px-1.5 text-sm text-gray-400 dark:text-gray-500"
+                        className="px-1.5 text-sm text-muted-foreground dark:text-muted-foreground"
                     >
                         …
                     </span>
@@ -60,7 +60,7 @@ const PaginationButtons = ({
                             'flex h-9 min-w-9 items-center justify-center rounded-full px-3 text-sm font-medium transition-all duration-300',
                             page === p
                                 ? 'bg-brand text-brand-foreground shadow-sm'
-                                : 'border border-gray-200 bg-white text-gray-600 hover:border-brand hover:text-brand dark:border-white/10 dark:bg-white/5 dark:text-gray-300 dark:hover:border-brand dark:hover:text-brand',
+                                : 'border border-border bg-white text-muted-foreground hover:border-brand hover:text-brand dark:border-white/10 dark:bg-white/5 dark:text-muted-foreground dark:hover:border-brand dark:hover:text-brand',
                         )}
                     >
                         {p}

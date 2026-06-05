@@ -115,18 +115,21 @@ export default function Dashboard() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 py-4 sm:py-6 lg:py-8">
+        <div className="min-h-screen bg-background py-4 sm:py-6 lg:py-8">
             <div className="container mx-auto px-3 sm:px-4 lg:px-8">
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="mb-4 sm:mb-6 lg:mb-8"
                 >
-                    <h1 className="mb-1 font-['Poppins'] text-xl font-bold text-gray-900 sm:mb-2 sm:text-2xl lg:text-4xl">
-                        Welcome back, {auth.user.name}! 👋
+                    <div className="tracking-editorial mb-2 font-mono text-[10px] uppercase text-cobalt dark:text-cobalt-lt">
+                        Dashboard Anggota
+                    </div>
+                    <h1 className="mb-1 font-display text-xl font-bold text-foreground sm:mb-2 sm:text-2xl lg:text-4xl">
+                        Selamat datang, {auth.user.name}!
                     </h1>
-                    <p className="text-xs text-gray-600 sm:text-sm lg:text-base">
-                        Here's what's happening with your library account
+                    <p className="text-xs text-muted-foreground sm:text-sm lg:text-base">
+                        Ringkasan aktivitas akun perpustakaan Anda.
                     </p>
                 </motion.div>
 
@@ -140,7 +143,7 @@ export default function Dashboard() {
                             bg: 'bg-primary/10',
                             label: 'Currently Borrowed',
                             value: stats.currentlyBorrowed,
-                            color: 'text-gray-900',
+                            color: 'text-foreground',
                         },
                         {
                             icon: (
@@ -149,7 +152,7 @@ export default function Dashboard() {
                             bg: 'bg-green-100',
                             label: 'Books Read',
                             value: stats.booksRead,
-                            color: 'text-gray-900',
+                            color: 'text-foreground',
                         },
                         {
                             icon: (
@@ -158,24 +161,24 @@ export default function Dashboard() {
                             bg: 'bg-accent/10',
                             label: 'Due Soon (3 days)',
                             value: stats.dueSoon,
-                            color: 'text-gray-900',
+                            color: 'text-foreground',
                         },
                         {
                             icon: (
                                 <AlertCircle
-                                    className={`h-3.5 w-3.5 sm:h-4 sm:w-4 lg:h-6 lg:w-6 ${stats.fineCount > 0 ? 'text-red-600' : 'text-gray-400'}`}
+                                    className={`h-3.5 w-3.5 sm:h-4 sm:w-4 lg:h-6 lg:w-6 ${stats.fineCount > 0 ? 'text-red-600' : 'text-muted-foreground'}`}
                                 />
                             ),
                             bg:
                                 stats.fineCount > 0
                                     ? 'bg-red-100'
-                                    : 'bg-gray-100',
+                                    : 'bg-muted',
                             label: 'Total Fines',
                             value: `Rp ${stats.totalFines.toLocaleString('id-ID')}`,
                             color:
                                 stats.fineCount > 0
                                     ? 'text-red-600'
-                                    : 'text-gray-900',
+                                    : 'text-foreground',
                         },
                     ].map((s, i) => (
                         <motion.div
@@ -192,7 +195,7 @@ export default function Dashboard() {
                                         {s.icon}
                                     </div>
                                     <div>
-                                        <p className="text-[10px] leading-tight text-gray-600 sm:text-xs lg:text-sm">
+                                        <p className="text-[10px] leading-tight text-muted-foreground sm:text-xs lg:text-sm">
                                             {s.label}
                                         </p>
                                         <p
@@ -218,7 +221,7 @@ export default function Dashboard() {
                                 transition={{ delay: 0.5 }}
                             >
                                 <Card className="p-3 sm:p-4 lg:p-6">
-                                    <h3 className="mb-3 text-sm font-semibold text-gray-900 sm:text-base lg:text-lg">
+                                    <h3 className="mb-3 text-sm font-semibold text-foreground sm:text-base lg:text-lg">
                                         User Borrowing (Past Week)
                                     </h3>
                                     <ResponsiveContainer
@@ -253,7 +256,7 @@ export default function Dashboard() {
                                 transition={{ delay: 0.6 }}
                             >
                                 <Card className="p-3 sm:p-4 lg:p-6">
-                                    <h3 className="mb-3 text-sm font-semibold text-gray-900 sm:text-base lg:text-lg">
+                                    <h3 className="mb-3 text-sm font-semibold text-foreground sm:text-base lg:text-lg">
                                         Fine Payments IDR (Past Week)
                                     </h3>
                                     <ResponsiveContainer
@@ -292,7 +295,7 @@ export default function Dashboard() {
                             transition={{ delay: 0.7 }}
                         >
                             <Card className="p-3 sm:p-4 lg:p-6">
-                                <h3 className="mb-3 text-sm font-semibold text-gray-900 sm:text-base lg:text-lg">
+                                <h3 className="mb-3 text-sm font-semibold text-foreground sm:text-base lg:text-lg">
                                     Book Returns (Past Week)
                                 </h3>
                                 <ResponsiveContainer width="100%" height={200}>
@@ -326,7 +329,7 @@ export default function Dashboard() {
                             transition={{ delay: 0.8 }}
                         >
                             <div className="mb-3 flex items-center justify-between lg:mb-4">
-                                <h2 className="text-base font-semibold text-gray-900 sm:text-lg lg:text-xl">
+                                <h2 className="text-base font-semibold text-foreground sm:text-lg lg:text-xl">
                                     {activeTab === 'borrowed'
                                         ? 'Currently Borrowed'
                                         : 'Recently Returned'}
@@ -369,7 +372,7 @@ export default function Dashboard() {
                                                 >
                                                     <Card className="p-2.5 transition-shadow hover:shadow-lg sm:p-3 lg:p-5">
                                                         <div className="flex gap-2 sm:gap-3 lg:gap-4">
-                                                            <div className="h-16 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 sm:h-24 sm:w-16 lg:h-28 lg:w-20">
+                                                            <div className="h-16 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-muted sm:h-24 sm:w-16 lg:h-28 lg:w-20">
                                                                 <ImageWithFallback
                                                                     src={
                                                                         loan
@@ -386,14 +389,14 @@ export default function Dashboard() {
                                                                 />
                                                             </div>
                                                             <div className="min-w-0 flex-1">
-                                                                <h3 className="mb-0.5 truncate text-xs font-semibold text-gray-900 sm:mb-1 sm:text-sm lg:text-base">
+                                                                <h3 className="mb-0.5 truncate text-xs font-semibold text-foreground sm:mb-1 sm:text-sm lg:text-base">
                                                                     {
                                                                         loan
                                                                             .book
                                                                             .title
                                                                     }
                                                                 </h3>
-                                                                <p className="mb-1 truncate text-[10px] text-gray-600 sm:mb-2 sm:text-xs lg:text-sm">
+                                                                <p className="mb-1 truncate text-[10px] text-muted-foreground sm:mb-2 sm:text-xs lg:text-sm">
                                                                     {loan.book.authors
                                                                         .map(
                                                                             (
@@ -407,8 +410,8 @@ export default function Dashboard() {
                                                                 </p>
                                                                 <div className="flex flex-wrap items-center gap-1.5 text-[10px] sm:gap-2 sm:text-xs lg:gap-3">
                                                                     <div className="flex items-center gap-0.5 sm:gap-1">
-                                                                        <Calendar className="h-2.5 w-2.5 text-gray-400 sm:h-3 sm:w-3 lg:h-4 lg:w-4" />
-                                                                        <span className="text-gray-600">
+                                                                        <Calendar className="h-2.5 w-2.5 text-muted-foreground sm:h-3 sm:w-3 lg:h-4 lg:w-4" />
+                                                                        <span className="text-muted-foreground">
                                                                             Due:{' '}
                                                                             {
                                                                                 loan.due_date
@@ -470,7 +473,7 @@ export default function Dashboard() {
                                             );
                                         })
                                     ) : (
-                                        <div className="flex h-48 flex-col items-center justify-center gap-2 text-gray-400">
+                                        <div className="flex h-48 flex-col items-center justify-center gap-2 text-muted-foreground">
                                             <BookOpen className="h-10 w-10 opacity-30" />
                                             <p className="text-sm">
                                                 No active loans found
@@ -489,7 +492,7 @@ export default function Dashboard() {
                                         >
                                             <Card className="p-2.5 transition-shadow hover:shadow-lg sm:p-3 lg:p-5">
                                                 <div className="flex gap-2 sm:gap-3 lg:gap-4">
-                                                    <div className="h-16 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 sm:h-24 sm:w-16 lg:h-28 lg:w-20">
+                                                    <div className="h-16 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-muted sm:h-24 sm:w-16 lg:h-28 lg:w-20">
                                                         <ImageWithFallback
                                                             src={
                                                                 ret.book
@@ -501,10 +504,10 @@ export default function Dashboard() {
                                                         />
                                                     </div>
                                                     <div className="min-w-0 flex-1">
-                                                        <h3 className="mb-0.5 truncate text-xs font-semibold text-gray-900 sm:mb-1 sm:text-sm lg:text-base">
+                                                        <h3 className="mb-0.5 truncate text-xs font-semibold text-foreground sm:mb-1 sm:text-sm lg:text-base">
                                                             {ret.book.title}
                                                         </h3>
-                                                        <p className="mb-1 truncate text-[10px] text-gray-600 sm:mb-2 sm:text-xs lg:text-sm">
+                                                        <p className="mb-1 truncate text-[10px] text-muted-foreground sm:mb-2 sm:text-xs lg:text-sm">
                                                             {ret.book.authors
                                                                 .map(
                                                                     (a) =>
@@ -514,8 +517,8 @@ export default function Dashboard() {
                                                         </p>
                                                         <div className="flex flex-wrap items-center gap-1.5 text-[10px] sm:gap-2 sm:text-xs lg:gap-3">
                                                             <div className="flex items-center gap-0.5 sm:gap-1">
-                                                                <Calendar className="h-2.5 w-2.5 text-gray-400 sm:h-3 sm:w-3 lg:h-4 lg:w-4" />
-                                                                <span className="text-gray-600">
+                                                                <Calendar className="h-2.5 w-2.5 text-muted-foreground sm:h-3 sm:w-3 lg:h-4 lg:w-4" />
+                                                                <span className="text-muted-foreground">
                                                                     Returned:{' '}
                                                                     {
                                                                         ret.return_date
@@ -568,7 +571,7 @@ export default function Dashboard() {
                                         </motion.div>
                                     ))
                                 ) : (
-                                    <div className="flex h-48 flex-col items-center justify-center gap-2 text-gray-400">
+                                    <div className="flex h-48 flex-col items-center justify-center gap-2 text-muted-foreground">
                                         <RotateCcw className="h-10 w-10 opacity-30" />
                                         <p className="text-sm">
                                             No return history found
@@ -598,7 +601,7 @@ export default function Dashboard() {
                             transition={{ delay: 0.7 }}
                         >
                             <Card className="p-3 sm:p-4 lg:p-6">
-                                <h3 className="mb-2 text-sm font-semibold text-gray-900 sm:mb-3 sm:text-base lg:mb-4 lg:text-lg">
+                                <h3 className="mb-2 text-sm font-semibold text-foreground sm:mb-3 sm:text-base lg:mb-4 lg:text-lg">
                                     Quick Actions
                                 </h3>
                                 <div className="space-y-1.5 sm:space-y-2">
@@ -650,13 +653,13 @@ export default function Dashboard() {
                             transition={{ delay: 0.8 }}
                         >
                             <Card className="p-3 sm:p-4 lg:p-6">
-                                <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-gray-900 sm:mb-4 sm:text-base lg:mb-6 lg:text-lg">
+                                <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground sm:mb-4 sm:text-base lg:mb-6 lg:text-lg">
                                     <Filter className="h-3.5 w-3.5 sm:h-4 sm:w-4 lg:h-5 lg:w-5" />{' '}
                                     Filter Options
                                 </h3>
                                 <div className="space-y-3 sm:space-y-4 lg:space-y-5">
                                     <div>
-                                        <label className="mb-1.5 block text-xs font-semibold text-gray-800 sm:mb-2 sm:text-sm">
+                                        <label className="mb-1.5 block text-xs font-semibold text-foreground sm:mb-2 sm:text-sm">
                                             Sort By
                                         </label>
                                         <select
@@ -667,7 +670,7 @@ export default function Dashboard() {
                                                     sortBy: e.target.value,
                                                 }))
                                             }
-                                            className="w-full rounded-lg border border-gray-200 bg-white p-2 text-xs focus:ring-2 focus:ring-primary focus:outline-none sm:p-2.5 sm:text-sm"
+                                            className="w-full rounded-lg border border-border bg-background p-2 text-xs focus:ring-2 focus:ring-primary focus:outline-none sm:p-2.5 sm:text-sm"
                                         >
                                             <option>Due Date</option>
                                             <option>Title</option>
@@ -677,7 +680,7 @@ export default function Dashboard() {
                                     </div>
                                     {activeTab === 'borrowed' && (
                                         <div>
-                                            <label className="mb-1.5 block text-xs font-semibold text-gray-800 sm:mb-2 sm:text-sm">
+                                            <label className="mb-1.5 block text-xs font-semibold text-foreground sm:mb-2 sm:text-sm">
                                                 Status
                                             </label>
                                             <select
@@ -688,7 +691,7 @@ export default function Dashboard() {
                                                         status: e.target.value,
                                                     }))
                                                 }
-                                                className="w-full rounded-lg border border-gray-200 bg-white p-2 text-xs focus:ring-2 focus:ring-primary focus:outline-none sm:p-2.5 sm:text-sm"
+                                                className="w-full rounded-lg border border-border bg-background p-2 text-xs focus:ring-2 focus:ring-primary focus:outline-none sm:p-2.5 sm:text-sm"
                                             >
                                                 <option>All Status</option>
                                                 <option>Due Soon</option>
@@ -698,7 +701,7 @@ export default function Dashboard() {
                                         </div>
                                     )}
                                     <div>
-                                        <label className="mb-1.5 block text-xs font-semibold text-gray-800 sm:mb-2 sm:text-sm">
+                                        <label className="mb-1.5 block text-xs font-semibold text-foreground sm:mb-2 sm:text-sm">
                                             Category
                                         </label>
                                         <select
@@ -709,7 +712,7 @@ export default function Dashboard() {
                                                     category: e.target.value,
                                                 }))
                                             }
-                                            className="w-full rounded-lg border border-gray-200 bg-white p-2 text-xs focus:ring-2 focus:ring-primary focus:outline-none sm:p-2.5 sm:text-sm"
+                                            className="w-full rounded-lg border border-border bg-background p-2 text-xs focus:ring-2 focus:ring-primary focus:outline-none sm:p-2.5 sm:text-sm"
                                         >
                                             <option>All Categories</option>
                                             {categories.map((c) => (
@@ -718,7 +721,7 @@ export default function Dashboard() {
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="mb-1.5 block text-xs font-semibold text-gray-800 sm:mb-2 sm:text-sm">
+                                        <label className="mb-1.5 block text-xs font-semibold text-foreground sm:mb-2 sm:text-sm">
                                             Date Range
                                         </label>
                                         <select
@@ -729,7 +732,7 @@ export default function Dashboard() {
                                                     dateRange: e.target.value,
                                                 }))
                                             }
-                                            className="w-full rounded-lg border border-gray-200 bg-white p-2 text-xs focus:ring-2 focus:ring-primary focus:outline-none sm:p-2.5 sm:text-sm"
+                                            className="w-full rounded-lg border border-border bg-background p-2 text-xs focus:ring-2 focus:ring-primary focus:outline-none sm:p-2.5 sm:text-sm"
                                         >
                                             <option>All Time</option>
                                             <option>Last 7 Days</option>
@@ -737,7 +740,7 @@ export default function Dashboard() {
                                             <option>Last 3 Months</option>
                                         </select>
                                     </div>
-                                    <div className="space-y-1.5 border-t border-gray-200 pt-3 sm:space-y-2">
+                                    <div className="space-y-1.5 border-t border-border pt-3 sm:space-y-2">
                                         <Button
                                             onClick={handleSubmitFilters}
                                             className="w-full bg-primary py-2 text-xs hover:bg-primary/90 sm:py-3 sm:text-sm"

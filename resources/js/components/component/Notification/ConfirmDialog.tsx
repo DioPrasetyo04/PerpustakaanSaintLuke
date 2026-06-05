@@ -38,17 +38,17 @@ export default function ConfirmDialog({
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0.9, opacity: 0 }}
                         onClick={(e) => e.stopPropagation()}
-                        className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-2xl"
+                        className="w-full max-w-md rounded-2xl bg-card p-8 text-center shadow-2xl"
                     >
                         <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-red-100">
                             <AlertTriangle className="h-12 w-12 text-red-600" />
                         </div>
 
-                        <h3 className="mb-2 text-2xl font-bold text-gray-900">
+                        <h3 className="mb-2 text-2xl font-bold text-foreground">
                             {title}
                         </h3>
 
-                        <p className="mb-6 text-gray-600">{message}</p>
+                        <p className="mb-6 text-muted-foreground">{message}</p>
 
                         <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
                             <Button

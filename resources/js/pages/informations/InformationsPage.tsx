@@ -10,7 +10,7 @@ import type { InformationPageType } from '@/types/InformationPage/Information';
 import { Link, usePage } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Calendar } from 'lucide-react';
-import React from 'react';
+import { CatalogHeader } from '@/components/component/Catalog/CatalogShell';
 
 function InformationsPage() {
     const { language } = useLanguage();
@@ -22,20 +22,22 @@ function InformationsPage() {
         informationsData.meta?.per_page ?? 10,
     );
     return (
-        <div className="min-h-screen bg-gray-50 py-8">
+        <div className="min-h-screen bg-background py-8">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mb-8"
-                >
-                    <h1 className="mb-2 font-['Poppins'] text-3xl font-bold text-gray-900 sm:text-4xl">
-                        Library Announcements
-                    </h1>
-                    <p className="text-gray-600">
-                        Stay updated with the latest news and events
-                    </p>
-                </motion.div>
+                <CatalogHeader
+                    eyebrow={language === 'id' ? 'Berita' : 'News'}
+                    title={
+                        language === 'id'
+                            ? 'Kabar & Pengumuman Perpustakaan'
+                            : 'Library News & Announcements'
+                    }
+                    count={informationsData.meta?.total}
+                    subtitle={
+                        language === 'id'
+                            ? 'Ikuti kabar koleksi baru, acara klub baca, dan pengumuman terkini.'
+                            : 'Stay updated with the latest news, book club events, and announcements.'
+                    }
+                />
 
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {informationsData.data.map((information, index) => (
@@ -48,7 +50,7 @@ function InformationsPage() {
                         >
                             <Card className="flex h-full flex-col overflow-hidden transition-shadow hover:shadow-xl">
                                 {/* Image */}
-                                <div className="relative aspect-video overflow-hidden bg-gray-100">
+                                <div className="relative aspect-video overflow-hidden bg-muted">
                                     <ImageWithFallback
                                         src={information.image}
                                         alt={information.name}
@@ -64,7 +66,7 @@ function InformationsPage() {
                                                 alt={information.category.name}
                                                 className="h-8 w-8 object-cover object-center"
                                             />
-                                            <Badge className="bg-purple-200 text-purple-700">
+                                            <Badge className="bg-brass-lt text-brass">
                                                 {information.category.name}
                                             </Badge>
                                         </div>
@@ -73,7 +75,7 @@ function InformationsPage() {
 
                                 {/* Content */}
                                 <div className="flex flex-1 flex-col p-6">
-                                    <div className="mb-3 flex items-center gap-2 text-sm text-gray-500">
+                                    <div className="mb-3 flex items-center gap-2 text-sm text-muted-foreground">
                                         <Calendar className="h-4 w-4" />
                                         <span>
                                             {formattedDate(
@@ -83,11 +85,11 @@ function InformationsPage() {
                                         </span>
                                     </div>
 
-                                    <h3 className="mb-3 font-['Poppins'] text-xl font-semibold text-gray-900">
+                                    <h3 className="mb-3 font-display text-xl font-semibold text-foreground">
                                         {information.name}
                                     </h3>
 
-                                    <p className="mb-4 line-clamp-3 flex-1 text-gray-600">
+                                    <p className="mb-4 line-clamp-3 flex-1 text-muted-foreground">
                                         {information.description}
                                     </p>
 

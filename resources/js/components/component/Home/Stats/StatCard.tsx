@@ -73,7 +73,7 @@ function StatCard({
                 )}
             </div>
 
-            <div className="font-poppins text-4xl font-extrabold tracking-tight text-foreground tabular-nums">
+            <div className="font-display text-4xl font-extrabold tracking-tight text-foreground tabular-nums">
                 {count}
                 {suffix}
             </div>

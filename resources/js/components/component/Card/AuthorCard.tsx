@@ -40,10 +40,10 @@ export const AuthorsCard = ({
                         alt={name}
                         className="mx-auto mb-4 h-24 w-24 rounded-full border-4 border-primary/20 object-cover"
                     />
-                    <h3 className="mb-1 font-['Poppins'] text-lg font-bold text-gray-900">
+                    <h3 className="mb-1 font-display text-lg font-bold text-foreground">
                         {name}
                     </h3>
-                    <p className="mb-2 text-sm text-gray-600">{speciality}</p>
+                    <p className="mb-2 text-sm text-muted-foreground">{speciality}</p>
                     <Badge
                         variant="outline"
                         className="border-primary text-primary"

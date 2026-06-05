@@ -45,13 +45,13 @@ export function ProfilePage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 py-8">
+        <div className="min-h-screen bg-background py-8">
             <div className="container mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                 >
-                    <h1 className="mb-8 font-['Poppins'] text-3xl font-bold text-gray-900">
+                    <h1 className="mb-8 font-display text-3xl font-bold text-foreground">
                         My Profile
                     </h1>
 
@@ -78,18 +78,18 @@ export function ProfilePage() {
                                     )}
                                 </motion.div>
 
-                                <h2 className="mb-1 text-xl font-semibold text-gray-900">
+                                <h2 className="mb-1 text-xl font-semibold text-foreground">
                                     {profileData.name}
                                 </h2>
-                                <p className="mb-4 text-gray-600">
+                                <p className="mb-4 text-muted-foreground">
                                     Library Member
                                 </p>
 
-                                <div className="rounded-lg bg-gray-50 p-3 text-sm">
-                                    <p className="text-gray-500">
+                                <div className="rounded-lg bg-background p-3 text-sm">
+                                    <p className="text-muted-foreground">
                                         Member Since
                                     </p>
-                                    <p className="font-medium text-gray-900">
+                                    <p className="font-medium text-foreground">
                                         {new Date(
                                             profileData.memberSince,
                                         ).toLocaleDateString('en-US', {
@@ -104,7 +104,7 @@ export function ProfilePage() {
                         {/* Profile Information */}
                         <Card className="p-6 lg:col-span-2">
                             <div className="mb-6 flex items-center justify-between">
-                                <h3 className="text-xl font-semibold text-gray-900">
+                                <h3 className="text-xl font-semibold text-foreground">
                                     Profile Information
                                 </h3>
                                 {!isEditing ? (
@@ -141,7 +141,7 @@ export function ProfilePage() {
                                 {/* Full Name */}
                                 <div>
                                     <Label className="mb-2 flex items-center gap-2">
-                                        <User className="h-4 w-4 text-gray-400" />
+                                        <User className="h-4 w-4 text-muted-foreground" />
                                         Full Name
                                     </Label>
                                     {isEditing ? (
@@ -155,7 +155,7 @@ export function ProfilePage() {
                                             }
                                         />
                                     ) : (
-                                        <p className="pl-6 text-gray-900">
+                                        <p className="pl-6 text-foreground">
                                             {profileData.name}
                                         </p>
                                     )}
@@ -164,7 +164,7 @@ export function ProfilePage() {
                                 {/* Email */}
                                 <div>
                                     <Label className="mb-2 flex items-center gap-2">
-                                        <Mail className="h-4 w-4 text-gray-400" />
+                                        <Mail className="h-4 w-4 text-muted-foreground" />
                                         Email Address
                                     </Label>
                                     {isEditing ? (
@@ -179,7 +179,7 @@ export function ProfilePage() {
                                             }
                                         />
                                     ) : (
-                                        <p className="pl-6 text-gray-900">
+                                        <p className="pl-6 text-foreground">
                                             {profileData.email}
                                         </p>
                                     )}
@@ -188,7 +188,7 @@ export function ProfilePage() {
                                 {/* Phone */}
                                 <div>
                                     <Label className="mb-2 flex items-center gap-2">
-                                        <Phone className="h-4 w-4 text-gray-400" />
+                                        <Phone className="h-4 w-4 text-muted-foreground" />
                                         Phone Number
                                     </Label>
                                     {isEditing ? (
@@ -203,7 +203,7 @@ export function ProfilePage() {
                                             }
                                         />
                                     ) : (
-                                        <p className="pl-6 text-gray-900">
+                                        <p className="pl-6 text-foreground">
                                             {profileData.phone}
                                         </p>
                                     )}
@@ -212,7 +212,7 @@ export function ProfilePage() {
                                 {/* Date of Birth */}
                                 <div>
                                     <Label className="mb-2 flex items-center gap-2">
-                                        <Calendar className="h-4 w-4 text-gray-400" />
+                                        <Calendar className="h-4 w-4 text-muted-foreground" />
                                         Date of Birth
                                     </Label>
                                     {isEditing ? (
@@ -227,7 +227,7 @@ export function ProfilePage() {
                                             }
                                         />
                                     ) : (
-                                        <p className="pl-6 text-gray-900">
+                                        <p className="pl-6 text-foreground">
                                             {new Date(
                                                 profileData.dateOfBirth,
                                             ).toLocaleDateString('en-US', {
@@ -242,7 +242,7 @@ export function ProfilePage() {
                                 {/* Address */}
                                 <div>
                                     <Label className="mb-2 flex items-center gap-2">
-                                        <MapPin className="h-4 w-4 text-gray-400" />
+                                        <MapPin className="h-4 w-4 text-muted-foreground" />
                                         Address
                                     </Label>
                                     {isEditing ? (
@@ -257,7 +257,7 @@ export function ProfilePage() {
                                             rows={3}
                                         />
                                     ) : (
-                                        <p className="pl-6 text-gray-900">
+                                        <p className="pl-6 text-foreground">
                                             {profileData.address}
                                         </p>
                                     )}
@@ -267,14 +267,14 @@ export function ProfilePage() {
                     </div>
 
                     {/* Change Password Card */}
-                    <Card className="mt-6 border-2 border-primary/20 bg-gradient-to-br from-blue-50 to-purple-50 p-6">
+                    <Card className="mt-6 border-2 border-primary/20 bg-gradient-to-br from-blue-50 to-brass-50 p-6">
                         <div className="mb-6 flex items-center justify-between">
                             <div>
-                                <h3 className="mb-2 flex items-center gap-2 text-xl font-semibold text-gray-900">
+                                <h3 className="mb-2 flex items-center gap-2 text-xl font-semibold text-foreground">
                                     <Lock className="h-6 w-6 text-primary" />
                                     Security Settings
                                 </h3>
-                                <p className="text-sm text-gray-600">
+                                <p className="text-sm text-muted-foreground">
                                     Manage your password and account security
                                 </p>
                             </div>
@@ -289,20 +289,20 @@ export function ProfilePage() {
                             </Link>
                         </div>
 
-                        <div className="rounded-lg border border-gray-200 bg-white p-4">
+                        <div className="rounded-lg border border-border bg-card p-4">
                             <div className="flex items-start gap-3">
                                 <div className="rounded-lg bg-yellow-100 p-2">
                                     <Lock className="h-5 w-5 text-yellow-600" />
                                 </div>
                                 <div className="flex-1">
-                                    <h4 className="mb-1 font-semibold text-gray-900">
+                                    <h4 className="mb-1 font-semibold text-foreground">
                                         Password Protection
                                     </h4>
-                                    <p className="mb-2 text-sm text-gray-600">
+                                    <p className="mb-2 text-sm text-muted-foreground">
                                         Your password was last changed on{' '}
                                         <strong>January 15, 2024</strong>
                                     </p>
-                                    <p className="text-sm text-gray-600">
+                                    <p className="text-sm text-muted-foreground">
                                         We recommend changing your password
                                         every 3-6 months to keep your account
                                         secure.

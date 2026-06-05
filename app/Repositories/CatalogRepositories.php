@@ -15,6 +15,8 @@ class CatalogRepositories implements CatalogInterfaceRepositories
 {
     public function getAllBooks(array $filters, int $perPage, int $page): LengthAwarePaginator
     {
+        $publishers = $filters['publishers'] ?? $filters['publisher'] ?? null;
+
         return Book::query()
             ->select([
                 'id',
@@ -24,26 +26,57 @@ class CatalogRepositories implements CatalogInterfaceRepositories
                 'slug',
                 'status',
                 'cover',
+                'publication_year',
                 'is_published',
             ])->with([
                 'publisher:id,name,logo',
                 'categories:id,name,icon',
                 'authors:id,name,username,avatar', // cukup ini
                 'language:id,language,photo', // cukup ini
-            ])->when(
+            ])
+            ->withAvg('reviews as avg_rating', 'rating')
+            ->when(
                 ($filters['field'] ?? null) && ($filters['direction'] ?? null),
                 fn($query) => $query->orderBy($filters['field'], $filters['direction'])
             )->when($filters['search'] ?? null, function ($query, $search) {
                 $query->where(function ($query) use ($search) {
-                    $query->where('title', 'REGEXP', $search)
-                        ->orWhere('slug', 'REGEXP', $search)
-                        ->orWhereHas('publisher', fn($q) => $q->where('name', 'REGEXP', $search))
-                        ->orWhereHas('authors', fn($q) => $q->where('name', 'REGEXP', $search))
-                        ->orWhereHas('categories', fn($q) => $q->where('name', 'REGEXP', $search));
+                    $query->where('title', 'like', "%{$search}%")
+                        ->orWhere('slug', 'like', "%{$search}%")
+                        ->orWhereHas('publisher', fn($q) => $q->where('name', 'like', "%{$search}%"))
+                        ->orWhereHas('authors', fn($q) => $q->where('name', 'like', "%{$search}%"))
+                        ->orWhereHas('categories', fn($q) => $q->where('name', 'like', "%{$search}%"));
                 });
             })
+            ->when($filters['categories'] ?? null, function ($query, $categories) {
+                $query->whereHas('categories', fn($q) => $q->whereIn('name', (array) $categories));
+            })
+            ->when($filters['authors'] ?? null, function ($query, $authors) {
+                $query->whereHas('authors', fn($q) => $q->whereIn('name', (array) $authors));
+            })
+            ->when($publishers, function ($query) use ($publishers) {
+                $query->whereHas('publisher', fn($q) => $q->whereIn('name', (array) $publishers));
+            })
+            ->when($filters['types'] ?? null, function ($query, $types) {
+                $query->whereHas('types', fn($q) => $q->whereIn('type', (array) $types));
+            })
+            ->when($filters['attachments'] ?? null, function ($query, $attachments) {
+                $query->whereHas('assets', fn($q) => $q->whereIn('type', (array) $attachments));
+            })
+            ->when($filters['yearMin'] ?? null, fn($query, $yearMin) => $query->where('publication_year', '>=', (int) $yearMin))
+            ->when($filters['yearMax'] ?? null, fn($query, $yearMax) => $query->where('publication_year', '<=', (int) $yearMax))
+            ->when($filters['availability'] ?? null, function ($query, $availability) {
+                $map = [
+                    'available' => BookStatus::AVAILABLE->value,
+                    'borrowed' => BookStatus::LOAN->value,
+                    'unavailable' => BookStatus::UNAVAILABLE->value,
+                    'lost' => BookStatus::LOST->value,
+                    'damaged' => BookStatus::DAMAGED->value,
+                ];
+                if (isset($map[$availability])) {
+                    $query->where('status', $map[$availability]);
+                }
+            })
             ->where('is_published', PublishedBooks::PUBLISH->value)
-            ->where('status', BookStatus::AVAILABLE->value)
             ->paginate($perPage, ['*'], 'books_page', $page);
     }
     public function getAllCategories(array $filters, int $perPage, int $page): LengthAwarePaginator

@@ -292,21 +292,21 @@ export default function CatalogPage() {
 
     return (
         <>
-            <div className="min-h-screen bg-gray-50 py-8">
+            <div className="min-h-screen bg-background py-8">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Header */}
                     <div className="mb-8">
-                        <h1 className="mb-2 font-['Poppins'] text-3xl font-bold text-gray-900 sm:text-4xl">
+                        <h1 className="mb-2 font-display text-3xl font-bold text-foreground sm:text-4xl">
                             {t.title}
                         </h1>
-                        <p className="text-gray-600">{t.subtitle}</p>
+                        <p className="text-muted-foreground">{t.subtitle}</p>
                     </div>
 
                     <div className="flex flex-col gap-6 lg:flex-row">
                         {/* Sidebar Filters - Desktop */}
                         <div className="hidden w-64 flex-shrink-0 lg:block">
-                            <div className="sticky top-24 rounded-xl bg-white p-6 shadow-sm">
-                                <h3 className="mb-4 flex items-center gap-2 font-semibold text-gray-900">
+                            <div className="sticky top-24 rounded-xl bg-card p-6 shadow-sm">
+                                <h3 className="mb-4 flex items-center gap-2 font-semibold text-foreground">
                                     <Filter className="h-4 w-4" />
                                     {t.filters}
                                 </h3>
@@ -336,7 +336,7 @@ export default function CatalogPage() {
                                                 />
                                                 <label
                                                     htmlFor={`cat-${category}`}
-                                                    className="ml-2 cursor-pointer text-sm text-gray-700"
+                                                    className="ml-2 cursor-pointer text-sm text-foreground"
                                                 >
                                                     {category}
                                                 </label>
@@ -370,7 +370,7 @@ export default function CatalogPage() {
                                                 />
                                                 <label
                                                     htmlFor={`pub-${publisher}`}
-                                                    className="ml-2 cursor-pointer text-sm text-gray-700"
+                                                    className="ml-2 cursor-pointer text-sm text-foreground"
                                                 >
                                                     {publisher}
                                                 </label>
@@ -431,10 +431,10 @@ export default function CatalogPage() {
                         {/* Main Content */}
                         <div className="flex-1">
                             {/* Search and Sort Bar */}
-                            <div className="mb-6 rounded-xl bg-white p-4 shadow-sm">
+                            <div className="mb-6 rounded-xl bg-card p-4 shadow-sm">
                                 <div className="flex flex-col gap-4 sm:flex-row">
                                     <div className="relative flex-1">
-                                        <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                                        <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                         <Input
                                             placeholder={t.search}
                                             value={searchQuery}
@@ -494,10 +494,10 @@ export default function CatalogPage() {
                                             opacity: 1,
                                         }}
                                         exit={{ height: 0, opacity: 0 }}
-                                        className="mb-6 overflow-hidden rounded-xl bg-white p-6 shadow-sm lg:hidden"
+                                        className="mb-6 overflow-hidden rounded-xl bg-card p-6 shadow-sm lg:hidden"
                                     >
                                         <div className="mb-4 flex items-center justify-between">
-                                            <h3 className="font-semibold text-gray-900">
+                                            <h3 className="font-semibold text-foreground">
                                                 {t.filters}
                                             </h3>
                                             <button
@@ -535,7 +535,7 @@ export default function CatalogPage() {
                                                                 />
                                                                 <label
                                                                     htmlFor={`cat-mobile-${category}`}
-                                                                    className="ml-2 cursor-pointer text-sm text-gray-700"
+                                                                    className="ml-2 cursor-pointer text-sm text-foreground"
                                                                 >
                                                                     {category}
                                                                 </label>
@@ -582,7 +582,7 @@ export default function CatalogPage() {
 
                             {/* Results Count */}
                             <div className="mb-4">
-                                <p className="text-sm text-gray-600">
+                                <p className="text-sm text-muted-foreground">
                                     {t.showing} {startIndex + 1}-
                                     {Math.min(endIndex, sortedBooks.length)}{' '}
                                     {t.of} {sortedBooks.length} {t.books}
@@ -614,10 +614,10 @@ export default function CatalogPage() {
                                     <div className="mb-4 text-6xl">
                                         {'\uD83D\uDCDA'}
                                     </div>
-                                    <h3 className="mb-2 text-xl font-semibold text-gray-900">
+                                    <h3 className="mb-2 text-xl font-semibold text-foreground">
                                         {t.noBooks}
                                     </h3>
-                                    <p className="text-gray-600">
+                                    <p className="text-muted-foreground">
                                         {t.tryAdjust}
                                     </p>
                                 </div>
