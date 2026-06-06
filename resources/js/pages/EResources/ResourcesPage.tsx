@@ -18,6 +18,7 @@ import {
 import { useDebounce } from '@/hooks/useDebounce';
 import { useLanguage } from '@/hooks/useLanguage';
 import { cn } from '@/lib/utils';
+import { SortToggle } from '@/components/component/Catalog/CatalogShell';
 import type { OnlineResourcePageProps } from '@/types/ResourcePage/OnlineResourcePageProps';
 
 const content = {
@@ -89,6 +90,9 @@ const ResourcesPage = () => {
     const [type, setType] = useState(filters.type || 'Semua');
     const debounceSearch = useDebounce(search, 400);
 
+    // Urut judul A–Z (asc) / Z–A (desc). null = urutan default (sort_order, title).
+    const [sortDir, setSortDir] = useState<'asc' | 'desc' | null>(null);
+
     const firstRender = useRef(true);
     useEffect(() => {
         if (firstRender.current) {
@@ -97,11 +101,15 @@ const ResourcesPage = () => {
         }
         router.get(
             route('resource'),
-            { search: debounceSearch || undefined, type },
+            {
+                search: debounceSearch || undefined,
+                type,
+                ...(sortDir ? { field: 'title', direction: sortDir } : {}),
+            },
             { preserveState: true, preserveScroll: true, replace: true },
         );
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [debounceSearch, type]);
+    }, [debounceSearch, type, sortDir]);
 
     const chips = ['Semua', ...typeOptions];
 
@@ -155,15 +163,22 @@ const ResourcesPage = () => {
                 </motion.div>
             </div>
 
-            {/* Search */}
-            <div className="hairline mt-8 flex items-center gap-3 rounded-full border bg-card px-5 shadow-soft transition-colors focus-within:border-cobalt dark:bg-night-2">
-                <Search className="h-5 w-5 shrink-0 text-muted-foreground" />
-                <input
-                    type="search"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder={t.placeholder}
-                    className="flex-1 bg-transparent py-3.5 text-base text-foreground outline-none placeholder:text-muted-foreground"
+            {/* Search + sort */}
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <div className="hairline flex flex-1 items-center gap-3 rounded-full border bg-card px-5 shadow-soft transition-colors focus-within:border-cobalt dark:bg-night-2">
+                    <Search className="h-5 w-5 shrink-0 text-muted-foreground" />
+                    <input
+                        type="search"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder={t.placeholder}
+                        className="flex-1 bg-transparent py-3.5 text-base text-foreground outline-none placeholder:text-muted-foreground"
+                    />
+                </div>
+                <SortToggle
+                    direction={sortDir}
+                    onChange={setSortDir}
+                    language={language}
                 />
             </div>
 

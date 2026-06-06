@@ -2,19 +2,19 @@
 
 namespace App\Services;
 
+use App\Enums\BookType;
 use App\Enums\LoanType;
 use App\Exceptions\BusinessException;
 use App\Http\Resources\BookResource;
 use App\Http\Resources\FineSettingsResource;
 use App\Http\Resources\LoanResource;
 use App\Interface\LoanInterfaceRepositories;
+use App\Models\Book;
 use App\Models\Fine;
 use App\Models\FineSettings;
 use App\Models\Loan;
-use App\Models\Stock;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-use Throwable;
 
 class LoanService
 {
@@ -51,39 +51,75 @@ class LoanService
         ];
     }
 
-    public function postDataLoanUserAuth(array $data): Loan
+    /**
+     * Alur "Baca Buku": catat peminjaman DIGITAL lalu izinkan akses aset.
+     * - Jika sudah ada pinjaman aktif buku ini (fisik/digital) → DITOLAK
+     *   (loan.already_reading) karena buku sedang aktif dibaca/dipinjam.
+     * - Pinjaman digital di-auto-return saat due_date lewat (lihat EnsureUserHasActiveLoan).
+     */
+    public function readDigitalBook(string $slug): string
     {
         $auth = auth()->user();
+        $book = $this->loanService->findBookBySlug($slug);
 
-        $this->validateLoan($auth->id, $data['book_id']);
+        // Sudah punya pinjaman aktif buku ini → tolak (buku sedang aktif dibaca).
+        if (Loan::hasActiveLoan($auth->id, $book->id)) {
+            throw new BusinessException('loan.already_reading', 409);
+        }
+
+        $this->validateDigitalRead($auth->id, $book);
 
         $duration = FineSettings::query()->value('loan_duration_days') ?? 14;
 
-        try {
-            return DB::transaction(function () use ($auth, $data, $duration) {
-                $detailData = [
-                    'book_id'   => $data['book_id'],
-                    'loan_date' => now(),
-                    'due_date'  => now()->addDays($duration),
-                    'loan_type' => LoanType::DIGITAL->value,
-                ];
+        DB::transaction(function () use ($auth, $book, $duration) {
+            $detailData = [
+                'book_id'   => $book->id,
+                'loan_date' => now(),
+                'due_date'  => now()->addDays($duration),
+                'loan_type' => LoanType::DIGITAL->value,
+            ];
 
-                $existingLoan = Loan::getActiveLoan($auth->id);
+            $existingLoan = Loan::getActiveLoan($auth->id);
 
-                if ($existingLoan) {
-                    return $this->loanService->addDetailToLoan($existingLoan, $detailData);
-                }
-
-                return $this->loanService->createLoan(
+            if ($existingLoan) {
+                $this->loanService->addDetailToLoan($existingLoan, $detailData);
+            } else {
+                $this->loanService->createLoan(
                     [
                         'user_id'   => $auth->id,
                         'loan_code' => generateUniqueCode('Loan', Loan::class, 'loan_code'),
                     ],
                     $detailData
                 );
-            });
-        } catch (Throwable $th) {
-            throw $th;
+            }
+        });
+
+        return $book->slug;
+    }
+
+    private function validateDigitalRead(int $userId, Book $book): void
+    {
+        // RULE 1: Buku harus memiliki format Digital.
+        $isDigital = $book->relationLoaded('types')
+            && $book->types->contains(fn ($type) => $type->type === BookType::DIGITAL->value);
+
+        if (! $isDigital) {
+            throw new BusinessException('loan.not_digital', 422);
+        }
+
+        // RULE 2: Tidak boleh ada denda yang belum dibayar.
+        if (Fine::hasUnpaidFine($userId)) {
+            throw new BusinessException('loan.has_unpaid_fine');
+        }
+
+        // RULE 3: Akun harus terverifikasi.
+        if (! Loan::checkUserVerified($userId)) {
+            throw new BusinessException('loan.user_not_verified', 403);
+        }
+
+        // RULE 4: Pengaturan denda/peminjaman harus terkonfigurasi.
+        if (! FineSettings::checkSettings()) {
+            throw new BusinessException('loan.settings_not_configured', 500);
         }
     }
 
@@ -103,32 +139,5 @@ class LoanService
         $loan = $this->loanService->getLoanDetail($auth->id, $loanCode);
 
         return transformData($loan, LoanResource::class);
-    }
-    private function validateLoan(int $userId, int $bookId)
-    {
-        // RULE 1: Buku yang sama tidak boleh dipinjam dua kali sebelum dikembalikan
-        if (Loan::hasActiveLoan($userId, $bookId)) {
-            throw new BusinessException("loan.same_book_active");
-        }
-
-        // RULE 2: Tidak boleh meminjam jika masih ada denda yang belum dibayar
-        if (Fine::hasUnpaidFine($userId)) {
-            throw new BusinessException("loan.has_unpaid_fine");
-        }
-
-        // RULE 3: Stok buku harus tersedia
-        if (!Loan::checkStock($bookId)) {
-            throw new BusinessException("loan.stock_empty");
-        }
-
-        // RULE 4: Akun pengguna harus sudah terverifikasi
-        if (!Loan::checkUserVerified($userId)) {
-            throw new BusinessException("loan.user_not_verified", 403);
-        }
-
-        // RULE 5: Pengaturan denda/peminjaman harus sudah dikonfigurasi
-        if (!FineSettings::checkSettings()) {
-            throw new BusinessException("loan.settings_not_configured", 500);
-        }
     }
 }

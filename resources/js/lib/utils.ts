@@ -42,3 +42,16 @@ export const moneyFormatter = (value: string | number) => {
         maximumFractionDigits: 0,
     }).format(Number(value));
 };
+
+/**
+ * Buang tag HTML (mis. konten RichEditor `<p>...</p>`) menjadi teks polos,
+ * untuk preview ringkas di dalam elemen <p> (hindari tag mentah tampil literal).
+ */
+export const stripHtml = (value?: string | null): string => {
+    if (!value) return '';
+    return value
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+};

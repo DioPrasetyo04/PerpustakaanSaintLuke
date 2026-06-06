@@ -13,7 +13,7 @@ type TestimonialsProps = {
 
 const copy = {
     id: {
-        eyebrow: 'Kata Mereka',
+        eyebrow: 'Testimoni',
         title: 'Cerita & testimoni dari anggota kami',
         desc: 'Dengarkan langsung pengalaman siswa, guru, dan alumni — setiap cerita terekam dalam video.',
         watch: 'Putar video',
@@ -92,7 +92,7 @@ const Testimonials = ({ testimonials }: TestimonialsProps) => {
             <div className="absolute inset-0 grid place-items-center">
                 <span
                     className={cn(
-                        'grid h-14 w-14 place-items-center rounded-full bg-white/15 text-white backdrop-blur-md ring-1 ring-white/40 transition-all duration-300 group-hover:scale-110 group-hover:bg-cobalt',
+                        'grid h-14 w-14 place-items-center rounded-full bg-white/15 text-white ring-1 ring-white/40 backdrop-blur-md transition-all duration-300 group-hover:scale-110 group-hover:bg-cobalt',
                         RINGS[index % RINGS.length],
                     )}
                 >
@@ -106,7 +106,9 @@ const Testimonials = ({ testimonials }: TestimonialsProps) => {
                     {it.name}
                 </div>
                 {it.role && (
-                    <div className="mt-0.5 text-xs text-white/65">{it.role}</div>
+                    <div className="mt-0.5 text-xs text-white/65">
+                        {it.role}
+                    </div>
                 )}
             </div>
 
@@ -125,7 +127,7 @@ const Testimonials = ({ testimonials }: TestimonialsProps) => {
                         initial={{ opacity: 0, y: 12 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="tracking-editorial mx-auto inline-flex items-center gap-2 font-mono text-[11px] font-semibold uppercase text-cobalt dark:text-cobalt-lt"
+                        className="mx-auto inline-flex items-center gap-2 font-mono text-[11px] font-semibold tracking-editorial text-cobalt uppercase dark:text-cobalt-lt"
                     >
                         <Quote className="h-3.5 w-3.5" />
                         {t.eyebrow}
@@ -220,7 +222,11 @@ function TestimonialModal({
                         initial={{ opacity: 0, scale: 0.96, y: 16 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.97, y: 10 }}
-                        transition={{ type: 'spring', stiffness: 280, damping: 26 }}
+                        transition={{
+                            type: 'spring',
+                            stiffness: 280,
+                            damping: 26,
+                        }}
                         onClick={(e) => e.stopPropagation()}
                         className="relative w-full max-w-4xl overflow-hidden rounded-3xl border border-white/10 bg-night-2 shadow-2xl"
                     >

@@ -1,9 +1,10 @@
 import { motion } from 'framer-motion';
 import { Link } from '@inertiajs/react';
-import { Star, ArrowRight } from 'lucide-react';
+import { Star, ArrowRight, Globe } from 'lucide-react';
 import { cn, formattedRating } from '@/lib/utils';
 import { ImageWithFallback } from '@/components/common/ImageWithFallback';
 import BookmarkButton from '@/components/common/BookmarkButton';
+import BookTypeBadge from '@/components/common/BookTypeBadge';
 import type { BookProps, BookStatus } from '@/types/DataTypes/BooksProps';
 import { useLanguage } from '@/hooks/useLanguage';
 
@@ -31,6 +32,8 @@ const BookCard = ({
     categories,
     publisher,
     avg_rating,
+    types,
+    language: bookLanguage,
     isBookmarked = false,
 }: BookCardProps) => {
     const { language } = useLanguage();
@@ -76,11 +79,28 @@ const BookCard = ({
                         </div>
 
                         {/* badges top-left */}
-                        <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5">
+                        <div className="absolute top-3 left-3 z-10 flex max-w-[calc(100%-3.5rem)] flex-wrap items-center gap-1.5">
                             {popular && (
                                 <span className="tracking-editorial inline-flex items-center gap-1 rounded-full bg-brass px-2 py-0.5 text-[10px] font-bold uppercase text-white shadow-sm">
                                     <Star className="h-2.5 w-2.5 fill-current" />
                                     {labels.popular}
+                                </span>
+                            )}
+                            {/* Format buku: Digital / Fisik / keduanya */}
+                            <BookTypeBadge types={types} />
+                            {/* Bahasa buku + bendera */}
+                            {bookLanguage?.language && (
+                                <span className="tracking-editorial inline-flex items-center gap-1 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-bold text-white uppercase shadow-sm backdrop-blur-sm">
+                                    {bookLanguage.photo ? (
+                                        <ImageWithFallback
+                                            src={bookLanguage.photo}
+                                            alt={bookLanguage.language}
+                                            className="h-2.5 w-3.5 shrink-0 rounded-[2px] object-cover"
+                                        />
+                                    ) : (
+                                        <Globe className="h-2.5 w-2.5" />
+                                    )}
+                                    {bookLanguage.language}
                                 </span>
                             )}
                             {!isAvailable && (
@@ -109,8 +129,17 @@ const BookCard = ({
                     {/* Meta */}
                     <div className="flex flex-1 flex-col p-4 pt-3.5">
                         <div className="mb-2 flex items-center justify-between gap-2">
-                            <span className="tracking-editorial truncate font-mono text-[10px] uppercase text-cobalt dark:text-cobalt-lt">
-                                {category?.name}
+                            <span className="inline-flex min-w-0 items-center gap-1.5">
+                                {category?.icon && (
+                                    <ImageWithFallback
+                                        src={category.icon}
+                                        alt={category.name}
+                                        className="h-4 w-4 shrink-0 rounded object-cover"
+                                    />
+                                )}
+                                <span className="tracking-editorial truncate font-mono text-[10px] uppercase text-cobalt dark:text-cobalt-lt">
+                                    {category?.name}
+                                </span>
                             </span>
                             <span
                                 className={cn(
@@ -127,8 +156,15 @@ const BookCard = ({
                         </h3>
 
                         {author?.name && (
-                            <div className="mt-1 line-clamp-1 text-xs text-muted-foreground">
-                                {author.name}
+                            <div className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+                                <ImageWithFallback
+                                    src={author.avatar}
+                                    alt={author.name}
+                                    className="h-5 w-5 shrink-0 rounded-full object-cover ring-1 ring-border"
+                                />
+                                <span className="line-clamp-1">
+                                    {author.name}
+                                </span>
                             </div>
                         )}
 
@@ -140,8 +176,17 @@ const BookCard = ({
                                 </span>
                             </span>
                             {publisher?.name && (
-                                <span className="truncate text-muted-foreground">
-                                    {publisher.name}
+                                <span className="inline-flex min-w-0 items-center gap-1.5 text-muted-foreground">
+                                    {publisher.logo && (
+                                        <ImageWithFallback
+                                            src={publisher.logo}
+                                            alt={publisher.name}
+                                            className="h-4 w-4 shrink-0 rounded bg-white object-contain p-px"
+                                        />
+                                    )}
+                                    <span className="truncate">
+                                        {publisher.name}
+                                    </span>
                                 </span>
                             )}
                         </div>

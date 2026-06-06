@@ -65,7 +65,9 @@ export default function LibraryStatusBadge({ initialAnnouncement }: Props) {
                 left: 0,
                 right: 0,
                 bottom: '1rem',
-                zIndex: 9990,
+                // Di bawah mobile drawer (z-60) agar tidak menutupi menu navbar
+                // responsif saat dibuka; tetap mengambang di atas konten halaman.
+                zIndex: 40,
                 display: 'flex',
                 justifyContent: 'flex-end',
                 alignItems: 'center',

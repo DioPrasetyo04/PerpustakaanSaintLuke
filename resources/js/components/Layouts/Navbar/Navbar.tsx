@@ -18,6 +18,7 @@ import {
 import { navItems, navAuthItems, profileSubNavItems } from '@/data/data';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useAppearance } from '@/hooks/use-appearance';
+import { cn } from '@/lib/utils';
 import type { NavItem } from '@/types/navbar';
 
 /* Brand mark — SL monogram + wordmark */
@@ -25,10 +26,14 @@ function BrandMark() {
     return (
         <div className="flex items-center gap-3">
             <div
-                className="relative grid h-[38px] w-[38px] place-items-center rounded-xl bg-ink text-paper shadow-soft dark:bg-card dark:text-ink"
+                className="relative grid h-[38px] w-[38px] place-items-center rounded-xl text-paper shadow-soft"
                 aria-hidden="true"
             >
-               <img src="/assets/logos/Saint-Luke.png" alt="Logo Saint Luke" className="h-full w-full" />
+                <img
+                    src="/assets/logos/Saint-Luke.png"
+                    alt="Logo Saint Luke"
+                    className="h-full w-full"
+                />
                 <span className="absolute -right-1 -bottom-1 h-3 w-3 rounded-full border-2 border-paper bg-cobalt dark:border-night" />
             </div>
             <div className="leading-tight">
@@ -61,6 +66,10 @@ const Navbar = ({ initialAuth }: { initialAuth?: any }) => {
     const [auth, setAuth] = useState<any>(initialAuth ?? null);
     const [scrolled, setScrolled] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
+    // Accordion menu mobile (Katalog/Tentang) yang sedang terbuka.
+    const [mobileSubmenu, setMobileSubmenu] = useState<string | null>(null);
+    // Dropdown profil pada drawer mobile (default tertutup).
+    const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
     const [openMenu, setOpenMenu] = useState<string | null>(null);
     const [currentPath, setCurrentPath] = useState<string>(
         typeof window !== 'undefined' ? window.location.pathname : '/',
@@ -98,6 +107,19 @@ const Navbar = ({ initialAuth }: { initialAuth?: any }) => {
             ? currentPath === '/'
             : currentPath === href || currentPath.startsWith(href + '/');
 
+    // Grup (Katalog/Tentang) dianggap aktif bila salah satu submenunya aktif.
+    const isGroupActive = (n: NavItem) =>
+        isActive(n.href) || !!n.menu?.some((m) => isActive(m.href));
+
+    // Saat drawer dibuka, otomatis buka accordion grup yang memuat halaman aktif.
+    useEffect(() => {
+        if (!mobileOpen) return;
+        const activeGroup = navItems.find((n) => n.menu && isGroupActive(n));
+        setMobileSubmenu(activeGroup?.id ?? null);
+        setMobileProfileOpen(false); // selalu mulai tertutup tiap drawer dibuka
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [mobileOpen]);
+
     const handleEnter = (id: string) => {
         if (closeTimer.current) clearTimeout(closeTimer.current);
         setOpenMenu(id);
@@ -109,7 +131,8 @@ const Navbar = ({ initialAuth }: { initialAuth?: any }) => {
     const submitSearch = (e: React.FormEvent) => {
         e.preventDefault();
         const kw = search.trim();
-        router.get(route('resource'), kw ? { search: kw } : {});
+        // Cari di Katalog Buku (BooksPage membaca filters.search).
+        router.get(route('catalog.books'), kw ? { search: kw } : {});
     };
 
     const avatarSrc = auth?.user?.avatar
@@ -117,6 +140,7 @@ const Navbar = ({ initialAuth }: { initialAuth?: any }) => {
         : '/assets/images/default-avatar.png';
 
     return (
+        <>
         <header
             className={`sticky top-0 z-40 transition-all duration-300 ${
                 scrolled
@@ -179,9 +203,14 @@ const Navbar = ({ initialAuth }: { initialAuth?: any }) => {
                                 <Link
                                     href={n.href}
                                     aria-current={
-                                        isActive(n.href) ? 'page' : undefined
+                                        isGroupActive(n) ? 'page' : undefined
                                     }
-                                    className="nav-link inline-flex items-center gap-1 rounded-full px-3.5 py-2 font-sans text-[14px] font-medium text-foreground transition-colors hover:text-cobalt dark:hover:text-cobalt-lt"
+                                    className={cn(
+                                        'nav-link inline-flex items-center gap-1 rounded-full px-3.5 py-2 font-sans text-[14px] font-medium transition-colors hover:text-cobalt dark:hover:text-cobalt-lt',
+                                        isGroupActive(n)
+                                            ? 'text-cobalt dark:text-cobalt-lt'
+                                            : 'text-foreground',
+                                    )}
                                 >
                                     {language === 'en'
                                         ? n.label.en
@@ -361,10 +390,14 @@ const Navbar = ({ initialAuth }: { initialAuth?: any }) => {
                     </div>
                 </div>
             </div>
+        </header>
 
-            {/* mobile drawer */}
+            {/* mobile drawer — DIRENDER DI LUAR <header>: header memakai
+                backdrop-filter saat scroll yang membuat containing block untuk
+                elemen position:fixed, sehingga drawer ikut terpotong bila berada
+                di dalam header. Di luar header, fixed kembali relatif ke viewport. */}
             {mobileOpen && (
-                <div className="fixed inset-0 z-50 lg:hidden">
+                <div className="fixed inset-0 z-[60] lg:hidden">
                     <div
                         className="absolute inset-0 bg-ink/40"
                         onClick={() => setMobileOpen(false)}
@@ -399,68 +432,246 @@ const Navbar = ({ initialAuth }: { initialAuth?: any }) => {
                             </form>
                         </div>
                         <nav className="p-3" aria-label="Navigasi seluler">
-                            {navItems.map((n: NavItem) => (
-                                <div key={n.id} className="py-1">
+                            {navItems.map((n: NavItem) => {
+                                const label =
+                                    language === 'en' ? n.label.en : n.label.id;
+
+                                // Item dengan submenu → accordion yang bisa diklik.
+                                if (n.menu) {
+                                    const expanded = mobileSubmenu === n.id;
+                                    const groupActive = isGroupActive(n);
+                                    return (
+                                        <div key={n.id} className="py-0.5">
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    setMobileSubmenu(
+                                                        expanded ? null : n.id,
+                                                    )
+                                                }
+                                                aria-expanded={expanded}
+                                                className={cn(
+                                                    'flex w-full items-center justify-between rounded-lg px-3 py-2.5 font-display text-lg transition-colors',
+                                                    groupActive
+                                                        ? 'bg-cobalt-50 text-cobalt dark:bg-cobalt/10 dark:text-cobalt-lt'
+                                                        : 'text-foreground hover:bg-paper-2/60 dark:hover:bg-night-3',
+                                                )}
+                                            >
+                                                <span>{label}</span>
+                                                <ChevronDown
+                                                    className={cn(
+                                                        'h-4 w-4 transition-transform',
+                                                        expanded && 'rotate-180',
+                                                    )}
+                                                />
+                                            </button>
+                                            {expanded && (
+                                                <div className="hairline mt-1 ml-3 space-y-0.5 border-l pl-4">
+                                                    {n.menu.map((m) => {
+                                                        const subActive =
+                                                            isActive(m.href);
+                                                        return (
+                                                            <Link
+                                                                key={m.id}
+                                                                href={m.href}
+                                                                onClick={() =>
+                                                                    setMobileOpen(
+                                                                        false,
+                                                                    )
+                                                                }
+                                                                aria-current={
+                                                                    subActive
+                                                                        ? 'page'
+                                                                        : undefined
+                                                                }
+                                                                className={cn(
+                                                                    'block rounded-md px-3 py-2 text-sm transition-colors',
+                                                                    subActive
+                                                                        ? 'bg-cobalt-50 font-semibold text-cobalt dark:bg-cobalt/10 dark:text-cobalt-lt'
+                                                                        : 'text-foreground/70 hover:text-cobalt dark:hover:text-cobalt-lt',
+                                                                )}
+                                                            >
+                                                                {language ===
+                                                                'en'
+                                                                    ? m.label.en
+                                                                    : m.label.id}
+                                                            </Link>
+                                                        );
+                                                    })}
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                }
+
+                                // Item tanpa submenu → link langsung.
+                                const active = isActive(n.href);
+                                return (
                                     <Link
+                                        key={n.id}
                                         href={n.href}
                                         onClick={() => setMobileOpen(false)}
-                                        className="block px-3 py-2 font-display text-lg text-foreground"
+                                        aria-current={
+                                            active ? 'page' : undefined
+                                        }
+                                        className={cn(
+                                            'my-0.5 block rounded-lg px-3 py-2.5 font-display text-lg transition-colors',
+                                            active
+                                                ? 'bg-cobalt-50 text-cobalt dark:bg-cobalt/10 dark:text-cobalt-lt'
+                                                : 'text-foreground hover:bg-paper-2/60 dark:hover:bg-night-3',
+                                        )}
                                     >
-                                        {language === 'en'
-                                            ? n.label.en
-                                            : n.label.id}
+                                        {label}
                                     </Link>
-                                    {n.menu && (
-                                        <div className="hairline ml-3 border-l pl-6">
-                                            {n.menu.map((m) => (
+                                );
+                            })}
+                        </nav>
+                        <div className="hairline mt-2 space-y-4 border-t p-5">
+                            {/* language */}
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm text-muted-foreground">
+                                    {t('Bahasa', 'Language')}
+                                </span>
+                                <div className="hairline flex items-center overflow-hidden rounded-full border text-[11px] font-bold">
+                                    {(['id', 'en'] as const).map((lc) => (
+                                        <button
+                                            key={lc}
+                                            onClick={() => setLanguage(lc)}
+                                            aria-pressed={language === lc}
+                                            className={`px-2.5 py-2 tracking-wider uppercase transition-colors ${
+                                                language === lc
+                                                    ? 'bg-cobalt text-white'
+                                                    : 'text-muted-foreground'
+                                            }`}
+                                        >
+                                            {lc}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* theme: light / dark */}
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm text-muted-foreground">
+                                    {t('Tema', 'Theme')}
+                                </span>
+                                <div className="hairline flex items-center overflow-hidden rounded-full border text-[11px] font-bold">
+                                    <button
+                                        onClick={() =>
+                                            updateAppearance('light')
+                                        }
+                                        aria-pressed={!isDark}
+                                        className={cn(
+                                            'flex items-center gap-1.5 px-3 py-2 tracking-wider uppercase transition-colors',
+                                            !isDark
+                                                ? 'bg-cobalt text-white'
+                                                : 'text-muted-foreground',
+                                        )}
+                                    >
+                                        <Sun className="h-3.5 w-3.5" />
+                                        {t('Terang', 'Light')}
+                                    </button>
+                                    <button
+                                        onClick={() => updateAppearance('dark')}
+                                        aria-pressed={isDark}
+                                        className={cn(
+                                            'flex items-center gap-1.5 px-3 py-2 tracking-wider uppercase transition-colors',
+                                            isDark
+                                                ? 'bg-cobalt text-white'
+                                                : 'text-muted-foreground',
+                                        )}
+                                    >
+                                        <Moon className="h-3.5 w-3.5" />
+                                        {t('Gelap', 'Dark')}
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Profil pengguna — dropdown (klik untuk buka) atau login */}
+                            {isAuthenticated ? (
+                                <div className="hairline rounded-xl2 border bg-card p-2 dark:bg-night-2">
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setMobileProfileOpen((o) => !o)
+                                        }
+                                        aria-expanded={mobileProfileOpen}
+                                        className="flex w-full items-center gap-3 rounded-lg p-2 text-left transition-colors hover:bg-paper-2/60 dark:hover:bg-night-3"
+                                    >
+                                        <img
+                                            src={avatarSrc}
+                                            alt={auth.user.name}
+                                            className="h-11 w-11 rounded-full object-cover ring-1 ring-border"
+                                        />
+                                        <div className="min-w-0 flex-1">
+                                            <div className="truncate font-display text-base font-semibold text-foreground">
+                                                {auth.user.name}
+                                            </div>
+                                            {auth.user.email && (
+                                                <div className="truncate text-xs text-muted-foreground">
+                                                    {auth.user.email}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <ChevronDown
+                                            className={cn(
+                                                'h-4 w-4 shrink-0 text-muted-foreground transition-transform',
+                                                mobileProfileOpen &&
+                                                    'rotate-180',
+                                            )}
+                                        />
+                                    </button>
+                                    {mobileProfileOpen && (
+                                    <div className="hairline mt-1 border-t pt-1">
+                                        {profileSubNavItems.map((item) => {
+                                            const Icon =
+                                                profileIcons[item.icon] ?? User;
+                                            const isLogout =
+                                                item.icon === 'logout';
+                                            const itemActive =
+                                                !isLogout && isActive(item.href);
+                                            return (
                                                 <Link
-                                                    key={m.id}
-                                                    href={m.href}
+                                                    key={item.id}
+                                                    href={item.href}
+                                                    method={
+                                                        isLogout ? 'post' : 'get'
+                                                    }
+                                                    as={isLogout ? 'button' : 'a'}
                                                     onClick={() =>
                                                         setMobileOpen(false)
                                                     }
-                                                    className="block py-1.5 text-sm text-foreground/70 hover:text-cobalt"
+                                                    aria-current={
+                                                        itemActive
+                                                            ? 'page'
+                                                            : undefined
+                                                    }
+                                                    className={cn(
+                                                        'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors',
+                                                        isLogout
+                                                            ? 'text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10'
+                                                            : itemActive
+                                                              ? 'bg-cobalt-50 font-medium text-cobalt dark:bg-cobalt/10 dark:text-cobalt-lt'
+                                                              : 'text-foreground hover:bg-paper-2/70 dark:hover:bg-night-3',
+                                                    )}
                                                 >
+                                                    <Icon className="h-4 w-4" />
                                                     {language === 'en'
-                                                        ? m.label.en
-                                                        : m.label.id}
+                                                        ? item.label.en
+                                                        : item.label.id}
                                                 </Link>
-                                            ))}
-                                        </div>
+                                            );
+                                        })}
+                                    </div>
                                     )}
                                 </div>
-                            ))}
-                        </nav>
-                        <div className="hairline mt-2 flex items-center justify-between border-t p-5">
-                            <div className="hairline flex items-center overflow-hidden rounded-full border text-[11px] font-bold">
-                                {(['id', 'en'] as const).map((lc) => (
-                                    <button
-                                        key={lc}
-                                        onClick={() => setLanguage(lc)}
-                                        className={`px-2.5 py-2 tracking-wider uppercase transition-colors ${
-                                            language === lc
-                                                ? 'bg-cobalt text-white'
-                                                : 'text-muted-foreground'
-                                        }`}
-                                    >
-                                        {lc}
-                                    </button>
-                                ))}
-                            </div>
-                            {isAuthenticated ? (
-                                <Link
-                                    href="/dashboard"
-                                    onClick={() => setMobileOpen(false)}
-                                    className="rounded-full bg-cobalt px-4 py-2.5 text-[12px] font-semibold text-white"
-                                >
-                                    {t('Dashboard', 'Dashboard')}
-                                </Link>
                             ) : (
                                 <Link
                                     href={navAuthItems.href}
                                     onClick={() => setMobileOpen(false)}
-                                    className="rounded-full bg-cobalt px-4 py-2.5 text-[12px] font-semibold text-white"
+                                    className="btn-press flex w-full items-center justify-center gap-2 rounded-full bg-cobalt px-4 py-3 text-[13px] font-semibold tracking-editorial text-white uppercase transition-colors hover:bg-cobalt-dk"
                                 >
+                                    <User className="h-4 w-4" />
                                     {language === 'en'
                                         ? navAuthItems.label.en
                                         : navAuthItems.label.id}
@@ -470,7 +681,7 @@ const Navbar = ({ initialAuth }: { initialAuth?: any }) => {
                     </div>
                 </div>
             )}
-        </header>
+        </>
     );
 };
 

@@ -9,6 +9,8 @@ import {
     List as ListIcon,
     Book,
     X,
+    ChevronUp,
+    ChevronDown,
 } from 'lucide-react';
 import BookCard from '@/components/component/Card/BookCard';
 import Pagination from '@/components/component/Home/Pagination/Pagination';
@@ -61,7 +63,19 @@ const BooksPage = () => {
         yearMax: filters.yearMax ?? null,
     });
     const [sort, setSort] = useState(deriveSort(filters.field));
+    // Arah urut khusus judul: panah atas = A→Z (asc), panah bawah = Z→A (desc).
+    const [titleDir, setTitleDir] = useState<'asc' | 'desc'>(
+        filters.field === 'title' && filters.direction === 'desc'
+            ? 'desc'
+            : 'asc',
+    );
     const [view, setView] = useState<'grid' | 'list'>('grid');
+
+    // Klik panah → aktifkan sort judul dengan arah terpilih.
+    const setTitleSort = (dir: 'asc' | 'desc') => {
+        setTitleDir(dir);
+        setSort('title');
+    };
     const [showMobileFilters, setShowMobileFilters] = useState(false);
 
     const setFilter = <K extends keyof CatalogFilters>(
@@ -100,6 +114,8 @@ const BooksPage = () => {
 
     const buildParams = (page: number, perPage: number) => {
         const { field, direction } = sortMap[sort];
+        // Untuk judul, arah ditentukan tombol panah (titleDir).
+        const dir = sort === 'title' ? titleDir : direction;
         const params: Record<string, unknown> = {
             search: debounceSearch || undefined,
             categories: local.categories,
@@ -109,7 +125,7 @@ const BooksPage = () => {
             attachments: local.attachments,
             availability: local.availability || undefined,
             field: field || undefined,
-            direction: direction || undefined,
+            direction: dir || undefined,
             books_page: page,
             books_load: perPage,
         };
@@ -133,7 +149,7 @@ const BooksPage = () => {
             replace: true,
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [debounceSearch, local, sort]);
+    }, [debounceSearch, local, sort, titleDir]);
 
     const onPageChange = (page: number) =>
         router.get(
@@ -214,8 +230,49 @@ const BooksPage = () => {
                             <option value="rating">
                                 {tr('Penilaian', 'Rating')}
                             </option>
-                            <option value="title">{tr('Judul A–Z', 'Title A–Z')}</option>
+                            <option value="title">{tr('Judul', 'Title')}</option>
                         </select>
+                        {/* Sort judul: panah atas = A→Z, panah bawah = Z→A */}
+                        <div
+                            role="group"
+                            aria-label={tr('Urutkan judul', 'Sort by title')}
+                            className="hairline inline-flex overflow-hidden rounded-full border"
+                        >
+                            <button
+                                type="button"
+                                onClick={() => setTitleSort('asc')}
+                                aria-label={tr('Judul A–Z', 'Title A–Z')}
+                                aria-pressed={
+                                    sort === 'title' && titleDir === 'asc'
+                                }
+                                title={tr('Judul A–Z', 'Title A–Z')}
+                                className={cn(
+                                    'grid h-10 w-10 place-items-center transition-colors',
+                                    sort === 'title' && titleDir === 'asc'
+                                        ? 'bg-cobalt text-white'
+                                        : 'text-muted-foreground hover:text-cobalt',
+                                )}
+                            >
+                                <ChevronUp className="h-4 w-4" />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setTitleSort('desc')}
+                                aria-label={tr('Judul Z–A', 'Title Z–A')}
+                                aria-pressed={
+                                    sort === 'title' && titleDir === 'desc'
+                                }
+                                title={tr('Judul Z–A', 'Title Z–A')}
+                                className={cn(
+                                    'grid h-10 w-10 place-items-center transition-colors',
+                                    sort === 'title' && titleDir === 'desc'
+                                        ? 'bg-cobalt text-white'
+                                        : 'text-muted-foreground hover:text-cobalt',
+                                )}
+                            >
+                                <ChevronDown className="h-4 w-4" />
+                            </button>
+                        </div>
                         <div className="hairline inline-flex overflow-hidden rounded-full border">
                             <button
                                 type="button"

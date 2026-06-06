@@ -451,6 +451,7 @@ class BookForm
                                         ->columnSpan(1),
                                     Select::make('types')
                                         ->label('Types')
+                                        ->live()
                                         ->relationship('types', 'type')
                                         ->getOptionLabelFromRecordUsing(function ($record) {
                                             $iconUrl = $record->icon ? asset('storage/' . $record->icon) : null;
@@ -554,6 +555,14 @@ class BookForm
                                         'Published' => 'heroicon-o-check-circle',
                                         'Unpublished' => 'heroicon-o-pencil'
                                     ])->columnSpan(1)->inline(),
+                                    Toggle::make('is_spotlight')
+                                        ->label('Jadikan Buku Sorotan (Beranda)')
+                                        ->helperText('Tampil di section "Pilihan Pustakawan" pada Beranda. Hanya satu buku yang bisa aktif — mengaktifkan ini otomatis menonaktifkan buku sorotan lainnya.')
+                                        ->onIcon('heroicon-m-star')
+                                        ->offIcon('heroicon-m-star')
+                                        ->onColor('warning')
+                                        ->default(false)
+                                        ->columnSpan(1),
                                     // TextInput::make('price')
                                     //     ->label('Price')
                                     //     ->prefix('Rp')
@@ -680,11 +689,29 @@ class BookForm
                         ]),
                     Wizard\Step::make('Asset Books Information')->description('Asset Of Books')
                         ->schema([
-                            Section::make('Asset Books')->description('This is asset of books etc: pdf, image, audio, more...')
+                            Section::make('Asset Books')->description('Aset hanya wajib untuk buku berformat Digital. Buku Fisik saja boleh tanpa aset.')
                                 ->schema([
                                     Repeater::make('assets')
                                         ->label('Assets')
                                         ->relationship('assets')
+                                        ->helperText(function (Get $get): string {
+                                            $ids = (array) ($get('types') ?? []);
+                                            $hasDigital = $ids && Type::whereIn('id', $ids)
+                                                ->where('type', BookType::DIGITAL->value)
+                                                ->exists();
+
+                                            return $hasDigital
+                                                ? 'Buku Digital wajib memiliki minimal satu aset (mis. PDF / e-book).'
+                                                : 'Opsional untuk buku Fisik. Tambahkan aset hanya bila tersedia versi digital.';
+                                        })
+                                        ->minItems(function (Get $get): int {
+                                            $ids = (array) ($get('types') ?? []);
+                                            $hasDigital = $ids && Type::whereIn('id', $ids)
+                                                ->where('type', BookType::DIGITAL->value)
+                                                ->exists();
+
+                                            return $hasDigital ? 1 : 0;
+                                        })
                                         ->schema([
                                             Select::make('type')
                                                 ->label('Type Asset')

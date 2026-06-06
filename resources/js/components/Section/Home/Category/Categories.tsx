@@ -71,33 +71,49 @@ const Categories = ({ categories }: FeaturedCategoriesProps) => {
                                 href={route('catalog.category.books', {
                                     slug: c.slug,
                                 })}
-                                className="hairline group relative block overflow-hidden rounded-xl2 border bg-card p-6 transition-all duration-300 hover:-translate-y-1 hover:border-cobalt/30 hover:shadow-lift dark:bg-night-2"
+                                className="hairline group relative block aspect-[4/3] overflow-hidden rounded-xl2 border bg-card transition-all duration-300 hover:-translate-y-1 hover:border-cobalt/30 hover:shadow-lift dark:bg-night-2"
                             >
-                                {/* hover blob */}
-                                <div className="absolute -top-6 -right-6 h-24 w-24 rounded-full bg-cobalt-50 transition-transform duration-500 group-hover:scale-150 dark:bg-cobalt/10" />
+                                {/* Foto kategori sebagai gambar utama kartu */}
+                                {c.photo ? (
+                                    <ImageWithFallback
+                                        src={c.photo}
+                                        alt={c.name}
+                                        loading="lazy"
+                                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                    />
+                                ) : (
+                                    <div className="absolute inset-0 bg-gradient-to-br from-cobalt/25 via-night-2 to-night" />
+                                )}
 
-                                <div className="relative flex items-start justify-between">
-                                    <div className="grid h-12 w-12 place-items-center overflow-hidden rounded-xl bg-brand/10 ring-1 ring-brand/15 transition-transform duration-300 group-hover:scale-110">
-                                        {c.icon ? (
-                                            <ImageWithFallback
-                                                src={c.icon}
-                                                alt={c.name}
-                                                loading="lazy"
-                                                className="h-7 w-7 object-contain"
-                                            />
-                                        ) : (
-                                            <LayoutGrid className="h-6 w-6 text-brand" />
-                                        )}
-                                    </div>
-                                    <ArrowUpRight className="h-[18px] w-[18px] text-muted-foreground transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-cobalt dark:group-hover:text-cobalt-lt" />
+                                {/* Scrim agar teks terbaca di atas foto */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-black/35" />
+
+                                {/* Ikon kategori — tetap berkotak, kini sebagai badge di atas */}
+                                <div className="absolute top-3 left-3 grid h-11 w-11 place-items-center overflow-hidden rounded-xl bg-white/90 ring-1 ring-white/40 backdrop-blur-sm transition-transform duration-300 group-hover:scale-110 dark:bg-night-3/85">
+                                    {c.icon ? (
+                                        <ImageWithFallback
+                                            src={c.icon}
+                                            alt={c.name}
+                                            loading="lazy"
+                                            className="h-7 w-7 object-contain"
+                                        />
+                                    ) : (
+                                        <LayoutGrid className="h-6 w-6 text-cobalt dark:text-cobalt-lt" />
+                                    )}
                                 </div>
 
-                                <div className="relative mt-7">
-                                    <div className="font-display text-lg font-semibold text-foreground transition-colors group-hover:text-cobalt dark:group-hover:text-cobalt-lt">
+                                {/* Panah */}
+                                <span className="absolute top-3 right-3 grid h-8 w-8 place-items-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-all duration-300 group-hover:bg-cobalt">
+                                    <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                                </span>
+
+                                {/* Nama + jumlah judul (overlay bawah) */}
+                                <div className="absolute inset-x-0 bottom-0 p-4">
+                                    <div className="font-display text-lg font-semibold text-white">
                                         {c.name}
                                     </div>
-                                    <div className="mt-1 text-xs text-muted-foreground">
-                                        <span className="tabnum font-medium text-foreground/70">
+                                    <div className="mt-0.5 text-xs text-white/70">
+                                        <span className="tabnum font-medium text-white/90">
                                             {c.count_of_books ?? 0}
                                         </span>{' '}
                                         {language === 'id'

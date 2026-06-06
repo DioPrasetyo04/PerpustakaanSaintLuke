@@ -4,13 +4,14 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { useSearch } from '@/hooks/useSearch';
 import { FeaturedCatalogCategoriesProps } from '@/types/CatalogPage/CatalogCategoriesPageProps';
 import { router, usePage } from '@inertiajs/react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 import {
     CatalogHeader,
     CatalogSearch,
     CatalogResultMeta,
     CatalogEmpty,
+    SortToggle,
 } from '@/components/component/Catalog/CatalogShell';
 import { CategoriesCard } from '@/components/component/Card/CategoriesCard';
 import Pagination from '@/components/component/Home/Pagination/Pagination';
@@ -28,6 +29,12 @@ const CategoriesPage = () => {
 
     const debounceSearch = useDebounce(search, 400);
 
+    // Urut nama A–Z (asc) / Z–A (desc). null = ikut urutan default server.
+    const [sortDir, setSortDir] = useState<'asc' | 'desc' | null>(null);
+    const sortParams = sortDir
+        ? { field: 'name', direction: sortDir }
+        : {};
+
     useEffect(() => {
         router.get(
             route('catalog.categories'),
@@ -35,6 +42,7 @@ const CategoriesPage = () => {
                 search: debounceSearch,
                 categories_page: 1,
                 categories_load: state.load,
+                ...sortParams,
             },
             {
                 preserveState: true,
@@ -42,7 +50,8 @@ const CategoriesPage = () => {
                 replace: true,
             },
         );
-    }, [debounceSearch, state.load]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [debounceSearch, state.load, sortDir]);
 
     const onPageChange = (page: number) => {
         router.get(
@@ -51,6 +60,7 @@ const CategoriesPage = () => {
                 search,
                 categories_page: page,
                 categories_load: categories.meta.per_page,
+                ...sortParams,
             },
             {
                 preserveState: true,
@@ -66,6 +76,7 @@ const CategoriesPage = () => {
                 search,
                 categories_page: 1,
                 categories_load: perPage,
+                ...sortParams,
             },
             {
                 preserveState: true,
@@ -94,6 +105,13 @@ const CategoriesPage = () => {
                     placeholder={text.placeholder}
                     value={search}
                     onChange={handleSearchChange}
+                    trailing={
+                        <SortToggle
+                            direction={sortDir}
+                            onChange={setSortDir}
+                            language={language}
+                        />
+                    }
                 />
                 {categories.data.length > 0 ? (
                     <>

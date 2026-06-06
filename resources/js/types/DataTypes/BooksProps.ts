@@ -12,6 +12,13 @@ export type BookStatus =
     | 'Hilang'
     | 'Rusak';
 
+export type BookFormat = 'digital' | 'fisik';
+
+export type BookTypeProps = {
+    id: number;
+    type: BookFormat;
+};
+
 export type BookProps = {
     id: number;
     title: string;
@@ -26,6 +33,7 @@ export type BookProps = {
     language: LanguageProps;
     authors: AuthorProps[];
     categories: CategoryProps[];
+    types?: BookTypeProps[];
     synopsis?: string;
     price?: number;
     avg_rating?: number;

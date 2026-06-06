@@ -1,6 +1,7 @@
-import { Search } from 'lucide-react';
+import { Search, ChevronUp, ChevronDown } from 'lucide-react';
 import { motion } from 'framer-motion';
-import type { ChangeEvent, ComponentType } from 'react';
+import type { ChangeEvent, ComponentType, ReactNode } from 'react';
+import { cn } from '@/lib/utils';
 
 /* Editorial catalog header — mono eyebrow + Space Grotesk title + subtitle */
 export function CatalogHeader({
@@ -39,26 +40,85 @@ export function CatalogHeader({
     );
 }
 
-/* Rounded pill search field */
+/* Rounded pill search field — optional `trailing` slot for a sort toggle, etc. */
 export function CatalogSearch({
     placeholder,
     value,
     onChange,
+    trailing,
 }: {
     placeholder?: string;
     value: string;
     onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+    trailing?: ReactNode;
 }) {
     return (
-        <div className="hairline mb-6 flex items-center gap-3 rounded-full border bg-card px-5 shadow-soft transition-colors focus-within:border-cobalt dark:bg-night-2">
-            <Search className="h-5 w-5 shrink-0 text-muted-foreground" />
-            <input
-                type="search"
-                value={value}
-                onChange={onChange}
-                placeholder={placeholder}
-                className="flex-1 bg-transparent py-3.5 text-base text-foreground outline-none placeholder:text-muted-foreground"
-            />
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="hairline flex flex-1 items-center gap-3 rounded-full border bg-card px-5 shadow-soft transition-colors focus-within:border-cobalt dark:bg-night-2">
+                <Search className="h-5 w-5 shrink-0 text-muted-foreground" />
+                <input
+                    type="search"
+                    value={value}
+                    onChange={onChange}
+                    placeholder={placeholder}
+                    className="flex-1 bg-transparent py-3.5 text-base text-foreground outline-none placeholder:text-muted-foreground"
+                />
+            </div>
+            {trailing}
+        </div>
+    );
+}
+
+/**
+ * Tombol urut A–Z: panah atas = ascending (A→Z), panah bawah = descending (Z→A).
+ * `direction` null berarti belum aktif (tidak ada yang ter-highlight).
+ */
+export function SortToggle({
+    direction,
+    onChange,
+    language,
+}: {
+    direction: 'asc' | 'desc' | null;
+    onChange: (dir: 'asc' | 'desc') => void;
+    language: 'id' | 'en';
+}) {
+    const tr = (id: string, en: string) => (language === 'id' ? id : en);
+    return (
+        <div
+            role="group"
+            aria-label={tr('Urutkan A–Z', 'Sort A–Z')}
+            className="hairline inline-flex shrink-0 overflow-hidden rounded-full border bg-card shadow-soft dark:bg-night-2"
+        >
+            <button
+                type="button"
+                onClick={() => onChange('asc')}
+                aria-pressed={direction === 'asc'}
+                aria-label={tr('Urutkan A ke Z', 'Sort A to Z')}
+                title={tr('A–Z', 'A–Z')}
+                className={cn(
+                    'grid h-12 w-12 place-items-center transition-colors',
+                    direction === 'asc'
+                        ? 'bg-cobalt text-white'
+                        : 'text-muted-foreground hover:text-cobalt',
+                )}
+            >
+                <ChevronUp className="h-4 w-4" />
+            </button>
+            <button
+                type="button"
+                onClick={() => onChange('desc')}
+                aria-pressed={direction === 'desc'}
+                aria-label={tr('Urutkan Z ke A', 'Sort Z to A')}
+                title={tr('Z–A', 'Z–A')}
+                className={cn(
+                    'grid h-12 w-12 place-items-center transition-colors',
+                    direction === 'desc'
+                        ? 'bg-cobalt text-white'
+                        : 'text-muted-foreground hover:text-cobalt',
+                )}
+            >
+                <ChevronDown className="h-4 w-4" />
+            </button>
         </div>
     );
 }

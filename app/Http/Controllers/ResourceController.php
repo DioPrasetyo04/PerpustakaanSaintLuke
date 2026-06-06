@@ -18,7 +18,7 @@ class ResourceController extends Controller
 
     public function index(Request $request)
     {
-        $filters = $request->only(['search', 'type']);
+        $filters = $request->only(['search', 'type', 'field', 'direction']);
 
         $resources = $this->onlineResourceServices->getActiveResourcesRaw($filters);
 

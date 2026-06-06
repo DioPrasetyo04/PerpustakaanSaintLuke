@@ -4,23 +4,65 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useLanguage } from '@/hooks/useLanguage';
-import { useQueryParams } from '@/hooks/useQueryParams';
-import { formattedDate } from '@/lib/utils';
+import { useDebounce } from '@/hooks/useDebounce';
+import { formattedDate, stripHtml } from '@/lib/utils';
 import type { InformationPageType } from '@/types/InformationPage/Information';
-import { Link, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
+import { route } from 'ziggy-js';
 import { motion } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
 import { ArrowRight, Calendar } from 'lucide-react';
-import { CatalogHeader } from '@/components/component/Catalog/CatalogShell';
+import {
+    CatalogHeader,
+    CatalogSearch,
+    SortToggle,
+} from '@/components/component/Catalog/CatalogShell';
 
 function InformationsPage() {
     const { language } = useLanguage();
-    const { informationsData } = usePage<InformationPageType>().props;
-    const { createPagination } = useQueryParams();
+    const { informationsData, state } = usePage<InformationPageType>().props;
+    const perPage = informationsData.meta?.per_page ?? 10;
 
-    const { onPageChange, onPerPageChange } = createPagination(
-        'informations_page',
-        informationsData.meta?.per_page ?? 10,
-    );
+    const [search, setSearch] = useState(state?.search || '');
+    const debounceSearch = useDebounce(search, 400);
+    // Urut judul A–Z (asc) / Z–A (desc). null = default (terbaru).
+    const [sortDir, setSortDir] = useState<'asc' | 'desc' | null>(null);
+
+    const buildParams = (page: number, load: number) => ({
+        search: debounceSearch || undefined,
+        informations_page: page,
+        informations_load: load,
+        ...(sortDir ? { field: 'name', direction: sortDir } : {}),
+    });
+
+    // Search/sort → kembali ke halaman 1 (lewati mount pertama).
+    const firstRender = useRef(true);
+    useEffect(() => {
+        if (firstRender.current) {
+            firstRender.current = false;
+            return;
+        }
+        router.get(route('announcements.index'), buildParams(1, perPage), {
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [debounceSearch, sortDir]);
+
+    const onPageChange = (page: number) =>
+        router.get(route('announcements.index'), buildParams(page, perPage), {
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+        });
+
+    const onPerPageChange = (load: number) =>
+        router.get(route('announcements.index'), buildParams(1, load), {
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+        });
     return (
         <div className="min-h-screen bg-background py-8">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -36,6 +78,23 @@ function InformationsPage() {
                         language === 'id'
                             ? 'Ikuti kabar koleksi baru, acara klub baca, dan pengumuman terkini.'
                             : 'Stay updated with the latest news, book club events, and announcements.'
+                    }
+                />
+
+                <CatalogSearch
+                    placeholder={
+                        language === 'id'
+                            ? 'Cari berita atau pengumuman…'
+                            : 'Search news or announcements…'
+                    }
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    trailing={
+                        <SortToggle
+                            direction={sortDir}
+                            onChange={setSortDir}
+                            language={language}
+                        />
                     }
                 />
 
@@ -90,11 +149,11 @@ function InformationsPage() {
                                     </h3>
 
                                     <p className="mb-4 line-clamp-3 flex-1 text-muted-foreground">
-                                        {information.description}
+                                        {stripHtml(information.description)}
                                     </p>
 
                                     <Link
-                                        href={`/information/${information.slug}`}
+                                        href={`/information/detail/${information.slug}`}
                                     >
                                         <Button
                                             variant="link"
@@ -111,13 +170,16 @@ function InformationsPage() {
                 </div>
 
                 {/* Pagination */}
-                <Pagination
-                    page={informationsData.meta.current_page}
-                    total={informationsData.meta.total}
-                    perPage={informationsData.meta.per_page}
-                    onPageChange={onPageChange}
-                    onPerPageChange={onPerPageChange}
-                />
+                {informationsData.meta.total >
+                    informationsData.meta.per_page && (
+                    <Pagination
+                        page={informationsData.meta.current_page}
+                        total={informationsData.meta.total}
+                        perPage={informationsData.meta.per_page}
+                        onPageChange={onPageChange}
+                        onPerPageChange={onPerPageChange}
+                    />
+                )}
             </div>
         </div>
     );

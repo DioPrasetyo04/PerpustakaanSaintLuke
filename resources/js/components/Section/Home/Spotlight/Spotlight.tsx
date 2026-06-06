@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Star, ArrowRight } from 'lucide-react';
 import { route } from 'ziggy-js';
 import { useLanguage } from '@/hooks/useLanguage';
+import { stripHtml } from '@/lib/utils';
 import { ImageWithFallback } from '@/components/common/ImageWithFallback';
 import type { BookProps } from '@/types/DataTypes/BooksProps';
 
@@ -22,7 +23,7 @@ const Spotlight = ({ book }: SpotlightProps) => {
 
     const rating = book.avg_rating ?? 4.8;
     const synopsis =
-        book.synopsis ??
+        stripHtml(book.synopsis) ||
         (language === 'id'
             ? 'Pilihan pustakawan minggu ini — sebuah bacaan yang layak masuk daftar baca setiap jenjang.'
             : "This week's librarian pick — a read worth adding to every reading list.");

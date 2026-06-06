@@ -28,6 +28,11 @@ class InformationRepositories implements InformationRepositoriesInterface
                         ->orWhereHas('category', fn($q) => $q->where('name', 'REGEXP', $search));
                 });
             })
+            ->when(
+                ($filters['field'] ?? null) && ($filters['direction'] ?? null),
+                fn($query) => $query->orderBy($filters['field'], $filters['direction']),
+                fn($query) => $query->latest()
+            )
             ->paginate($perPage, ['*'], 'informations_page', $page);
     }
 

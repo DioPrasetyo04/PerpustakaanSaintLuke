@@ -38,6 +38,7 @@ class Book extends Model
         'cover',
         'price',
         'is_published',
+        'is_spotlight',
     ];
 
     protected $casts = [
@@ -46,7 +47,24 @@ class Book extends Model
         'price' => 'integer',
         'status' => BookStatus::class,
         'is_published' => PublishedBooks::class,
+        'is_spotlight' => 'boolean',
     ];
+
+    /**
+     * Jaga agar hanya ada satu buku "Sorotan" aktif: saat sebuah buku
+     * ditandai spotlight, buku lain otomatis dilepas tandanya.
+     */
+    protected static function booted(): void
+    {
+        static::saved(function (Book $book) {
+            if ($book->is_spotlight && $book->wasChanged('is_spotlight')) {
+                static::query()
+                    ->whereKeyNot($book->getKey())
+                    ->where('is_spotlight', true)
+                    ->update(['is_spotlight' => false]);
+            }
+        });
+    }
 
     public function publisher(): BelongsTo
     {

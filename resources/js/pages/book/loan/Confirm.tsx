@@ -1,17 +1,15 @@
-import React, { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 import { motion } from 'framer-motion';
 import { Link, router, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Calendar } from 'lucide-react';
+import { ArrowLeft, Calendar, BookOpen } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 import type { ConfirmLoanPageProps } from '@/types/ConfirmLoanPage/ConfirmLoanPageProps';
 import { dataLoan } from '@/data/data';
 import { Card } from '@/components/ui/card';
 import { ImageWithFallback } from '@/components/common/ImageWithFallback';
 import { Label } from '@/components/ui/label';
-// import { FaPercentage } from 'react-icons/fa';
-import { moneyFormatter } from '@/lib/utils';
 import LoanNotification from '@/components/component/Notification/Notification';
 import axios from 'axios';
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
@@ -25,15 +23,21 @@ type LoanKey =
     | 'loan.same_book_active'
     | 'loan.has_unpaid_fine'
     | 'loan.user_not_verified'
+    | 'loan.not_digital'
+    | 'loan.already_reading'
     | 'loan.settings_not_configured';
 
 type LoanTranslation = {
     headerNavigation: string;
     days: string;
-    borrowingTerms: {
-        rule1: string;
-        rule2: string;
-    };
+    confirmTitle: string;
+    accessDuration: string;
+    accessDeadline: string;
+    accessTermsTitle: string;
+    accessTerms: string[];
+    confirmButton: string;
+    processing: string;
+    cancel: string;
     checked: string;
 } & Record<LoanKey, string>;
 
@@ -42,10 +46,11 @@ type PagePropsWithFlash = ConfirmLoanPageProps & {
         success?: string;
     };
 };
+
 export default function Confirm() {
     const { language } = useLanguage();
     const { props } = usePage<PagePropsWithFlash>();
-    const { book, fineSettings, loanPreview } = props;
+    const { book, loanPreview } = props;
     const [loading, setLoading] = useState(false);
     const [checkBox, setCheckBox] = useState(false);
     const data = dataLoan[language] as LoanTranslation;
@@ -56,37 +61,14 @@ export default function Confirm() {
 
     const t = (key: LoanKey) => data[key] ?? key;
 
-    const calculators = {
-        percentage: (price: number, fee: number) => (price * fee) / 100,
-        fixed: (_: number, fee: number) => fee,
-    };
-
-    const calculateDamageType = useMemo(() => {
-        if (!book || !fineSettings) return 0;
-
-        const price = Number(book.price);
-        const fee = Number(fineSettings.damage_fee_book);
-        const type = fineSettings.damage_discount_type;
-
-        return calculators[type]?.(price, fee) ?? 0;
-    }, [book, fineSettings]);
-
-    const calculateLostType = useMemo(() => {
-        if (!book || !fineSettings) return 0;
-
-        const price = Number(book.price);
-        const fee = Number(fineSettings.lost_fee_book);
-        const type = fineSettings.lost_discount_type;
-
-        return calculators[type]?.(price, fee) ?? 0;
-    }, [book, fineSettings]);
-
     const onHandleCheckBoxChange = (checked: boolean) => {
         setCheckBox(checked);
     };
 
-    // 🔥 HANDLE BORROW
-    const onHandleBorrowBook = async () => {
+    // 🔥 KONFIRMASI BACA BUKU DIGITAL
+    // Memakai alur peminjaman DIGITAL (loan_type digital) yang otomatis
+    // dikembalikan saat masa akses berakhir, lalu membuka aset buku.
+    const onHandleReadBook = async () => {
         try {
             if (!checkBox) {
                 return setNotification({
@@ -96,9 +78,9 @@ export default function Confirm() {
             }
             setLoading(true);
 
-            const response = await axios.post(`/loan/book/${book.slug}`, {
-                book_id: book.id,
-            });
+            const response = await axios.post(
+                `/loan/digital/book/${book.slug}`,
+            );
 
             setLoading(false);
 
@@ -109,7 +91,7 @@ export default function Confirm() {
                 message: t(successKey),
             });
 
-            // 🔥 popup dulu → delay → redirect
+            // 🔥 popup dulu → delay → buka aset buku
             setTimeout(() => {
                 router.visit(`/assets/book/${response.data.slug}`);
             }, 1500);
@@ -143,7 +125,7 @@ export default function Confirm() {
                 >
                     <Card className="p-8">
                         <h1 className="mb-6 font-display text-2xl font-bold text-foreground">
-                            Borrow Book
+                            {data.confirmTitle}
                         </h1>
 
                         {/* Book Summary */}
@@ -178,23 +160,23 @@ export default function Confirm() {
                             </div>
                         </div>
 
-                        {/* Borrow Duration */}
+                        {/* Access Duration */}
                         <div className="mb-6">
                             <Label className="mb-2 block">
-                                Borrow Duration
+                                {data.accessDuration}
                             </Label>
                             <Label>
                                 {loanPreview.duration} {data.days}
                             </Label>
                         </div>
 
-                        {/* Due Date Info */}
+                        {/* Access Deadline Info */}
                         <div className="mb-6 rounded-lg border border-cobalt-lt bg-cobalt-50 p-4">
                             <div className="flex items-start gap-3">
                                 <Calendar className="mt-0.5 h-5 w-5 text-cobalt-dk" />
                                 <div>
                                     <p className="mb-1 font-medium text-ink">
-                                        Due Date
+                                        {data.accessDeadline}
                                     </p>
                                     <p className="text-sm text-cobalt-dk">
                                         {loanPreview.due_date}
@@ -203,46 +185,15 @@ export default function Confirm() {
                             </div>
                         </div>
 
-                        {/* Terms */}
+                        {/* Access Terms */}
                         <div className="mb-6 rounded-lg bg-background p-4">
                             <h4 className="mb-2 font-medium text-foreground">
-                                Borrowing Terms
+                                {data.accessTermsTitle}
                             </h4>
                             <ul className="list-disc space-y-1 pl-3 text-justify text-sm text-muted-foreground">
-                                <li>
-                                    Return the book on or before the due date
-                                </li>
-                                <li>Late returns incur a fine of $1 per day</li>
-                                {fineSettings.damage_discount_type ===
-                                'percentage' ? (
-                                    <li className="w-full list-disc items-center">
-                                        Damage type{' '}
-                                        {fineSettings.damage_discount_type} {''}
-                                        {fineSettings.damage_fee_book}% from
-                                        total price book{' '}
-                                        {moneyFormatter(book?.price ?? 0)}{' '}
-                                        equals to {''}
-                                        {moneyFormatter(calculateDamageType)}
-                                    </li>
-                                ) : (
-                                    <li>cndncdbn</li>
-                                )}
-                                {fineSettings.lost_discount_type ===
-                                'percentage' ? (
-                                    <li className="w-full list-disc items-center">
-                                        Lost type{' '}
-                                        {fineSettings.lost_discount_type} {''}
-                                        {fineSettings.lost_fee_book}% from total
-                                        price book{' '}
-                                        {moneyFormatter(book?.price ?? 0)}{' '}
-                                        equals to {''}
-                                        {moneyFormatter(calculateLostType)}
-                                    </li>
-                                ) : (
-                                    <li>cndncdbn</li>
-                                )}
-                                <li>Take good care of the book</li>
-                                <li>Report any damage immediately</li>
+                                {data.accessTerms.map((term, index) => (
+                                    <li key={index}>{term}</li>
+                                ))}
                             </ul>
                         </div>
 
@@ -269,12 +220,19 @@ export default function Confirm() {
                         {/* Action Buttons */}
                         <div className="flex gap-3">
                             <Button
-                                onClick={onHandleBorrowBook}
-                                className="flex-1 bg-primary hover:bg-primary/90"
+                                onClick={onHandleReadBook}
+                                className="flex-1 gap-2 bg-primary hover:bg-primary/90"
                                 size="lg"
                                 disabled={loading}
                             >
-                                {loading ? 'Processing...' : 'Confirm Borrow'}
+                                {loading ? (
+                                    data.processing
+                                ) : (
+                                    <>
+                                        {data.confirmButton}
+                                        <BookOpen className="h-4 w-4" />
+                                    </>
+                                )}
                             </Button>
                             <Link
                                 href={`/book/detail/${book.slug}`}
@@ -285,7 +243,7 @@ export default function Confirm() {
                                     size="lg"
                                     className="w-full"
                                 >
-                                    Cancel
+                                    {data.cancel}
                                 </Button>
                             </Link>
                         </div>

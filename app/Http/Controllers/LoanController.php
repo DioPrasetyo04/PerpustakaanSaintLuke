@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\LoanRequest;
 use App\Services\LoanService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -57,17 +56,17 @@ class LoanController extends Controller
         ]);
     }
 
-    public function store(LoanRequest $request)
+    /**
+     * Alur "Baca Buku": buat peminjaman digital (bila belum ada) lalu kembalikan
+     * slug agar frontend mengarahkan langsung ke halaman aset buku.
+     */
+    public function readDigital(string $slug)
     {
-        $data = $request->validated();
-
-        $loan = $this->loanController->postDataLoanUserAuth($data);
-
-        $newDetail = $loan->loanDetails->firstWhere('book_id', $data['book_id']);
+        $slug = $this->loanController->readDigitalBook($slug);
 
         return response()->json([
             'message' => 'loan.success',
-            'slug'    => $newDetail?->book?->slug,
+            'slug'    => $slug,
         ]);
     }
 }

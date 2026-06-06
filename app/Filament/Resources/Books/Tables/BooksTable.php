@@ -16,6 +16,7 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
@@ -99,6 +100,14 @@ class BooksTable
                         PublishedBooks::PUBLISH => 'heroicon-s-check-badge',
                         PublishedBooks::UNPUBLISH => 'heroicon-s-pencil',
                     })->label('Publikasi')->searchable()->sortable(),
+
+                ToggleColumn::make('is_spotlight')
+                    ->label('Sorotan')
+                    ->onIcon('heroicon-m-star')
+                    ->offIcon('heroicon-m-star')
+                    ->onColor('warning')
+                    ->sortable()
+                    ->tooltip('Jadikan buku sorotan di Beranda (hanya satu yang aktif)'),
 
                 TextColumn::make('active_loans_count')
                     ->label('Sedang Dipinjam')
