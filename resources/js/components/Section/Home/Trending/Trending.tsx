@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Star, ArrowRight } from 'lucide-react';
 import { route } from 'ziggy-js';
 import { useLanguage } from '@/hooks/useLanguage';
-import { formattedRating } from '@/lib/utils';
+import { formattedRating, stripHtml } from '@/lib/utils';
 import { ImageWithFallback } from '@/components/common/ImageWithFallback';
 import type { BookProps } from '@/types/DataTypes/BooksProps';
 
@@ -93,9 +93,9 @@ const Trending = ({ books }: TrendingProps) => {
                                     <div className="mt-1 text-sm text-paper/60">
                                         {hero.authors?.[0]?.name}
                                     </div>
-                                    {hero.synopsis && (
+                                    {stripHtml(hero.synopsis) && (
                                         <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-paper/55">
-                                            {hero.synopsis}
+                                            {stripHtml(hero.synopsis)}
                                         </p>
                                     )}
                                     <div className="mt-auto flex items-center gap-4 pt-4 text-xs">

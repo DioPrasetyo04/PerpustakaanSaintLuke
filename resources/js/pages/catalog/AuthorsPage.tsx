@@ -4,13 +4,14 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { useSearch } from '@/hooks/useSearch';
 import { FeaturedCatalogCategoriesProps } from '@/types/CatalogPage/CatalogCategoriesPageProps';
 import { router, usePage } from '@inertiajs/react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 import {
     CatalogHeader,
     CatalogSearch,
     CatalogResultMeta,
     CatalogEmpty,
+    SortToggle,
 } from '@/components/component/Catalog/CatalogShell';
 import Pagination from '@/components/component/Home/Pagination/Pagination';
 import { TbCategoryPlus } from 'react-icons/tb';
@@ -27,6 +28,12 @@ const AuthorsPage = () => {
 
     const debounceSearch = useDebounce(search, 400);
 
+    // Urut nama A–Z (asc) / Z–A (desc). null = ikut urutan default server.
+    const [sortDir, setSortDir] = useState<'asc' | 'desc' | null>(null);
+    const sortParams = sortDir
+        ? { field: 'name', direction: sortDir }
+        : {};
+
     useEffect(() => {
         router.get(
             route('catalog.authors'),
@@ -34,6 +41,7 @@ const AuthorsPage = () => {
                 search: debounceSearch,
                 authors_page: 1,
                 authors_load: state.load,
+                ...sortParams,
             },
             {
                 preserveState: true,
@@ -41,7 +49,8 @@ const AuthorsPage = () => {
                 replace: true,
             },
         );
-    }, [debounceSearch, state.load]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [debounceSearch, state.load, sortDir]);
 
     const onPageChange = (page: number) => {
         router.get(
@@ -50,6 +59,7 @@ const AuthorsPage = () => {
                 search,
                 authors_page: page,
                 authors_load: authors.meta.per_page,
+                ...sortParams,
             },
             {
                 preserveState: true,
@@ -65,6 +75,7 @@ const AuthorsPage = () => {
                 search,
                 authors_page: 1,
                 authors_load: perPage,
+                ...sortParams,
             },
             {
                 preserveState: true,
@@ -92,6 +103,13 @@ const AuthorsPage = () => {
                     placeholder={text.placeholder}
                     value={search}
                     onChange={handleSearchChange}
+                    trailing={
+                        <SortToggle
+                            direction={sortDir}
+                            onChange={setSortDir}
+                            language={language}
+                        />
+                    }
                 />
                 {authors.data.length > 0 ? (
                     <>

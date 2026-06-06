@@ -8,6 +8,7 @@ import type { InformationProps } from '@/types/DataTypes/InformationProps';
 import { Link, usePage } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Calendar } from 'lucide-react';
+import DOMPurify from 'dompurify';
 import React from 'react';
 
 export default function show() {
@@ -70,12 +71,15 @@ export default function show() {
 
                         {/* Content */}
                         <div className="p-8 sm:p-12">
-                            {/* Description */}
-                            <div className="prose prose-lg mb-8 max-w-none">
-                                <p className="border-l-4 border-primary pl-6 text-xl leading-relaxed text-foreground italic">
-                                    {detailInfo.description}
-                                </p>
-                            </div>
+                            {/* Description — render konten RichEditor (HTML) sesuai tagnya */}
+                            <div
+                                className="prose prose-lg dark:prose-invert mb-8 max-w-none border-l-4 border-primary pl-6 leading-relaxed text-foreground [&_a]:text-primary [&_a]:underline [&_b]:font-bold [&_strong]:font-bold"
+                                dangerouslySetInnerHTML={{
+                                    __html: DOMPurify.sanitize(
+                                        detailInfo.description ?? '',
+                                    ),
+                                }}
+                            />
 
                             {/* CTA */}
                             <div className="mt-8 flex items-center justify-between">

@@ -57,10 +57,20 @@ class ReturnBookService
         return [
             'book' => transformData($book, BookResource::class),
             'loan' => $loanArray,
+            'loan_type' => $loanDetail->loan_type?->value,
+            // Sudah dikembalikan (mis. auto-return digital / dikembalikan via tab lain).
+            'already_returned' => (bool) $loanDetail->returnBook,
             'late_days' => $lateDays,
             'late_fee' => $lateFee,
             'total_fee' => $lateFee,
-            'has_review' => ReviewBook::where('loan_user_id', $loanDetail->id)->exists(),
+            // Sudah pernah review buku INI (lintas pinjaman), bukan hanya detail ini,
+            // agar modal review tidak muncul lagi untuk buku yang sudah diulas.
+            'has_review' => ReviewBook::query()
+                ->whereHas('loanDetail', function ($q) use ($book, $userId) {
+                    $q->where('book_id', $book->id)
+                        ->whereHas('loan', fn ($l) => $l->where('user_id', $userId));
+                })
+                ->exists(),
         ];
     }
 
@@ -148,13 +158,15 @@ class ReturnBookService
     {
         $loan->loadMissing(['loanDetails.returnBook', 'loanDetails.book']);
 
-        $detail = $loan->loanDetails->firstWhere('book_id', $bookId);
+        $details = $loan->loanDetails->where('book_id', $bookId);
 
-        if (! $detail) {
+        if ($details->isEmpty()) {
             throw new BusinessException('return.loan_detail_not_found', 404);
         }
 
-        return $detail;
+        // Utamakan detail yang masih aktif (belum punya pengembalian) agar tidak
+        // salah memilih detail buku yang sudah dikembalikan sebelumnya.
+        return $details->first(fn ($d) => is_null($d->returnBook)) ?? $details->first();
     }
 
     public function storeReview(string $returnBookCode, array $data, int $userId): void
@@ -162,9 +174,18 @@ class ReturnBookService
         $return = ReturnBook::query()
             ->where('return_book_code', $returnBookCode)
             ->whereHas('loanDetail.loan', fn($q) => $q->where('user_id', $userId))
+            ->with('loanDetail')
             ->firstOrFail();
 
-        if (ReviewBook::where('loan_user_id', $return->loan_user_id)->exists()) {
+        // Cegah review ganda untuk buku yang sama oleh user yang sama (lintas pinjaman).
+        $alreadyReviewed = ReviewBook::query()
+            ->whereHas('loanDetail', function ($q) use ($return, $userId) {
+                $q->where('book_id', $return->loanDetail->book_id)
+                    ->whereHas('loan', fn ($l) => $l->where('user_id', $userId));
+            })
+            ->exists();
+
+        if ($alreadyReviewed) {
             throw new BusinessException('review.already_exists', 400);
         }
 

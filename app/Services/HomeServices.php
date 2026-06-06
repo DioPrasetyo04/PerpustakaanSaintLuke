@@ -23,6 +23,30 @@ class HomeServices
         return $this->homeServices->getAllBooksHomePage($filters, $perPage, $page);
     }
 
+    /**
+     * Buku trending (rating desc, judul asc) siap dipakai frontend.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function getTrendingBooks(int $limit = 12): array
+    {
+        return BookResource::collection(
+            $this->homeServices->getTrendingBooks($limit)
+        )->resolve();
+    }
+
+    /**
+     * Buku Sorotan/Pilihan Pustakawan untuk Beranda (null bila tak ada buku layak).
+     *
+     * @return array<string, mixed>|null
+     */
+    public function getSpotlightBook(): ?array
+    {
+        $book = $this->homeServices->getSpotlightBook();
+
+        return $book ? BookResource::make($book)->resolve() : null;
+    }
+
     public function getCategoriesRaw(array $filters, int $perPage, int $page): LengthAwarePaginator
     {
         return $this->homeServices->getAllCategoriesHomePage($filters, $perPage, $page);

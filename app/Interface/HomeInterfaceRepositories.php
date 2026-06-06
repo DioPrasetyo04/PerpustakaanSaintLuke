@@ -3,10 +3,22 @@
 namespace App\Interface;
 
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 interface HomeInterfaceRepositories
 {
     public function getAllBooksHomePage(array $filters, int $perPage, int $page): LengthAwarePaginator;
+
+    /**
+     * Buku trending: diurutkan rating tertinggi, lalu abjad judul bila rating sama.
+     */
+    public function getTrendingBooks(int $limit): Collection;
+
+    /**
+     * Buku Sorotan/Pilihan Pustakawan (dipilih dari Filament). Fallback ke
+     * buku dengan rating tertinggi bila belum ada yang ditandai.
+     */
+    public function getSpotlightBook(): ?\App\Models\Book;
 
     public function getAllCategoriesHomePage(array $filters, int $perPage, int $page): LengthAwarePaginator;
 

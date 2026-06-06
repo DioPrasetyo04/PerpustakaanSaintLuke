@@ -22,6 +22,14 @@ class ReturnBookController extends Controller
     {
         $data = $this->returnController->getConfirmationReturnBookUserAuth($slug, $loanCode, auth()->id());
 
+        // Buku sudah dikembalikan → jangan tampilkan halaman konfirmasi yang akan
+        // gagal saat submit; arahkan ke daftar pinjaman dengan info.
+        if (!empty($data['already_returned'])) {
+            return redirect()
+                ->route('loan.index')
+                ->with('info', 'return.already_returned');
+        }
+
         return Inertia::render('book/return/Confirmation', [
             'data' => $data
         ]);

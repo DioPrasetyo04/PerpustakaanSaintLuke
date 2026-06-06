@@ -56,6 +56,8 @@ export type EventItem = {
 export type HomePageProps = {
     data: {
         books: Paginated<BookProps>;
+        trending_books: BookProps[];
+        spotlight_book: BookProps | null;
         categories: Paginated<CategoryProps>;
         informations: Paginated<InformationProps>;
         live_activities: LiveActivity[];

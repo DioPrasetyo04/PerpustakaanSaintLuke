@@ -13,6 +13,7 @@ use App\Models\Publisher;
 use App\Models\User;
 use App\Models\Visit;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 
 class HomeRepositories implements HomeInterfaceRepositories
@@ -36,6 +37,7 @@ class HomeRepositories implements HomeInterfaceRepositories
                 'categories:id,name,slug,icon',
                 'authors:id,name,username,avatar', // cukup ini
                 'language:id,language,photo', // cukup ini
+                'types:id,type',
             ])
             ->withAvg('reviews as avg_rating', 'rating')
             ->when(
@@ -59,6 +61,72 @@ class HomeRepositories implements HomeInterfaceRepositories
             ->where('status', BookStatus::AVAILABLE->value)
 
             ->paginate($perPage, ['*'], 'book_page', $page);
+    }
+
+    public function getTrendingBooks(int $limit = 12): Collection
+    {
+        return Book::query()
+            ->select([
+                'id',
+                'publisher_id',
+                'language_id',
+                'book_code',
+                'title',
+                'slug',
+                'status',
+                'cover',
+                'is_published',
+                'synopsis',
+                'publication_year',
+            ])
+            ->with([
+                'publisher:id,name,slug,logo',
+                'categories:id,name,slug,icon',
+                'authors:id,name,username,avatar',
+                'language:id,language,photo',
+                'types:id,type',
+            ])
+            ->withAvg('reviews as avg_rating', 'rating')
+            ->where('is_published', PublishedBooks::PUBLISH->value)
+            ->where('status', BookStatus::AVAILABLE->value)
+            // Rating tertinggi dulu (tanpa rating dianggap 0/terakhir),
+            // bila rating sama urutkan berdasarkan abjad judul.
+            ->orderByRaw('COALESCE(avg_rating, 0) DESC')
+            ->orderBy('title')
+            ->limit($limit)
+            ->get();
+    }
+
+    public function getSpotlightBook(): ?Book
+    {
+        return Book::query()
+            ->select([
+                'id',
+                'publisher_id',
+                'language_id',
+                'title',
+                'slug',
+                'status',
+                'cover',
+                'synopsis',
+                'publication_year',
+                'is_published',
+                'is_spotlight',
+            ])
+            ->with([
+                'authors:id,name,username,avatar',
+                'categories:id,name,slug,icon',
+                'types:id,type',
+            ])
+            ->withAvg('reviews as avg_rating', 'rating')
+            ->where('is_published', PublishedBooks::PUBLISH->value)
+            ->where('status', BookStatus::AVAILABLE->value)
+            // Buku yang ditandai spotlight didahulukan; bila tidak ada,
+            // fallback ke rating tertinggi lalu terbaru.
+            ->orderByDesc('is_spotlight')
+            ->orderByRaw('COALESCE(avg_rating, 0) DESC')
+            ->orderByDesc('id')
+            ->first();
     }
 
     public function getAllCategoriesHomePage(array $filters, int $perPage, int $page): LengthAwarePaginator

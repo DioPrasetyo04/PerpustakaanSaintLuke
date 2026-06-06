@@ -3,13 +3,14 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { useSearch } from '@/hooks/useSearch';
 import { FeaturedCatalogCategoriesProps } from '@/types/CatalogPage/CatalogCategoriesPageProps';
 import { router, usePage } from '@inertiajs/react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 import {
     CatalogHeader,
     CatalogSearch,
     CatalogResultMeta,
     CatalogEmpty,
+    SortToggle,
 } from '@/components/component/Catalog/CatalogShell';
 import Pagination from '@/components/component/Home/Pagination/Pagination';
 import { TbCategoryPlus } from 'react-icons/tb';
@@ -29,6 +30,12 @@ const PublishersPage = () => {
 
     const debounceSearch = useDebounce(search, 400);
 
+    // Urut nama A–Z (asc) / Z–A (desc). null = ikut urutan default server.
+    const [sortDir, setSortDir] = useState<'asc' | 'desc' | null>(null);
+    const sortParams = sortDir
+        ? { field: 'name', direction: sortDir }
+        : {};
+
     useEffect(() => {
         router.get(
             route('catalog.publishers'),
@@ -36,6 +43,7 @@ const PublishersPage = () => {
                 search: debounceSearch,
                 publishers_page: 1,
                 publishers_load: state.load,
+                ...sortParams,
             },
             {
                 preserveState: true,
@@ -43,15 +51,17 @@ const PublishersPage = () => {
                 replace: true,
             },
         );
-    }, [debounceSearch, state.load]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [debounceSearch, state.load, sortDir]);
 
     const onPageChange = (page: number) => {
         router.get(
             route('catalog.publishers'),
             {
                 search,
-                categories_page: page,
-                categories_load: publishers.meta.per_page,
+                publishers_page: page,
+                publishers_load: publishers.meta.per_page,
+                ...sortParams,
             },
             {
                 preserveState: true,
@@ -67,6 +77,7 @@ const PublishersPage = () => {
                 search,
                 publishers_page: 1,
                 publishers_load: perPage,
+                ...sortParams,
             },
             {
                 preserveState: true,
@@ -95,6 +106,13 @@ const PublishersPage = () => {
                     placeholder={text.placeholder}
                     value={search}
                     onChange={handleSearchChange}
+                    trailing={
+                        <SortToggle
+                            direction={sortDir}
+                            onChange={setSortDir}
+                            language={language}
+                        />
+                    }
                 />
                 {publishers.data.length > 0 ? (
                     <>
@@ -105,7 +123,7 @@ const PublishersPage = () => {
                             language={language}
                             noun={{ id: 'penerbit', en: 'publishers' }}
                         />
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                             {publishers.data.map((publisher) => (
                                 <PublisherCard
                                     key={publisher.id}

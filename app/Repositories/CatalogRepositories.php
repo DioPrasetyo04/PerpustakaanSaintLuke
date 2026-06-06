@@ -33,6 +33,7 @@ class CatalogRepositories implements CatalogInterfaceRepositories
                 'categories:id,name,icon',
                 'authors:id,name,username,avatar', // cukup ini
                 'language:id,language,photo', // cukup ini
+                'types:id,type',
             ])
             ->withAvg('reviews as avg_rating', 'rating')
             ->when(

@@ -3,7 +3,6 @@ import {
     Star,
     BookOpen,
     ChevronRight,
-    ArrowRight,
     Bookmark,
     Quote,
 } from 'lucide-react';
@@ -15,6 +14,9 @@ import { useLanguage } from '@/hooks/useLanguage';
 import type { DetailBookProps } from '@/types/DetailBookPage/DetailBookProps';
 import { bookDetailPage } from '@/data/data';
 import SectionRecomended from '@/components/Section/BookDetail/RecomendedBooks';
+import BookTypeBadge, {
+    uniqueFormats,
+} from '@/components/common/BookTypeBadge';
 import { formattedRating, formattedYear } from '@/lib/utils';
 import DOMPurify from 'dompurify';
 import Notification from '@/components/component/Notification/Notification';
@@ -102,10 +104,11 @@ function BookShow() {
         message: string;
     } | null>(null);
 
-    const onHandleBorrowConfirmation = () => {
-        if (bookAvailable) {
-            router.get(route('loan.confirmation', book.slug));
-        }
+    // "Baca Buku": arahkan ke halaman konfirmasi akses buku digital.
+    // Konfirmasi di sana yang mencatat peminjaman digital lalu membuka aset.
+    const onHandleReadConfirmation = () => {
+        if (!book) return;
+        router.get(route('loan.confirmation', book.slug));
     };
 
     const onHandleAddWishlist = () => {
@@ -156,24 +159,49 @@ function BookShow() {
     }
 
     const ratingValue = Number(book.avg_rating) || 0;
+
+    // Aset perpustakaan ini digital: hanya tombol "Baca Buku" yang tersedia.
+    // Buku tanpa format Digital (mis. fisik saja) tidak menampilkan tombol baca.
+    const formats = uniqueFormats(book.types);
+    const showRead = formats.includes('digital');
+
     const firstSentence = (book.synopsis ?? '')
         .replace(/<[^>]*>/g, '')
         .split('.')[0];
 
-    const biblio: [string, string | number, ('mono' | undefined)?][] = [
-        ['ISBN', book.isbn ?? '-', 'mono'],
-        ['Halaman', book.number_of_pages ?? '-'],
-        [
-            'Tahun Terbit',
-            book?.publication_year
+    const biblio: {
+        k: string;
+        v: string | number;
+        mono?: boolean;
+        img?: string | null;
+    }[] = [
+        { k: 'ISBN', v: book.isbn ?? '-', mono: true },
+        { k: 'Halaman', v: book.number_of_pages ?? '-' },
+        {
+            k: 'Tahun Terbit',
+            v: book?.publication_year
                 ? formattedYear(book.publication_year, language)
                 : '-',
-            'mono',
-        ],
-        ['Bahasa', book.language?.language ?? '-'],
-        ['Penerbit', book.publisher?.name ?? '-'],
-        ['Kategori', book.categories?.[0]?.name ?? '-'],
+            mono: true,
+        },
+        {
+            k: 'Bahasa',
+            v: book.language?.language ?? '-',
+            img: book.language?.photo,
+        },
+        {
+            k: 'Penerbit',
+            v: book.publisher?.name ?? '-',
+            img: book.publisher?.logo,
+        },
+        {
+            k: 'Kategori',
+            v: book.categories?.[0]?.name ?? '-',
+            img: book.categories?.[0]?.icon,
+        },
     ];
+
+    const bookFormats = uniqueFormats(book.types);
 
     return (
         <>
@@ -218,30 +246,33 @@ function BookShow() {
                                 className="col-span-12 lg:col-span-5 xl:col-span-4"
                             >
                                 <div className="lg:sticky lg:top-28">
-                                    <div className="group book-3d flex justify-center lg:justify-start">
-                                        <div className="book-3d-inner w-full max-w-[320px] overflow-hidden rounded-r-xl rounded-l-sm bg-muted shadow-book-3d">
-                                            <div className="aspect-[3/4] overflow-hidden">
+                                    <div className="group book3d-stage flex justify-center lg:justify-start">
+                                        <div className="book3d-tilt aspect-[3/4] w-full max-w-[320px]">
+                                            <div className="book3d-face spine-shadow h-full w-full overflow-hidden rounded-l-sm rounded-r-md bg-muted">
                                                 <ImageWithFallback
                                                     src={book.cover}
                                                     alt={book.title}
                                                     className="h-full w-full object-cover"
                                                 />
+                                                <div className="book3d-sheen" />
                                             </div>
                                         </div>
                                     </div>
 
                                     <div className="mt-8 lg:max-w-[340px]">
-                                        <Button
-                                            className="w-full gap-2 bg-cobalt text-white hover:bg-cobalt-dk"
-                                            size="lg"
-                                            disabled={!bookAvailable}
-                                            onClick={onHandleBorrowConfirmation}
-                                        >
-                                            {bookAvailable
-                                                ? t.borrowBook
-                                                : t.notAvailable}
-                                            <ArrowRight className="h-4 w-4" />
-                                        </Button>
+                                        {/* Buku Digital → Baca: arahkan ke konfirmasi akses. */}
+                                        {showRead && (
+                                            <Button
+                                                className="w-full gap-2 bg-cobalt text-white hover:bg-cobalt-dk"
+                                                size="lg"
+                                                onClick={onHandleReadConfirmation}
+                                            >
+                                                {language === 'id'
+                                                    ? 'Baca Buku'
+                                                    : 'Read Book'}
+                                                <BookOpen className="h-4 w-4" />
+                                            </Button>
+                                        )}
 
                                         <button
                                             onClick={onHandleAddWishlist}
@@ -374,6 +405,8 @@ function BookShow() {
                                             {category.name}
                                         </span>
                                     ))}
+                                    {/* Format buku: Digital / Fisik / keduanya */}
+                                    <BookTypeBadge types={book.types} size="md" />
                                 </div>
 
                                 <h1
@@ -485,7 +518,7 @@ function BookShow() {
                                         className="mb-5"
                                     />
                                     <dl className="hairline grid grid-cols-2 gap-px overflow-hidden rounded-xl2 border bg-line lg:grid-cols-3 dark:bg-night-line">
-                                        {biblio.map(([k, v, kind]) => (
+                                        {biblio.map(({ k, v, mono, img }) => (
                                             <div
                                                 key={k}
                                                 className="bg-card p-4 transition-colors hover:bg-cobalt-50 dark:bg-night-2 dark:hover:bg-night-3"
@@ -494,12 +527,38 @@ function BookShow() {
                                                     {k}
                                                 </dt>
                                                 <dd
-                                                    className={`mt-1 text-foreground ${kind === 'mono' ? 'font-mono text-sm' : 'text-sm'}`}
+                                                    className={`mt-1.5 flex items-center gap-2 text-foreground ${mono ? 'font-mono text-sm' : 'text-sm'}`}
                                                 >
-                                                    {v}
+                                                    {img && (
+                                                        <ImageWithFallback
+                                                            src={img}
+                                                            alt={String(v)}
+                                                            className="h-6 w-6 shrink-0 rounded bg-white/5 object-contain ring-1 ring-border"
+                                                        />
+                                                    )}
+                                                    <span className="min-w-0 truncate">
+                                                        {v}
+                                                    </span>
                                                 </dd>
                                             </div>
                                         ))}
+
+                                        {/* Tipe / format buku — sel penuh dengan badge agar rapi & modern */}
+                                        {bookFormats.length > 0 && (
+                                            <div className="col-span-2 flex flex-wrap items-center justify-between gap-3 bg-card p-4 lg:col-span-3 dark:bg-night-2">
+                                                <dt className="tracking-editorial font-mono text-[10px] uppercase text-muted-foreground">
+                                                    {language === 'id'
+                                                        ? 'Format Tersedia'
+                                                        : 'Available Format'}
+                                                </dt>
+                                                <dd className="flex flex-wrap items-center gap-2">
+                                                    <BookTypeBadge
+                                                        types={book.types}
+                                                        size="md"
+                                                    />
+                                                </dd>
+                                            </div>
+                                        )}
                                     </dl>
                                 </div>
 

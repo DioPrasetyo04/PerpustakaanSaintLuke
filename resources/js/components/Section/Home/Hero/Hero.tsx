@@ -27,11 +27,13 @@ const content = {
         availableSub: 'Koleksi siap dipinjam',
         showcase: 'Koleksi Unggulan',
         swipeUp: 'Geser ke atas',
-        stats: [
-            { v: '12.480+', l: 'Koleksi buku' },
-            { v: '1.856', l: 'Anggota aktif' },
-            { v: '58 thn', l: 'Melayani' },
-        ],
+        collections: 'koleksi',
+        statLabels: {
+            books: 'Koleksi buku',
+            members: 'Anggota aktif',
+            service: 'Melayani',
+        },
+        serviceYears: '58 thn',
     },
     en: {
         eyebrow: 'Digital Library · Saint Luke Foundation',
@@ -51,34 +53,57 @@ const content = {
         availableSub: 'Ready to borrow',
         showcase: 'Featured Collection',
         swipeUp: 'Swipe up',
-        stats: [
-            { v: '12,480+', l: 'Book collections' },
-            { v: '1,856', l: 'Active members' },
-            { v: '58 yrs', l: 'Of service' },
-        ],
+        collections: 'collections',
+        statLabels: {
+            books: 'Book collections',
+            members: 'Active members',
+            service: 'Of service',
+        },
+        serviceYears: '58 yrs',
     },
 };
 
-const trendingTerms = [
-    'Pramoedya',
-    'Filosofi Teras',
-    'Atomic Habits',
-    'Sapiens',
-    'Laskar Pelangi',
-];
 
 type HeroSectionProps = {
     books?: BookProps[];
+    booksCount?: number;
+    membersCount?: number;
 };
 
-const HeroSection = ({ books = [] }: HeroSectionProps) => {
+const HeroSection = ({
+    books = [],
+    booksCount = 0,
+    membersCount = 0,
+}: HeroSectionProps) => {
     const { language } = useLanguage();
     const t = language === 'id' ? content.id : content.en;
+    const locale = language === 'id' ? 'id-ID' : 'en-US';
+    const formatNum = (n: number) => n.toLocaleString(locale);
+
+    // Statistik nyata dari database (koleksi & anggota aktif); masa layanan tetap.
+    const stats = [
+        { v: `${formatNum(booksCount)}+`, l: t.statLabels.books },
+        { v: formatNum(membersCount), l: t.statLabels.members },
+        { v: t.serviceYears, l: t.statLabels.service },
+    ];
     const [searchInput, setSearchInput] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const secRef = useRef<HTMLElement>(null);
 
     const showcaseBooks = books.slice(0, 8);
+
+    // Chip "Trending" dari backend: buku terurut rating (lalu abjad), judul unik.
+    const trendingChips = (() => {
+        const seen = new Set<string>();
+        const out: { title: string; slug: string }[] = [];
+        for (const b of books) {
+            if (!b?.title || seen.has(b.title)) continue;
+            seen.add(b.title);
+            out.push({ title: b.title, slug: b.slug });
+            if (out.length >= 5) break;
+        }
+        return out;
+    })();
 
     // Background slideshow (hero1 → hero2 → hero3)
     const [bgIndex, setBgIndex] = useState(0);
@@ -133,7 +158,7 @@ const HeroSection = ({ books = [] }: HeroSectionProps) => {
             onMouseMove={onMove}
             className="relative overflow-hidden"
         >
-            {/* Background slideshow (hero1 → hero2 → hero3) */}
+            {/* Background slideshow (hero1 → hero2 → hero3) — gambar tampil penuh */}
             <div className="pointer-events-none absolute inset-0">
                 {slidesHero.map((src, i) => (
                     <img
@@ -142,26 +167,15 @@ const HeroSection = ({ books = [] }: HeroSectionProps) => {
                         alt=""
                         aria-hidden
                         className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[1200ms] ease-in-out ${
-                            i === bgIndex
-                                ? 'opacity-100 dark:opacity-90'
-                                : 'opacity-0'
+                            i === bgIndex ? 'opacity-100' : 'opacity-0'
                         }`}
                     />
                 ))}
-                {/* directional scrims — protect the text on the left, let the image stay vivid on the right */}
-                <div className="absolute inset-0 bg-gradient-to-r from-background via-background/75 to-transparent" />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/85 via-background/10 to-background/30" />
+                {/* Scrim ringan: hanya melindungi keterbacaan teks di kiri & bawah,
+                    selebihnya gambar dibiarkan tajam dan dominan. */}
+                <div className="absolute inset-0 bg-gradient-to-r from-background/85 via-background/25 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent" />
             </div>
-
-            <div className="cursor-glow pointer-events-none absolute inset-0" />
-            <div className="hero-mesh pointer-events-none absolute inset-0" />
-            <div
-                className="dot-grid pointer-events-none absolute inset-0 opacity-50"
-                style={{
-                    maskImage:
-                        'linear-gradient(to bottom, black, transparent 70%)',
-                }}
-            />
 
             <div className="relative mx-auto max-w-7xl px-6 pt-14 pb-16 lg:px-10 lg:pt-20 lg:pb-24">
                 <div className="grid grid-cols-12 items-center gap-8 lg:gap-6">
@@ -198,7 +212,7 @@ const HeroSection = ({ books = [] }: HeroSectionProps) => {
                         <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
                             {t.lead1}
                             <span className="font-semibold text-foreground">
-                                {t.leadStrong}
+                                {formatNum(booksCount)}+ {t.collections}
                             </span>
                             {t.lead2}
                         </p>
@@ -235,26 +249,33 @@ const HeroSection = ({ books = [] }: HeroSectionProps) => {
                             </button>
                         </form>
 
-                        {/* Trending chips */}
-                        <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-muted-foreground">
-                            <span className="tracking-editorial font-mono uppercase">
-                                {t.trending}:
-                            </span>
-                            {trendingTerms.map((term) => (
-                                <button
-                                    key={term}
-                                    type="button"
-                                    onClick={() => goSearch(term)}
-                                    className="hairline rounded-full border px-3 py-1 transition-colors hover:border-cobalt/40 hover:text-cobalt dark:hover:text-cobalt-lt"
-                                >
-                                    {term}
-                                </button>
-                            ))}
-                        </div>
+                        {/* Trending chips — buku trending dari backend (rating → abjad) */}
+                        {trendingChips.length > 0 && (
+                            <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-muted-foreground">
+                                <span className="tracking-editorial font-mono uppercase">
+                                    {t.trending}:
+                                </span>
+                                {trendingChips.map((b) => (
+                                    <button
+                                        key={b.slug}
+                                        type="button"
+                                        onClick={() =>
+                                            router.visit(
+                                                `/book/detail/${b.slug}`,
+                                            )
+                                        }
+                                        className="hairline max-w-[200px] truncate rounded-full border px-3 py-1 transition-colors hover:border-cobalt/40 hover:text-cobalt dark:hover:text-cobalt-lt"
+                                        title={b.title}
+                                    >
+                                        {b.title}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
 
                         {/* Inline stats */}
                         <div className="mt-8 flex items-center gap-8">
-                            {t.stats.map((s, i) => (
+                            {stats.map((s, i) => (
                                 <div key={i} className="flex items-center gap-8">
                                     {i > 0 && (
                                         <span className="h-10 w-px bg-line dark:bg-night-line" />

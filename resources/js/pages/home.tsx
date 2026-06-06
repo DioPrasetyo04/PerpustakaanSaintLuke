@@ -23,14 +23,18 @@ const home = () => {
     const { data, state } = usePage<HomePageProps>().props;
     return (
         <>
-            <HeroSection books={data.books.data} />
+            <HeroSection
+                books={data.trending_books}
+                booksCount={data.count_of_all_books}
+                membersCount={data.count_of_all_users}
+            />
             <LiveTicker activities={data.live_activities} />
-            <TrustBar />
-            <Spotlight book={data.books.data[0]} />
+            <TrustBar booksCount={data.count_of_all_books} />
+            <Spotlight book={data.spotlight_book} />
             <FeatureBooks books={data.books} state={state.books} />
             <Categories categories={data.categories} state={state.categories} />
             <HowToBorrow />
-            <Trending books={data.books.data} />
+            <Trending books={data.trending_books} />
             <Stats
                 dataCountBooks={data.count_of_all_books}
                 dataCountVisitors={data.count_of_all_visitors}

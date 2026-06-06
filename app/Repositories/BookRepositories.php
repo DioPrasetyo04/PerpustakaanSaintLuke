@@ -28,7 +28,7 @@ class BookRepositories implements BookInterfaceRepositories
             'cover',
             'is_published'
         ])
-            ->with(['publisher:id,name,logo,slug', 'categories:id,name,icon,slug', 'authors:id,name,avatar', 'language:id,language,photo', 'stock:id,book_id,total,available,loan,damaged,lost'])
+            ->with(['publisher:id,name,logo,slug', 'categories:id,name,icon,slug', 'authors:id,name,avatar', 'language:id,language,photo', 'stock:id,book_id,total,available,loan,damaged,lost', 'types:id,type'])
             ->withCount('stock')
             ->withAvg('reviews as avg_rating', 'rating')
             ->where('slug', $slug)
@@ -58,6 +58,7 @@ class BookRepositories implements BookInterfaceRepositories
                 'categories:id,name,icon,slug',
                 'authors:id,name,username,avatar',
                 'language:id,language,photo',
+                'types:id,type',
             ])
             ->withAvg('reviews as avg_rating', 'rating')
             ->whereHas('loanDetails')

@@ -29,7 +29,7 @@ class ReturnBookRepositories implements ReturnBookInterfaceRepositories
             'is_published',
             'price'
         ])
-            ->with(['publisher:id,name,logo,slug', 'categories:id,name,icon,slug', 'authors:id,name,avatar', 'language:id,language,photo', 'stock:id,book_id,total,available,loan,damaged,lost'])
+            ->with(['publisher:id,name,logo,slug', 'categories:id,name,icon,slug', 'authors:id,name,avatar', 'language:id,language,photo', 'stock:id,book_id,total,available,loan,damaged,lost', 'types:id,type'])
             ->withCount('stock')
             ->withAvg('reviews as avg_rating', 'rating')
             ->where('slug', $slug)

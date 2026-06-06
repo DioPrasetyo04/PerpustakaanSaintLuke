@@ -39,15 +39,17 @@ function Eyebrow({
 }
 
 /* ─────────── TRUST BAR ─────────── */
-export function TrustBar() {
+export function TrustBar({ booksCount = 0 }: { booksCount?: number }) {
     const { language } = useLanguage();
+    const locale = language === 'id' ? 'id-ID' : 'en-US';
+    const collectionCount = `${booksCount.toLocaleString(locale)}+`;
     const items =
         language === 'id'
             ? [
                   {
                       icon: BookOpen,
                       t: 'Katalog Lengkap',
-                      s: '12.480+ koleksi terkurasi',
+                      s: `${collectionCount} koleksi terkurasi`,
                   },
                   {
                       icon: Clock,
@@ -69,7 +71,7 @@ export function TrustBar() {
                   {
                       icon: BookOpen,
                       t: 'Full Catalog',
-                      s: '12,480+ curated items',
+                      s: `${collectionCount} curated items`,
                   },
                   {
                       icon: Clock,
@@ -273,7 +275,9 @@ export function WhyUs() {
                         className="col-span-12 lg:col-span-4"
                     >
                         <Eyebrow>
-                            {language === 'id' ? 'Kenapa Kami' : 'Why Us'}
+                            {language === 'id'
+                                ? 'Fitur Kami'
+                                : 'Feature Highlights'}
                         </Eyebrow>
                         <h2
                             className="mt-5 font-display text-3xl leading-tight text-foreground lg:text-5xl"
@@ -391,7 +395,7 @@ export function Testimonials() {
             >
                 <div className="flex justify-center">
                     <Eyebrow center>
-                        {language === 'id' ? 'Kata Mereka' : 'Testimonials'}
+                        {language === 'id' ? 'Testimoni' : 'Testimonials'}
                     </Eyebrow>
                 </div>
                 <h2

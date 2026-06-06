@@ -24,8 +24,11 @@ class OnlineResourceRepositories implements OnlineResourceInterfaceRepositories
                         ->orWhere('tag', 'like', "%{$search}%");
                 });
             })
-            ->orderBy('sort_order')
-            ->orderBy('title')
+            ->when(
+                ($filters['field'] ?? null) && ($filters['direction'] ?? null),
+                fn($query) => $query->orderBy($filters['field'], $filters['direction']),
+                fn($query) => $query->orderBy('sort_order')->orderBy('title')
+            )
             ->get();
     }
 }

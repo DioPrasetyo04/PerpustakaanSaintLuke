@@ -42,6 +42,8 @@ class HomeController extends Controller
                 'books'                => $this->homeController->transformBooks($booksPaginator),
                 'categories'           => $this->homeController->transformCategories($categoriesPaginator),
                 'informations'         => $this->homeController->transformInformations($informationsPaginator),
+                'trending_books'       => $this->homeController->getTrendingBooks(),
+                'spotlight_book'       => $this->homeController->getSpotlightBook(),
                 'live_activities'      => $this->homeController->getLiveActivities(),
                 'publishers'           => $this->homeController->getFeaturedPublishers(),
                 'testimonials'         => $this->testimonialServices->getTestimonials(),

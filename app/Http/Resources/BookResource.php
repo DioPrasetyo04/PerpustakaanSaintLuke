@@ -72,6 +72,16 @@ class BookResource extends JsonResource
                 : [];
         }
 
+        if ($this->relationLoaded('types')) {
+            $data['types'] = $this->types
+                ->map(fn ($type) => [
+                    'id' => $type->id,
+                    'type' => $type->type,
+                ])
+                ->values()
+                ->all();
+        }
+
         if ($this->relationLoaded('addedBy') && $this->addedBy) {
             $data['addedBy'] = UserResource::make($this->addedBy)->resolve();
         }

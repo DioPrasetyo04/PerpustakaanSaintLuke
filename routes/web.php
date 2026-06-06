@@ -61,10 +61,10 @@ Route::controller(InformationController::class)->group(function () {
 });
 
 Route::prefix('about')->name('about.')->group(function () {
-    Route::get('/profile', fn () => Inertia::render('about/ProfilePage'))->name('profile');
-    Route::get('/vision-mission', fn () => Inertia::render('about/VisionMissionPage'))->name('vision-mission');
-    Route::get('/contact', fn () => Inertia::render('about/ContactPage'))->name('contact');
-    Route::get('/organization-structure', fn () => Inertia::render('about/OrganizationStructurePage'))->name('organization-structure');
+    Route::get('/profile', fn() => Inertia::render('about/ProfilePage'))->name('profile');
+    Route::get('/vision-mission', fn() => Inertia::render('about/VisionMissionPage'))->name('vision-mission');
+    Route::get('/contact', fn() => Inertia::render('about/ContactPage'))->name('contact');
+    Route::get('/organization-structure', fn() => Inertia::render('about/OrganizationStructurePage'))->name('organization-structure');
 });
 
 // Kiosk publik pencatatan kunjungan perpustakaan (scan kartu / cari user / isi manual).
@@ -105,7 +105,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard/loans', 'index')->name('loan.index');
         Route::get('/dashboard/loan/{loanCode}', 'detail')->name('loan.detail');
         Route::get('/confirmation/loan/book/{slug}', 'confirmation')->name('loan.confirmation');
-        Route::post('/loan/book/{slug}', 'store')->name('loan.store');
+        Route::post('/loan/digital/book/{slug}', 'readDigital')->name('loan.digital');
     });
 
     Route::middleware('ensure.loan')->group(function () {
