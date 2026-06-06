@@ -14,8 +14,8 @@ return new class extends Migration
     {
         Schema::create('assets', function (Blueprint $table) {
             $table->id();
-            $table->enum('type', AssetTypes::values());
-            $table->string('utility_path');
+            $table->enum('type', AssetTypes::values())->nullable();
+            $table->string('utility_path')->nullable();
             $table->timestamps();
         });
     }

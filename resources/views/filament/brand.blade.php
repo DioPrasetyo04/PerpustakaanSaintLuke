@@ -18,7 +18,7 @@
         alt="Saint Luke"
         style="height:46px;width:46px;min-width:36px;border-radius:50%;object-fit:contain;flex-shrink:0;"
     >
-    <span class="brand-text" style="font-size:26px;font-weight:700;line-height:1.25;white-space:nowrap;">
+    <span class="brand-text" style="font-size:20px;font-weight:700;line-height:1.25;white-space:nowrap;">
         E-Library Santo Lukas
     </span>
 </div>

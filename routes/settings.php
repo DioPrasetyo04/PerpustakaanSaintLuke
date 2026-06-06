@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Settings\MemberCardController;
 use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\SocialMediaController;
@@ -19,6 +20,13 @@ Route::middleware(['auth'])->group(function () {
         Route::post('settings/social-media', 'store')->name('social-media.store');
         Route::patch('settings/social-media/{id}', 'update')->name('social-media.update');
         Route::delete('settings/social-media/{id}', 'destroy')->name('social-media.destroy');
+    });
+
+    Route::controller(MemberCardController::class)->group(function () {
+        Route::get('settings/member-card/download', 'download')->name('member-card.download');
+        Route::post('settings/member-card/request', 'request')
+            ->middleware('throttle:6,1')
+            ->name('member-card.request');
     });
 });
 

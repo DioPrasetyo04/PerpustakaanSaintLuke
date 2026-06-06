@@ -27,6 +27,7 @@
         .meta table { width: 100%; }
         .meta .left td { padding: 1px 0; }
         .meta .right { text-align: right; }
+        .recipient { margin: 12px 0 4px; line-height: 1.5; font-size: 11px; }
         .intro { text-align: justify; line-height: 1.55; margin: 12px 0 10px; }
         .period-box { border: 1px solid #d1d5db; background: #f9fafb; padding: 8px 12px; margin-bottom: 14px; font-size: 11px; }
         .period-box strong { display: inline-block; min-width: 140px; }
@@ -34,8 +35,8 @@
         .chart-wrap { text-align: center; margin: 4px 0 12px; border: 1px solid #e5e7eb; padding: 6px; background: #ffffff; }
         .chart-wrap img { max-width: 100%; height: auto; }
 
-        table.data { width: 100%; border-collapse: collapse; font-size: 10px; }
-        table.data th, table.data td { border: 1px solid #4b5563; padding: 4px 6px; vertical-align: middle; }
+        table.data { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 10px; }
+        table.data th, table.data td { border: 1px solid #4b5563; padding: 4px 6px; vertical-align: middle; word-wrap: break-word; overflow-wrap: break-word; }
         table.data thead { display: table-header-group; }
         table.data tr { page-break-inside: avoid; }
         table.data thead th { background: #1f2937; color: #fff; text-align: center; text-transform: uppercase; font-size: 9.5px; }
@@ -67,7 +68,6 @@
                     <table>
                         <tr><td style="width:60px;">No</td><td>: {{ $headerNomor }}</td></tr>
                         <tr><td>Hal</td><td>: {{ $title }}</td></tr>
-                        <tr><td>Lamp.</td><td>: 1 (Satu) Berkas</td></tr>
                     </table>
                 </td>
                 <td class="right" style="width:45%;">
@@ -77,9 +77,24 @@
         </table>
     </div>
 
+    @php
+        $kepada  = trim($report['state']['kepada'] ?? '');
+        $salam   = trim($report['state']['salam'] ?? 'Semoga Tuhan Yesus selalu memberkati dan menyertai Bapak/Ibu sekalian dalam menjalankan aktivitas sehari-hari.');
+        $penutup = trim($report['state']['penutup'] ?? ('Demikian ' . strtolower($title) . ' ini kami sampaikan untuk dapat menjadi bahan evaluasi dan pengambilan keputusan. Atas perhatian dan kerja samanya kami ucapkan terima kasih.'));
+    @endphp
+
+    @if ($kepada !== '')
+        <div class="recipient">
+            <div>Kepada Yth.</div>
+            <div style="white-space: pre-line; font-weight: bold;">{{ $kepada }}</div>
+        </div>
+    @endif
+
     <div class="intro">
         <p style="margin:8px 0;"><strong>Dengan Hormat,</strong></p>
-        <p style="margin:0 0 8px;">Semoga Tuhan Yesus selalu memberkati dan menyertai Bapak/Ibu sekalian dalam menjalankan aktivitas sehari-hari.</p>
+        @if ($salam !== '')
+            <p style="margin:0 0 8px; white-space: pre-line;">{{ $salam }}</p>
+        @endif
         <p style="margin:0;">
             Bersama dengan surat ini kami sampaikan {{ strtolower($title) }} Perpustakaan Saint Luke
             untuk periode <strong>{{ $report['periodLabel'] }}</strong> ({{ $report['periodRange'] }}).
@@ -100,10 +115,7 @@
 
     {{ $slot }}
 
-    <div class="summary">
-        Demikian {{ strtolower($title) }} ini kami sampaikan untuk dapat menjadi bahan evaluasi dan pengambilan
-        keputusan. Atas perhatian dan kerjasamanya kami ucapkan terima kasih.
-    </div>
+    <div class="summary" style="white-space: pre-line;">{{ $penutup }}</div>
 
     <div class="signatures">
         <table>

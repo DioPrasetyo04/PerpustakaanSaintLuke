@@ -9,6 +9,46 @@ use Illuminate\Support\Facades\Log;
 
 class WhatsAppService
 {
+    /**
+     * Kirim pesan WhatsApp teks bebas via Fonnte.
+     * Dipakai notifikasi umum (mis. permintaan kartu anggota ke staf).
+     */
+    public function sendText(?string $phone, string $message)
+    {
+        $token = env('FONNTE_TOKEN');
+        if (empty($token)) {
+            Log::error('[Fonte] FONNTE_TOKEN tidak diset di .env');
+            return null;
+        }
+        if (empty($phone)) {
+            Log::warning('[Fonte] Skip kirim WA: nomor tujuan kosong');
+            return null;
+        }
+
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => $token,
+            ])->asForm()->post('https://api.fonnte.com/send', [
+                'target' => $phone,
+                'message' => $message,
+            ]);
+
+            Log::info('[Fonte] Response (text)', [
+                'phone' => $phone,
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+
+            return $response;
+        } catch (\Throwable $e) {
+            Log::error('[Fonte] Exception saat kirim WA (text)', [
+                'phone' => $phone,
+                'message' => $e->getMessage(),
+            ]);
+            return null;
+        }
+    }
+
     public function sendReminder($phone, $loanDetail, $diff)
     {
         $token = env('FONNTE_TOKEN');

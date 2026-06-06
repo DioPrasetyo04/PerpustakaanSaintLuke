@@ -53,6 +53,18 @@ class HistoryService
         return $this->paginate($paginator, fn($item) => $this->transformFine($item));
     }
 
+    public function getStats(): array
+    {
+        $userId = auth()->id();
+
+        return [
+            'bookmarks' => $this->historyService->getBookmarkStats($userId),
+            'loans' => $this->historyService->getLoanStats($userId),
+            'returns' => $this->historyService->getReturnStats($userId),
+            'fines' => $this->historyService->getFineStats($userId),
+        ];
+    }
+
     private function paginate(LengthAwarePaginator $paginator, callable $transformer): array
     {
         return [

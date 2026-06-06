@@ -18,7 +18,6 @@ use App\Models\Book;
 use App\Models\User;
 use App\Models\Language;
 use App\Models\Type;
-use Filament\Notifications\Notification;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
@@ -275,15 +274,12 @@ class BookForm
                                                 $data
                                             );
 
+                                            // Pastikan author punya role "writer" agar langsung bisa
+                                            // dipilih sebagai penulis buku (untuk author yang baru,
+                                            // role sudah otomatis lewat Author::booted(); baris ini
+                                            // menutup kasus author lama hasil firstOrCreate).
                                             if (! $author->hasRole('writer')) {
-                                                Notification::make()
-                                                    ->title('Author dibuat, namun belum bisa dipilih')
-                                                    ->body("Author \"{$author->name}\" berhasil dibuat. Sebelum bisa dipilih sebagai penulis buku, tambahkan author ini ke role \"writer\" di menu Roles → Writer → Authors.")
-                                                    ->warning()
-                                                    ->duration(12000)
-                                                    ->send();
-
-                                                return null;
+                                                $author->assignRole('writer');
                                             }
 
                                             return $author->id;
@@ -513,40 +509,134 @@ class BookForm
                                             return $type->id;
                                         })
                                         ->createOptionModalHeading('Create Type Form'),
-                                    Select::make('language_id')
-                                        ->label('Language')
-                                        ->relationship('language', 'language')
-                                        ->getOptionLabelFromRecordUsing(function ($record) {
-                                            $flagUrl = $record->photo ? asset('storage/' . $record->photo) : null;
+                                    Grid::make(2)->schema([
+                                        Select::make('categories')->relationship('categories', 'name')
+                                            ->getOptionLabelFromRecordUsing(function ($record) {
+                                                $iconUrl = $record->icon ? asset('storage/' . $record->icon) : null;
 
-                                            return
-                                                "<div style='display:flex;align-items:center;gap:6px'>
+                                                $icon = $iconUrl
+                                                    ? '<img src="' . e($iconUrl) . '" style="width:22px;height:22px;border-radius:4px;object-fit:cover;flex-shrink:0;border:1px solid #e5e7eb;background:#ffffff;" alt="">'
+                                                    : '<span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;background:#fce7f3;color:#9d174d;flex-shrink:0;">'
+                                                    . '<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+                                                    . '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>'
+                                                    . '<path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>'
+                                                    . '</svg>'
+                                                    . '</span>';
+
+                                                return new HtmlString(
+                                                    '<span style="display:inline-flex;align-items:center;gap:8px;line-height:1.25;">'
+                                                        . $icon
+                                                        . '<span style="font-weight:500;color:#111827;text-transform:capitalize;">' . e($record->name) . '</span>'
+                                                        . '</span>'
+                                                );
+                                            })
+                                            ->allowHtml()
+                                            ->multiple()
+                                            ->preload()
+                                            ->searchable()
+                                            ->required()
+                                            ->columnSpan(1)
+                                            ->createOptionForm([
+                                                Grid::make(2)->schema([
+
+                                                    // NAME
+                                                    TextInput::make('name')
+                                                        ->label('Name Of Category')
+                                                        ->live()
+                                                        ->maxLength(255)
+                                                        ->afterStateUpdated(function (Set $set, $state) {
+                                                            if (filled($state)) {
+                                                                $set('slug', generateSlug($state, Category::class));
+                                                            } else {
+                                                                $set('slug', null);
+                                                            }
+                                                        })
+                                                        ->required()
+                                                        ->columnSpan(1),
+
+                                                    // SLUG
+                                                    TextInput::make('slug')
+                                                        ->label('Slug Of Category')
+                                                        ->maxLength(255)
+                                                        ->unique(ignoreRecord: true)
+                                                        ->readOnly()
+                                                        ->dehydrated()
+                                                        ->columnSpan(1),
+
+                                                    // ICON
+                                                    FileUpload::make('icon')
+                                                        ->label('Icon Of Categories')
+                                                        ->image()
+                                                        ->maxSize(1024) // 1MB
+                                                        ->directory('categories/icons')
+                                                        ->disk('public')
+                                                        ->visibility('public')
+                                                        ->columnSpanFull(),
+
+                                                    // PHOTO (FULL WIDTH)
+                                                    FileUpload::make('photo')
+                                                        ->label('Photo Of Categories')
+                                                        ->image()
+                                                        ->maxSize(4096) // 4MB
+                                                        ->disk('public')
+                                                        ->directory('categories/images')
+                                                        ->imageResizeMode('cover')
+                                                        ->visibility('public')
+                                                        ->columnSpanFull(),
+
+                                                    // DESCRIPTION (FULL WIDTH)
+                                                    RichEditor::make('description')
+                                                        ->label('Description Of Categories')
+                                                        ->columnSpanFull(),
+
+                                                    // TOGGLE
+                                                    Toggle::make('is_active')
+                                                        ->label('Is Active')
+                                                        ->onIcon('heroicon-m-check-badge')
+                                                        ->offIcon('heroicon-m-x-circle')
+                                                        ->default(true)
+                                                        ->columnSpanFull(),
+                                                ])
+                                            ])->label('Category')->createOptionUsing(function (array $data) {
+                                                $category = Category::firstOrCreate($data);
+                                                return $category->id;
+                                            })
+                                            ->createOptionModalHeading('Create Category Form'),
+                                        Select::make('language_id')
+                                            ->label('Language')
+                                            ->relationship('language', 'language')
+                                            ->getOptionLabelFromRecordUsing(function ($record) {
+                                                $flagUrl = $record->photo ? asset('storage/' . $record->photo) : null;
+
+                                                return
+                                                    "<div style='display:flex;align-items:center;gap:6px'>
                                                 " . ($flagUrl ? "<img src='{$flagUrl}' width='20' height='15' style='border-radius:3px' />" : "") . "
                                                 <span>{$record->language}</span>
                                                 </div>";
-                                        })
-                                        ->allowHtml()
-                                        ->searchable()
-                                        ->preload()
-                                        ->required()
-                                        ->createOptionForm([
-                                            Section::make('language')->schema([
-                                                TextInput::make('language')->maxLength(255)->live()->afterStateUpdated(function (Set $set, $state) {
-                                                    if (filled($state)) {
-                                                        $set('code', generateUniqueCode($state, Language::class, 'code'));
-                                                    } else {
-                                                        $set('code', null);
-                                                    }
-                                                })->required()->columnSpan(1),
-                                                TextInput::make('code')->maxLength(255)->unique(ignoreRecord: true)->readOnly()->disabled()->dehydrated(),
-                                                FileUpload::make('photo')->image()->maxSize(2048)->directory('languages')->disk('public')->visibility('public')->columnSpanFull(),
+                                            })
+                                            ->allowHtml()
+                                            ->searchable()
+                                            ->preload()
+                                            ->required()
+                                            ->createOptionForm([
+                                                Section::make('language')->schema([
+                                                    TextInput::make('language')->maxLength(255)->live()->afterStateUpdated(function (Set $set, $state) {
+                                                        if (filled($state)) {
+                                                            $set('code', generateUniqueCode($state, Language::class, 'code'));
+                                                        } else {
+                                                            $set('code', null);
+                                                        }
+                                                    })->required()->columnSpan(1),
+                                                    TextInput::make('code')->maxLength(255)->unique(ignoreRecord: true)->readOnly()->disabled()->dehydrated(),
+                                                    FileUpload::make('photo')->image()->maxSize(2048)->directory('languages')->disk('public')->visibility('public')->columnSpanFull(),
 
                                                 ])->label('Create Language'),
-                                        ])
-                                        ->createOptionUsing(function (array $data) {
-                                            $language = Language::firstOrCreate($data);
-                                            return $language->id;
-                                        }),
+                                            ])
+                                            ->createOptionUsing(function (array $data) {
+                                                $language = Language::firstOrCreate($data);
+                                                return $language->id;
+                                            }),
+                                    ])->columnSpanFull(),
                                     FileUpload::make('cover')->image()->disk('public')->directory('books/cover')->maxSize(2048)->columnSpanFull(),
                                     ToggleButtons::make('is_published')->options(PublishedBooks::options())->default(PublishedBooks::PUBLISH->value)->colors([
                                         'Published' => 'success',
@@ -593,98 +683,6 @@ class BookForm
                                         )
                                         ->rules(['required', 'integer'])
                                         ->columnSpan(1),
-                                    Select::make('categories')->relationship('categories', 'name')
-                                        ->getOptionLabelFromRecordUsing(function ($record) {
-                                            $iconUrl = $record->icon ? asset('storage/' . $record->icon) : null;
-
-                                            $icon = $iconUrl
-                                                ? '<img src="' . e($iconUrl) . '" style="width:22px;height:22px;border-radius:4px;object-fit:cover;flex-shrink:0;border:1px solid #e5e7eb;background:#ffffff;" alt="">'
-                                                : '<span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;background:#fce7f3;color:#9d174d;flex-shrink:0;">'
-                                                . '<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
-                                                . '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>'
-                                                . '<path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>'
-                                                . '</svg>'
-                                                . '</span>';
-
-                                            return new HtmlString(
-                                                '<span style="display:inline-flex;align-items:center;gap:8px;line-height:1.25;">'
-                                                    . $icon
-                                                    . '<span style="font-weight:500;color:#111827;text-transform:capitalize;">' . e($record->name) . '</span>'
-                                                    . '</span>'
-                                            );
-                                        })
-                                        ->allowHtml()
-                                        ->multiple()
-                                        ->preload()
-                                        ->searchable()
-                                        ->required()
-                                        ->columnSpan(1)
-                                        ->createOptionForm([
-                                            Grid::make(2)->schema([
-
-                                                // NAME
-                                                TextInput::make('name')
-                                                    ->label('Name Of Category')
-                                                    ->live()
-                                                    ->maxLength(255)
-                                                    ->afterStateUpdated(function (Set $set, $state) {
-                                                        if (filled($state)) {
-                                                            $set('slug', generateSlug($state, Category::class));
-                                                        } else {
-                                                            $set('slug', null);
-                                                        }
-                                                    })
-                                                    ->required()
-                                                    ->columnSpan(1),
-
-                                                // SLUG
-                                                TextInput::make('slug')
-                                                    ->label('Slug Of Category')
-                                                    ->maxLength(255)
-                                                    ->unique(ignoreRecord: true)
-                                                    ->readOnly()
-                                                    ->dehydrated()
-                                                    ->columnSpan(1),
-
-                                                // ICON
-                                                FileUpload::make('icon')
-                                                    ->label('Icon Of Categories')
-                                                    ->image()
-                                                    ->maxSize(1024) // 1MB
-                                                    ->directory('categories/icons')
-                                                    ->disk('public')
-                                                    ->visibility('public')
-                                                    ->columnSpanFull(),
-
-                                                // PHOTO (FULL WIDTH)
-                                                FileUpload::make('photo')
-                                                    ->label('Photo Of Categories')
-                                                    ->image()
-                                                    ->maxSize(4096) // 4MB
-                                                    ->disk('public')
-                                                    ->directory('categories/images')
-                                                    ->imageResizeMode('cover')
-                                                    ->visibility('public')
-                                                    ->columnSpanFull(),
-
-                                                // DESCRIPTION (FULL WIDTH)
-                                                RichEditor::make('description')
-                                                    ->label('Description Of Categories')
-                                                    ->columnSpanFull(),
-
-                                                // TOGGLE
-                                                Toggle::make('is_active')
-                                                    ->label('Is Active')
-                                                    ->onIcon('heroicon-m-check-badge')
-                                                    ->offIcon('heroicon-m-x-circle')
-                                                    ->default(true)
-                                                    ->columnSpanFull(),
-                                            ])
-                                        ])->label('Category')->createOptionUsing(function (array $data) {
-                                            $category = Category::firstOrCreate($data);
-                                            return $category->id;
-                                        })
-                                        ->createOptionModalHeading('Create Category Form'),
                                 ])->columns(3),
                         ]),
                     Wizard\Step::make('Asset Books Information')->description('Asset Of Books')
@@ -718,7 +716,6 @@ class BookForm
                                                 ->options(AssetTypes::options())
                                                 ->live()
                                                 ->afterStateUpdated(fn(Set $set) => $set('utility_path', null))
-                                                ->required()
                                                 ->columnSpan(1),
                                             FileUpload::make('utility_path')
                                                 ->key(fn($get) => 'upload-' . $get('type'))

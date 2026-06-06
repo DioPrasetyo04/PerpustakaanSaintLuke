@@ -40,7 +40,7 @@
 
     <!-- HEADER -->
     <tr>
-        <td style="background: linear-gradient(135deg,#1e3a8a,#3b82f6); padding:20px; text-align:center; color:white;">
+        <td style="background:#f59e0b; padding:20px; text-align:center; color:white;">
 
             <table align="center" cellpadding="0" cellspacing="0">
                 <tr>

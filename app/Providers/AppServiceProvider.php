@@ -63,6 +63,16 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(UpdatePasswordInterfaceRepositories::class, UpdatePasswordRepositories::class);
         $this->app->bind(TestimonialInterfaceRepositories::class, TestimonialRepositories::class);
         $this->app->bind(EventInterfaceRepositories::class, EventRepositories::class);
+
+        // Kirim email reset password panel admin secara SINKRON (bukan di-queue),
+        // agar tetap terkirim tanpa perlu queue worker. Filament memanggil
+        // app(ResetPassword::class, ['token' => $token]) lalu meng-set ->url.
+        $this->app->bind(
+            \Filament\Auth\Notifications\ResetPassword::class,
+            fn($app, array $params) => new \App\Notifications\Admin\FilamentResetPasswordNotification(
+                $params['token'] ?? '',
+            ),
+        );
     }
 
     public function boot(): void
