@@ -7,6 +7,7 @@ use App\Interface\BookInterfaceRepositories;
 use App\Interface\BookmarkInterfaceRepositories;
 use App\Interface\CatalogInterfaceRepositories;
 use App\Interface\DashboardInterfaceRepositories;
+use App\Interface\EventInterfaceRepositories;
 use App\Interface\HistoryInterfaceRepositories;
 use App\Interface\HomeInterfaceRepositories;
 use App\Interface\InformationRepositoriesInterface;
@@ -22,6 +23,7 @@ use App\Repositories\BookRepositories;
 use App\Repositories\BookmarkRepositories;
 use App\Repositories\CatalogRepositories;
 use App\Repositories\DashboardRepositories;
+use App\Repositories\EventRepositories;
 use App\Repositories\HistoryRepositories;
 use App\Repositories\HomeRepositories;
 use App\Repositories\InformationRepositories;
@@ -60,6 +62,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ProfileInterfaceRepositories::class, ProfileRepositories::class);
         $this->app->bind(UpdatePasswordInterfaceRepositories::class, UpdatePasswordRepositories::class);
         $this->app->bind(TestimonialInterfaceRepositories::class, TestimonialRepositories::class);
+        $this->app->bind(EventInterfaceRepositories::class, EventRepositories::class);
     }
 
     public function boot(): void

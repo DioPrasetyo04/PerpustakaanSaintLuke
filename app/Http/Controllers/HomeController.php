@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\EventServices;
 use App\Services\HomeServices;
 use App\Services\TestimonialServices;
 use Illuminate\Http\Request;
@@ -13,10 +14,13 @@ class HomeController extends Controller
 
     protected TestimonialServices $testimonialServices;
 
-    public function __construct(HomeServices $homeServices, TestimonialServices $testimonialServices)
+    protected EventServices $eventServices;
+
+    public function __construct(HomeServices $homeServices, TestimonialServices $testimonialServices, EventServices $eventServices)
     {
         $this->homeController = $homeServices;
         $this->testimonialServices = $testimonialServices;
+        $this->eventServices = $eventServices;
     }
 
     public function index(Request $request)
@@ -41,6 +45,7 @@ class HomeController extends Controller
                 'live_activities'      => $this->homeController->getLiveActivities(),
                 'publishers'           => $this->homeController->getFeaturedPublishers(),
                 'testimonials'         => $this->testimonialServices->getTestimonials(),
+                'events'               => $this->eventServices->getEvents(),
                 'count_of_all_books'   => $this->homeController->getAllCountOfBooks(),
                 'count_of_all_visitors' => $this->homeController->getAllCountOfVisitors(),
                 'count_of_all_users'   => $this->homeController->getAllCountOfUsers(),
