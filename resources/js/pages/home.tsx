@@ -42,7 +42,7 @@ const home = () => {
             />
             <WhyUs />
             <Testimonials testimonials={data.testimonials} />
-            <Events />
+            <Events events={data.events} />
             <PublishersMarquee publishers={data.publishers} />
             <AnnouncementsSection
                 informations={data.informations}

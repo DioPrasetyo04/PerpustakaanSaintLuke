@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             StaffUsersSeeder::class,
             OnlineResourceSeeder::class,
             TestimonialSeeder::class,
+            EventSeeder::class,
             // LoanSeeder::class, // Aktifkan saat testing fitur reminder/auto-return; jalankan via: php artisan db:seed --class=LoanSeeder
         ]);
     }

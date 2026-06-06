@@ -37,6 +37,22 @@ export type Testimonial = {
     thumbnail_url: string | null;
 };
 
+export type EventItem = {
+    id: number;
+    title: string;
+    slug: string;
+    description: string | null;
+    category: string | null;
+    location: string | null;
+    start_at: string | null;
+    end_at: string | null;
+    capacity: number | null;
+    seats_taken: number;
+    seats_left: number | null;
+    registration_url: string | null;
+    thumbnail_url: string | null;
+};
+
 export type HomePageProps = {
     data: {
         books: Paginated<BookProps>;
@@ -45,6 +61,7 @@ export type HomePageProps = {
         live_activities: LiveActivity[];
         publishers: FeaturedPublisher[];
         testimonials: Testimonial[];
+        events: EventItem[];
         count_of_all_books: number;
         count_of_all_visitors: number;
         count_of_all_users: number;

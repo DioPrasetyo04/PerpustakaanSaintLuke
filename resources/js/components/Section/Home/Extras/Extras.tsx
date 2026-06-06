@@ -30,7 +30,7 @@ function Eyebrow({
 }) {
     return (
         <div
-            className={`tracking-editorial inline-flex items-center gap-2 font-mono text-[11px] uppercase text-cobalt dark:text-cobalt-lt ${center ? 'justify-center' : ''}`}
+            className={`inline-flex items-center gap-2 font-mono text-[11px] tracking-editorial text-cobalt uppercase dark:text-cobalt-lt ${center ? 'justify-center' : ''}`}
         >
             <span className="h-1.5 w-1.5 rounded-full bg-cobalt dark:bg-cobalt-lt" />
             {children}
@@ -44,15 +44,43 @@ export function TrustBar() {
     const items =
         language === 'id'
             ? [
-                  { icon: BookOpen, t: 'Katalog Lengkap', s: '12.480+ koleksi terkurasi' },
-                  { icon: Clock, t: 'Pinjam Mudah', s: 'Reservasi daring 24/7' },
-                  { icon: Globe, t: 'Sumber Digital', s: 'E-book, jurnal & riset' },
-                  { icon: Check, t: 'Gratis Anggota', s: 'Untuk seluruh siswa' },
+                  {
+                      icon: BookOpen,
+                      t: 'Katalog Lengkap',
+                      s: '12.480+ koleksi terkurasi',
+                  },
+                  {
+                      icon: Clock,
+                      t: 'Pinjam Mudah',
+                      s: 'Reservasi daring 24/7',
+                  },
+                  {
+                      icon: Globe,
+                      t: 'Sumber Digital',
+                      s: 'E-book, jurnal & riset',
+                  },
+                  {
+                      icon: Check,
+                      t: 'Gratis Anggota',
+                      s: 'Untuk seluruh siswa',
+                  },
               ]
             : [
-                  { icon: BookOpen, t: 'Full Catalog', s: '12,480+ curated items' },
-                  { icon: Clock, t: 'Easy Borrowing', s: 'Online reservation 24/7' },
-                  { icon: Globe, t: 'Digital Sources', s: 'E-books, journals & research' },
+                  {
+                      icon: BookOpen,
+                      t: 'Full Catalog',
+                      s: '12,480+ curated items',
+                  },
+                  {
+                      icon: Clock,
+                      t: 'Easy Borrowing',
+                      s: 'Online reservation 24/7',
+                  },
+                  {
+                      icon: Globe,
+                      t: 'Digital Sources',
+                      s: 'E-books, journals & research',
+                  },
                   { icon: Check, t: 'Free Membership', s: 'For all students' },
               ];
     return (
@@ -92,16 +120,48 @@ export function HowToBorrow() {
     const steps =
         language === 'id'
             ? [
-                  { icon: Search, title: 'Cari & Temukan', body: 'Telusuri katalog daring, gunakan filter kategori, penulis, atau ketersediaan.' },
-                  { icon: Bookmark, title: 'Reservasi Online', body: 'Klik "Pinjam" pada halaman buku. Reservasi langsung tercatat di akunmu.' },
-                  { icon: MapPin, title: 'Ambil di Rak', body: 'Datang ke perpustakaan, tunjukkan kode, ambil di lokasi rak yang tertera.' },
-                  { icon: Check, title: 'Baca & Kembalikan', body: 'Pinjam hingga 14 hari. Perpanjang sekali lewat akun jika butuh waktu lebih.' },
+                  {
+                      icon: Search,
+                      title: 'Cari & Temukan',
+                      body: 'Telusuri katalog daring, gunakan filter kategori, penulis, atau ketersediaan.',
+                  },
+                  {
+                      icon: Bookmark,
+                      title: 'Reservasi Online',
+                      body: 'Klik "Pinjam" pada halaman buku. Reservasi langsung tercatat di akunmu.',
+                  },
+                  {
+                      icon: MapPin,
+                      title: 'Ambil di Rak',
+                      body: 'Datang ke perpustakaan, tunjukkan kode, ambil di lokasi rak yang tertera.',
+                  },
+                  {
+                      icon: Check,
+                      title: 'Baca & Kembalikan',
+                      body: 'Pinjam hingga 14 hari. Perpanjang sekali lewat akun jika butuh waktu lebih.',
+                  },
               ]
             : [
-                  { icon: Search, title: 'Search & Find', body: 'Browse the online catalog, filter by category, author, or availability.' },
-                  { icon: Bookmark, title: 'Reserve Online', body: 'Click "Borrow" on a book page. The reservation is logged to your account.' },
-                  { icon: MapPin, title: 'Pick Up at Shelf', body: 'Come to the library, show your code, collect it at the listed shelf.' },
-                  { icon: Check, title: 'Read & Return', body: 'Borrow up to 14 days. Extend once via your account if you need more time.' },
+                  {
+                      icon: Search,
+                      title: 'Search & Find',
+                      body: 'Browse the online catalog, filter by category, author, or availability.',
+                  },
+                  {
+                      icon: Bookmark,
+                      title: 'Reserve Online',
+                      body: 'Click "Borrow" on a book page. The reservation is logged to your account.',
+                  },
+                  {
+                      icon: MapPin,
+                      title: 'Pick Up at Shelf',
+                      body: 'Come to the library, show your code, collect it at the listed shelf.',
+                  },
+                  {
+                      icon: Check,
+                      title: 'Read & Return',
+                      body: 'Borrow up to 14 days. Extend once via your account if you need more time.',
+                  },
               ];
     return (
         <section className="mx-auto max-w-7xl px-6 py-20 lg:px-10 lg:py-28">
@@ -137,8 +197,9 @@ export function HowToBorrow() {
                             <div className="hairline grid h-14 w-14 place-items-center rounded-2xl border bg-card text-cobalt shadow-soft dark:bg-night-2 dark:text-cobalt-lt">
                                 <Icon className="h-6 w-6" />
                             </div>
-                            <div className="tracking-editorial mt-5 font-mono text-[11px] uppercase text-muted-foreground">
-                                {language === 'id' ? 'Langkah' : 'Step'} 0{i + 1}
+                            <div className="mt-5 font-mono text-[11px] tracking-editorial text-muted-foreground uppercase">
+                                {language === 'id' ? 'Langkah' : 'Step'} 0
+                                {i + 1}
                             </div>
                             <h3 className="mt-2 font-display text-xl font-semibold text-foreground">
                                 {s.title}
@@ -160,22 +221,57 @@ export function WhyUs() {
     const feats =
         language === 'id'
             ? [
-                  { icon: BookOpen, title: 'Koleksi Terkurasi', body: 'Setiap judul dipilih pustakawan, bukan algoritma. Dari sastra kanon hingga sains terkini.' },
-                  { icon: Globe, title: 'Akses Digital 24/7', body: 'Telusuri katalog, reservasi buku, dan akses e-book serta jurnal akademik kapan saja.' },
-                  { icon: Users, title: 'Untuk Setiap Jenjang', body: 'Melayani siswa SD hingga SMA dengan koleksi sesuai usia dan kebutuhan akademik.' },
-                  { icon: Star, title: 'Program Literasi', body: 'Klub baca, lomba resensi, dan pelatihan literasi digital yang menumbuhkan minat baca.' },
+                  {
+                      icon: BookOpen,
+                      title: 'Koleksi Terkurasi',
+                      body: 'Setiap judul dipilih pustakawan, bukan algoritma. Dari sastra kanon hingga sains terkini.',
+                  },
+                  {
+                      icon: Globe,
+                      title: 'Akses Digital 24/7',
+                      body: 'Telusuri katalog, reservasi buku, dan akses e-book serta jurnal akademik kapan saja.',
+                  },
+                  {
+                      icon: Users,
+                      title: 'Untuk Setiap Jenjang',
+                      body: 'Melayani siswa SD hingga SMA dengan koleksi sesuai usia dan kebutuhan akademik.',
+                  },
+                  {
+                      icon: Star,
+                      title: 'Program Literasi',
+                      body: 'Klub baca, lomba resensi, dan pelatihan literasi digital yang menumbuhkan minat baca.',
+                  },
               ]
             : [
-                  { icon: BookOpen, title: 'Curated Collection', body: 'Every title is chosen by librarians, not algorithms — from canon literature to current science.' },
-                  { icon: Globe, title: '24/7 Digital Access', body: 'Browse the catalog, reserve books, and access e-books and academic journals anytime.' },
-                  { icon: Users, title: 'For Every Level', body: 'Serving primary to high-school students with age- and curriculum-appropriate collections.' },
-                  { icon: Star, title: 'Literacy Programs', body: 'Book clubs, review contests, and digital-literacy training that grow reading habits.' },
+                  {
+                      icon: BookOpen,
+                      title: 'Curated Collection',
+                      body: 'Every title is chosen by librarians, not algorithms — from canon literature to current science.',
+                  },
+                  {
+                      icon: Globe,
+                      title: '24/7 Digital Access',
+                      body: 'Browse the catalog, reserve books, and access e-books and academic journals anytime.',
+                  },
+                  {
+                      icon: Users,
+                      title: 'For Every Level',
+                      body: 'Serving primary to high-school students with age- and curriculum-appropriate collections.',
+                  },
+                  {
+                      icon: Star,
+                      title: 'Literacy Programs',
+                      body: 'Book clubs, review contests, and digital-literacy training that grow reading habits.',
+                  },
               ];
     return (
         <section className="hairline border-y bg-paper-2/40 dark:bg-night-2/30">
             <div className="mx-auto max-w-7xl px-6 py-20 lg:px-10 lg:py-28">
                 <div className="grid grid-cols-12 gap-10 lg:gap-16">
-                    <motion.div {...fadeUp} className="col-span-12 lg:col-span-4">
+                    <motion.div
+                        {...fadeUp}
+                        className="col-span-12 lg:col-span-4"
+                    >
                         <Eyebrow>
                             {language === 'id' ? 'Kenapa Kami' : 'Why Us'}
                         </Eyebrow>
@@ -272,7 +368,7 @@ export function Testimonials() {
             text:
                 language === 'id'
                     ? 'Dulu malas baca. Sejak ikut klub baca di sini, sekarang target 1 buku per minggu. Koleksinya lengkap.'
-                    : "I used to dislike reading. Since joining the book club here, I aim for a book a week. The collection is complete.",
+                    : 'I used to dislike reading. Since joining the book club here, I aim for a book a week. The collection is complete.',
             bg: '#1F9D73',
             ink: '#08120D',
         },
@@ -289,7 +385,10 @@ export function Testimonials() {
     ];
     return (
         <section className="mx-auto max-w-7xl px-6 py-20 lg:px-10 lg:py-28">
-            <motion.div {...fadeUp} className="mx-auto mb-14 max-w-2xl text-center">
+            <motion.div
+                {...fadeUp}
+                className="mx-auto mb-14 max-w-2xl text-center"
+            >
                 <div className="flex justify-center">
                     <Eyebrow center>
                         {language === 'id' ? 'Kata Mereka' : 'Testimonials'}
@@ -374,9 +473,11 @@ export function CtaJoin() {
                     <div className="absolute -bottom-24 -left-10 h-72 w-72 rounded-full bg-cobalt-dk/40 blur-2xl" />
                     <div className="relative grid grid-cols-12 items-center gap-8">
                         <div className="col-span-12 lg:col-span-8">
-                            <span className="tracking-editorial inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold uppercase">
+                            <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold tracking-editorial uppercase">
                                 <Users className="h-3 w-3" />
-                                {language === 'id' ? 'Akun Anggota' : 'Member Account'}
+                                {language === 'id'
+                                    ? 'Akun Anggota'
+                                    : 'Member Account'}
                             </span>
                             <h2
                                 className="mt-5 font-display text-3xl leading-tight lg:text-5xl"
@@ -397,14 +498,18 @@ export function CtaJoin() {
                                 href="/dashboard"
                                 className="btn-press inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-cobalt transition-colors hover:bg-paper"
                             >
-                                {language === 'id' ? 'Masuk Anggota' : 'Member Sign In'}
+                                {language === 'id'
+                                    ? 'Masuk Anggota'
+                                    : 'Member Sign In'}
                                 <ArrowRight className="h-4 w-4" />
                             </Link>
                             <Link
                                 href="/catalog/books"
                                 className="btn-press inline-flex w-full items-center justify-center rounded-full border border-white/30 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
                             >
-                                {language === 'id' ? 'Jelajah Katalog' : 'Browse Catalog'}
+                                {language === 'id'
+                                    ? 'Jelajah Katalog'
+                                    : 'Browse Catalog'}
                             </Link>
                         </div>
                     </div>
