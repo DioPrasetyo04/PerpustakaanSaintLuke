@@ -14,20 +14,18 @@ class OnlineResource extends Model
 
     protected $fillable = [
         'title',
-        'slug',
         'type',
         'format',
         'tag',
         'description',
         'url',
-        'palette',
+        'color',
         'is_active',
         'sort_order',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
-        'palette' => 'integer',
         'sort_order' => 'integer',
     ];
 

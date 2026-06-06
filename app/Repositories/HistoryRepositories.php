@@ -5,9 +5,11 @@ namespace App\Repositories;
 use App\Enums\PaymentStatus;
 use App\Interface\HistoryInterfaceRepositories;
 use App\Models\Book;
+use App\Models\Category;
 use App\Models\Fine;
 use App\Models\Loan;
 use App\Models\ReturnBook;
+use Illuminate\Support\Carbon;
 
 class HistoryRepositories implements HistoryInterfaceRepositories
 {
@@ -181,5 +183,174 @@ class HistoryRepositories implements HistoryInterfaceRepositories
             ->orderByDesc('fines.fine_date')
             ->paginate($perPage, ['*'], 'fines_page', $page)
             ->withQueryString();
+    }
+
+    public function getBookmarkStats(int $userId): array
+    {
+        $base = Book::query()
+            ->join('bookmarks', 'bookmarks.book_id', '=', 'books.id')
+            ->where('bookmarks.user_id', $userId);
+
+        $total = (clone $base)->count();
+
+        $available = (clone $base)
+            ->whereHas('stock', fn($q) => $q->where('available', '>', 0))
+            ->count();
+
+        $avgRating = (clone $base)
+            ->withAvg('reviews as avg_rating', 'rating')
+            ->get()
+            ->avg('avg_rating');
+
+        $byCategory = Category::query()
+            ->select('categories.name')
+            ->selectRaw('COUNT(bookmarks.id) as total')
+            ->join('book_of_categories', 'book_of_categories.category_id', '=', 'categories.id')
+            ->join('bookmarks', function ($join) use ($userId) {
+                $join->on('bookmarks.book_id', '=', 'book_of_categories.book_id')
+                    ->where('bookmarks.user_id', '=', $userId);
+            })
+            ->groupBy('categories.id', 'categories.name')
+            ->orderByDesc('total')
+            ->limit(6)
+            ->get();
+
+        return [
+            'total' => $total,
+            'available' => $available,
+            'borrowed' => $total - $available,
+            'avg_rating' => round((float) $avgRating, 1),
+            'by_category' => $byCategory
+                ->map(fn($c) => ['label' => $c->name, 'total' => (int) $c->total])
+                ->values()
+                ->toArray(),
+        ];
+    }
+
+    public function getLoanStats(int $userId): array
+    {
+        $base = Loan::query()
+            ->where('loans.user_id', $userId)
+            ->whereHas('loanDetails', fn($q) => $q->whereDoesntHave('returnBook'));
+
+        $total = (clone $base)->count();
+
+        $active = (clone $base)
+            ->whereHas('loanDetails', fn($q) => $q
+                ->whereDoesntHave('returnBook')
+                ->whereDate('due_date', '>=', now()->toDateString()))
+            ->count();
+
+        $overdue = (clone $base)
+            ->whereHas('loanDetails', fn($q) => $q
+                ->whereDoesntHave('returnBook')
+                ->whereDate('due_date', '<', now()->toDateString()))
+            ->count();
+
+        $trend = $this->monthlyTrend(
+            Loan::query()->where('user_id', $userId),
+            'loans.created_at',
+        );
+
+        return [
+            'total' => $total,
+            'active' => $active,
+            'overdue' => $overdue,
+            'trend' => $trend,
+        ];
+    }
+
+    public function getReturnStats(int $userId): array
+    {
+        $base = ReturnBook::query()
+            ->whereHas('loanDetail.loan', fn($q) => $q->where('user_id', $userId));
+
+        $total = (clone $base)->count();
+
+        $late = (clone $base)
+            ->whereHas('loanDetail', fn($q) => $q
+                ->whereColumn('return_books.return_date', '>', 'loan_details.due_date'))
+            ->count();
+
+        $trend = $this->monthlyTrend(
+            ReturnBook::query()
+                ->whereHas('loanDetail.loan', fn($q) => $q->where('user_id', $userId)),
+            'return_books.return_date',
+        );
+
+        return [
+            'total' => $total,
+            'on_time' => $total - $late,
+            'late' => $late,
+            'trend' => $trend,
+        ];
+    }
+
+    public function getFineStats(int $userId): array
+    {
+        $base = Fine::query()
+            ->whereHas('returnBook.loanDetail.loan', fn($q) => $q->where('user_id', $userId));
+
+        $total = (clone $base)->count();
+        $totalAmount = (float) (clone $base)->sum('total_fee');
+        $paidAmount = (float) (clone $base)
+            ->where('payment_status', PaymentStatus::SUCCESS->value)
+            ->sum('total_fee');
+
+        $unpaidCount = (clone $base)
+            ->whereIn('payment_status', [
+                PaymentStatus::PENDING->value,
+                PaymentStatus::FAILED->value,
+                PaymentStatus::ERROR->value,
+            ])
+            ->count();
+
+        $trend = $this->monthlyTrend(
+            Fine::query()
+                ->whereHas('returnBook.loanDetail.loan', fn($q) => $q->where('user_id', $userId))
+                ->where('payment_status', PaymentStatus::SUCCESS->value),
+            'fines.fine_date',
+            'fines.total_fee',
+        );
+
+        return [
+            'total' => $total,
+            'total_amount' => $totalAmount,
+            'paid_amount' => $paidAmount,
+            'unpaid_amount' => max(0, $totalAmount - $paidAmount),
+            'unpaid_count' => $unpaidCount,
+            'trend' => $trend,
+        ];
+    }
+
+    /**
+     * Build a 6-month trend ending on the current month.
+     * When $sumColumn is given the values are summed, otherwise rows are counted.
+     */
+    private function monthlyTrend($query, string $column, ?string $sumColumn = null): array
+    {
+        $start = Carbon::now()->startOfMonth()->subMonths(5);
+
+        $aggregate = $sumColumn
+            ? "COALESCE(SUM({$sumColumn}), 0) as total"
+            : 'COUNT(*) as total';
+
+        $rows = $query
+            ->where($column, '>=', $start)
+            ->selectRaw("DATE_FORMAT({$column}, '%Y-%m') as ym")
+            ->selectRaw($aggregate)
+            ->groupBy('ym')
+            ->pluck('total', 'ym');
+
+        $result = [];
+        for ($i = 0; $i < 6; $i++) {
+            $month = (clone $start)->addMonths($i);
+            $result[] = [
+                'label' => $month->format('M'),
+                'total' => (float) ($rows[$month->format('Y-m')] ?? 0),
+            ];
+        }
+
+        return $result;
     }
 }

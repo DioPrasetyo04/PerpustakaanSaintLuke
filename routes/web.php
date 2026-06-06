@@ -14,10 +14,8 @@ use App\Http\Controllers\LoanController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\ReturnBookController;
-use App\Http\Controllers\UpdatePasswordController;
 use App\Http\Controllers\VisitFormController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\URL;
 use Inertia\Inertia;
 
 // Route::get('/', function () {

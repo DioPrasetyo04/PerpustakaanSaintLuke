@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Enums\Days;
 use App\Filament\Pages\Auth\Register;
+use App\Filament\Pages\Auth\RequestPasswordReset;
 use App\Filament\Pages\Auth\ResetPassword;
 use App\Filament\Pages\Profile;
 use App\Models\Announcement;
@@ -40,13 +41,21 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->registration(Register::class)
             ->profile(Profile::class)
-            ->passwordReset(resetAction: ResetPassword::class)
+            ->passwordReset(
+                requestAction: RequestPasswordReset::class,
+                resetAction: ResetPassword::class,
+            )
             ->colors([
                 'primary' => Color::Amber,
             ])
             ->renderHook(
                 'panels::head.end',
                 fn() => '<style>' . file_get_contents(resource_path('css/filament/admin/custom.css')) . '</style>',
+            )
+            ->renderHook(
+                'panels::simple-page.start',
+                fn() => view('filament.partials.auth-back-to-login'),
+                scopes: RequestPasswordReset::class,
             )
             ->renderHook(
                 'panels::user-menu.before',

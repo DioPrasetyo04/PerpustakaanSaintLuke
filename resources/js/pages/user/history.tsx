@@ -12,7 +12,22 @@ import {
     XCircle,
     Eye,
     Trash2,
+    Star,
+    AlertCircle,
+    Wallet,
+    TrendingUp,
 } from 'lucide-react';
+import {
+    LineChart,
+    Line,
+    BarChart,
+    Bar,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    ResponsiveContainer,
+} from 'recharts';
 import { Link, router, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 import { Card } from '@/components/ui/card';
@@ -100,8 +115,49 @@ type TabFilters = {
     per_page: number;
 };
 
+type TrendPoint = { label: string; total: number };
+
+type BookmarkStats = {
+    total: number;
+    available: number;
+    borrowed: number;
+    avg_rating: number;
+    by_category: TrendPoint[];
+};
+
+type LoanStats = {
+    total: number;
+    active: number;
+    overdue: number;
+    trend: TrendPoint[];
+};
+
+type ReturnStats = {
+    total: number;
+    on_time: number;
+    late: number;
+    trend: TrendPoint[];
+};
+
+type FineStats = {
+    total: number;
+    total_amount: number;
+    paid_amount: number;
+    unpaid_amount: number;
+    unpaid_count: number;
+    trend: TrendPoint[];
+};
+
+type HistoryStats = {
+    bookmarks: BookmarkStats;
+    loans: LoanStats;
+    returns: ReturnStats;
+    fines: FineStats;
+};
+
 type HistoryPageProps = {
     activeTab: TabId;
+    stats: HistoryStats;
     bookmarks: Paginated<BookmarkItem>;
     loans: Paginated<LoanItem>;
     returns: Paginated<ReturnItem>;
@@ -140,7 +196,7 @@ const getInitialTabFromUrl = (fallback: TabId): TabId => {
 
 export default function HistoryPage() {
     const { props } = usePage<HistoryPageProps>();
-    const { bookmarks, loans, returns, fines, filters } = props;
+    const { bookmarks, loans, returns, fines, filters, stats } = props;
 
     const [activeTab, setActiveTab] = useState<TabId>(() =>
         getInitialTabFromUrl(props.activeTab ?? 'bookmarks'),
@@ -462,6 +518,20 @@ export default function HistoryPage() {
                         </div>
                     </div>
 
+                    {/* Stats & Chart per active tab */}
+                    {activeTab === 'bookmarks' && (
+                        <BookmarkStatsSection stats={stats.bookmarks} />
+                    )}
+                    {activeTab === 'loans' && (
+                        <LoanStatsSection stats={stats.loans} />
+                    )}
+                    {activeTab === 'returns' && (
+                        <ReturnStatsSection stats={stats.returns} />
+                    )}
+                    {activeTab === 'fines' && (
+                        <FineStatsSection stats={stats.fines} />
+                    )}
+
                     {/* Filters */}
                     <Card className="p-4 mb-6">
                         <div className="flex flex-col sm:flex-row gap-4">
@@ -584,6 +654,305 @@ export default function HistoryPage() {
                 notification={notification}
                 onClose={() => setNotification(null)}
             />
+        </div>
+    );
+}
+
+/* ------------------------------------------------------------------ */
+/* Stats & charts                                                     */
+/* ------------------------------------------------------------------ */
+
+const COBALT = '#1E3A8A';
+const COBALT_LT = '#3B82F6';
+const ACCENT = '#F59E0B';
+
+const formatIDR = (value: number) => `Rp ${value.toLocaleString('id-ID')}`;
+
+function StatCard({
+    icon: Icon,
+    iconClass,
+    bg,
+    label,
+    value,
+    delay = 0,
+}: {
+    icon: typeof Bookmark;
+    iconClass: string;
+    bg: string;
+    label: string;
+    value: string | number;
+    delay?: number;
+}) {
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay }}
+        >
+            <Card className="p-3 transition-shadow hover:shadow-lg sm:p-4">
+                <div className="flex items-center gap-3">
+                    <div className={`flex-shrink-0 rounded-full p-2.5 ${bg}`}>
+                        <Icon className={`h-5 w-5 ${iconClass}`} />
+                    </div>
+                    <div className="min-w-0">
+                        <p className="truncate text-[11px] text-muted-foreground sm:text-xs">
+                            {label}
+                        </p>
+                        <p className="text-lg font-bold text-foreground sm:text-xl">
+                            {value}
+                        </p>
+                    </div>
+                </div>
+            </Card>
+        </motion.div>
+    );
+}
+
+function ChartCard({
+    title,
+    hasData,
+    children,
+}: {
+    title: string;
+    hasData: boolean;
+    children: React.ReactElement;
+}) {
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+        >
+            <Card className="p-4 sm:p-6">
+                <h3 className="mb-4 text-sm font-semibold text-foreground sm:text-base">
+                    {title}
+                </h3>
+                {hasData ? (
+                    <ResponsiveContainer width="100%" height={220}>
+                        {children}
+                    </ResponsiveContainer>
+                ) : (
+                    <div className="flex h-[220px] flex-col items-center justify-center gap-2 text-muted-foreground">
+                        <TrendingUp className="h-8 w-8 opacity-30" />
+                        <p className="text-sm">No data to display yet</p>
+                    </div>
+                )}
+            </Card>
+        </motion.div>
+    );
+}
+
+function BookmarkStatsSection({ stats }: { stats: BookmarkStats }) {
+    const hasData = stats.by_category.some((c) => c.total > 0);
+    return (
+        <div className="mb-6 space-y-4">
+            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                <StatCard
+                    icon={Bookmark}
+                    iconClass="text-cobalt dark:text-cobalt-lt"
+                    bg="bg-cobalt/10"
+                    label="Total Bookmarks"
+                    value={stats.total}
+                    delay={0.05}
+                />
+                <StatCard
+                    icon={CheckCircle}
+                    iconClass="text-green-600"
+                    bg="bg-green-100 dark:bg-green-500/15"
+                    label="Available"
+                    value={stats.available}
+                    delay={0.1}
+                />
+                <StatCard
+                    icon={BookOpen}
+                    iconClass="text-red-600"
+                    bg="bg-red-100 dark:bg-red-500/15"
+                    label="Borrowed"
+                    value={stats.borrowed}
+                    delay={0.15}
+                />
+                <StatCard
+                    icon={Star}
+                    iconClass="text-amber-500"
+                    bg="bg-amber-100 dark:bg-amber-500/15"
+                    label="Avg Rating"
+                    value={stats.avg_rating.toFixed(1)}
+                    delay={0.2}
+                />
+            </div>
+            <ChartCard title="Bookmarks by Category" hasData={hasData}>
+                <BarChart data={stats.by_category}>
+                    <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                    <XAxis dataKey="label" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
+                    <Tooltip
+                        formatter={(v: number) => [v, 'Bookmarks']}
+                        cursor={{ fill: 'rgba(30,58,138,0.08)' }}
+                    />
+                    <Bar dataKey="total" fill={COBALT} radius={[4, 4, 0, 0]} />
+                </BarChart>
+            </ChartCard>
+        </div>
+    );
+}
+
+function LoanStatsSection({ stats }: { stats: LoanStats }) {
+    const hasData = stats.trend.some((p) => p.total > 0);
+    return (
+        <div className="mb-6 space-y-4">
+            <div className="grid grid-cols-3 gap-3">
+                <StatCard
+                    icon={BookOpen}
+                    iconClass="text-cobalt dark:text-cobalt-lt"
+                    bg="bg-cobalt/10"
+                    label="Total Loans"
+                    value={stats.total}
+                    delay={0.05}
+                />
+                <StatCard
+                    icon={Clock}
+                    iconClass="text-blue-600"
+                    bg="bg-blue-100 dark:bg-blue-500/15"
+                    label="Active"
+                    value={stats.active}
+                    delay={0.1}
+                />
+                <StatCard
+                    icon={XCircle}
+                    iconClass="text-red-600"
+                    bg="bg-red-100 dark:bg-red-500/15"
+                    label="Overdue"
+                    value={stats.overdue}
+                    delay={0.15}
+                />
+            </div>
+            <ChartCard title="Loan Activity (Last 6 Months)" hasData={hasData}>
+                <LineChart data={stats.trend}>
+                    <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                    <XAxis dataKey="label" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
+                    <Tooltip formatter={(v: number) => [v, 'Loans']} />
+                    <Line
+                        type="monotone"
+                        dataKey="total"
+                        stroke={COBALT}
+                        strokeWidth={2}
+                        dot={{ r: 3 }}
+                    />
+                </LineChart>
+            </ChartCard>
+        </div>
+    );
+}
+
+function ReturnStatsSection({ stats }: { stats: ReturnStats }) {
+    const hasData = stats.trend.some((p) => p.total > 0);
+    return (
+        <div className="mb-6 space-y-4">
+            <div className="grid grid-cols-3 gap-3">
+                <StatCard
+                    icon={RefreshCw}
+                    iconClass="text-cobalt dark:text-cobalt-lt"
+                    bg="bg-cobalt/10"
+                    label="Total Returns"
+                    value={stats.total}
+                    delay={0.05}
+                />
+                <StatCard
+                    icon={CheckCircle}
+                    iconClass="text-green-600"
+                    bg="bg-green-100 dark:bg-green-500/15"
+                    label="On Time"
+                    value={stats.on_time}
+                    delay={0.1}
+                />
+                <StatCard
+                    icon={XCircle}
+                    iconClass="text-red-600"
+                    bg="bg-red-100 dark:bg-red-500/15"
+                    label="Late"
+                    value={stats.late}
+                    delay={0.15}
+                />
+            </div>
+            <ChartCard title="Returns (Last 6 Months)" hasData={hasData}>
+                <LineChart data={stats.trend}>
+                    <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                    <XAxis dataKey="label" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
+                    <Tooltip formatter={(v: number) => [v, 'Returns']} />
+                    <Line
+                        type="monotone"
+                        dataKey="total"
+                        stroke={COBALT_LT}
+                        strokeWidth={2}
+                        dot={{ r: 3 }}
+                    />
+                </LineChart>
+            </ChartCard>
+        </div>
+    );
+}
+
+function FineStatsSection({ stats }: { stats: FineStats }) {
+    const hasData = stats.trend.some((p) => p.total > 0);
+    return (
+        <div className="mb-6 space-y-4">
+            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                <StatCard
+                    icon={DollarSign}
+                    iconClass="text-cobalt dark:text-cobalt-lt"
+                    bg="bg-cobalt/10"
+                    label="Total Fines"
+                    value={formatIDR(stats.total_amount)}
+                    delay={0.05}
+                />
+                <StatCard
+                    icon={Wallet}
+                    iconClass="text-green-600"
+                    bg="bg-green-100 dark:bg-green-500/15"
+                    label="Paid"
+                    value={formatIDR(stats.paid_amount)}
+                    delay={0.1}
+                />
+                <StatCard
+                    icon={AlertCircle}
+                    iconClass="text-red-600"
+                    bg="bg-red-100 dark:bg-red-500/15"
+                    label="Unpaid"
+                    value={formatIDR(stats.unpaid_amount)}
+                    delay={0.15}
+                />
+                <StatCard
+                    icon={CreditCard}
+                    iconClass="text-amber-500"
+                    bg="bg-amber-100 dark:bg-amber-500/15"
+                    label="Unpaid Bills"
+                    value={stats.unpaid_count}
+                    delay={0.2}
+                />
+            </div>
+            <ChartCard
+                title="Fines Paid (Last 6 Months)"
+                hasData={hasData}
+            >
+                <BarChart data={stats.trend}>
+                    <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                    <XAxis dataKey="label" tick={{ fontSize: 12 }} />
+                    <YAxis
+                        tick={{ fontSize: 12 }}
+                        width={70}
+                        tickFormatter={(v: number) =>
+                            v >= 1000 ? `${v / 1000}k` : `${v}`
+                        }
+                    />
+                    <Tooltip
+                        formatter={(v: number) => [formatIDR(v), 'Paid']}
+                        cursor={{ fill: 'rgba(245,158,11,0.08)' }}
+                    />
+                    <Bar dataKey="total" fill={ACCENT} radius={[4, 4, 0, 0]} />
+                </BarChart>
+            </ChartCard>
         </div>
     );
 }

@@ -52,6 +52,7 @@ class LaporanBuku extends Page implements HasForms
             'nama_kiri'           => 'Dio Prasetyo',
             'penandatangan_kanan' => 'Kepala Perpustakaan',
             'nama_kanan'          => 'Ariesta Francisco Ratu',
+            ...$this->suratDefaults(),
         ]);
     }
 
@@ -111,6 +112,8 @@ class LaporanBuku extends Page implements HasForms
                     TextInput::make('penandatangan_kanan')->label('Jabatan (Kanan)'),
                     TextInput::make('nama_kanan')->label('Nama (Kanan)'),
                 ]),
+
+                ...$this->suratFields(),
             ])
             ->statePath('data');
     }
@@ -177,6 +180,9 @@ class LaporanBuku extends Page implements HasForms
 
     public function downloadPdf()
     {
+        // Render tabel besar via dompdf bisa memakan memori; beri ruang lebih.
+        @ini_set('memory_limit', '1024M');
+
         $report = $this->getReportData();
 
         if ($report['total'] === 0) {

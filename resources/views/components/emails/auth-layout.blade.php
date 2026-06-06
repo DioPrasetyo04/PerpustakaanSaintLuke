@@ -46,7 +46,7 @@
 
         <!-- HEADER -->
         <tr>
-            <td style="background:linear-gradient(135deg,#15795a 0%,#1f9d73 45%,#b0822f 100%); padding:34px 32px; text-align:center;">
+            <td style="background:#f59e0b; padding:34px 32px; text-align:center;">
                 @if($logoSrc)
                     <img src="{{ $logoSrc }}" width="60" height="60" alt="Saint Luke" style="display:inline-block; border-radius:50%; background:#ffffff; padding:6px; margin-bottom:12px;">
                 @endif

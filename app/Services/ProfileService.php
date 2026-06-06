@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\SocialMedia as SocialMediaEnum;
 use App\Exceptions\BusinessException;
 use App\Interface\ProfileInterfaceRepositories;
+use App\Services\MemberCardService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -34,6 +35,7 @@ class ProfileService
             'date_of_birth' => $user->date_of_birth,
             'avatar' => $user->avatar ? Storage::url($user->avatar) : null,
             'created_at' => $user->created_at,
+            'member_card' => $this->buildMemberCard($user),
             'socialmedia' => $user->socialmedia->map(function ($item) {
                 $enum = SocialMediaEnum::tryFrom($item->platform);
                 return [
@@ -46,6 +48,35 @@ class ProfileService
                     'username' => $item->username,
                 ];
             })->values()->toArray(),
+        ];
+    }
+
+    /**
+     * Data kartu anggota untuk halaman profil.
+     * Mengembalikan null bila user belum memiliki kartu (belum diterbitkan staf).
+     *
+     * @return array<string, mixed>|null
+     */
+    private function buildMemberCard($user): ?array
+    {
+        if (! $user->hasMemberCard()) {
+            return null;
+        }
+
+        $value = MemberCardService::barcodeValue($user);
+
+        return [
+            'member_number' => $value,
+            'name' => $user->name,
+            'kelas' => $user->getTypeLabelAttribute(),
+            'email' => $user->email,
+            'issued_at' => $user->member_card_issued_at,
+            'avatar' => MemberCardService::avatarDataUri($user),
+            'initials' => MemberCardService::initials($user),
+            'barcode' => MemberCardService::barcodePngDataUri($value),
+            'qr' => MemberCardService::qrPngDataUri($value, 160),
+            'logo' => MemberCardService::logoDataUri(),
+            'download_url' => route('member-card.download'),
         ];
     }
 

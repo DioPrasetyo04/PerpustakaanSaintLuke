@@ -52,6 +52,7 @@ class LaporanDenda extends Page implements HasForms
             'nama_kiri'           => 'Dio Prasetyo',
             'penandatangan_kanan' => 'Kepala Perpustakaan',
             'nama_kanan'          => 'Ariesta Francisco Ratu',
+            ...$this->suratDefaults(),
         ]);
     }
 
@@ -121,6 +122,8 @@ class LaporanDenda extends Page implements HasForms
                     TextInput::make('penandatangan_kanan')->label('Jabatan (Kanan)'),
                     TextInput::make('nama_kanan')->label('Nama (Kanan)'),
                 ]),
+
+                ...$this->suratFields(),
             ])
             ->statePath('data');
     }

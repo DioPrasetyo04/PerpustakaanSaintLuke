@@ -58,17 +58,34 @@ const content = {
     },
 };
 
-/* thumbnail palettes (self-contained colored headers, theme-agnostic) */
-const PALETTES = [
-    { bg: '#0F3D2E', accent: '#6FD7AC' },
-    { bg: '#11324F', accent: '#74B8F0' },
-    { bg: '#3A2B14', accent: '#E0B564' },
-    { bg: '#1E2440', accent: '#9AA6F2' },
-    { bg: '#3A1530', accent: '#F0A0C8' },
-    { bg: '#13322F', accent: '#67D6C6' },
-    { bg: '#2A1840', accent: '#C09BF0' },
-    { bg: '#402015', accent: '#F0A878' },
-];
+/* thumbnail theme derived from the resource's saved hex color */
+const cardTheme = (hex: string | null | undefined) => {
+    const bg = hex && /^#?[0-9a-fA-F]{3,8}$/.test(hex) ? normalizeHex(hex) : '#0F3D2E';
+    // Light backgrounds get dark accents, dark backgrounds get light accents,
+    // so badges/icons/quotes stay readable on top of the chosen color.
+    const accent = isLightHex(bg) ? '#0f172a' : '#ffffff';
+    return { bg, accent };
+};
+
+function normalizeHex(hex: string): string {
+    let c = hex.startsWith('#') ? hex.slice(1) : hex;
+    if (c.length === 3) {
+        c = c
+            .split('')
+            .map((x) => x + x)
+            .join('');
+    }
+    return '#' + c.slice(0, 6);
+}
+
+function isLightHex(hex: string): boolean {
+    const c = normalizeHex(hex).slice(1);
+    const r = parseInt(c.slice(0, 2), 16) || 0;
+    const g = parseInt(c.slice(2, 4), 16) || 0;
+    const b = parseInt(c.slice(4, 6), 16) || 0;
+    // Perceived luminance (0–1); >0.6 is treated as a light color.
+    return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.6;
+}
 
 const ICONS: Record<string, ComponentType<{ className?: string }>> = {
     'book-open': BookOpen,
@@ -209,7 +226,7 @@ const ResourcesPage = () => {
             {resources.length > 0 ? (
                 <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
                     {resources.map((r, i) => {
-                        const p = PALETTES[r.palette % PALETTES.length];
+                        const p = cardTheme(r.color);
                         const Icon = ICONS[r.icon] ?? BookOpen;
                         return (
                             <motion.a

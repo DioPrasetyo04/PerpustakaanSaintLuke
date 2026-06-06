@@ -49,6 +49,7 @@ class HistoryController extends Controller
 
         return Inertia::render('user/history', [
             'activeTab' => $activeTab,
+            'stats' => fn() => $this->historyController->getStats(),
             'bookmarks' => fn() => $this->historyController->getBookmarks(
                 $bookmarksFilters,
                 $bookmarksPerPage,

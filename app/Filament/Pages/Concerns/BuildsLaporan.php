@@ -281,4 +281,50 @@ trait BuildsLaporan
         }
         return $opts;
     }
+
+    /**
+     * Default isi surat (penerima, salam pembuka, kalimat penutup).
+     * Dapat di-merge ke form->fill() pada mount().
+     *
+     * @return array<string, string>
+     */
+    public function suratDefaults(): array
+    {
+        return [
+            'kepada'  => "Kepala Yayasan Pendidikan Umum Santo Lukas\ndi Tempat",
+            'salam'   => 'Semoga Tuhan Yesus selalu memberkati dan menyertai Bapak/Ibu sekalian dalam menjalankan aktivitas sehari-hari.',
+            'penutup' => 'Demikian laporan ini kami sampaikan untuk dapat menjadi bahan evaluasi dan pengambilan keputusan. Atas perhatian dan kerja samanya kami ucapkan terima kasih.',
+        ];
+    }
+
+    /**
+     * Field "Isi Surat" yang sama untuk semua laporan: penerima (Kepada Yth.),
+     * salam pembuka, dan kalimat penutup — bisa diubah per laporan.
+     *
+     * @return array<int, \Filament\Schemas\Components\Component>
+     */
+    public function suratFields(): array
+    {
+        return [
+            \Filament\Schemas\Components\Section::make('Isi Surat')
+                ->description('Bagian pembuka & penutup surat laporan — dapat diubah sesuai konteks tiap laporan.')
+                ->columns(1)
+                ->schema([
+                    \Filament\Forms\Components\Textarea::make('kepada')
+                        ->label('Kepada Yth.')
+                        ->rows(2)
+                        ->placeholder("Nama / jabatan penerima\nmis. Kepala Yayasan Pendidikan Umum Santo Lukas\ndi Tempat")
+                        ->helperText('Penerima surat (boleh beberapa baris). Kosongkan bila tidak perlu menampilkan bagian "Kepada Yth.".'),
+
+                    \Filament\Forms\Components\Textarea::make('salam')
+                        ->label('Salam Pembuka')
+                        ->rows(2)
+                        ->helperText('Kalimat setelah "Dengan Hormat,".'),
+
+                    \Filament\Forms\Components\Textarea::make('penutup')
+                        ->label('Kalimat Penutup')
+                        ->rows(3),
+                ]),
+        ];
+    }
 }

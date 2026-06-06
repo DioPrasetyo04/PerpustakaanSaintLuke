@@ -15,14 +15,13 @@ class OnlineResourceResource extends JsonResource
         return [
             'id' => $this->id,
             'title' => $this->title,
-            'slug' => $this->slug,
             'type' => $this->type,
             'icon' => $type?->icon() ?? 'book-open',
             'format' => $this->format,
             'tag' => $this->tag,
             'description' => $this->description,
             'url' => $this->url,
-            'palette' => (int) $this->palette,
+            'color' => $this->color ?: '#0F3D2E',
         ];
     }
 }

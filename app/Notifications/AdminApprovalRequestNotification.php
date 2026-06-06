@@ -35,18 +35,13 @@ class AdminApprovalRequestNotification extends Notification
 
         return (new MailMessage)
             ->subject('Permintaan Verifikasi Akun Baru - Perpustakaan Saint Luke')
-            ->greeting('Halo ' . ($notifiable->name ?? 'Admin') . ',')
-            ->line('Ada pendaftar baru yang membutuhkan persetujuan Anda:')
-            ->line('**Nama:** ' . $this->pendingUser->name)
-            ->line('**Username:** ' . $this->pendingUser->username)
-            ->line('**Email:** ' . $this->pendingUser->email)
-            ->line('**Telepon:** ' . ($this->pendingUser->phone ?? '-'))
-            ->line('**Role yang diminta:** ' . ucfirst($roleLabel))
-            ->action('Setujui Pendaftaran', $approveUrl)
-            ->line('Jika permintaan ini tidak valid, Anda dapat menolaknya:')
-            ->line('[Tolak Pendaftaran](' . $rejectUrl . ')')
-            ->line('Link ini akan kedaluwarsa dalam 7 hari.')
-            ->salutation('Terima kasih, Perpustakaan Saint Luke');
+            ->view('emails.admin.approval-request', [
+                'staff' => $notifiable,
+                'pendingUser' => $this->pendingUser,
+                'roleLabel' => $roleLabel,
+                'approveUrl' => $approveUrl,
+                'rejectUrl' => $rejectUrl,
+            ]);
     }
 
     public function toArray(object $notifiable): array

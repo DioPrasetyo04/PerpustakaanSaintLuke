@@ -16,4 +16,14 @@ class EditOnlineResources extends EditRecord
             DeleteAction::make(),
         ];
     }
+
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        return OnlineResourcesResource::expandCustomType($data);
+    }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        return OnlineResourcesResource::resolveCustomType($data);
+    }
 }

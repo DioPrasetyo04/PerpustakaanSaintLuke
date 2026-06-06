@@ -63,7 +63,6 @@ const content = {
     },
 };
 
-
 type HeroSectionProps = {
     books?: BookProps[];
     booksCount?: number;
@@ -181,7 +180,7 @@ const HeroSection = ({
                 <div className="grid grid-cols-12 items-center gap-8 lg:gap-6">
                     {/* LEFT */}
                     <div className="col-span-12 lg:col-span-7">
-                        <div className="tracking-editorial inline-flex items-center gap-2 font-mono text-[11px] uppercase text-cobalt dark:text-cobalt-lt">
+                        <div className="inline-flex items-center gap-2 font-mono text-[11px] tracking-editorial text-cobalt uppercase dark:text-cobalt-lt">
                             <span className="h-1.5 w-1.5 rounded-full bg-cobalt dark:bg-cobalt-lt" />
                             {t.eyebrow}
                         </div>
@@ -252,7 +251,7 @@ const HeroSection = ({
                         {/* Trending chips — buku trending dari backend (rating → abjad) */}
                         {trendingChips.length > 0 && (
                             <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-muted-foreground">
-                                <span className="tracking-editorial font-mono uppercase">
+                                <span className="font-mono tracking-editorial uppercase">
                                     {t.trending}:
                                 </span>
                                 {trendingChips.map((b) => (
@@ -276,12 +275,15 @@ const HeroSection = ({
                         {/* Inline stats */}
                         <div className="mt-8 flex items-center gap-8">
                             {stats.map((s, i) => (
-                                <div key={i} className="flex items-center gap-8">
+                                <div
+                                    key={i}
+                                    className="flex items-center gap-8"
+                                >
                                     {i > 0 && (
                                         <span className="h-10 w-px bg-line dark:bg-night-line" />
                                     )}
                                     <div>
-                                        <div className="font-display text-2xl tabnum text-foreground">
+                                        <div className="tabnum font-display text-2xl text-foreground">
                                             {s.v}
                                         </div>
                                         <div className="text-xs text-muted-foreground">
@@ -299,7 +301,7 @@ const HeroSection = ({
                             <div className="relative">
                                 <div className="pointer-events-none absolute -inset-6 -z-10 rounded-full bg-cobalt/10 blur-3xl" />
 
-                                <div className="tracking-editorial mb-3 flex items-center gap-2 font-mono text-[11px] uppercase text-cobalt dark:text-cobalt-lt">
+                                <div className="mb-3 flex items-center gap-2 font-mono text-[11px] tracking-editorial text-cobalt uppercase dark:text-cobalt-lt">
                                     <span className="h-1.5 w-1.5 rounded-full bg-cobalt dark:bg-cobalt-lt" />
                                     {t.showcase}
                                 </div>
@@ -311,7 +313,9 @@ const HeroSection = ({
                                     autoplay={3000}
                                     loop
                                     spaceBetween={16}
-                                    renderItem={(book) => <BookCard {...book} />}
+                                    renderItem={(book) => (
+                                        <BookCard {...book} />
+                                    )}
                                     breakpoints={{
                                         0: { slidesPerView: 1.3 },
                                         480: { slidesPerView: 2.2 },
@@ -335,7 +339,7 @@ const HeroSection = ({
                     <span className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card/70 shadow-soft backdrop-blur-sm transition-transform group-hover:-translate-y-0.5">
                         <ChevronUp className="h-4 w-4 animate-bounce" />
                     </span>
-                    <span className="tracking-editorial font-mono text-[10px] uppercase">
+                    <span className="font-mono text-[10px] tracking-editorial uppercase">
                         {t.swipeUp}
                     </span>
                 </button>

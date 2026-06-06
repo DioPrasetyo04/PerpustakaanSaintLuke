@@ -18,6 +18,9 @@ import {
     Camera,
     Share2,
     AlertTriangle,
+    CreditCard,
+    Download,
+    Send,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -25,7 +28,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import {
     Select,
     SelectContent,
@@ -71,6 +73,20 @@ function PlatformIcon({
     );
 }
 
+type MemberCardData = {
+    member_number: string | null;
+    name: string;
+    kelas: string | null;
+    email: string;
+    issued_at: string | null;
+    avatar: string | null;
+    initials: string;
+    barcode: string;
+    qr: string;
+    logo: string | null;
+    download_url: string;
+};
+
 type ProfileData = {
     id: number;
     name: string;
@@ -82,6 +98,7 @@ type ProfileData = {
     date_of_birth: string | null;
     avatar: string | null;
     created_at: string;
+    member_card: MemberCardData | null;
     socialmedia: SocialMediaItem[];
 };
 
@@ -285,6 +302,41 @@ export default function ProfilePage() {
 
     const requestDeleteSocial = (item: SocialMediaItem) => {
         setSocialToDelete(item);
+    };
+
+    /* ---------- Member card ---------- */
+    const [requestingCard, setRequestingCard] = useState(false);
+
+    const downloadMemberCard = () => {
+        if (profile.member_card) {
+            window.open(profile.member_card.download_url, '_blank');
+        }
+    };
+
+    const requestMemberCard = () => {
+        if (requestingCard) return;
+        setRequestingCard(true);
+        router.post(
+            route('member-card.request'),
+            {},
+            {
+                preserveScroll: true,
+                onSuccess: () =>
+                    setNotification({
+                        type: 'success',
+                        message:
+                            'Permintaan kartu anggota telah dikirim ke petugas. Anda akan dihubungi setelah kartu diterbitkan.',
+                    }),
+                onError: (errs) =>
+                    setNotification({
+                        type: 'error',
+                        message:
+                            errs?.member_card ??
+                            'Gagal mengirim permintaan kartu anggota.',
+                    }),
+                onFinish: () => setRequestingCard(false),
+            },
+        );
     };
 
     const cancelDeleteSocial = () => {
@@ -577,8 +629,10 @@ export default function ProfilePage() {
                         </Card>
                     </div>
 
+                    {/* Social Media + Member Card */}
+                    <div className="mt-6 grid gap-6 lg:grid-cols-2">
                     {/* Social Media Management */}
-                    <Card className="p-6 mt-6">
+                    <Card className="p-6">
                         <div className="flex flex-col gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between">
                             <div>
                                 <h3 className="text-xl font-semibold text-foreground mb-1 flex items-center gap-2">
@@ -745,21 +799,44 @@ export default function ProfilePage() {
                         )}
 
                         {profile.socialmedia.length === 0 ? (
-                            <div className="text-center py-10 border border-dashed rounded-xl">
-                                <Globe className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
-                                <p className="text-muted-foreground">
-                                    Belum ada social media yang ditambahkan.
+                            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/70 bg-muted/30 py-12 text-center">
+                                <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+                                    <Globe className="h-7 w-7 text-primary" />
+                                </div>
+                                <p className="font-medium text-foreground">
+                                    Belum ada social media
+                                </p>
+                                <p className="mt-1 max-w-xs px-4 text-sm text-muted-foreground">
+                                    Tambahkan akun pertama Anda agar pengunjung
+                                    mudah terhubung.
                                 </p>
                             </div>
                         ) : (
-                            <div className="grid gap-3 md:grid-cols-2">
+                            <div className="flex flex-col gap-3">
                                 {profile.socialmedia.map((item) => (
-                                    <div
+                                    <motion.div
                                         key={item.id}
-                                        className="flex items-start gap-3 rounded-xl border bg-card p-4 shadow-sm hover:shadow-md transition-shadow"
+                                        whileHover={{ y: -2 }}
+                                        transition={{
+                                            type: 'spring',
+                                            stiffness: 400,
+                                            damping: 25,
+                                        }}
+                                        className="group relative flex items-center gap-4 overflow-hidden rounded-2xl border border-border/70 bg-card p-4 shadow-sm transition-shadow hover:border-primary/40 hover:shadow-md"
                                     >
+                                        {/* accent bar */}
+                                        <span
+                                            aria-hidden
+                                            className="absolute inset-y-0 left-0 w-1"
+                                            style={{
+                                                background:
+                                                    item.color ?? '#e5e7eb',
+                                            }}
+                                        />
+
+                                        {/* icon */}
                                         <div
-                                            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full"
+                                            className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl text-white shadow-sm"
                                             style={{
                                                 background:
                                                     item.color ?? '#e5e7eb',
@@ -768,79 +845,94 @@ export default function ProfilePage() {
                                             {item.icon ? (
                                                 <PlatformIcon
                                                     svg={item.icon}
-                                                    size={22}
+                                                    size={24}
                                                 />
                                             ) : (
-                                                <Globe className="h-5 w-5 text-white" />
+                                                <Globe className="h-6 w-6" />
                                             )}
                                         </div>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <h4 className="font-semibold text-foreground">
-                                                    {item.platform_label}
-                                                </h4>
-                                                <Badge
-                                                    variant="outline"
-                                                    className="text-xs"
-                                                >
-                                                    {item.platform}
-                                                </Badge>
-                                            </div>
+
+                                        {/* content */}
+                                        <div className="min-w-0 flex-1">
+                                            <h4 className="truncate font-semibold text-foreground">
+                                                {item.platform_label}
+                                            </h4>
+                                            {item.username && (
+                                                <p className="truncate text-sm text-muted-foreground">
+                                                    @{item.username}
+                                                </p>
+                                            )}
                                             <a
                                                 href={item.url}
                                                 target="_blank"
                                                 rel="noreferrer"
-                                                className="block truncate text-sm text-blue-600 hover:underline"
+                                                className="mt-0.5 block truncate text-xs text-primary hover:underline"
                                             >
                                                 {item.url}
                                             </a>
-                                            {item.username && (
-                                                <p className="text-xs text-muted-foreground mt-1">
-                                                    @{item.username}
-                                                </p>
-                                            )}
                                         </div>
-                                        <div className="flex flex-col gap-1">
+
+                                        {/* actions — reveal on hover (desktop), always visible on touch */}
+                                        <div className="flex flex-shrink-0 items-center gap-1.5 opacity-100 transition-opacity duration-200 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
                                             <Button
-                                                size="sm"
-                                                variant="outline"
+                                                size="icon"
+                                                variant="ghost"
+                                                className="h-9 w-9 rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary"
                                                 onClick={() =>
                                                     openEditSocial(item)
                                                 }
+                                                aria-label={`Edit ${item.platform_label}`}
                                             >
                                                 <Edit2 className="h-4 w-4" />
                                             </Button>
                                             <Button
-                                                size="sm"
-                                                variant="outline"
-                                                className="text-red-600 hover:text-red-700"
+                                                size="icon"
+                                                variant="ghost"
+                                                className="h-9 w-9 rounded-full text-muted-foreground hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10"
                                                 onClick={() =>
                                                     requestDeleteSocial(item)
                                                 }
+                                                aria-label={`Hapus ${item.platform_label}`}
                                             >
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>
                                         </div>
-                                    </div>
+                                    </motion.div>
                                 ))}
                             </div>
                         )}
                     </Card>
 
-                    {/* Password card */}
-                    <Card className="p-6 mt-6 bg-gradient-to-br from-blue-50 to-brass-50 border-2 border-primary/20">
-                        <div className="flex items-center justify-between mb-6">
-                            <div>
-                                <h3 className="text-xl font-semibold text-foreground mb-2 flex items-center gap-2">
+                    {/* Member Card (Kartu Tanda Anggota) */}
+                    <MemberCardSection
+                        card={profile.member_card}
+                        requesting={requestingCard}
+                        onDownload={downloadMemberCard}
+                        onRequest={requestMemberCard}
+                    />
+                    </div>
+
+                    {/* Security Settings card */}
+                    <Card className="mt-6 border border-primary/20 bg-gradient-to-br from-primary/5 via-card to-accent/40 p-6">
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="flex items-start gap-4">
+                                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
                                     <Lock className="h-6 w-6 text-primary" />
-                                    Security Settings
-                                </h3>
-                                <p className="text-muted-foreground text-sm">
-                                    Manage your password and account security
-                                </p>
+                                </div>
+                                <div>
+                                    <h3 className="mb-1 text-xl font-semibold text-foreground">
+                                        Security Settings
+                                    </h3>
+                                    <p className="text-sm text-muted-foreground">
+                                        Manage your password and account security
+                                    </p>
+                                </div>
                             </div>
-                            <Link href={route('password-update.edit')}>
-                                <Button className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white shadow-lg gap-2">
+                            <Link
+                                href={route('password-update.edit')}
+                                className="sm:shrink-0"
+                            >
+                                <Button className="w-full gap-2 shadow-sm sm:w-auto">
                                     <Lock className="h-4 w-4" />
                                     Update Password
                                 </Button>
@@ -848,32 +940,33 @@ export default function ProfilePage() {
                         </div>
                     </Card>
 
-                    {/* Delete Account */}
-                    <Card className="p-6 mt-6 border-2 border-red-200 bg-red-50">
-                        <div className="flex items-start gap-4">
-                            <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100">
-                                <AlertTriangle className="h-6 w-6 text-red-600" />
+                    {/* Delete Account card */}
+                    <Card className="mt-6 border border-red-200 bg-red-50 p-6 dark:border-red-500/30 dark:bg-red-500/10">
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                            <div className="flex items-start gap-4">
+                                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 dark:bg-red-500/20">
+                                    <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />
+                                </div>
+                                <div className="flex-1">
+                                    <h3 className="mb-1 text-xl font-semibold text-red-700 dark:text-red-400">
+                                        Delete Account
+                                    </h3>
+                                    <p className="max-w-2xl text-sm text-red-600/80 dark:text-red-300/80">
+                                        Setelah akun dihapus, seluruh data Anda
+                                        akan hilang permanen. Akun tidak dapat
+                                        dihapus jika masih ada pinjaman aktif
+                                        atau denda yang belum dibayar.
+                                    </p>
+                                </div>
                             </div>
-                            <div className="flex-1">
-                                <h3 className="text-xl font-semibold text-red-700 mb-1">
-                                    Delete Account
-                                </h3>
-                                <p className="text-sm text-red-700/80 mb-4">
-                                    Setelah akun dihapus, seluruh data Anda akan
-                                    hilang permanen. Akun tidak dapat dihapus
-                                    jika masih ada pinjaman aktif atau denda
-                                    yang belum dibayar.
-                                </p>
-                                <Button
-                                    variant="destructive"
-                                    onClick={() =>
-                                        setConfirmDeleteAccount(true)
-                                    }
-                                >
-                                    <Trash2 className="h-4 w-4 mr-2" />
-                                    Delete My Account
-                                </Button>
-                            </div>
+                            <Button
+                                variant="destructive"
+                                className="w-full shrink-0 gap-2 sm:w-auto"
+                                onClick={() => setConfirmDeleteAccount(true)}
+                            >
+                                <Trash2 className="h-4 w-4" />
+                                Delete My Account
+                            </Button>
                         </div>
                     </Card>
                 </motion.div>
@@ -909,6 +1002,152 @@ export default function ProfilePage() {
                 onClose={() => setNotification(null)}
             />
         </div>
+    );
+}
+
+function MemberCardSection({
+    card,
+    requesting,
+    onDownload,
+    onRequest,
+}: {
+    card: MemberCardData | null;
+    requesting: boolean;
+    onDownload: () => void;
+    onRequest: () => void;
+}) {
+    return (
+        <Card className="flex flex-col p-6">
+            <div className="mb-5">
+                <h3 className="mb-1 flex items-center gap-2 text-xl font-semibold text-foreground">
+                    <CreditCard className="h-5 w-5 text-primary" />
+                    Kartu Anggota
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                    Kartu tanda anggota perpustakaan Anda.
+                </p>
+            </div>
+
+            {card ? (
+                <div className="flex flex-1 flex-col">
+                    {/* Card preview — hover to download */}
+                    <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary to-brass p-5 text-white shadow-lg">
+                        {/* Header */}
+                        <div className="mb-4 flex items-center gap-2">
+                            {card.logo ? (
+                                <img
+                                    src={card.logo}
+                                    alt="Logo"
+                                    className="h-9 w-9 rounded-md bg-white/90 object-contain p-0.5"
+                                />
+                            ) : null}
+                            <div className="leading-tight">
+                                <p className="text-[11px] font-semibold tracking-wider uppercase">
+                                    E-Library Santo Lukas
+                                </p>
+                                <p className="text-[10px] text-white/80">
+                                    Kartu Tanda Anggota
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Body */}
+                        <div className="flex items-center gap-4">
+                            <div className="flex h-20 w-20 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/20 ring-2 ring-white/40">
+                                {card.avatar ? (
+                                    <img
+                                        src={card.avatar}
+                                        alt={card.name}
+                                        className="h-full w-full object-cover"
+                                    />
+                                ) : (
+                                    <span className="text-xl font-bold">
+                                        {card.initials}
+                                    </span>
+                                )}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <p className="truncate text-lg font-bold">
+                                    {card.name}
+                                </p>
+                                <p className="truncate font-mono text-sm text-white/90">
+                                    {card.member_number}
+                                </p>
+                                {card.kelas && card.kelas !== '-' && (
+                                    <p className="truncate text-xs text-white/80">
+                                        {card.kelas}
+                                    </p>
+                                )}
+                            </div>
+                            {card.qr && (
+                                <img
+                                    src={card.qr}
+                                    alt="QR"
+                                    className="h-24 w-24 flex-shrink-0 rounded-md bg-white p-1"
+                                />
+                            )}
+                        </div>
+
+                        {/* Barcode */}
+                        {card.barcode && (
+                            <div className="mt-4 rounded-md bg-white p-2.5">
+                                <img
+                                    src={card.barcode}
+                                    alt="Barcode"
+                                    className="mx-auto h-12 w-full object-contain"
+                                />
+                            </div>
+                        )}
+
+                        {/* Hover overlay */}
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/55 opacity-0 backdrop-blur-[1px] transition-opacity duration-200 group-hover:opacity-100">
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                className="gap-2"
+                                onClick={onDownload}
+                            >
+                                <Download className="h-4 w-4" />
+                                Download PDF
+                            </Button>
+                        </div>
+                    </div>
+
+                    {/* Fallback button (visible, for touch devices) */}
+                    <Button
+                        type="button"
+                        variant="outline"
+                        className="mt-4 w-full gap-2"
+                        onClick={onDownload}
+                    >
+                        <Download className="h-4 w-4" />
+                        Download Kartu (PDF)
+                    </Button>
+                </div>
+            ) : (
+                <div className="flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed py-8 text-center">
+                    <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+                        <CreditCard className="h-7 w-7 text-primary" />
+                    </div>
+                    <p className="mb-1 font-semibold text-foreground">
+                        Belum punya kartu anggota
+                    </p>
+                    <p className="mb-4 max-w-xs px-4 text-sm text-muted-foreground">
+                        Ajukan permintaan, dan petugas akan diberi tahu via email
+                        & WhatsApp untuk menerbitkan kartu Anda.
+                    </p>
+                    <Button
+                        type="button"
+                        className="gap-2"
+                        onClick={onRequest}
+                        disabled={requesting}
+                    >
+                        <Send className="h-4 w-4" />
+                        {requesting ? 'Mengirim...' : 'Minta Buat Kartu'}
+                    </Button>
+                </div>
+            )}
+        </Card>
     );
 }
 
