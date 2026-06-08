@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Interface\TestimonialInterfaceRepositories;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class TestimonialServices
 {
@@ -11,24 +12,27 @@ class TestimonialServices
     ) {}
 
     /**
-     * Daftar testimoni aktif (siap dipakai frontend, dengan URL video/poster publik).
-     *
-     * @return array<int, array<string, mixed>>
+     * Paginator testimoni aktif (mentah) untuk halaman publik.
      */
-    public function getTestimonials(): array
+    public function getTestimonialsRaw(int $perPage, int $page): LengthAwarePaginator
     {
-        return $this->testimonialRepository
-            ->getActiveTestimonials()
-            ->map(fn ($testimonial) => [
-                'id' => $testimonial->id,
-                'name' => $testimonial->name,
-                'slug' => $testimonial->slug,
-                'role' => $testimonial->role,
-                'description' => $testimonial->description,
-                'video_url' => $testimonial->video_url,
-                'thumbnail_url' => $testimonial->thumbnail_url,
-            ])
-            ->values()
-            ->toArray();
+        return $this->testimonialRepository->getActiveTestimonials($perPage, $page);
+    }
+
+    /**
+     * Ubah paginator menjadi struktur { data, meta, links } siap pakai frontend
+     * (dengan URL video/poster publik).
+     */
+    public function transformTestimonials(LengthAwarePaginator $paginator): array
+    {
+        return paginateMapped($paginator, fn ($testimonial) => [
+            'id' => $testimonial->id,
+            'name' => $testimonial->name,
+            'slug' => $testimonial->slug,
+            'role' => $testimonial->role,
+            'description' => $testimonial->description,
+            'video_url' => $testimonial->video_url,
+            'thumbnail_url' => $testimonial->thumbnail_url,
+        ]);
     }
 }

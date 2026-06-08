@@ -9,6 +9,7 @@ import {
     FieldSeparator,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from './component/form/PasswordInput';
 import { ImageWithFallback } from './common/ImageWithFallback';
 import { GoogleButton } from './common/GoogleButton';
 import { Link } from '@inertiajs/react';
@@ -121,10 +122,9 @@ export function RegisterForm({
                                 <FieldLabel htmlFor="password">
                                     {text.fieldHeaderPassword}
                                 </FieldLabel>
-                                <Input
+                                <PasswordInput
                                     id="password"
                                     name="password"
-                                    type="password"
                                     value={data.password}
                                     onChange={onHandleChange}
                                     placeholder={text.placeholderPassword}
@@ -140,10 +140,9 @@ export function RegisterForm({
                                 <FieldLabel htmlFor="password_confirmation">
                                     {text.fieldHeaderConfirmPassword}
                                 </FieldLabel>
-                                <Input
+                                <PasswordInput
                                     id="password_confirmation"
                                     name="password_confirmation"
-                                    type="password"
                                     value={data.password_confirmation}
                                     onChange={onHandleChange}
                                     placeholder={

@@ -3,7 +3,13 @@ import { router } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 import { useLanguage } from '@/hooks/useLanguage';
 import { slidesHero } from '@/data/data';
-import { Search, ArrowRight, Loader2, ChevronUp } from 'lucide-react';
+import {
+    Search,
+    ArrowRight,
+    Loader2,
+    ChevronUp,
+    TrendingUp,
+} from 'lucide-react';
 import Carousel from '@/components/common/Carousel';
 import BookCard from '@/components/component/Card/BookCard';
 import type { BookProps } from '@/types/DataTypes/BooksProps';
@@ -170,25 +176,23 @@ const HeroSection = ({
                         }`}
                     />
                 ))}
-                {/* Scrim ringan: hanya melindungi keterbacaan teks di kiri & bawah,
-                    selebihnya gambar dibiarkan tajam dan dominan. */}
-                <div className="absolute inset-0 bg-gradient-to-r from-background/85 via-background/25 to-transparent" />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent" />
+                {/* Scrim adaptif: di light mode dibuat jauh lebih ringan agar gambar
+                    tampak hidup & tajam, sementara di dark mode tetap cukup pekat untuk
+                    keterbacaan teks. Hanya melindungi zona teks (kiri & bawah). */}
+                <div className="absolute inset-0 bg-gradient-to-r from-background/60 via-background/10 to-transparent dark:from-background/85 dark:via-background/30" />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent dark:from-background/70" />
             </div>
 
-            <div className="relative mx-auto max-w-7xl px-6 pt-14 pb-16 lg:px-10 lg:pt-20 lg:pb-24">
-                <div className="grid grid-cols-12 items-center gap-8 lg:gap-6">
+            <div className="relative mx-auto max-w-[100rem] px-6 pt-14 pb-16 lg:px-10 lg:pt-20 lg:pb-24">
+                <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-12 lg:gap-6">
                     {/* LEFT */}
-                    <div className="col-span-12 lg:col-span-7">
+                    <div className="col-span-full lg:col-span-7">
                         <div className="inline-flex items-center gap-2 font-mono text-[11px] tracking-editorial text-cobalt uppercase dark:text-cobalt-lt">
                             <span className="h-1.5 w-1.5 rounded-full bg-cobalt dark:bg-cobalt-lt" />
                             {t.eyebrow}
                         </div>
 
-                        <h1
-                            className="mt-6 font-display text-[44px] leading-[0.98] font-medium text-foreground sm:text-[60px] lg:text-[72px] xl:text-[80px]"
-                            style={{ textWrap: 'balance' }}
-                        >
+                        <h1 className="mt-6 font-display text-[clamp(1.85rem,7vw,2.5rem)] leading-[1.05] font-medium text-balance break-words text-foreground [text-shadow:0_1px_12px_rgb(255_255_255_/_0.5)] sm:text-[42px] sm:whitespace-nowrap md:text-[50px] lg:text-[50px] xl:text-[62px] dark:[text-shadow:0_2px_14px_rgb(0_0_0_/_0.55)]">
                             <span className="block">{t.h1a}</span>
                             <span className="block">
                                 {t.h1b}
@@ -208,7 +212,7 @@ const HeroSection = ({
                             </span>
                         </h1>
 
-                        <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
+                        <p className="mt-6 max-w-xl text-lg leading-relaxed text-foreground/80 [text-shadow:0_1px_8px_rgb(255_255_255_/_0.55)] dark:text-muted-foreground dark:[text-shadow:0_1px_8px_rgb(0_0_0_/_0.5)]">
                             {t.lead1}
                             <span className="font-semibold text-foreground">
                                 {formatNum(booksCount)}+ {t.collections}
@@ -250,9 +254,10 @@ const HeroSection = ({
 
                         {/* Trending chips — buku trending dari backend (rating → abjad) */}
                         {trendingChips.length > 0 && (
-                            <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-muted-foreground">
-                                <span className="font-mono tracking-editorial uppercase">
-                                    {t.trending}:
+                            <div className="mt-5 flex flex-wrap items-center gap-x-2.5 gap-y-2 text-xs">
+                                <span className="inline-flex items-center gap-1.5 rounded-full bg-cobalt px-2.5 py-1 font-mono text-[11px] font-semibold tracking-editorial text-white uppercase shadow-sm dark:bg-cobalt-lt dark:text-night">
+                                    <TrendingUp className="h-3.5 w-3.5" />
+                                    {t.trending}
                                 </span>
                                 {trendingChips.map((b) => (
                                     <button
@@ -263,10 +268,13 @@ const HeroSection = ({
                                                 `/book/detail/${b.slug}`,
                                             )
                                         }
-                                        className="hairline max-w-[200px] truncate rounded-full border px-3 py-1 transition-colors hover:border-cobalt/40 hover:text-cobalt dark:hover:text-cobalt-lt"
+                                        className="btn-press group/chip inline-flex max-w-[210px] items-center gap-1.5 rounded-full border border-border bg-card/85 px-3.5 py-1.5 font-medium text-foreground shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-cobalt hover:bg-cobalt hover:text-white hover:shadow-lift active:translate-y-0 dark:bg-night-2/85 dark:hover:bg-cobalt"
                                         title={b.title}
                                     >
-                                        {b.title}
+                                        <span className="truncate">
+                                            {b.title}
+                                        </span>
+                                        <ArrowRight className="h-3 w-3 shrink-0 -translate-x-1 opacity-0 transition-all duration-300 group-hover/chip:translate-x-0 group-hover/chip:opacity-100" />
                                     </button>
                                 ))}
                             </div>
@@ -296,7 +304,7 @@ const HeroSection = ({
                     </div>
 
                     {/* RIGHT — auto-sliding book showcase */}
-                    <div className="relative col-span-12 lg:col-span-5">
+                    <div className="relative col-span-full lg:col-span-5">
                         {showcaseBooks.length > 0 && (
                             <div className="relative">
                                 <div className="pointer-events-none absolute -inset-6 -z-10 rounded-full bg-cobalt/10 blur-3xl" />

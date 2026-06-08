@@ -29,7 +29,7 @@ export default function PaymentPending() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-white to-brass-50 py-12">
+        <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-white to-brass-50 py-12 dark:from-yellow-950/20 dark:via-background dark:to-background">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="mx-auto max-w-2xl">
                     <motion.div
@@ -67,7 +67,7 @@ export default function PaymentPending() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.4 }}
                         >
-                            <Card className="mb-6 border-2 border-yellow-100 p-6 shadow-xl">
+                            <Card className="mb-6 border-2 border-yellow-100 p-6 shadow-xl dark:border-yellow-900/40">
                                 <div className="mb-6 flex items-center gap-2">
                                     <Info className="h-5 w-5 text-brass" />
                                     <h2 className="font-display text-xl font-bold text-foreground">
@@ -115,7 +115,7 @@ export default function PaymentPending() {
                                     </div>
                                 </div>
 
-                                <div className="rounded-xl border-2 border-brass-lt bg-gradient-to-br from-yellow-50 to-brass-50 p-6">
+                                <div className="rounded-xl border-2 border-brass-lt bg-gradient-to-br from-yellow-50 to-brass-50 p-6 dark:border-brass dark:from-yellow-950/30 dark:to-brass/15">
                                     <div className="flex items-center justify-between">
                                         <span className="text-lg font-medium text-foreground">
                                             Amount Due:
@@ -127,9 +127,9 @@ export default function PaymentPending() {
                                 </div>
                             </Card>
 
-                            <Card className="mb-6 border-cobalt-lt bg-cobalt-50 p-6">
+                            <Card className="mb-6 border-cobalt-lt bg-cobalt-50 p-6 dark:border-cobalt-dk dark:bg-cobalt-dk/15">
                                 <div className="flex gap-3">
-                                    <Info className="mt-1 h-6 w-6 flex-shrink-0 text-cobalt-dk" />
+                                    <Info className="mt-1 h-6 w-6 flex-shrink-0 text-cobalt-dk dark:text-cobalt-lt" />
                                     <div>
                                         <h3 className="mb-2 font-semibold text-foreground">
                                             What happens next?

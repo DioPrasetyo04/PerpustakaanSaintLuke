@@ -83,7 +83,7 @@ class CatalogRepositories implements CatalogInterfaceRepositories
     public function getAllCategories(array $filters, int $perPage, int $page): LengthAwarePaginator
     {
         return Category::query()
-            ->select(['id', 'name', 'slug', 'icon'])
+            ->select(['id', 'name', 'slug', 'icon', 'photo'])
             ->withCount('books as count_of_books')
             ->when(
                 ($filters['field'] ?? null) && ($filters['direction'] ?? null),
@@ -98,7 +98,9 @@ class CatalogRepositories implements CatalogInterfaceRepositories
     }
     public function getAllAuthors(array $filters, int $perPage, int $page): LengthAwarePaginator
     {
-        return Author::query()->select(['id', 'name', 'username', 'avatar'])->withCount('books as count_of_books')
+        return Author::query()->select(['id', 'name', 'username', 'avatar'])
+            ->with(['socialmedia:id,socialable_id,socialable_type,platform,url,username'])
+            ->withCount('books as count_of_books')
             ->when(
                 ($filters['field'] ?? null) && ($filters['direction'] ?? null),
                 fn($query) => $query->orderBy($filters['field'], $filters['direction'])

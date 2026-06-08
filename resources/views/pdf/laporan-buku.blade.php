@@ -38,7 +38,7 @@
 
     {{-- Category & Publisher breakdown side by side --}}
     @if ($report['categoryStats']->isNotEmpty() || $report['publisherStats']->isNotEmpty())
-        <table style="width:100%; margin-bottom:12px; border-collapse:collapse; font-size:10px;">
+        <table style="width:100%; margin-bottom:12px; border-collapse:separate; border-spacing:0; font-size:10px;">
             <tr>
                 @if ($report['categoryStats']->isNotEmpty())
                     <td style="width:50%; vertical-align:top; padding-right:8px;">

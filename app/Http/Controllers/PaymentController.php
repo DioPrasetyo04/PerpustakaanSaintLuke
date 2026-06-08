@@ -6,6 +6,7 @@ use App\Enums\PaymentStatus;
 use App\Enums\ReturnBookStatus;
 use App\Models\Fine;
 use App\Models\ReturnBook;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -286,6 +287,45 @@ class PaymentController extends Controller
             'fine' => $this->resolveFineProps($request),
             'message' => $request->string('message')->toString() ?: null,
         ]);
+    }
+
+    public function downloadReceipt(Fine $fine)
+    {
+        $fine->load('returnBook.loanDetail.book.categories', 'returnBook.loanDetail.loan.user');
+
+        $this->authorizeFineOwner($fine);
+
+        abort_unless($fine->payment_status === PaymentStatus::SUCCESS, 403);
+
+        $book = $fine->returnBook?->loanDetail?->book;
+        $user = $fine->returnBook?->loanDetail?->loan?->user;
+
+        $coverPath = null;
+        if ($book?->cover) {
+            $candidate = public_path('storage/' . ltrim($book->cover, '/'));
+            if (is_file($candidate)) {
+                $coverPath = $candidate;
+            }
+        }
+
+        $pdf = Pdf::loadView('pdf.payment-receipt', [
+            'logo' => \App\Services\MemberCardService::logoDataUri(),
+            'orderId' => $fine->order_id,
+            'fineId' => (string) $fine->id,
+            'bookTitle' => $book?->title,
+            'category' => $book?->categories->first()?->name,
+            'coverPath' => $coverPath,
+            'amount' => (float) $fine->total_fee,
+            'paymentMethod' => 'Midtrans Gateway',
+            'status' => 'Paid',
+            'transactionDate' => ($fine->updated_at ?? now())->translatedFormat('d F Y, H:i'),
+            'userName' => $user?->name,
+            'userEmail' => $user?->email,
+        ])->setPaper('a4', 'portrait');
+
+        $filename = 'receipt-' . ($fine->order_id ?: 'fine-' . $fine->id) . '.pdf';
+
+        return $pdf->download($filename);
     }
 
     private function authorizeFineOwner(Fine $fine): void

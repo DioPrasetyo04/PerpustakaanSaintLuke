@@ -16,6 +16,7 @@ import {
     LogOut,
 } from 'lucide-react';
 import { navItems, navAuthItems, profileSubNavItems } from '@/data/data';
+import DropdownMenuLanguage from './DropdownMenuLanguage';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useAppearance } from '@/hooks/use-appearance';
 import { cn } from '@/lib/utils';
@@ -24,9 +25,9 @@ import type { NavItem } from '@/types/navbar';
 /* Brand mark — SL monogram + wordmark */
 function BrandMark() {
     return (
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 items-center gap-3">
             <div
-                className="relative grid h-[38px] w-[38px] place-items-center rounded-xl text-paper shadow-soft"
+                className="relative grid h-[38px] w-[38px] shrink-0 place-items-center rounded-xl text-paper shadow-soft"
                 aria-hidden="true"
             >
                 <img
@@ -36,11 +37,11 @@ function BrandMark() {
                 />
                 <span className="absolute -right-1 -bottom-1 h-3 w-3 rounded-full border-2 border-paper bg-cobalt dark:border-night" />
             </div>
-            <div className="leading-tight">
-                <div className="font-display text-[16px] font-semibold text-foreground">
+            <div className="min-w-0 leading-tight">
+                <div className="truncate font-display text-[16px] font-semibold text-foreground">
                     E-Library
                 </div>
-                <div className="font-sans text-[9px] tracking-editorial text-muted-foreground uppercase">
+                <div className="truncate font-sans text-[9px] tracking-editorial text-muted-foreground uppercase">
                     Yayasan Pendidikan Umum Santo Lukas
                 </div>
             </div>
@@ -59,7 +60,7 @@ const profileIcons: Record<
 };
 
 const Navbar = ({ initialAuth }: { initialAuth?: any }) => {
-    const { language, setLanguage } = useLanguage();
+    const { language } = useLanguage();
     const { resolvedAppearance, updateAppearance } = useAppearance();
     const isDark = resolvedAppearance === 'dark';
 
@@ -148,49 +149,16 @@ const Navbar = ({ initialAuth }: { initialAuth?: any }) => {
                     : 'border-b border-transparent bg-paper dark:bg-night'
             }`}
         >
-            {/* top strip */}
-            <div className="hairline border-b bg-ink/[.03] dark:bg-night-2/40">
-                <div className="mx-auto flex h-8 max-w-7xl items-center justify-between px-6 font-sans text-[11px] text-muted-foreground lg:px-10">
-                    <div className="flex items-center gap-4">
-                        <span className="hidden items-center gap-1.5 sm:inline-flex">
-                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                            {t('Perpustakaan buka', 'Library open')} ·{' '}
-                            <span className="font-medium">06.30 – 16.00</span>
-                        </span>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <Link
-                            href="/resources"
-                            className="hover:text-cobalt dark:hover:text-cobalt-lt"
-                        >
-                            {t('Sumber Digital', 'Digital Resources')}
-                        </Link>
-                        <Link
-                            href="/about/contact"
-                            className="hover:text-cobalt dark:hover:text-cobalt-lt"
-                        >
-                            {t('Bantuan', 'Help')}
-                        </Link>
-                        <Link
-                            href="/informations"
-                            className="hidden hover:text-cobalt sm:inline dark:hover:text-cobalt-lt"
-                        >
-                            {t('Berita', 'News')}
-                        </Link>
-                    </div>
-                </div>
-            </div>
-
             {/* main bar */}
-            <div className="mx-auto max-w-7xl px-6 lg:px-10">
-                <div className="flex h-[68px] items-center justify-between gap-6">
-                    <Link href="/" className="shrink-0" aria-label="Beranda">
+            <div className="mx-auto max-w-[100rem] px-6 lg:px-10">
+                <div className="flex h-[68px] items-center justify-between gap-3 lg:gap-4">
+                    <Link href="/" className="min-w-0" aria-label="Beranda">
                         <BrandMark />
                     </Link>
 
                     {/* desktop nav */}
                     <nav
-                        className="hidden items-center gap-1 lg:flex"
+                        className="hidden shrink-0 items-center gap-1 lg:flex"
                         aria-label="Navigasi utama"
                     >
                         {navItems.map((n: NavItem) => (
@@ -224,26 +192,51 @@ const Navbar = ({ initialAuth }: { initialAuth?: any }) => {
                                 {n.menu && openMenu === n.id && (
                                     <div className="hairline dd-enter in absolute top-full left-0 mt-3 w-[300px] overflow-hidden rounded-xl2 border bg-card shadow-lift dark:bg-night-2">
                                         <div className="p-2">
-                                            {n.menu.map((m) => (
-                                                <Link
-                                                    key={m.id}
-                                                    href={m.href}
-                                                    onClick={() =>
-                                                        setOpenMenu(null)
-                                                    }
-                                                    className="group flex items-start gap-3 rounded-lg px-4 py-3 transition-colors hover:bg-paper-2/70 dark:hover:bg-night-3"
-                                                >
-                                                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-cobalt transition-transform group-hover:scale-150" />
-                                                    <span className="flex-1">
-                                                        <span className="block font-display text-[15px] text-foreground">
-                                                            {language === 'en'
-                                                                ? m.label.en
-                                                                : m.label.id}
+                                            {n.menu.map((m) => {
+                                                const subActive = isActive(
+                                                    m.href,
+                                                );
+                                                return (
+                                                    <Link
+                                                        key={m.id}
+                                                        href={m.href}
+                                                        aria-current={
+                                                            subActive
+                                                                ? 'page'
+                                                                : undefined
+                                                        }
+                                                        onClick={() =>
+                                                            setOpenMenu(null)
+                                                        }
+                                                        className="group flex items-start gap-3 rounded-lg px-4 py-3 transition-colors hover:bg-paper-2/70 dark:hover:bg-night-3"
+                                                    >
+                                                        <span
+                                                            className={cn(
+                                                                'mt-2 h-1.5 w-1.5 shrink-0 rounded-full transition-transform group-hover:scale-150',
+                                                                subActive
+                                                                    ? 'bg-cobalt'
+                                                                    : 'bg-muted-foreground/30',
+                                                            )}
+                                                        />
+                                                        <span className="flex-1">
+                                                            <span
+                                                                className={cn(
+                                                                    'block font-display text-[15px]',
+                                                                    subActive
+                                                                        ? 'text-cobalt dark:text-cobalt-lt'
+                                                                        : 'text-foreground',
+                                                                )}
+                                                            >
+                                                                {language ===
+                                                                'en'
+                                                                    ? m.label.en
+                                                                    : m.label.id}
+                                                            </span>
                                                         </span>
-                                                    </span>
-                                                    <ArrowUpRight className="mt-1 h-3.5 w-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-60" />
-                                                </Link>
-                                            ))}
+                                                        <ArrowUpRight className="mt-1 h-3.5 w-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-60" />
+                                                    </Link>
+                                                );
+                                            })}
                                         </div>
                                     </div>
                                 )}
@@ -252,12 +245,12 @@ const Navbar = ({ initialAuth }: { initialAuth?: any }) => {
                     </nav>
 
                     {/* right controls */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex shrink-0 items-center gap-2">
                         {/* search */}
                         <form
                             onSubmit={submitSearch}
                             role="search"
-                            className="hairline hidden h-10 items-center gap-2 rounded-full border bg-card/70 px-4 backdrop-blur transition-colors focus-within:border-cobalt md:flex md:w-[200px] xl:w-[260px] dark:bg-night-2/70"
+                            className="hairline hidden h-10 items-center gap-2 rounded-full border bg-card/70 px-4 backdrop-blur transition-colors focus-within:border-cobalt xl:flex xl:w-[200px] 2xl:w-[260px] dark:bg-night-2/70"
                         >
                             <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
                             <input
@@ -273,22 +266,9 @@ const Navbar = ({ initialAuth }: { initialAuth?: any }) => {
                             />
                         </form>
 
-                        {/* language pills */}
-                        <div className="hairline hidden items-center overflow-hidden rounded-full border text-[11px] font-bold sm:flex">
-                            {(['id', 'en'] as const).map((lc) => (
-                                <button
-                                    key={lc}
-                                    onClick={() => setLanguage(lc)}
-                                    aria-pressed={language === lc}
-                                    className={`px-2.5 py-2 tracking-wider uppercase transition-colors ${
-                                        language === lc
-                                            ? 'bg-cobalt text-white'
-                                            : 'text-muted-foreground hover:text-foreground'
-                                    }`}
-                                >
-                                    {lc}
-                                </button>
-                            ))}
+                        {/* language switcher (dropdown, data-driven) */}
+                        <div className="hidden sm:block">
+                            <DropdownMenuLanguage isScrolled />
                         </div>
 
                         {/* dark toggle */}
@@ -532,22 +512,7 @@ const Navbar = ({ initialAuth }: { initialAuth?: any }) => {
                                 <span className="text-sm text-muted-foreground">
                                     {t('Bahasa', 'Language')}
                                 </span>
-                                <div className="hairline flex items-center overflow-hidden rounded-full border text-[11px] font-bold">
-                                    {(['id', 'en'] as const).map((lc) => (
-                                        <button
-                                            key={lc}
-                                            onClick={() => setLanguage(lc)}
-                                            aria-pressed={language === lc}
-                                            className={`px-2.5 py-2 tracking-wider uppercase transition-colors ${
-                                                language === lc
-                                                    ? 'bg-cobalt text-white'
-                                                    : 'text-muted-foreground'
-                                            }`}
-                                        >
-                                            {lc}
-                                        </button>
-                                    ))}
-                                </div>
+                                <DropdownMenuLanguage variant="mobile" isScrolled />
                             </div>
 
                             {/* theme: light / dark */}

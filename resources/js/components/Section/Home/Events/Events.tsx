@@ -9,13 +9,16 @@ import {
     Users,
 } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useQueryParams } from '@/hooks/useQueryParams';
 import { cn } from '@/lib/utils';
 import Carousel from '@/components/common/Carousel';
+import Pagination from '@/components/component/Home/Pagination/Pagination';
 import { ImageWithFallback } from '@/components/common/ImageWithFallback';
 import type { EventItem } from '@/types/HomePage/HomePageProps';
+import type { Paginated } from '@/types/pagination';
 
 type EventsProps = {
-    events: EventItem[];
+    events: Paginated<EventItem>;
 };
 
 const fadeUp = {
@@ -70,7 +73,15 @@ const Events = ({ events }: EventsProps) => {
     const { language } = useLanguage();
     const t = language === 'id' ? copy.id : copy.en;
 
-    const items = events ?? [];
+    const items = events?.data ?? [];
+    const meta = events?.meta;
+
+    const { createPagination } = useQueryParams();
+    const { onPageChange, onPerPageChange } = createPagination(
+        'events',
+        meta?.per_page ?? 8,
+    );
+
     if (items.length === 0) return null;
 
     const Card = ({ e }: { e: EventItem }) => {
@@ -186,7 +197,7 @@ const Events = ({ events }: EventsProps) => {
 
     return (
         <section className="hairline border-y bg-paper-2/40 dark:bg-night-2/30">
-            <div className="mx-auto max-w-7xl px-6 py-20 lg:px-10 lg:py-28">
+            <div className="mx-auto max-w-[100rem] px-6 py-20 lg:px-10 lg:py-28">
                 {/* Header */}
                 <div className="mb-12 flex items-end justify-between gap-6">
                     <div>
@@ -238,6 +249,16 @@ const Events = ({ events }: EventsProps) => {
                         1024: { slidesPerView: 3 },
                     }}
                 />
+
+                {meta && meta.last_page > 1 && (
+                    <Pagination
+                        page={meta.current_page}
+                        total={meta.total}
+                        perPage={meta.per_page}
+                        onPageChange={onPageChange}
+                        onPerPageChange={onPerPageChange}
+                    />
+                )}
 
                 {/* Full calendar link (mobile) */}
                 <div className="mt-6 md:hidden">

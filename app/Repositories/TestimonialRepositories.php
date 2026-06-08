@@ -4,24 +4,35 @@ namespace App\Repositories;
 
 use App\Interface\TestimonialInterfaceRepositories;
 use App\Models\Testimonial;
-use Illuminate\Support\Collection;
+use App\Support\Cache\CacheTags;
+use App\Support\Cache\QueryCache;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class TestimonialRepositories implements TestimonialInterfaceRepositories
 {
-    public function getActiveTestimonials(): Collection
+    public function getActiveTestimonials(int $perPage, int $page): LengthAwarePaginator
     {
-        return Testimonial::query()
-            ->active()
-            ->orderBy('sort_order')
-            ->orderByDesc('id')
-            ->get([
-                'id',
-                'name',
-                'slug',
-                'role',
-                'description',
-                'video',
-                'thumbnail',
-            ]);
+        return QueryCache::remember(
+            "testimonials:list:p{$page}:l{$perPage}",
+            [CacheTags::TESTIMONIALS],
+            fn (): LengthAwarePaginator => Testimonial::query()
+                ->active()
+                ->orderBy('sort_order')
+                ->orderByDesc('id')
+                ->paginate(
+                    $perPage,
+                    [
+                        'id',
+                        'name',
+                        'slug',
+                        'role',
+                        'description',
+                        'video',
+                        'thumbnail',
+                    ],
+                    'testimonials_page',
+                    $page
+                )
+        );
     }
 }

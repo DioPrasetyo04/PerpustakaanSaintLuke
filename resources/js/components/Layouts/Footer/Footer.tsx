@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { Mail, Phone, Instagram } from 'lucide-react';
+import { Mail, Phone, Instagram, MapPin } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 
 export function Footer() {
@@ -58,48 +58,16 @@ export function Footer() {
 
     return (
         <footer className="mt-0 bg-ink text-paper dark:bg-night-2">
-            {/* newsletter band */}
-            <div className="border-b border-paper/10">
-                <div className="mx-auto grid max-w-7xl grid-cols-12 items-center gap-8 px-6 py-12 lg:px-10">
-                    <div className="col-span-12 lg:col-span-6">
-                        <h3
-                            className="font-display text-2xl lg:text-3xl"
-                            style={{ textWrap: 'balance' }}
-                        >
-                            {l('newsletterTitle')}
-                        </h3>
-                        <p className="mt-2 max-w-md text-sm text-paper/60">
-                            {l('newsletterDesc')}
-                        </p>
-                    </div>
-                    <div className="col-span-12 lg:col-span-6">
-                        <form
-                            onSubmit={(e) => e.preventDefault()}
-                            className="flex max-w-md items-center gap-2 rounded-full border border-paper/10 bg-night-3/80 p-2 transition-colors focus-within:border-cobalt/50 lg:ml-auto dark:bg-night-3"
-                        >
-                            <Mail className="ml-3 h-[18px] w-[18px] text-paper/50" />
-                            <input
-                                type="email"
-                                placeholder={l('emailPlaceholder')}
-                                className="flex-1 bg-transparent py-2 text-sm text-paper outline-none placeholder:text-paper/40"
-                                aria-label="Email"
-                            />
-                            <button className="btn-press tracking-editorial whitespace-nowrap rounded-full bg-cobalt px-5 py-2.5 text-xs font-semibold uppercase text-white transition-colors hover:bg-cobalt-dk">
-                                {l('subscribe')}
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            <div className="mx-auto max-w-7xl px-6 pt-16 pb-10 lg:px-10">
-                <div className="grid grid-cols-12 gap-8">
-                    <div className="col-span-12 md:col-span-5">
+            <div className="mx-auto max-w-[100rem] px-6 pt-16 pb-10 lg:px-10">
+                <div className="grid grid-cols-1 gap-8 md:grid-cols-12">
+                    <div className="col-span-full md:col-span-5">
                         <div className="flex items-center gap-3">
-                            <div className="grid h-12 w-12 place-items-center rounded-xl bg-card text-ink">
-                                <span className="font-display text-[22px] leading-none italic">
-                                    SL
-                                </span>
+                            <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-card p-1.5">
+                                <img
+                                    src="/assets/logos/Saint-Luke.png"
+                                    alt="Logo Perpustakaan Santo Lukas"
+                                    className="h-full w-full object-contain"
+                                />
                             </div>
                             <div>
                                 <div className="font-display text-2xl">
@@ -232,20 +200,23 @@ export function Footer() {
                             </li>
                         </ul>
                     </div>
-                    <div className="col-span-12 md:col-span-3">
+                    <div className="col-span-full md:col-span-3">
                         <div className="tracking-editorial mb-4 text-[10px] uppercase text-paper/45">
                             {l('visit')}
                         </div>
-                        <address className="text-sm leading-relaxed text-paper/75 not-italic">
-                            {address}
-                        </address>
-                        <div className="mt-4 space-y-1.5 text-sm text-paper/75">
+                        <div className="space-y-2.5 text-sm text-paper/75">
                             <div className="flex items-start gap-2">
-                                <Phone className="mt-0.5 h-3.5 w-3.5 text-cobalt-lt" />{' '}
+                                <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-cobalt-lt" />
+                                <address className="leading-relaxed not-italic">
+                                    {address}
+                                </address>
+                            </div>
+                            <div className="flex items-start gap-2">
+                                <Phone className="mt-0.5 h-3.5 w-3.5 shrink-0 text-cobalt-lt" />{' '}
                                 021-6507574
                             </div>
                             <div className="flex items-start gap-2">
-                                <Mail className="mt-0.5 h-3.5 w-3.5 text-cobalt-lt" />{' '}
+                                <Mail className="mt-0.5 h-3.5 w-3.5 shrink-0 text-cobalt-lt" />{' '}
                                 santo.lukas@yahoo.co.id
                             </div>
                         </div>

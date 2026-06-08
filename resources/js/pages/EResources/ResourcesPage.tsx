@@ -131,13 +131,13 @@ const ResourcesPage = () => {
     const chips = ['Semua', ...typeOptions];
 
     return (
-        <section className="mx-auto max-w-7xl px-6 pt-12 pb-24 lg:px-10">
+        <section className="mx-auto max-w-[100rem] px-6 pt-12 pb-24 lg:px-10">
             {/* Header */}
-            <div className="grid grid-cols-12 items-end gap-8">
+            <div className="grid grid-cols-1 items-end gap-8 lg:grid-cols-12">
                 <motion.div
                     initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="col-span-12 lg:col-span-8"
+                    className="col-span-full lg:col-span-8"
                 >
                     <div className="tracking-editorial inline-flex items-center gap-2 font-mono text-[11px] uppercase text-cobalt dark:text-cobalt-lt">
                         <span className="h-1.5 w-1.5 rounded-full bg-cobalt dark:bg-cobalt-lt" />
@@ -162,7 +162,7 @@ const ResourcesPage = () => {
                     initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="col-span-12 lg:col-span-4"
+                    className="col-span-full lg:col-span-4"
                 >
                     <div className="hairline flex items-center gap-4 rounded-xl2 border bg-card p-5 shadow-soft dark:bg-night-2">
                         <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-cobalt text-white">
@@ -325,8 +325,8 @@ const ResourcesPage = () => {
             <div className="relative mt-16 overflow-hidden rounded-4xl bg-cobalt p-8 text-white lg:p-12">
                 <div className="dot-grid absolute inset-0 opacity-20" />
                 <div className="absolute -top-16 -right-16 h-72 w-72 rounded-full bg-white/10 blur-2xl" />
-                <div className="relative grid grid-cols-12 items-center gap-8">
-                    <div className="col-span-12 lg:col-span-8">
+                <div className="relative grid grid-cols-1 items-center gap-8 lg:grid-cols-12">
+                    <div className="col-span-full lg:col-span-8">
                         <h3
                             className="font-display text-3xl leading-tight font-semibold lg:text-4xl"
                             style={{ textWrap: 'balance' }}
@@ -337,7 +337,7 @@ const ResourcesPage = () => {
                             {t.ctaDesc}
                         </p>
                     </div>
-                    <div className="col-span-12 lg:col-span-4 lg:text-right">
+                    <div className="col-span-full lg:col-span-4 lg:text-right">
                         <Link
                             href={route('about.contact')}
                             className="btn-press inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-cobalt transition-colors hover:bg-paper"

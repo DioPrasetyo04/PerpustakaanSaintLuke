@@ -2,12 +2,12 @@
 
 namespace App\Interface;
 
-use Illuminate\Support\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 interface EventInterfaceRepositories
 {
     /**
-     * Ambil seluruh acara aktif (mendatang lebih dulu) untuk halaman publik.
+     * Ambil acara aktif (mendatang lebih dulu) untuk halaman publik, terpaginasi.
      */
-    public function getActiveEvents(int $limit = 12): Collection;
+    public function getActiveEvents(int $perPage, int $page): LengthAwarePaginator;
 }

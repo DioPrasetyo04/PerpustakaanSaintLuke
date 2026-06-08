@@ -26,6 +26,7 @@
         "midtrans/midtrans-php": "^2.6",
         "picqer/php-barcode-generator": "^3.2",
         "pragmarx/countries": "^1.0",
+        "predis/predis": "^3.5",
         "spatie/laravel-permission": "^7.2",
         "tightenco/ziggy": "^2.0",
         "ysfkaya/filament-phone-input": "^4.1"

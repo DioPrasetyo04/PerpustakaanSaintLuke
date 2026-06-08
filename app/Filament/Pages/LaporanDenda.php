@@ -189,15 +189,11 @@ class LaporanDenda extends Page implements HasForms
 
         $chartImage = $this->buildBarChart($report['buckets'], '#ef4444');
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.laporan-denda', [
-            'report'     => $report,
-            'chartImage' => $chartImage,
-        ])->setPaper('a4', 'portrait');
-
         $filename = 'Laporan-Denda-' . $report['mode'] . '-' . ($report['state']['year'] ?? now()->year) . '.pdf';
 
-        return response()->streamDownload(function () use ($pdf) {
-            echo $pdf->output();
-        }, $filename);
+        return $this->streamLaporanPdf('pdf.laporan-denda', [
+            'report'     => $report,
+            'chartImage' => $chartImage,
+        ], $filename, 'portrait');
     }
 }

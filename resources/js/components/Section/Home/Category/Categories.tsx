@@ -21,7 +21,7 @@ const Categories = ({ categories }: FeaturedCategoriesProps) => {
     return (
         <section className="theme-transition relative overflow-hidden py-20 lg:py-28">
             <div className="dot-grid pointer-events-none absolute inset-0 opacity-40" />
-            <div className="relative mx-auto max-w-7xl px-6 lg:px-10">
+            <div className="relative mx-auto max-w-[100rem] px-6 lg:px-10">
                 {/* Header */}
                 <div className="mb-12 flex items-end justify-between gap-6">
                     <div>

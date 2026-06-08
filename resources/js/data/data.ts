@@ -6,6 +6,7 @@ import type {
     NavItemSettingsAuth,
     SubNavItemSettingsAuth,
 } from '@/types/navbar';
+import { FlagEN, FlagID } from '@/components/Layouts/Navbar/Flags';
 
 // ─── Logo ──────────────────────────────────────────────────────────────────────
 export const navLogo = {
@@ -137,11 +138,15 @@ export const languageItems: LanguageItem[] = [
         id: 1,
         language: 'id',
         label: 'Indonesia',
+        code: 'ID',
+        flag: FlagID,
     },
     {
         id: 2,
         language: 'en',
         label: 'English',
+        code: 'EN',
+        flag: FlagEN,
     },
 ];
 

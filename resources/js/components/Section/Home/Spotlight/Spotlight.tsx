@@ -29,10 +29,10 @@ const Spotlight = ({ book }: SpotlightProps) => {
             : "This week's librarian pick — a read worth adding to every reading list.");
 
     return (
-        <section className="mx-auto max-w-7xl px-6 pt-16 lg:px-10 lg:pt-20">
-            <div className="grid grid-cols-12 gap-5">
+        <section className="mx-auto max-w-[100rem] px-6 pt-16 lg:px-10 lg:pt-20">
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
                 {/* Big spotlight */}
-                <motion.div {...fadeUp} className="col-span-12 lg:col-span-8">
+                <motion.div {...fadeUp} className="col-span-full lg:col-span-8">
                     <div className="bracket relative flex h-full min-h-[260px] overflow-hidden rounded-xl2 bg-cobalt text-paper">
                         <div className="line-grid absolute inset-0 opacity-20" />
                         <div className="absolute -top-16 -right-16 h-72 w-72 rounded-full bg-brass/20 blur-2xl" />
@@ -91,7 +91,7 @@ const Spotlight = ({ book }: SpotlightProps) => {
                 <motion.div
                     {...fadeUp}
                     transition={{ delay: 0.12 }}
-                    className="col-span-12 lg:col-span-4"
+                    className="col-span-full lg:col-span-4"
                 >
                     <div className="bracket relative flex h-full min-h-[260px] flex-col justify-between overflow-hidden rounded-xl2 border-2 border-cobalt/30 bg-cobalt-50 p-8 text-cobalt dark:border-cobalt-lt/30 dark:bg-night-2 dark:text-cobalt-lt">
                         <div className="absolute -bottom-10 -left-10 h-44 w-44 rounded-full bg-brass/10 blur-2xl" />

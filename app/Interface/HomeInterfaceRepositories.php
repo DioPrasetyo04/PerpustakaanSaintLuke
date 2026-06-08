@@ -26,7 +26,7 @@ interface HomeInterfaceRepositories
 
     public function getLiveLoanActivities(int $limit): array;
 
-    public function getFeaturedPublishers(int $limit): array;
+    public function getFeaturedPublishers(int $perPage, int $page): LengthAwarePaginator;
 
     public function getCountOfAllBooks(): int;
 

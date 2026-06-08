@@ -180,9 +180,6 @@ class LaporanBuku extends Page implements HasForms
 
     public function downloadPdf()
     {
-        // Render tabel besar via dompdf bisa memakan memori; beri ruang lebih.
-        @ini_set('memory_limit', '1024M');
-
         $report = $this->getReportData();
 
         if ($report['total'] === 0) {
@@ -211,17 +208,13 @@ class LaporanBuku extends Page implements HasForms
         $chartCategory  = count($categoryBuckets)  ? $this->buildBarChart($categoryBuckets, '#10b981')  : null;
         $chartPublisher = count($publisherBuckets) ? $this->buildBarChart($publisherBuckets, '#f59e0b') : null;
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.laporan-buku', [
+        $filename = 'Laporan-Buku-' . $report['mode'] . '-' . ($report['state']['year'] ?? now()->year) . '.pdf';
+
+        return $this->streamLaporanPdf('pdf.laporan-buku', [
             'report'         => $report,
             'chartTrend'     => $chartTrend,
             'chartCategory'  => $chartCategory,
             'chartPublisher' => $chartPublisher,
-        ])->setPaper('a4', 'landscape');
-
-        $filename = 'Laporan-Buku-' . $report['mode'] . '-' . ($report['state']['year'] ?? now()->year) . '.pdf';
-
-        return response()->streamDownload(function () use ($pdf) {
-            echo $pdf->output();
-        }, $filename);
+        ], $filename, 'landscape');
     }
 }

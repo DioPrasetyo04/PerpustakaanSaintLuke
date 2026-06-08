@@ -87,7 +87,7 @@ export function TrustBar({ booksCount = 0 }: { booksCount?: number }) {
               ];
     return (
         <section className="hairline border-y bg-card/60 backdrop-blur dark:bg-night-2/40">
-            <div className="mx-auto max-w-7xl px-6 lg:px-10">
+            <div className="mx-auto max-w-[100rem] px-6 lg:px-10">
                 <div className="hairline grid grid-cols-2 divide-x divide-y lg:grid-cols-4 lg:divide-y-0">
                     {items.map((it, i) => {
                         const Icon = it.icon;
@@ -166,7 +166,7 @@ export function HowToBorrow() {
                   },
               ];
     return (
-        <section className="mx-auto max-w-7xl px-6 py-20 lg:px-10 lg:py-28">
+        <section className="mx-auto max-w-[100rem] px-6 py-20 lg:px-10 lg:py-28">
             <motion.div
                 {...fadeUp}
                 className="mx-auto mb-16 max-w-2xl text-center"
@@ -268,11 +268,11 @@ export function WhyUs() {
               ];
     return (
         <section className="hairline border-y bg-paper-2/40 dark:bg-night-2/30">
-            <div className="mx-auto max-w-7xl px-6 py-20 lg:px-10 lg:py-28">
-                <div className="grid grid-cols-12 gap-10 lg:gap-16">
+            <div className="mx-auto max-w-[100rem] px-6 py-20 lg:px-10 lg:py-28">
+                <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
                     <motion.div
                         {...fadeUp}
-                        className="col-span-12 lg:col-span-4"
+                        className="col-span-full lg:col-span-4"
                     >
                         <Eyebrow>
                             {language === 'id'
@@ -313,7 +313,7 @@ export function WhyUs() {
                         </Link>
                     </motion.div>
 
-                    <div className="col-span-12 grid gap-4 sm:grid-cols-2 lg:col-span-8">
+                    <div className="col-span-full grid gap-4 sm:grid-cols-2 lg:col-span-8">
                         {feats.map((f, i) => {
                             const Icon = f.icon;
                             return (
@@ -388,7 +388,7 @@ export function Testimonials() {
         },
     ];
     return (
-        <section className="mx-auto max-w-7xl px-6 py-20 lg:px-10 lg:py-28">
+        <section className="mx-auto max-w-[100rem] px-6 py-20 lg:px-10 lg:py-28">
             <motion.div
                 {...fadeUp}
                 className="mx-auto mb-14 max-w-2xl text-center"
@@ -469,14 +469,14 @@ export function Testimonials() {
 export function CtaJoin() {
     const { language } = useLanguage();
     return (
-        <section className="mx-auto max-w-7xl px-6 pb-24 lg:px-10">
+        <section className="mx-auto max-w-[100rem] px-6 pb-24 lg:px-10">
             <motion.div {...fadeUp}>
                 <div className="relative overflow-hidden rounded-4xl bg-cobalt p-10 text-white lg:p-16">
                     <div className="dot-grid absolute inset-0 opacity-20" />
                     <div className="absolute -top-20 -right-20 h-80 w-80 rounded-full bg-white/10 blur-2xl" />
                     <div className="absolute -bottom-24 -left-10 h-72 w-72 rounded-full bg-cobalt-dk/40 blur-2xl" />
-                    <div className="relative grid grid-cols-12 items-center gap-8">
-                        <div className="col-span-12 lg:col-span-8">
+                    <div className="relative grid grid-cols-1 items-center gap-8 lg:grid-cols-12">
+                        <div className="col-span-full lg:col-span-8">
                             <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold tracking-editorial uppercase">
                                 <Users className="h-3 w-3" />
                                 {language === 'id'
@@ -497,7 +497,7 @@ export function CtaJoin() {
                                     : 'Track borrowed books, due dates, reading history, and save titles you want — all in one dashboard.'}
                             </p>
                         </div>
-                        <div className="col-span-12 flex flex-col gap-3 sm:flex-row lg:col-span-4 lg:flex-col">
+                        <div className="col-span-full flex flex-col gap-3 sm:flex-row lg:col-span-4 lg:flex-col">
                             <Link
                                 href="/dashboard"
                                 className="btn-press inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-cobalt transition-colors hover:bg-paper"

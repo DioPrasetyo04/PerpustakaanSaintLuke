@@ -3,12 +3,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Play, Quote, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useQueryParams } from '@/hooks/useQueryParams';
 import Carousel from '@/components/common/Carousel';
+import Pagination from '@/components/component/Home/Pagination/Pagination';
 import { ImageWithFallback } from '@/components/common/ImageWithFallback';
 import type { Testimonial } from '@/types/HomePage/HomePageProps';
+import type { Paginated } from '@/types/pagination';
 
 type TestimonialsProps = {
-    testimonials: Testimonial[];
+    testimonials: Paginated<Testimonial>;
 };
 
 const copy = {
@@ -38,8 +41,15 @@ const Testimonials = ({ testimonials }: TestimonialsProps) => {
     const { language } = useLanguage();
     const t = language === 'id' ? copy.id : copy.en;
 
-    const items = testimonials ?? [];
+    const items = testimonials?.data ?? [];
+    const meta = testimonials?.meta;
     const [activeIndex, setActiveIndex] = useState<number | null>(null);
+
+    const { createPagination } = useQueryParams();
+    const { onPageChange, onPerPageChange } = createPagination(
+        'testimonials',
+        meta?.per_page ?? 8,
+    );
 
     if (items.length === 0) return null;
 
@@ -120,7 +130,7 @@ const Testimonials = ({ testimonials }: TestimonialsProps) => {
     return (
         <section className="theme-transition relative overflow-hidden py-20 lg:py-28">
             <div className="hero-mesh pointer-events-none absolute inset-0 opacity-60" />
-            <div className="relative mx-auto max-w-7xl px-6 lg:px-10">
+            <div className="relative mx-auto max-w-[100rem] px-6 lg:px-10">
                 {/* Header */}
                 <div className="mx-auto mb-14 max-w-2xl text-center">
                     <motion.span
@@ -161,6 +171,16 @@ const Testimonials = ({ testimonials }: TestimonialsProps) => {
                         1024: { slidesPerView: 4 },
                     }}
                 />
+
+                {meta && meta.last_page > 1 && (
+                    <Pagination
+                        page={meta.current_page}
+                        total={meta.total}
+                        perPage={meta.per_page}
+                        onPageChange={onPageChange}
+                        onPerPageChange={onPerPageChange}
+                    />
+                )}
             </div>
 
             {/* Modal player */}

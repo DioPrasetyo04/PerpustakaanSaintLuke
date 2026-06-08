@@ -84,11 +84,11 @@ function VisionMissionPage() {
                 </motion.h1>
 
                 {/* Visi */}
-                <div className="mt-20 grid grid-cols-12 gap-8">
-                    <div className="col-span-12 lg:col-span-3">
+                <div className="mt-20 grid grid-cols-1 gap-8 lg:grid-cols-12">
+                    <div className="col-span-full lg:col-span-3">
                         <SectionLabel num="I" label={t.visiLabel} />
                     </div>
-                    <motion.div {...fadeUp} className="col-span-12 lg:col-span-9">
+                    <motion.div {...fadeUp} className="col-span-full lg:col-span-9">
                         <div
                             className="font-display text-3xl leading-[1.15] text-foreground lg:text-5xl"
                             style={{ textWrap: 'balance' }}
@@ -104,17 +104,17 @@ function VisionMissionPage() {
                 </div>
 
                 {/* Misi */}
-                <div className="mt-24 grid grid-cols-12 gap-8">
-                    <div className="col-span-12 lg:col-span-3">
+                <div className="mt-24 grid grid-cols-1 gap-8 lg:grid-cols-12">
+                    <div className="col-span-full lg:col-span-3">
                         <SectionLabel num="II" label={t.misiLabel} />
                     </div>
-                    <div className="col-span-12 space-y-px lg:col-span-9">
+                    <div className="col-span-full space-y-px lg:col-span-9">
                         {t.missions.map((m, i) => (
                             <motion.div
                                 key={m.num}
                                 {...fadeUp}
                                 transition={{ delay: i * 0.08 }}
-                                className="hairline grid grid-cols-12 gap-6 border-t py-8"
+                                className="hairline grid grid-cols-12 gap-4 border-t py-8"
                             >
                                 <div className="col-span-2 lg:col-span-1">
                                     <div className="font-display text-5xl text-cobalt italic dark:text-cobalt-lt">

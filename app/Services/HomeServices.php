@@ -6,6 +6,7 @@ use App\Http\Resources\BookResource;
 use App\Http\Resources\InformationResource;
 use App\Interface\HomeInterfaceRepositories;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Resources\CategoryResource;
 
 class HomeServices
@@ -62,9 +63,9 @@ class HomeServices
         return $this->homeServices->getLiveLoanActivities($limit);
     }
 
-    public function getFeaturedPublishers(int $limit = 12): array
+    public function getFeaturedPublishersRaw(int $perPage, int $page): LengthAwarePaginator
     {
-        return $this->homeServices->getFeaturedPublishers($limit);
+        return $this->homeServices->getFeaturedPublishers($perPage, $page);
     }
 
     public function getAllCountOfBooks(): int
@@ -97,6 +98,17 @@ class HomeServices
     public function transformInformations(LengthAwarePaginator $paginator)
     {
         return paginateResource($paginator, InformationResource::class);
+    }
+
+    public function transformFeaturedPublishers(LengthAwarePaginator $paginator): array
+    {
+        return paginateMapped($paginator, fn ($publisher) => [
+            'id' => $publisher->id,
+            'name' => $publisher->name,
+            'slug' => $publisher->slug,
+            'logo' => $publisher->logo ? Storage::url($publisher->logo) : null,
+            'books_count' => (int) $publisher->books_count,
+        ]);
     }
 
     public function getCharts(): array

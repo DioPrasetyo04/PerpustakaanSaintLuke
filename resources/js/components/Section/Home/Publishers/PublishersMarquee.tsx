@@ -3,24 +3,34 @@ import { motion } from 'framer-motion';
 import { route } from 'ziggy-js';
 import { ArrowRight, ArrowUpRight, Building2 } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useQueryParams } from '@/hooks/useQueryParams';
 import { ImageWithFallback } from '@/components/common/ImageWithFallback';
+import Pagination from '@/components/component/Home/Pagination/Pagination';
 import type { FeaturedPublisher } from '@/types/HomePage/HomePageProps';
+import type { Paginated } from '@/types/pagination';
 
 type PublishersMarqueeProps = {
-    publishers: FeaturedPublisher[];
+    publishers: Paginated<FeaturedPublisher>;
 };
 
 const PublishersMarquee = ({ publishers }: PublishersMarqueeProps) => {
     const { language } = useLanguage();
 
-    // Tampilkan ringkas di beranda; selebihnya via "Semua penerbit".
-    const items = (publishers ?? []).slice(0, 12);
+    const items = publishers?.data ?? [];
+    const meta = publishers?.meta;
+
+    const { createPagination } = useQueryParams();
+    const { onPageChange, onPerPageChange } = createPagination(
+        'publishers',
+        meta?.per_page ?? 8,
+    );
+
     if (items.length === 0) return null;
 
     return (
         <section className="theme-transition relative overflow-hidden border-y border-border/60 bg-muted/30 py-20 lg:py-28 dark:bg-white/2">
             <div className="line-grid pointer-events-none absolute inset-0 opacity-40" />
-            <div className="relative mx-auto max-w-7xl px-6 lg:px-10">
+            <div className="relative mx-auto max-w-[100rem] px-6 lg:px-10">
                 {/* Header */}
                 <div className="mb-12 flex items-end justify-between gap-6">
                     <div>
@@ -104,6 +114,16 @@ const PublishersMarquee = ({ publishers }: PublishersMarqueeProps) => {
                         </motion.div>
                     ))}
                 </div>
+
+                {meta && meta.last_page > 1 && (
+                    <Pagination
+                        page={meta.current_page}
+                        total={meta.total}
+                        perPage={meta.per_page}
+                        onPageChange={onPageChange}
+                        onPerPageChange={onPerPageChange}
+                    />
+                )}
 
                 {/* Mobile view-all */}
                 <div className="mt-10 text-center md:hidden">

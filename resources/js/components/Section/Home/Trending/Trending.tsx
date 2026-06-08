@@ -26,7 +26,7 @@ const Trending = ({ books }: TrendingProps) => {
 
     return (
         <section className="hairline border-y bg-ink text-paper dark:bg-night-2">
-            <div className="mx-auto max-w-7xl px-6 py-20 lg:px-10 lg:py-28">
+            <div className="mx-auto max-w-[100rem] px-6 py-20 lg:px-10 lg:py-28">
                 <div className="mb-12 flex items-end justify-between gap-6">
                     <div>
                         <motion.span
@@ -64,9 +64,9 @@ const Trending = ({ books }: TrendingProps) => {
                     </Link>
                 </div>
 
-                <div className="grid grid-cols-12 gap-8">
+                <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
                     {/* Featured #1 */}
-                    <motion.div {...fadeUp} className="col-span-12 lg:col-span-5">
+                    <motion.div {...fadeUp} className="col-span-full lg:col-span-5">
                         <Link
                             href={route('book.detail', { slug: hero.slug })}
                             className="group block h-full rounded-xl2 border border-white/10 bg-night-3/60 p-7 transition-colors hover:border-cobalt/40 dark:bg-night-3"
@@ -115,7 +115,7 @@ const Trending = ({ books }: TrendingProps) => {
                     </motion.div>
 
                     {/* List 2-7 */}
-                    <div className="col-span-12 lg:col-span-7">
+                    <div className="col-span-full lg:col-span-7">
                         <div className="grid gap-x-8 gap-y-1 sm:grid-cols-2">
                             {rest.map((b, i) => (
                                 <motion.div

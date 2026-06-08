@@ -13,6 +13,7 @@ use App\Interface\HomeInterfaceRepositories;
 use App\Interface\InformationRepositoriesInterface;
 use App\Interface\LoanInterfaceRepositories;
 use App\Interface\OnlineResourceInterfaceRepositories;
+use App\Interface\OrganizationInterfaceRepositories;
 use App\Interface\ProfileInterfaceRepositories;
 use App\Interface\ResourceInterfaceRepositories;
 use App\Interface\ReturnBookInterfaceRepositories;
@@ -29,6 +30,7 @@ use App\Repositories\HomeRepositories;
 use App\Repositories\InformationRepositories;
 use App\Repositories\LoanRepositories;
 use App\Repositories\OnlineResourceRepositories;
+use App\Repositories\OrganizationRepositories;
 use App\Repositories\ProfileRepositories;
 use App\Repositories\ResourceRepositories;
 use App\Repositories\ReturnBookRepositories;
@@ -63,6 +65,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(UpdatePasswordInterfaceRepositories::class, UpdatePasswordRepositories::class);
         $this->app->bind(TestimonialInterfaceRepositories::class, TestimonialRepositories::class);
         $this->app->bind(EventInterfaceRepositories::class, EventRepositories::class);
+        $this->app->bind(OrganizationInterfaceRepositories::class, OrganizationRepositories::class);
 
         // Kirim email reset password panel admin secara SINKRON (bukan di-queue),
         // agar tetap terkirim tanpa perlu queue worker. Filament memanggil
