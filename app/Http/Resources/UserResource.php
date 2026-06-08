@@ -25,7 +25,13 @@ class UserResource extends JsonResource
             'phone' => $this->when(isset($this->phone), $this->phone),
             'avatar' => $this->when(isset($this->avatar), $this->avatar ? Storage::url($this->avatar) : null),
             'date_of_birth' => $this->when(isset($this->date_of_birth), $this->date_of_birth),
-            'address' => $this->when(isset($this->address), $this->address)
+            'address' => $this->when(isset($this->address), $this->address),
+            'socialmedia' => $this->whenLoaded('socialmedia', fn() => $this->socialmedia->map(fn($social) => [
+                'id' => $social->id,
+                'platform' => $social->platform,
+                'url' => $social->url,
+                'username' => $social->username,
+            ])->values()),
         ];
     }
 }

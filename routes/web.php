@@ -9,8 +9,10 @@ use App\Http\Controllers\InformationController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\BookmarkController;
 use App\Http\Controllers\CatalogController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoanController;
+use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\ReturnBookController;
@@ -23,6 +25,13 @@ use Inertia\Inertia;
 //         'canRegister' => Features::enabled(Features::registration()),
 //     ]);
 // })->name('home');
+
+// Pratinjau halaman error (hanya di luar produksi) — buka /__error/404, /__error/500, dst.
+if (! app()->isProduction()) {
+    Route::get('/__error/{status}', function (int $status) {
+        return Inertia::render('Error', ['status' => $status]);
+    })->where('status', '[0-9]{3}')->name('error.preview');
+}
 
 Route::get('dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -61,8 +70,11 @@ Route::controller(InformationController::class)->group(function () {
 Route::prefix('about')->name('about.')->group(function () {
     Route::get('/profile', fn() => Inertia::render('about/ProfilePage'))->name('profile');
     Route::get('/vision-mission', fn() => Inertia::render('about/VisionMissionPage'))->name('vision-mission');
-    Route::get('/contact', fn() => Inertia::render('about/ContactPage'))->name('contact');
-    Route::get('/organization-structure', fn() => Inertia::render('about/OrganizationStructurePage'))->name('organization-structure');
+    Route::get('/contact', [ContactController::class, 'index'])->name('contact');
+        Route::post('/contact', [ContactController::class, 'send'])
+            ->middleware('throttle:5,1')
+            ->name('contact.send');
+    Route::get('/organization-structure', [OrganizationController::class, 'index'])->name('organization-structure');
 });
 
 // Kiosk publik pencatatan kunjungan perpustakaan (scan kartu / cari user / isi manual).
@@ -85,6 +97,10 @@ Route::controller(PaymentController::class)->group(function () {
     Route::get('/payments/success', 'handleSuccess')->name('payment.success');
     Route::get('/payments/failed', 'handleFailed')->name('payment.failed');
     Route::get('/payments/cancel', 'handleCancel')->name('payment.cancel');
+
+    Route::middleware(['auth', 'verified'])
+        ->get('/payments/{fine}/receipt', 'downloadReceipt')
+        ->name('payment.receipt');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

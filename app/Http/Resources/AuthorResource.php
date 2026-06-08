@@ -26,7 +26,13 @@ class AuthorResource extends JsonResource
             'avatar' => $this->when(isset($this->avatar), $this->avatar ? Storage::url($this->avatar) : null),
             'bio' => $this->when(isset($this->bio), $this->bio),
             'verified_at' => $this->when(isset($this->verified_at), $this->verified_at),
-            'count_of_books' => $this->whenHas('count_of_books', $this->count_of_books ?? 0)
+            'count_of_books' => $this->whenHas('count_of_books', $this->count_of_books ?? 0),
+            'socialmedia' => $this->whenLoaded('socialmedia', fn() => $this->socialmedia->map(fn($social) => [
+                'id' => $social->id,
+                'platform' => $social->platform,
+                'url' => $social->url,
+                'username' => $social->username,
+            ])->values()),
         ];
     }
 }

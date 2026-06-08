@@ -37,6 +37,25 @@ const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 // Apply the persisted light/dark theme (.dark class) before the app renders.
 initializeTheme();
 
+/**
+ * Sembunyikan splash/loading screen (dirender di app.blade.php) dengan transisi
+ * halus setelah aplikasi siap. Dijaga tampil minimal ~500ms agar tidak berkedip
+ * terlalu cepat saat load instan.
+ */
+const hideSplash = () => {
+    const splash = document.getElementById('app-splash');
+    if (!splash) return;
+
+    const t0 = (window as unknown as { __SPLASH_T0?: number }).__SPLASH_T0 ?? 0;
+    const wait = Math.max(0, 500 - (Date.now() - t0));
+
+    window.setTimeout(() => {
+        splash.classList.add('app-splash--hidden');
+        // Hapus dari DOM setelah transisi opacity selesai.
+        window.setTimeout(() => splash.remove(), 700);
+    }, wait);
+};
+
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     resolve: (name) =>
@@ -58,12 +77,15 @@ createInertiaApp({
                     <LibraryStatusBadge initialAnnouncement={announcement} />
                     <AccessDeniedModal initialFlash={flash} />
                     <Navbar initialAuth={initialAuth} />
-                    <div className="flex-1">
+                    <div className="flex-1 overflow-x-clip">
                         <App {...props} />
                     </div>
                     <Footer />
                 </LanguageProvider>
             </StrictMode>,
         );
+
+        // Setelah React melukis frame pertama, baru sembunyikan splash.
+        requestAnimationFrame(() => requestAnimationFrame(hideSplash));
     },
 });

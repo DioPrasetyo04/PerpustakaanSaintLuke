@@ -38,6 +38,7 @@ class AdminPanelProvider extends PanelProvider
             ->brandName('E-Library Santo Lukas')
             ->brandLogo(fn() => view('filament.brand'))
             ->brandLogoHeight('2.75rem')
+            ->favicon(asset('assets/logos/Saint-Luke.png'))
             ->login()
             ->registration(Register::class)
             ->profile(Profile::class)

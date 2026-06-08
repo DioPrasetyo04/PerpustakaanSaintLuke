@@ -16,18 +16,6 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
     );
 }
 
-function SectionLabel({ num, label }: { num: string; label: string }) {
-    return (
-        <div className="mb-12 flex items-center gap-3">
-            <span className="section-num text-xl tabnum">{num}</span>
-            <span className="tracking-editorial font-mono text-[11px] font-semibold uppercase text-foreground/70">
-                {label}
-            </span>
-            <span className="h-px flex-1 bg-line dark:bg-night-line" />
-        </div>
-    );
-}
-
 const content = {
     id: {
         eyebrow: 'Tentang Yayasan',
@@ -89,8 +77,8 @@ function ProfilePage() {
         <section className="bg-background pb-24">
             {/* Editorial hero */}
             <div className="hairline border-b">
-                <div className="mx-auto grid max-w-7xl grid-cols-12 gap-10 px-6 pt-16 pb-20 lg:px-10">
-                    <div className="col-span-12 lg:col-span-7">
+                <div className="mx-auto grid max-w-[100rem] grid-cols-1 gap-10 px-6 pt-16 pb-20 lg:grid-cols-12 lg:px-10">
+                    <div className="col-span-full lg:col-span-7">
                         <motion.div {...fadeUp}>
                             <Eyebrow>{t.eyebrow}</Eyebrow>
                         </motion.div>
@@ -124,7 +112,7 @@ function ProfilePage() {
                         </motion.p>
                     </div>
 
-                    <div className="col-span-12 lg:col-span-5">
+                    <div className="col-span-full lg:col-span-5">
                         <div className="lg:sticky lg:top-32">
                             <div className="spine-shadow flex aspect-[4/5] flex-col justify-between bg-ink p-8 text-paper shadow-book-3d">
                                 <div className="tracking-editorial font-mono text-[10px] uppercase text-cobalt-lt">
@@ -148,48 +136,6 @@ function ProfilePage() {
                 </div>
             </div>
 
-            {/* Timeline */}
-            <div className="mx-auto max-w-7xl px-6 py-20 lg:px-10">
-                <SectionLabel num="01" label={t.timelineLabel} />
-                <div className="grid grid-cols-12 gap-8">
-                    {t.milestones.map((s, i) => (
-                        <motion.div
-                            key={s.y}
-                            {...fadeUp}
-                            transition={{ delay: i * 0.08 }}
-                            className="col-span-12 md:col-span-6 lg:col-span-4"
-                        >
-                            <div className="bracket hairline h-full rounded-xl2 border bg-card p-8 text-cobalt transition-all duration-300 hover:-translate-y-1 hover:border-cobalt/40 hover:shadow-lift dark:bg-night-2 dark:text-cobalt-lt">
-                                <div className="font-display text-5xl tabnum text-cobalt italic dark:text-cobalt-lt">
-                                    {s.y}
-                                </div>
-                                <div className="mt-2 font-display text-xl text-foreground">
-                                    {s.t}
-                                </div>
-                                <p className="mt-3 text-sm leading-relaxed text-foreground/75">
-                                    {s.b}
-                                </p>
-                            </div>
-                        </motion.div>
-                    ))}
-                </div>
-            </div>
-
-            {/* Numbers band */}
-            <div className="bg-ink py-20 text-paper dark:bg-night-2">
-                <div className="mx-auto max-w-7xl px-6 lg:px-10">
-                    <div className="grid grid-cols-2 gap-8 lg:grid-cols-4">
-                        {t.stats.map((s, i) => (
-                            <motion.div key={s.l} {...fadeUp} transition={{ delay: i * 0.08 }}>
-                                <div className="font-display text-6xl tabnum text-paper">
-                                    {s.v}
-                                </div>
-                                <div className="mt-2 text-sm text-paper/70">{s.l}</div>
-                            </motion.div>
-                        ))}
-                    </div>
-                </div>
-            </div>
         </section>
     );
 }

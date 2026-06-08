@@ -35,7 +35,7 @@ export default function PaymentError() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50 py-12">
+        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50 py-12 dark:from-orange-950/20 dark:via-background dark:to-background">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="mx-auto max-w-2xl">
                     <motion.div
@@ -72,9 +72,9 @@ export default function PaymentError() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.4 }}
                     >
-                        <Card className="mb-6 border-2 border-orange-100 bg-red-50/30 p-6 shadow-xl">
+                        <Card className="mb-6 border-2 border-orange-100 bg-red-50/30 p-6 shadow-xl dark:border-orange-900/40 dark:bg-red-950/20">
                             <div className="mb-4 flex items-start gap-3">
-                                <AlertTriangle className="mt-1 h-6 w-6 flex-shrink-0 text-orange-600" />
+                                <AlertTriangle className="mt-1 h-6 w-6 flex-shrink-0 text-orange-600 dark:text-orange-400" />
                                 <div>
                                     <h2 className="mb-2 font-display text-xl font-bold text-foreground">
                                         Error Details
@@ -130,12 +130,12 @@ export default function PaymentError() {
                                     </div>
                                 </div>
 
-                                <div className="rounded-xl border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-red-50 p-6">
+                                <div className="rounded-xl border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-red-50 p-6 dark:border-orange-900/40 dark:from-orange-950/30 dark:to-red-950/20">
                                     <div className="flex items-center justify-between">
                                         <span className="text-lg font-medium text-foreground">
                                             Amount Due:
                                         </span>
-                                        <span className="text-3xl font-bold text-orange-600">
+                                        <span className="text-3xl font-bold text-orange-600 dark:text-orange-400">
                                             {moneyFormatter(fine.amount)}
                                         </span>
                                     </div>
@@ -143,7 +143,7 @@ export default function PaymentError() {
                             </Card>
                         )}
 
-                        <Card className="mb-6 border-cobalt-lt bg-cobalt-50 p-6">
+                        <Card className="mb-6 border-cobalt-lt bg-cobalt-50 p-6 dark:border-cobalt-dk dark:bg-cobalt-dk/15">
                             <h3 className="mb-3 font-semibold text-foreground">
                                 Common Causes:
                             </h3>
@@ -197,7 +197,7 @@ export default function PaymentError() {
                             </Link>
                         </div>
 
-                        <Card className="border-brass-lt bg-gradient-to-br from-brass-50 to-cobalt-50 p-6">
+                        <Card className="border-brass-lt bg-gradient-to-br from-brass-50 to-cobalt-50 p-6 dark:border-brass dark:from-brass/15 dark:to-cobalt-dk/15">
                             <h3 className="mb-4 text-center font-semibold text-foreground">
                                 Still having issues?
                             </h3>

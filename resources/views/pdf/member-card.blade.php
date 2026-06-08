@@ -14,9 +14,11 @@
         body { color: #0f172a; }
         .note { font-size: 10px; color: #64748b; text-align: center; margin-bottom: 10px; }
 
-        .card { width: 35cm; border: 1px solid #e2e8f0; border-left: 5px solid #047857; }
-        .left  { width: 42%; padding: 12px; border-right: 1px dashed #cbd5e1; vertical-align: top; }
-        .right { padding: 12px; vertical-align: top; }
+        /* Lebar 100% = mengikuti area cetak A4 portrait (≈18.2cm setelah margin),
+           table-layout fixed + word-wrap agar konten tidak meluap & terpotong. */
+        .card { width: 100%; table-layout: fixed; border: 1px solid #e2e8f0; border-left: 5px solid #047857; }
+        .left  { width: 42%; padding: 12px; border-right: 1px dashed #cbd5e1; vertical-align: top; word-wrap: break-word; overflow-wrap: break-word; }
+        .right { padding: 12px; vertical-align: top; word-wrap: break-word; overflow-wrap: break-word; }
 
         .no-lbl { font-size: 7px; letter-spacing: 1px; text-transform: uppercase; color: #047857; font-weight: bold; }
         .no-val { font-size: 15px; font-weight: bold; color: #065f46; border-bottom: 2px dotted #94a3b8; padding-bottom: 2px; }

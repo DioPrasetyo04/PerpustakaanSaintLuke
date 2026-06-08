@@ -127,6 +127,21 @@
         0 12px 32px -8px rgba(24, 68, 58, 0.28);
 }
 
+/* ── Shared page shell width ──────────────────────────────────
+   Override Tailwind's default `container` (which stepped up to a
+   1536px cap and froze there) so the public site content tracks the
+   viewport and only caps on very large monitors. Below 1600px the
+   content is fluid (100% − the element's own px-* padding), matching
+   the full-bleed hero/ticker so everything resizes together when the
+   window is restored/minimized. Narrower per-page caps (max-w-2xl,
+   max-w-4xl, …) placed alongside `container` still win, so forms and
+   prose stay readable. */
+@utility container {
+    width: 100%;
+    margin-inline: auto;
+    max-width: 100rem; /* 1600px */
+}
+
 :root {
     color-scheme: light;
     /* Light theme — paper + ink */
@@ -217,10 +232,18 @@
         @apply border-border;
     }
 
+    html,
     body {
         @apply bg-background text-foreground;
         -webkit-font-smoothing: antialiased;
         text-rendering: optimizeLegibility;
+        /* Cegah scroll horizontal global: bila ada section/elemen yang sedikit
+           meluber (mis. carousel, marquee, atau navbar saat label panjang di
+           mode EN), dokumen tidak ikut melebar melewati lebar viewport.
+           `clip` dipakai (bukan `hidden`) agar tidak membuat scroll-container
+           baru sehingga `position: sticky` pada navbar tetap berfungsi. */
+        overflow-x: clip;
+        max-width: 100%;
     }
 
     ::selection {
@@ -1031,4 +1054,66 @@
     border-radius: 9999px;
     opacity: 1;
     background-image: linear-gradient(90deg, var(--color-cobalt), var(--color-brass));
+}
+
+/* ── react-phone-input-2 dark mode + theme alignment ── */
+.react-tel-input .form-control {
+    background-color: transparent !important;
+    color: var(--foreground) !important;
+    border-color: var(--input) !important;
+}
+.react-tel-input .form-control::placeholder {
+    color: var(--muted-foreground) !important;
+}
+.react-tel-input .flag-dropdown,
+.react-tel-input .selected-flag,
+.react-tel-input .selected-flag:hover,
+.react-tel-input .selected-flag:focus,
+.react-tel-input .flag-dropdown.open .selected-flag {
+    background-color: transparent !important;
+    border-color: var(--input) !important;
+}
+.react-tel-input .selected-flag .arrow {
+    border-top-color: var(--muted-foreground) !important;
+}
+.react-tel-input .country-list {
+    background-color: var(--popover) !important;
+    color: var(--popover-foreground) !important;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+.react-tel-input .country-list .country:hover,
+.react-tel-input .country-list .country.highlight {
+    background-color: var(--accent) !important;
+    color: var(--accent-foreground) !important;
+}
+.react-tel-input .country-list .country .dial-code {
+    color: var(--muted-foreground) !important;
+}
+.react-tel-input .country-list .search {
+    background-color: var(--popover) !important;
+}
+.react-tel-input .country-list .search-box {
+    background-color: transparent !important;
+    color: var(--foreground) !important;
+    border-color: var(--input) !important;
+}
+
+/* Borderless phone input — menyatu dengan sel form editorial (Hubungi Kami) */
+.contact-phone .react-tel-input .form-control {
+    width: 100% !important;
+    height: 2.25rem !important;
+    padding-left: 52px !important;
+    border: none !important;
+    border-radius: 0 !important;
+    font-size: 1rem !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+}
+.contact-phone .react-tel-input .flag-dropdown,
+.contact-phone .react-tel-input .selected-flag,
+.contact-phone .react-tel-input .flag-dropdown.open .selected-flag {
+    border: none !important;
+    border-radius: 0 !important;
+    background-color: transparent !important;
 }

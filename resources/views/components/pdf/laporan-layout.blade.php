@@ -35,12 +35,16 @@
         .chart-wrap { text-align: center; margin: 4px 0 12px; border: 1px solid #e5e7eb; padding: 6px; background: #ffffff; }
         .chart-wrap img { max-width: 100%; height: auto; }
 
-        table.data { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 10px; }
-        table.data th, table.data td { border: 1px solid #4b5563; padding: 4px 6px; vertical-align: middle; word-wrap: break-word; overflow-wrap: break-word; }
+        /* NOTE: border-collapse:separate (bukan collapse). Pada tabel besar
+           (mis. Laporan Buku ~1000 baris) dompdf menghabiskan memori saat
+           meresolusi border collapse antar-sel (Css/Style.php). Grid dibentuk
+           dari border-top+left tabel + border-right+bottom tiap sel → tampilan
+           tetap satu garis tanpa proses collapse yang berat. */
+        table.data { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; font-size: 10px; border-top: 1px solid #4b5563; border-left: 1px solid #4b5563; }
+        table.data th, table.data td { border-right: 1px solid #4b5563; border-bottom: 1px solid #4b5563; padding: 4px 6px; vertical-align: middle; word-wrap: break-word; overflow-wrap: break-word; }
         table.data thead { display: table-header-group; }
-        table.data tr { page-break-inside: avoid; }
         table.data thead th { background: #1f2937; color: #fff; text-align: center; text-transform: uppercase; font-size: 9.5px; }
-        table.data tbody tr:nth-child(even) { background: #f3f4f6; }
+        table.data tbody tr:nth-child(even) td { background: #f3f4f6; }
         table.data td.no, table.data td.center { text-align: center; }
         table.data td.right { text-align: right; }
         .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; background: #dbeafe; color: #1e3a8a; font-size: 9.5px; font-weight: bold; }
@@ -184,11 +188,11 @@
                 $titleW = $contentW - $logoSize - 18;
                 $cx     = $titleX + ($titleW / 2);
 
-                $line1 = "PERPUSTAKAAN SAINT LUKE";
-                $line2 = "YAYASAN SAINT LUKE LIBRARY";
-                $line3 = "GEREJA ANGGOTA PGI KE - 86";
-                $line4 = "Sekretariat : Jl. Gembira Terusan No. 24, Tlp/Fax : (021) 4350118, Tanjung Priok - Jakarta Utara";
-                $line5 = "Terdaftar di : DEPAG No. 3 Ket. 373/1628/76 - DEPAG No. 14 Tahun 1995 - DEPAGRI NO. 50 Thn. 1987";
+                $line1 = "PERPUSTAKAAN SANTO LUKAS";
+                $line2 = "YAYASAN PENDIDIKAN UMUM SANTO LUKAS";
+                $line3 = "Jl. Pademangan I Gang 7 No. 23, Jakarta Utara 14410";
+                $line4 = "Telepon (021) 6414260, 64714859";
+                $line5 = "Email: santo.lukas@yahoo.co.id";
 
                 $sz1 = 15; $sz2 = 12; $sz3 = 10; $sz4 = 8;
 

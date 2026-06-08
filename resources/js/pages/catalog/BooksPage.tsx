@@ -339,7 +339,16 @@ const BooksPage = () => {
                                         : 'hairline text-foreground hover:border-cobalt/40',
                                 )}
                             >
-                                {c.icon && <span>{c.icon}</span>}
+                                {c.icon &&
+                                    (/^(https?:|\/)/.test(c.icon) ? (
+                                        <img
+                                            src={c.icon}
+                                            alt=""
+                                            className="h-4 w-4 shrink-0 rounded-sm object-cover"
+                                        />
+                                    ) : (
+                                        <span>{c.icon}</span>
+                                    ))}
                                 {c.name}
                             </button>
                         ))}
@@ -418,9 +427,9 @@ const BooksPage = () => {
                     </div>
                 )}
 
-                <div className="grid grid-cols-12 gap-8">
+                <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
                     {/* Sidebar (desktop) */}
-                    <aside className="col-span-12 hidden lg:col-span-3 lg:block">
+                    <aside className="col-span-full hidden lg:col-span-3 lg:block">
                         <FilterSidebar
                             language={language}
                             filters={local}
@@ -433,7 +442,7 @@ const BooksPage = () => {
 
                     {/* Mobile sidebar */}
                     {showMobileFilters && (
-                        <div className="col-span-12 lg:hidden">
+                        <div className="col-span-full lg:hidden">
                             <FilterSidebar
                                 language={language}
                                 filters={local}
@@ -447,7 +456,7 @@ const BooksPage = () => {
                     )}
 
                     {/* Main */}
-                    <div className="col-span-12 lg:col-span-9">
+                    <div className="col-span-full lg:col-span-9">
                         {books.data.length > 0 ? (
                             <>
                                 <div className="tracking-editorial mb-5 font-mono text-[10px] uppercase text-muted-foreground">

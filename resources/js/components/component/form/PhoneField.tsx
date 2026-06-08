@@ -33,7 +33,6 @@ export default function PhoneField({
                 disabled={disabled}
                 containerClass="w-full"
                 buttonClass="!border !border-input"
-                dropdownClass="!text-black"
                 inputClass="!w-full !h-10 !text-sm !rounded-md !border"
             />
             {description && <FieldDescription>{description}</FieldDescription>}

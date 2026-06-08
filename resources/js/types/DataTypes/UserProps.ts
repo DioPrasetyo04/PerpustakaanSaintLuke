@@ -1,3 +1,5 @@
+import type { SocialMediaProps } from './SocialMediaProps';
+
 export type UserProps = {
     id: number;
     name: string;
@@ -8,4 +10,5 @@ export type UserProps = {
     avatar?: string;
     date_of_birth?: string;
     address?: string;
+    socialmedia?: SocialMediaProps[];
 };

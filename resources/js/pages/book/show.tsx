@@ -5,6 +5,8 @@ import {
     ChevronRight,
     Bookmark,
     Quote,
+    BookPlus,
+    AtSign,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -14,9 +16,12 @@ import { useLanguage } from '@/hooks/useLanguage';
 import type { DetailBookProps } from '@/types/DetailBookPage/DetailBookProps';
 import { bookDetailPage } from '@/data/data';
 import SectionRecomended from '@/components/Section/BookDetail/RecomendedBooks';
+import Carousel from '@/components/common/Carousel';
+import { SocialMediaLinks } from '@/components/common/SocialMediaLinks';
 import BookTypeBadge, {
     uniqueFormats,
 } from '@/components/common/BookTypeBadge';
+import type { ReviewsProps } from '@/types/DataTypes/ReviewsProps';
 import { formattedRating, formattedYear } from '@/lib/utils';
 import DOMPurify from 'dompurify';
 import Notification from '@/components/component/Notification/Notification';
@@ -87,6 +92,45 @@ function Stars({ value, size = 14 }: { value: number; size?: number }) {
                 );
             })}
         </span>
+    );
+}
+
+/* Kartu ulasan untuk slider (avatar, nama, rating, komentar, media sosial) */
+function ReviewCard({ review }: { review: ReviewsProps }) {
+    return (
+        <div className="hairline flex h-full flex-col rounded-xl2 border bg-card p-5 transition-all duration-300 hover:border-cobalt/30 hover:shadow-lift dark:bg-night-2">
+            <div className="flex items-start justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-3">
+                    <ImageWithFallback
+                        src={review.user?.avatar}
+                        alt={review.user?.name}
+                        className="h-11 w-11 shrink-0 rounded-full object-cover ring-2 ring-cobalt/15"
+                    />
+                    <div className="min-w-0">
+                        <div className="truncate text-sm font-semibold text-foreground">
+                            {review.user?.name}
+                        </div>
+                        <div className="text-[11px] text-muted-foreground">
+                            {review.created_at}
+                        </div>
+                    </div>
+                </div>
+                <Stars value={Number(review.rating)} size={12} />
+            </div>
+
+            <p
+                className="mt-3 line-clamp-5 flex-1 text-sm leading-relaxed text-foreground/80"
+                dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(review.comment ?? ''),
+                }}
+            />
+
+            <SocialMediaLinks
+                socials={review.user?.socialmedia}
+                size="sm"
+                className="mt-4 border-t border-border/60 pt-4"
+            />
+        </div>
     );
 }
 
@@ -216,7 +260,7 @@ function BookShow() {
                                 'linear-gradient(to bottom, black, transparent)',
                         }}
                     />
-                    <div className="relative mx-auto max-w-7xl px-6 pt-8 pb-14 lg:px-10">
+                    <div className="relative mx-auto max-w-[100rem] px-6 pt-8 pb-14 lg:px-10">
                         {/* Breadcrumb */}
                         <nav className="tracking-editorial mb-10 flex items-center gap-2 font-mono text-[10px] uppercase text-muted-foreground">
                             <Link
@@ -238,12 +282,12 @@ function BookShow() {
                             </span>
                         </nav>
 
-                        <div className="grid grid-cols-12 gap-10 lg:gap-12">
+                        <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-12">
                             {/* Cover + actions */}
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                className="col-span-12 lg:col-span-5 xl:col-span-4"
+                                className="col-span-full lg:col-span-5 xl:col-span-4"
                             >
                                 <div className="lg:sticky lg:top-28">
                                     <div className="group book3d-stage flex justify-center lg:justify-start">
@@ -387,7 +431,7 @@ function BookShow() {
                             <motion.div
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                className="col-span-12 lg:col-span-7 xl:col-span-8"
+                                className="col-span-full lg:col-span-7 xl:col-span-8"
                             >
                                 <div className="flex flex-wrap items-center gap-2">
                                     {book.categories?.map((category, index) => (
@@ -543,23 +587,97 @@ function BookShow() {
                                             </div>
                                         ))}
 
-                                        {/* Tipe / format buku — sel penuh dengan badge agar rapi & modern */}
+                                    </dl>
+
+                                    {/* Format tersedia + penambah buku, berdampingan & responsif */}
+                                    <div
+                                        className={`mt-4 grid items-stretch gap-4 ${book.addedBy ? 'md:grid-cols-2' : ''}`}
+                                    >
                                         {bookFormats.length > 0 && (
-                                            <div className="col-span-2 flex flex-wrap items-center justify-between gap-3 bg-card p-4 lg:col-span-3 dark:bg-night-2">
-                                                <dt className="tracking-editorial font-mono text-[10px] uppercase text-muted-foreground">
+                                            <div className="hairline group/fmt relative flex flex-col overflow-hidden rounded-xl2 border bg-card p-5 transition-all duration-300 hover:border-cobalt/30 hover:shadow-lift dark:bg-night-2">
+                                                <div className="tracking-editorial font-mono text-[10px] uppercase text-muted-foreground">
                                                     {language === 'id'
                                                         ? 'Format Tersedia'
                                                         : 'Available Format'}
-                                                </dt>
-                                                <dd className="flex flex-wrap items-center gap-2">
+                                                </div>
+                                                <div className="mt-auto flex flex-wrap items-center gap-2 pt-4">
                                                     <BookTypeBadge
                                                         types={book.types}
                                                         size="md"
                                                     />
-                                                </dd>
+                                                </div>
                                             </div>
                                         )}
-                                    </dl>
+
+                                        {/* Ditambahkan oleh — avatar, nama, media sosial */}
+                                        {book.addedBy && (
+                                            <div className="hairline group/add relative flex flex-col overflow-hidden rounded-xl2 border bg-card p-5 transition-all duration-300 hover:border-cobalt/30 hover:shadow-lift dark:bg-night-2">
+                                                {/* aksen glow saat hover */}
+                                                <div className="pointer-events-none absolute -top-10 -right-10 h-28 w-28 rounded-full bg-cobalt/10 opacity-0 blur-2xl transition-opacity duration-500 group-hover/add:opacity-100" />
+
+                                                <div className="tracking-editorial flex items-center gap-1.5 font-mono text-[10px] uppercase text-muted-foreground">
+                                                    <BookPlus className="h-3.5 w-3.5 text-cobalt dark:text-cobalt-lt" />
+                                                    {language === 'id'
+                                                        ? 'Ditambahkan oleh'
+                                                        : 'Added by'}
+                                                </div>
+
+                                                <div className="mt-3.5 flex items-center gap-3.5">
+                                                    <div className="relative shrink-0">
+                                                        <ImageWithFallback
+                                                            src={
+                                                                book.addedBy
+                                                                    .avatar
+                                                            }
+                                                            alt={
+                                                                book.addedBy
+                                                                    .name
+                                                            }
+                                                            className="h-12 w-12 rounded-full object-cover ring-2 ring-cobalt/25 transition-transform duration-300 group-hover/add:scale-105"
+                                                        />
+                                                        {/* badge penanda staf/penambah */}
+                                                        <span className="absolute -right-1 -bottom-1 grid h-5 w-5 place-items-center rounded-full bg-cobalt text-white ring-2 ring-card dark:ring-night-2">
+                                                            <BookPlus className="h-2.5 w-2.5" />
+                                                        </span>
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <div className="truncate font-display text-base font-semibold text-foreground">
+                                                            {book.addedBy.name}
+                                                        </div>
+                                                        <div className="mt-0.5 inline-flex max-w-full items-center gap-1 truncate text-[11px] text-muted-foreground">
+                                                            {book.addedBy
+                                                                .username ? (
+                                                                <>
+                                                                    <AtSign className="h-3 w-3 shrink-0" />
+                                                                    <span className="truncate">
+                                                                        {
+                                                                            book
+                                                                                .addedBy
+                                                                                .username
+                                                                        }
+                                                                    </span>
+                                                                </>
+                                                            ) : language ===
+                                                              'id' ? (
+                                                                'Pustakawan'
+                                                            ) : (
+                                                                'Librarian'
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* media sosial bila ada */}
+                                                <SocialMediaLinks
+                                                    socials={
+                                                        book.addedBy.socialmedia
+                                                    }
+                                                    size="sm"
+                                                    className="mt-auto border-t border-border/60 pt-4"
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {/* Reviews */}
@@ -573,9 +691,9 @@ function BookShow() {
                                         }
                                         className="mb-6"
                                     />
-                                    <div className="grid grid-cols-12 gap-8">
+                                    <div className="grid grid-cols-1 gap-8 sm:grid-cols-12">
                                         {/* score */}
-                                        <div className="col-span-12 sm:col-span-4">
+                                        <div className="col-span-full sm:col-span-4">
                                             <div className="hairline rounded-xl2 border bg-card p-6 text-center dark:bg-night-2">
                                                 <div className="font-display text-6xl tabnum text-foreground">
                                                     {formattedRating(
@@ -596,62 +714,37 @@ function BookShow() {
                                                 </div>
                                             </div>
                                         </div>
-                                        {/* review list */}
-                                        <div className="col-span-12 space-y-4 sm:col-span-8">
+                                        {/* review list — swiper agar bisa digeser ke samping */}
+                                        <div className="col-span-full min-w-0 sm:col-span-8">
                                             {reviews.data.length > 0 ? (
-                                                reviews.data.map((review) => (
-                                                    <div
-                                                        key={review.id}
-                                                        className="hairline rounded-xl2 border bg-card p-5 dark:bg-night-2"
-                                                    >
-                                                        <div className="flex items-center justify-between gap-3">
-                                                            <div className="flex items-center gap-3">
-                                                                <ImageWithFallback
-                                                                    src={
-                                                                        review
-                                                                            .user
-                                                                            ?.avatar
-                                                                    }
-                                                                    alt={
-                                                                        review
-                                                                            .user
-                                                                            ?.name
-                                                                    }
-                                                                    className="h-10 w-10 shrink-0 rounded-full object-cover"
-                                                                />
-                                                                <div>
-                                                                    <div className="text-sm font-semibold text-foreground">
-                                                                        {
-                                                                            review
-                                                                                .user
-                                                                                ?.name
-                                                                        }
-                                                                    </div>
-                                                                    <div className="text-[11px] text-muted-foreground">
-                                                                        {
-                                                                            review.created_at
-                                                                        }
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <Stars
-                                                                value={Number(
-                                                                    review.rating,
-                                                                )}
-                                                                size={12}
-                                                            />
-                                                        </div>
-                                                        <p
-                                                            className="mt-3 text-sm leading-relaxed text-foreground/80"
-                                                            dangerouslySetInnerHTML={{
-                                                                __html: DOMPurify.sanitize(
-                                                                    review.comment ??
-                                                                        '',
-                                                                ),
-                                                            }}
+                                                <Carousel<ReviewsProps>
+                                                    items={reviews.data}
+                                                    getKey={(review) =>
+                                                        review.id
+                                                    }
+                                                    ariaLabel={
+                                                        language === 'id'
+                                                            ? 'Ulasan pembaca'
+                                                            : 'Reader reviews'
+                                                    }
+                                                    spaceBetween={16}
+                                                    breakpoints={{
+                                                        0: {
+                                                            slidesPerView: 1,
+                                                        },
+                                                        1024: {
+                                                            slidesPerView: 1.5,
+                                                        },
+                                                        1280: {
+                                                            slidesPerView: 2,
+                                                        },
+                                                    }}
+                                                    renderItem={(review) => (
+                                                        <ReviewCard
+                                                            review={review}
                                                         />
-                                                    </div>
-                                                ))
+                                                    )}
+                                                />
                                             ) : (
                                                 <div className="hairline flex h-full items-center justify-center rounded-xl2 border border-dashed bg-card/50 p-8 text-center text-sm text-muted-foreground dark:bg-night-2/50">
                                                     {language === 'id'
@@ -668,7 +761,7 @@ function BookShow() {
                 </div>
 
                 {/* Recommended Books */}
-                <div className="mx-auto mt-16 max-w-7xl px-6 lg:px-10">
+                <div className="mx-auto mt-16 max-w-[100rem] px-6 lg:px-10">
                     <SectionRecomended
                         headerSection={t.recommended}
                         recomendedBooks={recomendedBooks}

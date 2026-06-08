@@ -29,7 +29,7 @@ export default function PaymentFailed() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50 py-12">
+        <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50 py-12 dark:from-red-950/20 dark:via-background dark:to-background">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="mx-auto max-w-2xl">
                     <motion.div
@@ -67,9 +67,9 @@ export default function PaymentFailed() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.4 }}
                         >
-                            <Card className="mb-6 border-2 border-red-100 p-6 shadow-xl">
+                            <Card className="mb-6 border-2 border-red-100 p-6 shadow-xl dark:border-red-900/40">
                                 <div className="mb-6 flex items-center gap-2">
-                                    <AlertTriangle className="h-5 w-5 text-red-600" />
+                                    <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
                                     <h2 className="font-display text-xl font-bold text-foreground">
                                         Payment Details
                                     </h2>
@@ -115,21 +115,21 @@ export default function PaymentFailed() {
                                     </div>
                                 </div>
 
-                                <div className="rounded-xl border-2 border-red-200 bg-gradient-to-br from-red-50 to-orange-50 p-6">
+                                <div className="rounded-xl border-2 border-red-200 bg-gradient-to-br from-red-50 to-orange-50 p-6 dark:border-red-900/40 dark:from-red-950/30 dark:to-orange-950/20">
                                     <div className="flex items-center justify-between">
                                         <span className="text-lg font-medium text-foreground">
                                             Amount Due:
                                         </span>
-                                        <span className="text-3xl font-bold text-red-600">
+                                        <span className="text-3xl font-bold text-red-600 dark:text-red-400">
                                             {moneyFormatter(fine.amount)}
                                         </span>
                                     </div>
                                 </div>
                             </Card>
 
-                            <Card className="mb-6 border-yellow-200 bg-yellow-50 p-6">
+                            <Card className="mb-6 border-yellow-200 bg-yellow-50 p-6 dark:border-yellow-900/40 dark:bg-yellow-950/20">
                                 <div className="flex gap-3">
-                                    <AlertTriangle className="mt-1 h-6 w-6 flex-shrink-0 text-yellow-600" />
+                                    <AlertTriangle className="mt-1 h-6 w-6 flex-shrink-0 text-yellow-600 dark:text-yellow-400" />
                                     <div>
                                         <h3 className="mb-2 font-semibold text-foreground">
                                             Why did this happen?
@@ -171,8 +171,8 @@ export default function PaymentFailed() {
                                 </Link>
                             </div>
 
-                            <div className="mt-6 rounded-lg border border-cobalt-lt bg-cobalt-50 p-4">
-                                <p className="text-center text-sm text-cobalt-dk">
+                            <div className="mt-6 rounded-lg border border-cobalt-lt bg-cobalt-50 p-4 dark:border-cobalt-dk dark:bg-cobalt-dk/15">
+                                <p className="text-center text-sm text-cobalt-dk dark:text-cobalt-lt">
                                     Need help? Contact our support team at
                                     support@library.com
                                 </p>

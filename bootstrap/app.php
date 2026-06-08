@@ -18,6 +18,7 @@ use Spatie\Permission\Exceptions\UnauthorizedException as SpatieUnauthorizedExce
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -63,5 +64,24 @@ return Application::configure(basePath: dirname(__DIR__))
                 'message' => $e->getMessage(),
                 'context' => $e->context(),
             ], $e->status());
+        });
+
+        // Halaman error kustom (Inertia) untuk respons HTML pada status umum.
+        // Tidak aktif saat debug menyala (agar developer tetap melihat detail
+        // error) maupun untuk permintaan yang mengharapkan JSON/API.
+        $exceptions->respond(function (Response $response, Throwable $e, Request $request) {
+            $status = $response->getStatusCode();
+
+            if (
+                ! app()->hasDebugModeEnabled()
+                && ! $request->expectsJson()
+                && in_array($status, [400, 401, 403, 404, 419, 429, 500, 503], true)
+            ) {
+                return Inertia::render('Error', ['status' => $status])
+                    ->toResponse($request)
+                    ->setStatusCode($status);
+            }
+
+            return $response;
         });
     })->create();

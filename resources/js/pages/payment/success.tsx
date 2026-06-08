@@ -25,11 +25,12 @@ export default function PaymentSuccess() {
     const { fine } = usePage<{ fine: FineProp | null }>().props;
 
     const handleDownloadReceipt = () => {
-        alert('Receipt downloaded successfully!');
+        if (!fine) return;
+        window.location.href = route('payment.receipt', { fine: fine.id });
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-cobalt-50 py-12">
+        <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-cobalt-50 py-12 dark:from-green-950/20 dark:via-background dark:to-background">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="mx-auto max-w-2xl">
                     <motion.div
@@ -67,7 +68,7 @@ export default function PaymentSuccess() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.4 }}
                         >
-                            <Card className="mb-6 border-2 border-green-100 p-6 shadow-xl">
+                            <Card className="mb-6 border-2 border-green-100 p-6 shadow-xl dark:border-green-900/40">
                                 <div className="mb-6 flex items-center gap-2">
                                     <Receipt className="h-5 w-5 text-primary" />
                                     <h2 className="font-display text-xl font-bold text-foreground">
@@ -128,7 +129,7 @@ export default function PaymentSuccess() {
                                     </div>
                                 </div>
 
-                                <div className="rounded-xl border-2 border-green-200 bg-gradient-to-br from-green-50 to-cobalt-50 p-6">
+                                <div className="rounded-xl border-2 border-green-200 bg-gradient-to-br from-green-50 to-cobalt-50 p-6 dark:border-green-900/40 dark:from-green-950/30 dark:to-green-900/20">
                                     <div className="flex items-center justify-between">
                                         <span className="text-lg font-medium text-foreground">
                                             Amount Paid:
@@ -162,8 +163,8 @@ export default function PaymentSuccess() {
                                 </Button>
                             </div>
 
-                            <div className="mt-6 rounded-lg border border-green-200 bg-green-50 p-4">
-                                <p className="text-center text-sm text-green-800">
+                            <div className="mt-6 rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-900/40 dark:bg-green-950/30">
+                                <p className="text-center text-sm text-green-800 dark:text-green-300">
                                     A confirmation email has been sent to your
                                     registered email address.
                                 </p>

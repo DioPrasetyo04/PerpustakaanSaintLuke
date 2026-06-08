@@ -16,6 +16,7 @@ class BookRepositories implements BookInterfaceRepositories
         return Book::query()->select([
             'id',
             'publisher_id',
+            'added_by',
             'language_id',
             'book_code',
             'title',
@@ -28,7 +29,16 @@ class BookRepositories implements BookInterfaceRepositories
             'cover',
             'is_published'
         ])
-            ->with(['publisher:id,name,logo,slug', 'categories:id,name,icon,slug', 'authors:id,name,avatar', 'language:id,language,photo', 'stock:id,book_id,total,available,loan,damaged,lost', 'types:id,type'])
+            ->with([
+                'publisher:id,name,logo,slug',
+                'categories:id,name,icon,slug',
+                'authors:id,name,avatar',
+                'language:id,language,photo',
+                'stock:id,book_id,total,available,loan,damaged,lost',
+                'types:id,type',
+                'addedBy:id,name,username,avatar',
+                'addedBy.socialmedia:id,socialable_id,socialable_type,platform,url,username',
+            ])
             ->withCount('stock')
             ->withAvg('reviews as avg_rating', 'rating')
             ->where('slug', $slug)
@@ -83,6 +93,7 @@ class BookRepositories implements BookInterfaceRepositories
             ->whereHas('book', fn($q) => $q->where('slug', $slug))
             ->with([
                 'loanDetail.user:users.id,name,email,username,avatar',
+                'loanDetail.user.socialmedia:id,socialable_id,socialable_type,platform,url,username',
             ])
             ->when(
                 ($filters['field'] ?? null) && ($filters['direction'] ?? null),

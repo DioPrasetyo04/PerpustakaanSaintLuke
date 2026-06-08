@@ -4,6 +4,7 @@ import type { LanguageProps } from './LanguageProps';
 import { LoanProps } from './LoanProps';
 import type { PublisherProps } from './PublisherProps';
 import type { StockProps } from './StockProps';
+import type { UserProps } from './UserProps';
 
 export type BookStatus =
     | 'Tersedia'
@@ -40,4 +41,5 @@ export type BookProps = {
     publication_year?: number;
     stock?: StockProps;
     loan?: LoanProps[];
+    addedBy?: UserProps;
 };

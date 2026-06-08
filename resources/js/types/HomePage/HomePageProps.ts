@@ -61,9 +61,9 @@ export type HomePageProps = {
         categories: Paginated<CategoryProps>;
         informations: Paginated<InformationProps>;
         live_activities: LiveActivity[];
-        publishers: FeaturedPublisher[];
-        testimonials: Testimonial[];
-        events: EventItem[];
+        publishers: Paginated<FeaturedPublisher>;
+        testimonials: Paginated<Testimonial>;
+        events: Paginated<EventItem>;
         count_of_all_books: number;
         count_of_all_visitors: number;
         count_of_all_users: number;
@@ -89,6 +89,18 @@ export type HomePageProps = {
             page: number;
             load: number;
             search: string;
+        };
+        publishers: {
+            page: number;
+            load: number;
+        };
+        testimonials: {
+            page: number;
+            load: number;
+        };
+        events: {
+            page: number;
+            load: number;
         };
     };
 };

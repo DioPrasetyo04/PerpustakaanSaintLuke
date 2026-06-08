@@ -166,6 +166,75 @@ trait BuildsLaporan
     }
 
     /**
+     * Render & stream sebuah laporan PDF secara hemat memori.
+     *
+     * Tabel laporan dapat berisi ribuan baris dan dompdf menahan seluruh
+     * dokumen (frame tree) di memori. Helper ini menyatukan pola aman untuk
+     * SEMUA laporan:
+     *   1. Menaikkan memory_limit bila lebih kecil dari target (tidak menurunkan
+     *      bila server sudah lebih longgar / unlimited).
+     *   2. Mem-build output PDF lalu MELEPAS objek $pdf sebelum streaming,
+     *      sehingga frame tree dompdf (konsumen memori terbesar) dibebaskan
+     *      lebih awal — mencegah memory leak saat respons dikirim.
+     *
+     * @param  string  $view         Nama view blade PDF (mis. 'pdf.laporan-buku').
+     * @param  array<string,mixed>  $data  Data untuk view.
+     * @param  string  $filename     Nama file unduhan.
+     * @param  string  $orientation  'portrait' | 'landscape'.
+     */
+    protected function streamLaporanPdf(string $view, array $data, string $filename, string $orientation = 'portrait')
+    {
+        $this->raiseMemoryForPdf();
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView($view, $data)
+            ->setPaper('a4', $orientation);
+
+        // Build penuh sekali, lalu lepas referensi berat sebelum streaming.
+        $output = $pdf->output();
+        unset($pdf, $data);
+        gc_collect_cycles();
+
+        return response()->streamDownload(function () use ($output) {
+            echo $output;
+        }, $filename, [
+            'Content-Type' => 'application/pdf',
+        ]);
+    }
+
+    /**
+     * Naikkan memory_limit ke $target hanya bila saat ini lebih kecil.
+     * Tidak menyentuh konfigurasi unlimited (-1) atau yang sudah lebih besar.
+     */
+    protected function raiseMemoryForPdf(string $target = '1024M'): void
+    {
+        $current = $this->memoryLimitToBytes((string) ini_get('memory_limit'));
+        $targetBytes = $this->memoryLimitToBytes($target);
+
+        if ($current !== -1 && $current < $targetBytes) {
+            @ini_set('memory_limit', $target);
+        }
+    }
+
+    /** Konversi nilai memory_limit (mis. "512M", "1G", "-1") ke byte. */
+    private function memoryLimitToBytes(string $value): int
+    {
+        $value = trim($value);
+        if ($value === '' || $value === '-1') {
+            return -1;
+        }
+
+        $unit = strtolower($value[strlen($value) - 1]);
+        $num  = (int) $value;
+
+        return match ($unit) {
+            'g' => $num * 1024 * 1024 * 1024,
+            'm' => $num * 1024 * 1024,
+            'k' => $num * 1024,
+            default => (int) $value,
+        };
+    }
+
+    /**
      * Build SVG bar chart from buckets and return data URI.
      */
     public function buildBarChart(array $buckets, string $color = '#3b82f6'): string

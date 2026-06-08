@@ -1,4 +1,5 @@
-import { Dispatch, SetStateAction } from 'react';
+import { ComponentType, Dispatch, SetStateAction } from 'react';
+import { Lang } from './language';
 
 export type SubNavItem = {
     id: string;
@@ -85,6 +86,8 @@ export type NavbarLanguageProps = {
 
 export type LanguageItem = {
     id: number;
-    language: string;
+    language: Lang;
     label: string;
+    code: string;
+    flag: ComponentType<{ className?: string }>;
 };

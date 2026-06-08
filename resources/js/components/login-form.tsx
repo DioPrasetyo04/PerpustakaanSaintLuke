@@ -3,6 +3,7 @@ import type { ChangeEvent, FormEvent } from 'react';
 import { Card, CardContent } from './ui/card';
 import { Field, FieldDescription, FieldGroup, FieldLabel } from './ui/field';
 import { Input } from './ui/input';
+import { PasswordInput } from './component/form/PasswordInput';
 import { Button } from './ui/button';
 import { Link } from '@inertiajs/react';
 import Checkbox from './Checkbox';
@@ -66,13 +67,13 @@ export const LoginForm = ({
                     >
                         <FieldGroup>
                             <div className="flex flex-col items-center gap-2 text-center">
-                                <div className="flex flex-row items-center gap-2 p-3 text-center">
+                                <div className="flex flex-row items-center justify-center gap-2 p-3 text-center">
                                     <ImageWithFallback
                                         src="/assets/logos/Saint-Luke.png"
                                         alt="login-page-image"
-                                        className="h-12 w-12 items-center rounded-full object-cover object-center"
+                                        className="h-12 w-12 shrink-0 items-center rounded-full object-cover object-center"
                                     />
-                                    <h1 className="text-2xl font-bold">
+                                    <h1 className="whitespace-nowrap text-xl font-bold">
                                         {text.logoHeader}
                                     </h1>
                                 </div>
@@ -97,9 +98,10 @@ export const LoginForm = ({
                                     required
                                 />
                                 {error.email && (
-                                    <InputError className="text-lg font-semibold text-red-500">
-                                        {error.email}
-                                    </InputError>
+                                    <InputError
+                                        message={error.email}
+                                        className="text-sm font-medium text-red-500"
+                                    />
                                 )}
                             </Field>
                             <Field>
@@ -116,19 +118,19 @@ export const LoginForm = ({
                                         </Link>
                                     )}
                                 </div>
-                                <Input
+                                <PasswordInput
                                     id="password"
                                     name="password"
-                                    type="password"
                                     value={data.password}
                                     onChange={onHandleChange}
                                     placeholder={text.placeholderPassword}
                                     required
                                 />
                                 {error.password && (
-                                    <InputError className="text-lg font-semibold text-red-500">
-                                        {error.password}
-                                    </InputError>
+                                    <InputError
+                                        message={error.password}
+                                        className="text-sm font-medium text-red-500"
+                                    />
                                 )}
                             </Field>
                             <div className="grid gap-2">

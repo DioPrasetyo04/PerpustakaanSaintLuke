@@ -2,12 +2,12 @@
 
 namespace App\Interface;
 
-use Illuminate\Support\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 interface TestimonialInterfaceRepositories
 {
     /**
-     * Ambil seluruh testimoni aktif untuk ditampilkan di halaman publik.
+     * Ambil testimoni aktif untuk halaman publik, terpaginasi.
      */
-    public function getActiveTestimonials(): Collection;
+    public function getActiveTestimonials(int $perPage, int $page): LengthAwarePaginator;
 }

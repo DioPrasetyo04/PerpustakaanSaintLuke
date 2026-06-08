@@ -200,6 +200,33 @@ if (!function_exists('paginateResource')) {
     }
 }
 
+if (!function_exists('paginateMapped')) {
+    /**
+     * Bungkus LengthAwarePaginator ke struktur { data, meta, links } yang sama
+     * dengan paginateResource(), tetapi item dipetakan lewat closure (untuk data
+     * yang tidak punya kelas Resource khusus — mis. testimoni/acara/penerbit).
+     */
+    function paginateMapped($paginator, callable $map)
+    {
+        return [
+            'data' => collect($paginator->items())->map($map)->values()->toArray(),
+            'meta' => [
+                'current_page' => $paginator->currentPage(),
+                'from' => $paginator->firstItem(),
+                'last_page' => $paginator->lastPage(),
+                'per_page' => $paginator->perPage(),
+                'to' => $paginator->lastItem(),
+                'total' => $paginator->total(),
+                'has_pages' => $paginator->hasPages(),
+            ],
+            'links' => [
+                'next' => $paginator->nextPageUrl(),
+                'prev' => $paginator->previousPageUrl(),
+            ]
+        ];
+    }
+}
+
 if (!function_exists('formatLast12Months')) {
     function formatLast12Months(array $data, string $key): array
     {

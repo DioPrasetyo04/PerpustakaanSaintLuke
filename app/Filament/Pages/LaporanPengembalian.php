@@ -171,15 +171,11 @@ class LaporanPengembalian extends Page implements HasForms
 
         $chartImage = $this->buildBarChart($report['buckets'], '#10b981');
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.laporan-pengembalian', [
-            'report'     => $report,
-            'chartImage' => $chartImage,
-        ])->setPaper('a4', 'portrait');
-
         $filename = 'Laporan-Pengembalian-' . $report['mode'] . '-' . ($report['state']['year'] ?? now()->year) . '.pdf';
 
-        return response()->streamDownload(function () use ($pdf) {
-            echo $pdf->output();
-        }, $filename);
+        return $this->streamLaporanPdf('pdf.laporan-pengembalian', [
+            'report'     => $report,
+            'chartImage' => $chartImage,
+        ], $filename, 'portrait');
     }
 }

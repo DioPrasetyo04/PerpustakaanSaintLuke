@@ -5,8 +5,8 @@ import { ChevronDown, Moon, Sun, LayoutDashboard, Settings, History, LogOut } fr
 import type { NavbarMobileProps } from '@/types/navbar';
 import { cn } from '@/lib/utils';
 import { ButtonVariants } from '@/components/ui/button3D';
-import { useLanguage } from '@/hooks/useLanguage';
 import { useAppearance } from '@/hooks/use-appearance';
+import DropdownMenuLanguage from './DropdownMenuLanguage';
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
     dashboard: LayoutDashboard,
@@ -26,7 +26,6 @@ const NavbarMobile = ({
     activeSection,
     language,
 }: NavbarMobileProps) => {
-    const { setLanguage } = useLanguage();
     const { resolvedAppearance, updateAppearance } = useAppearance();
     const isDark = resolvedAppearance === 'dark';
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -197,22 +196,7 @@ const NavbarMobile = ({
                                         <Moon className="h-4 w-4" />
                                     )}
                                 </button>
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        setLanguage(
-                                            language === 'id' ? 'en' : 'id',
-                                        )
-                                    }
-                                    className="flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border px-3 text-sm font-bold text-foreground/70 transition-colors hover:border-brand/40 hover:text-brand"
-                                >
-                                    <span className="text-base leading-none">
-                                        {language === 'id' ? '🇮🇩' : '🇬🇧'}
-                                    </span>
-                                    <span>
-                                        {language === 'id' ? 'ID' : 'EN'}
-                                    </span>
-                                </button>
+                                <DropdownMenuLanguage variant="mobile" />
                             </div>
                         </div>
 

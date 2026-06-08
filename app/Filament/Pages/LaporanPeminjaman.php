@@ -175,15 +175,11 @@ class LaporanPeminjaman extends Page implements HasForms
 
         $chartImage = $this->buildBarChart($report['buckets'], '#3b82f6');
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.laporan-peminjaman', [
-            'report'     => $report,
-            'chartImage' => $chartImage,
-        ])->setPaper('a4', 'portrait');
-
         $filename = 'Laporan-Peminjaman-' . $report['mode'] . '-' . ($report['state']['year'] ?? now()->year) . '.pdf';
 
-        return response()->streamDownload(function () use ($pdf) {
-            echo $pdf->output();
-        }, $filename);
+        return $this->streamLaporanPdf('pdf.laporan-peminjaman', [
+            'report'     => $report,
+            'chartImage' => $chartImage,
+        ], $filename, 'portrait');
     }
 }

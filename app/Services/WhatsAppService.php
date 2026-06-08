@@ -39,6 +39,17 @@ class WhatsAppService
                 'body' => $response->body(),
             ]);
 
+            // Fonnte selalu membalas HTTP 200; keberhasilan sebenarnya ada di
+            // field `status` pada body. `false` mis. saat device WA terputus
+            // ("request invalid on disconnected device").
+            if ($response->json('status') === false) {
+                Log::warning('[Fonte] Pengiriman ditolak Fonnte', [
+                    'phone' => $phone,
+                    'reason' => $response->json('reason'),
+                ]);
+                return null;
+            }
+
             return $response;
         } catch (\Throwable $e) {
             Log::error('[Fonte] Exception saat kirim WA (text)', [
