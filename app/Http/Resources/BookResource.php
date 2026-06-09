@@ -67,6 +67,9 @@ class BookResource extends JsonResource
             'synopsis' => $this->when(isset($this->synopsis), $this->synopsis),
             'number_of_pages' => $this->when(isset($this->number_of_pages), $this->number_of_pages),
 
+            'location_book' => $this->when(isset($this->location_book), $this->location_book),
+            'classification_number' => $this->when(isset($this->classification_number), $this->classification_number),
+
             'cover' => $this->when(
                 isset($this->cover),
                 $this->cover ? Storage::url($this->cover) : null

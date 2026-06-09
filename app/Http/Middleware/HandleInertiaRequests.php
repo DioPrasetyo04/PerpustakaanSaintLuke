@@ -22,6 +22,11 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'auth' => [
                 'user' => $request->user(),
+                // Nama peran user (Spatie) untuk kebutuhan gating di frontend,
+                // mis. staf (admin/super_admin) tidak boleh meminjam/baca buku.
+                'roles' => $request->user()
+                    ? $request->user()->getRoleNames()->values()->all()
+                    : [],
             ],
             'announcement' => $this->getTodayAnnouncement(),
             'flash' => [

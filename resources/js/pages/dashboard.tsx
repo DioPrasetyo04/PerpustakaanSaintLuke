@@ -27,7 +27,10 @@ import {
     ResponsiveContainer,
 } from 'recharts';
 import { useState } from 'react';
-import type { DashboardPageProps, LoanBook } from '@/types/DashboardPage/DashboardPageProps';
+import type {
+    DashboardPageProps,
+    LoanBook,
+} from '@/types/DashboardPage/DashboardPageProps';
 import Pagination from '@/components/component/Home/Pagination/Pagination';
 
 export default function Dashboard() {
@@ -83,11 +86,7 @@ export default function Dashboard() {
 
     const pagination = activeTab === 'borrowed' ? loans : returnBooks;
 
-    const formatTimeLeft = (
-        days: number,
-        hours: number,
-        minutes: number,
-    ) => {
+    const formatTimeLeft = (days: number, hours: number, minutes: number) => {
         const parts: string[] = [];
         if (days > 0) parts.push(`${days} ${days === 1 ? 'day' : 'days'}`);
         if (hours > 0) parts.push(`${hours} ${hours === 1 ? 'hour' : 'hours'}`);
@@ -122,7 +121,7 @@ export default function Dashboard() {
                     animate={{ opacity: 1, y: 0 }}
                     className="mb-4 sm:mb-6 lg:mb-8"
                 >
-                    <div className="tracking-editorial mb-2 font-mono text-[10px] uppercase text-cobalt dark:text-cobalt-lt">
+                    <div className="mb-2 font-mono text-[10px] tracking-editorial text-cobalt uppercase dark:text-cobalt-lt">
                         Dashboard Anggota
                     </div>
                     <h1 className="mb-1 font-display text-xl font-bold text-foreground sm:mb-2 sm:text-2xl lg:text-4xl">
@@ -169,10 +168,7 @@ export default function Dashboard() {
                                     className={`h-3.5 w-3.5 sm:h-4 sm:w-4 lg:h-6 lg:w-6 ${stats.fineCount > 0 ? 'text-red-600' : 'text-muted-foreground'}`}
                                 />
                             ),
-                            bg:
-                                stats.fineCount > 0
-                                    ? 'bg-red-100'
-                                    : 'bg-muted',
+                            bg: stats.fineCount > 0 ? 'bg-red-100' : 'bg-muted',
                             label: 'Total Fines',
                             value: `Rp ${stats.totalFines.toLocaleString('id-ID')}`,
                             color:
@@ -555,7 +551,7 @@ export default function Dashboard() {
                                                     </div>
                                                     <div className="flex flex-col gap-1 sm:gap-1.5">
                                                         <a
-                                                            href={`/dashboard/return/${ret.return_book_code}`}
+                                                            href={`/book/detail/${ret.book.slug}`}
                                                         >
                                                             <Button
                                                                 size="sm"

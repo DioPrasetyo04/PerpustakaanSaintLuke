@@ -4,7 +4,7 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { assetAccessDenied } from '@/data/data';
 import type { FlashProps, PageProps } from '@/types';
 
-type DeniedType = 'expired' | 'unauthorized';
+type DeniedType = 'expired' | 'unauthorized' | 'staff';
 
 type Props = {
     initialFlash: FlashProps | null;

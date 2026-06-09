@@ -28,6 +28,8 @@ export type BookProps = {
     number_of_pages: number;
     isbn: string;
     book_code: string;
+    location_book?: string;
+    classification_number?: string;
     status: BookStatus;
     is_published: boolean;
     publisher: PublisherProps;

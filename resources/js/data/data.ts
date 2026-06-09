@@ -536,6 +536,11 @@ export const assetAccessDenied = {
             description:
                 'Anda tidak memiliki akses untuk membaca buku ini. Pinjam buku terlebih dahulu.',
         },
+        staff: {
+            title: 'Akun Staf Tidak Diizinkan',
+            description:
+                'Akun staf (admin/super admin) tidak dapat membaca atau meminjam buku. Silakan gunakan akun anggota.',
+        },
     },
     en: {
         expired: {
@@ -547,6 +552,11 @@ export const assetAccessDenied = {
             title: 'Access Not Allowed',
             description:
                 'You do not have permission to access this book. Please borrow it first.',
+        },
+        staff: {
+            title: 'Staff Account Not Allowed',
+            description:
+                'Staff accounts (admin/super admin) cannot read or borrow books. Please use a member account.',
         },
     },
 };
