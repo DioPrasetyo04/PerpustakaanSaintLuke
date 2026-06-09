@@ -105,7 +105,7 @@ class BookForm
                                                 '<span style="display:inline-flex;align-items:center;gap:8px;line-height:1.25;">'
                                                     . $avatar
                                                     . '<span style="display:inline-flex;flex-direction:column;min-width:0;">'
-                                                    . '<span style="font-weight:600;color:#111827;font-size:13px;">' . e($record->name) . '</span>'
+                                                    . '<span style="font-weight:600;color:currentColor;font-size:13px;">' . e($record->name) . '</span>'
                                                     . '<span style="font-size:11px;color:#6b7280;">' . e($record->email) . '</span>'
                                                     . '</span>'
                                                     . '</span>'
@@ -127,7 +127,7 @@ class BookForm
                                                 '<span style="display:inline-flex;align-items:center;gap:8px;line-height:1.25;">'
                                                     . $avatar
                                                     . '<span style="display:inline-flex;flex-direction:column;min-width:0;">'
-                                                    . '<span style="font-weight:600;color:#111827;font-size:13px;">' . e($record->name) . '</span>'
+                                                    . '<span style="font-weight:600;color:currentColor;font-size:13px;">' . e($record->name) . '</span>'
                                                     . '<span style="font-size:11px;color:#6b7280;">' . e($record->email) . '</span>'
                                                     . '</span>'
                                                     . '</span>'
@@ -168,7 +168,7 @@ class BookForm
                                                 '<span style="display:inline-flex;align-items:center;gap:8px;line-height:1.25;">'
                                                     . $avatar
                                                     . '<span style="display:inline-flex;flex-direction:column;min-width:0;">'
-                                                    . '<span style="font-weight:600;color:#111827;display:inline-flex;align-items:center;">'
+                                                    . '<span style="font-weight:600;color:currentColor;display:inline-flex;align-items:center;">'
                                                     . e($record->name) . $verifiedBadge
                                                     . '</span>'
                                                     . ($username ? '<span style="font-size:11px;color:#6b7280;">' . e($username) . '</span>' : '')
@@ -307,7 +307,7 @@ class BookForm
 
                                             return '<span style="display:inline-flex;align-items:center;gap:8px;">'
                                                 . $logo
-                                                . '<span style="font-weight:500;color:#111827;text-transform:capitalize;">' . e($record->name) . '</span>'
+                                                . '<span style="font-weight:500;color:currentColor;text-transform:capitalize;">' . e($record->name) . '</span>'
                                                 . '</span>';
                                         })
                                         ->allowHtml()
@@ -355,7 +355,6 @@ class BookForm
                                                             ->defaultCountry('id')
                                                             ->separateDialCode()
                                                             ->showFlags()
-                                                            ->required()
                                                             ->columnSpan(1),
 
 
@@ -394,7 +393,6 @@ class BookForm
                                                             ->allowHtml()
                                                             ->getOptionLabelUsing(fn($value) => SocialMedia::from($value)->html())
                                                             ->searchable()
-                                                            ->required()
                                                             ->native(false)
                                                             ->columnSpan(1),
 
@@ -526,7 +524,7 @@ class BookForm
                                                 return new HtmlString(
                                                     '<span style="display:inline-flex;align-items:center;gap:8px;line-height:1.25;">'
                                                         . $icon
-                                                        . '<span style="font-weight:500;color:#111827;text-transform:capitalize;">' . e($record->name) . '</span>'
+                                                        . '<span style="font-weight:500;color:currentColor;text-transform:capitalize;">' . e($record->name) . '</span>'
                                                         . '</span>'
                                                 );
                                             })

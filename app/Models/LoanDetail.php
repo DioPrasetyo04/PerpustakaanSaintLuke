@@ -34,6 +34,19 @@ class LoanDetail extends Model
         'loan_type' => LoanType::class,
     ];
 
+    /**
+     * Kecualikan detail peminjaman bertipe digital. Data tetap tersimpan di
+     * database, hanya tidak ikut ditampilkan/diproses (laporan & tabel).
+     * Nilai null diperlakukan sebagai fisik.
+     */
+    public function scopeExcludeDigital($query)
+    {
+        return $query->where(function ($q) {
+            $q->where('loan_type', '!=', LoanType::DIGITAL->value)
+                ->orWhereNull('loan_type');
+        });
+    }
+
     public function loan(): BelongsTo
     {
         return $this->belongsTo(Loan::class, 'loan_id');

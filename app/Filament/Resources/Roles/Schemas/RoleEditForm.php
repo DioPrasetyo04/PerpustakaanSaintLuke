@@ -102,7 +102,7 @@ class RoleEditForm
         return '<span style="display:inline-flex;align-items:center;gap:8px;line-height:1.25;">'
             . $avatar
             . '<span style="display:inline-flex;flex-direction:column;min-width:0;">'
-                . '<span style="font-weight:600;color:#111827;">' . e($user->name) . '</span>'
+                . '<span style="font-weight:600;color:currentColor;">' . e($user->name) . '</span>'
                 . ($secondary ? '<span style="font-size:11px;color:#6b7280;">' . e($secondary) . '</span>' : '')
             . '</span>'
         . '</span>';
@@ -130,7 +130,7 @@ class RoleEditForm
         return '<span style="display:inline-flex;align-items:center;gap:8px;line-height:1.25;">'
             . $avatar
             . '<span style="display:inline-flex;flex-direction:column;min-width:0;">'
-                . '<span style="font-weight:600;color:#111827;display:inline-flex;align-items:center;">'
+                . '<span style="font-weight:600;color:currentColor;display:inline-flex;align-items:center;">'
                     . e($author->name) . $verifiedBadge
                 . '</span>'
                 . ($username ? '<span style="font-size:11px;color:#6b7280;">' . e($username) . '</span>' : '')

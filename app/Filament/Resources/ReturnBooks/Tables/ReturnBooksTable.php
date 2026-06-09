@@ -25,12 +25,16 @@ class ReturnBooksTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn($query) => $query->with([
-                'user',
-                'loanDetails.book',
-                'loanDetails.returnBook.returnBookCheck',
-                'loanDetails.returnBook.fine',
-            ]))
+            // Hanya tampilkan peminjaman yang punya buku non-digital. Data digital
+            // tetap tersimpan di database, hanya tidak ikut ditampilkan.
+            ->modifyQueryUsing(fn($query) => $query
+                ->whereHas('physicalLoanDetails')
+                ->with([
+                    'user',
+                    'physicalLoanDetails.book',
+                    'physicalLoanDetails.returnBook.returnBookCheck',
+                    'physicalLoanDetails.returnBook.fine',
+                ]))
             ->columns([
                 TextColumn::make('loan_code')
                     ->label('Kode Pinjam')
@@ -49,7 +53,7 @@ class ReturnBooksTable
                     ->searchable()
                     ->sortable(),
 
-                ImageColumn::make('loanDetails.book.cover')
+                ImageColumn::make('physicalLoanDetails.book.cover')
                     ->label('Cover Buku')
                     ->disk('public')
                     ->imageSize(50)
@@ -58,7 +62,7 @@ class ReturnBooksTable
                     ->overlap(0)
                     ->ring(2),
 
-                TextColumn::make('loanDetails.book.title')
+                TextColumn::make('physicalLoanDetails.book.title')
                     ->label('Buku Dikembalikan')
                     ->badge()
                     ->color('info')
@@ -71,7 +75,7 @@ class ReturnBooksTable
                     ->badge()
                     ->color('success')
                     ->alignCenter()
-                    ->state(fn($record) => $record->loanDetails->filter(fn($d) => $d->returnBook)->count()),
+                    ->state(fn($record) => $record->physicalLoanDetails->filter(fn($d) => $d->returnBook)->count()),
 
                 TextColumn::make('return_dates')
                     ->label('Tanggal Pengembalian')
@@ -80,7 +84,7 @@ class ReturnBooksTable
                     ->listWithLineBreaks()
                     ->limitList(3)
                     ->expandableLimitedList()
-                    ->state(fn($record) => $record->loanDetails
+                    ->state(fn($record) => $record->physicalLoanDetails
                         ->filter(fn($d) => $d->returnBook)
                         ->map(fn($d) => $d->returnBook->return_date
                             ? Carbon::parse($d->returnBook->return_date)->format('d M Y')
@@ -94,7 +98,7 @@ class ReturnBooksTable
                     ->listWithLineBreaks()
                     ->limitList(3)
                     ->expandableLimitedList()
-                    ->state(fn($record) => $record->loanDetails
+                    ->state(fn($record) => $record->physicalLoanDetails
                         ->filter(fn($d) => $d->returnBook?->returnBookCheck)
                         ->map(fn($d) => $d->returnBook->returnBookCheck->condition?->value ?? '-')
                         ->values()
@@ -110,6 +114,62 @@ class ReturnBooksTable
                         BookCondition::DAMAGED => 'heroicon-s-exclamation-triangle',
                         BookCondition::LOST => 'heroicon-s-x-circle',
                         default => 'heroicon-s-question-mark-circle',
+                    }),
+
+                TextColumn::make('fine_values')
+                    ->label('Nominal Denda')
+                    ->badge()
+                    ->listWithLineBreaks()
+                    ->limitList(3)
+                    ->expandableLimitedList()
+                    ->state(fn($record) => $record->physicalLoanDetails
+                        ->filter(fn($d) => $d->returnBook)
+                        ->map(function ($d) {
+                            $fine = $d->returnBook->fine;
+                            $total = $fine ? (float) $fine->total_fee : 0.0;
+
+                            return $total > 0
+                                ? 'Rp ' . number_format($total, 0, ',', '.')
+                                : 'Tidak ada';
+                        })
+                        ->values()
+                        ->all())
+                    ->color(fn($state) => str_starts_with((string) $state, 'Rp') ? 'danger' : 'gray')
+                    ->icon(fn($state) => str_starts_with((string) $state, 'Rp')
+                        ? 'heroicon-s-banknotes'
+                        : 'heroicon-s-minus-circle'),
+
+                TextColumn::make('fine_statuses')
+                    ->label('Status Denda')
+                    ->badge()
+                    ->listWithLineBreaks()
+                    ->limitList(3)
+                    ->expandableLimitedList()
+                    ->state(fn($record) => $record->physicalLoanDetails
+                        ->filter(fn($d) => $d->returnBook)
+                        ->map(function ($d) {
+                            $fine = $d->returnBook->fine;
+                            if (! $fine) {
+                                return 'Tidak ada denda';
+                            }
+
+                            return $fine->payment_status instanceof PaymentStatus
+                                ? $fine->payment_status->name
+                                : (string) $fine->payment_status;
+                        })
+                        ->values()
+                        ->all())
+                    ->color(fn($state) => match ((string) $state) {
+                        'SUCCESS' => 'success',
+                        'PENDING' => 'warning',
+                        'FAILED', 'ERROR' => 'danger',
+                        default => 'gray',
+                    })
+                    ->icon(fn($state) => match ((string) $state) {
+                        'SUCCESS' => 'heroicon-s-check-circle',
+                        'PENDING' => 'heroicon-s-clock',
+                        'FAILED', 'ERROR' => 'heroicon-s-x-circle',
+                        default => 'heroicon-s-minus-circle',
                     }),
             ])
             ->filters([
@@ -235,21 +295,21 @@ class ReturnBooksTable
             BookCondition::GOOD => DB::table('stocks')
                 ->where('book_id', $bookId)
                 ->update([
-                    'available' => DB::raw('GREATEST(available - 1,0)'),
+                    'available' => DB::raw('CASE WHEN available >= 1 THEN available - 1 ELSE 0 END'),
                     'loan' => DB::raw('loan + 1'),
                 ]),
 
             BookCondition::DAMAGED => DB::table('stocks')
                 ->where('book_id', $bookId)
                 ->update([
-                    'damaged' => DB::raw('GREATEST(damaged - 1,0)'),
+                    'damaged' => DB::raw('CASE WHEN damaged >= 1 THEN damaged - 1 ELSE 0 END'),
                     'loan' => DB::raw('loan + 1'),
                 ]),
 
             BookCondition::LOST => DB::table('stocks')
                 ->where('book_id', $bookId)
                 ->update([
-                    'lost' => DB::raw('GREATEST(lost - 1,0)'),
+                    'lost' => DB::raw('CASE WHEN lost >= 1 THEN lost - 1 ELSE 0 END'),
                     'loan' => DB::raw('loan + 1'),
                 ]),
         };

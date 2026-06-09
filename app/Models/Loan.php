@@ -38,6 +38,19 @@ class Loan extends Model
         return $this->hasMany(LoanDetail::class, 'loan_id');
     }
 
+    /**
+     * Detail peminjaman non-digital saja (untuk tampilan tabel & laporan).
+     * Detail digital tetap ada di database, hanya tidak ditampilkan.
+     */
+    public function physicalLoanDetails(): HasMany
+    {
+        return $this->hasMany(LoanDetail::class, 'loan_id')
+            ->where(function ($q) {
+                $q->where('loan_type', '!=', \App\Enums\LoanType::DIGITAL->value)
+                    ->orWhereNull('loan_type');
+            });
+    }
+
     public function books(): BelongsToMany
     {
         return $this->belongsToMany(Book::class, 'loan_details', 'loan_id', 'book_id');

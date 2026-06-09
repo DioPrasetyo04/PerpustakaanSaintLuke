@@ -204,21 +204,21 @@ class EditReturnBooks extends EditRecord
             BookCondition::GOOD => DB::table('stocks')
                 ->where('book_id', $bookId)
                 ->update([
-                    'available' => DB::raw('GREATEST(available - 1,0)'),
+                    'available' => DB::raw('CASE WHEN available >= 1 THEN available - 1 ELSE 0 END'),
                     'loan' => DB::raw('loan + 1'),
                 ]),
 
             BookCondition::DAMAGED => DB::table('stocks')
                 ->where('book_id', $bookId)
                 ->update([
-                    'damaged' => DB::raw('GREATEST(damaged - 1,0)'),
+                    'damaged' => DB::raw('CASE WHEN damaged >= 1 THEN damaged - 1 ELSE 0 END'),
                     'loan' => DB::raw('loan + 1'),
                 ]),
 
             BookCondition::LOST => DB::table('stocks')
                 ->where('book_id', $bookId)
                 ->update([
-                    'lost' => DB::raw('GREATEST(lost - 1,0)'),
+                    'lost' => DB::raw('CASE WHEN lost >= 1 THEN lost - 1 ELSE 0 END'),
                     'loan' => DB::raw('loan + 1'),
                 ]),
         };

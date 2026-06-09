@@ -61,7 +61,6 @@ class PublishersForm
                                 ->defaultCountry('id')
                                 ->separateDialCode()
                                 ->showFlags()
-                                ->required()
                                 ->columnSpan(1),
 
 
@@ -100,14 +99,12 @@ class PublishersForm
                                 ->allowHtml()
                                 ->getOptionLabelUsing(fn($value) => SocialMedia::from($value)->html())
                                 ->searchable()
-                                ->required()
                                 ->native(false)
                                 ->columnSpan(1),
 
                             TextInput::make('url')
                                 ->label('URL')
                                 ->url()
-                                ->required()
                                 ->columnSpan(1),
 
                             TextInput::make('username')
