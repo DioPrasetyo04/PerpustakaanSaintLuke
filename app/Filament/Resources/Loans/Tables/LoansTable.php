@@ -15,6 +15,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class LoansTable
 {
@@ -42,7 +43,7 @@ class LoansTable
                     ->searchable()
                     ->sortable(),
 
-                ImageColumn::make('loanDetails.book.cover')
+                ImageColumn::make('physicalLoanDetails.book.cover')
                     ->label('Cover Book')
                     ->disk('public')
                     ->imageSize(50)
@@ -51,7 +52,7 @@ class LoansTable
                     ->overlap(0)
                     ->ring(2),
 
-                TextColumn::make('loanDetails.book.title')
+                TextColumn::make('physicalLoanDetails.book.title')
                     ->label('Buku Dipinjam')
                     ->badge()
                     ->color('info')
@@ -59,7 +60,7 @@ class LoansTable
                     ->limitList(3)
                     ->expandableLimitedList(),
 
-                TextColumn::make('loanDetails.status')
+                TextColumn::make('physicalLoanDetails.status')
                     ->label('Status Per Buku')
                     ->badge()
                     ->listWithLineBreaks()
@@ -79,15 +80,15 @@ class LoansTable
                         default => 'heroicon-s-question-mark-circle',
                     }),
 
-                TextColumn::make('loan_details_count')
-                    ->counts('loanDetails')
+                TextColumn::make('physical_loan_details_count')
+                    ->counts('physicalLoanDetails')
                     ->label('Total Buku')
                     ->badge()
                     ->color('gray')
                     ->alignCenter()
                     ->sortable(),
 
-                TextColumn::make('loanDetails.loan_date')
+                TextColumn::make('physicalLoanDetails.loan_date')
                     ->label('Tanggal Pinjam')
                     ->date()
                     ->badge()
@@ -96,7 +97,7 @@ class LoansTable
                     ->limitList(3)
                     ->expandableLimitedList(),
 
-                TextColumn::make('loanDetails.due_date')
+                TextColumn::make('physicalLoanDetails.due_date')
                     ->label('Jatuh Tempo')
                     ->date()
                     ->badge()
@@ -124,6 +125,13 @@ class LoansTable
                     ->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
+            // Sembunyikan peminjaman yang seluruh bukunya digital (data tetap
+            // tersimpan, hanya tidak ditampilkan). Peminjaman tanpa detail
+            // sama sekali tetap tampil.
+            ->modifyQueryUsing(fn(Builder $query) => $query->where(function (Builder $q) {
+                $q->whereHas('physicalLoanDetails')
+                    ->orWhereDoesntHave('loanDetails');
+            }))
             ->filters([
                 //
             ])

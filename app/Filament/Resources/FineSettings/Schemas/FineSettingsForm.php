@@ -61,14 +61,6 @@ class FineSettingsForm
 
                                         if ($value > 100) {
                                             $fail('Persentase denda kerusakan tidak boleh melebihi 100%.');
-                                            return;
-                                        }
-
-                                        if ($get('lost_discount_type') === 'percentage') {
-                                            $total = (float) $value + (float) $get('lost_fee_book');
-                                            if ($total > 100) {
-                                                $fail("Total persentase denda kerusakan dan kehilangan tidak boleh melebihi 100% (saat ini: {$total}%).");
-                                            }
                                         }
                                     },
                                 ]),
@@ -105,14 +97,6 @@ class FineSettingsForm
 
                                         if ($value > 100) {
                                             $fail('Persentase denda kehilangan tidak boleh melebihi 100%.');
-                                            return;
-                                        }
-
-                                        if ($get('damage_discount_type') === 'percentage') {
-                                            $total = (float) $value + (float) $get('damage_fee_book');
-                                            if ($total > 100) {
-                                                $fail("Total persentase denda kerusakan dan kehilangan tidak boleh melebihi 100% (saat ini: {$total}%).");
-                                            }
                                         }
                                     },
                                 ]),

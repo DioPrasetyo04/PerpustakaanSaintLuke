@@ -132,11 +132,13 @@ class LaporanPengembalian extends Page implements HasForms
 
         $period = $this->buildPeriodBuckets($mode, $year, $month, function ($start, $end) {
             return ReturnBook::query()
+                ->whereHas('loanDetail', fn($q) => $q->excludeDigital())
                 ->whereBetween('return_date', [$start, $end])
                 ->count();
         }, $week);
 
         $rows = ReturnBook::query()
+            ->whereHas('loanDetail', fn($q) => $q->excludeDigital())
             ->with(['loanDetail.book', 'loanDetail.loan.user', 'fine'])
             ->whereBetween('return_date', [$period['rangeStart'], $period['rangeEnd']])
             ->orderBy('return_date')

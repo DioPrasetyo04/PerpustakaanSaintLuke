@@ -5,6 +5,7 @@ namespace App\Filament\Resources\FineSettings\Pages;
 use App\Enums\BookCondition;
 use App\Enums\DiscountType;
 use App\Enums\PaymentStatus;
+use App\Filament\Resources\FineSettings\Concerns\ValidatesFinePercentages;
 use App\Filament\Resources\FineSettings\FineSettingsResource;
 use App\Models\Fine;
 use Filament\Actions\DeleteAction;
@@ -13,7 +14,23 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditFineSettings extends EditRecord
 {
+    use ValidatesFinePercentages;
+
     protected static string $resource = FineSettingsResource::class;
+
+    protected function beforeSave(): void
+    {
+        if ($error = $this->finePercentageError($this->data)) {
+            Notification::make()
+                ->title('Gagal menyimpan pengaturan denda')
+                ->body($error)
+                ->danger()
+                ->persistent()
+                ->send();
+
+            $this->halt();
+        }
+    }
 
     protected function getHeaderActions(): array
     {

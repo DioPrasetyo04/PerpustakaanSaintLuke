@@ -87,16 +87,18 @@ class EditLoan extends EditRecord
                 ->exists();
 
             if ($activeElsewhere) {
+                $bookTitle = \App\Models\Book::query()->whereKey($bookId)->value('title') ?? 'tersebut';
                 $this->failWith(
                     "loanDetails.$index.book_id",
-                    'Peminjam masih memiliki pinjaman aktif untuk buku ini di transaksi peminjaman lain.'
+                    "Peminjam masih memiliki pinjaman aktif untuk buku \"{$bookTitle}\" di transaksi peminjaman lain."
                 );
             }
 
             if (! \in_array($bookId, $this->oldBookIds, true) && ! Loan::checkStock($bookId)) {
+                $bookTitle = \App\Models\Book::query()->whereKey($bookId)->value('title') ?? 'tersebut';
                 $this->failWith(
                     "loanDetails.$index.book_id",
-                    'Stok buku tidak tersedia.'
+                    "Stok buku \"{$bookTitle}\" tidak tersedia."
                 );
             }
         }

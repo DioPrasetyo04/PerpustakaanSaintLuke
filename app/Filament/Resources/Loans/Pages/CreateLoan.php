@@ -18,15 +18,16 @@ class CreateLoan extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $duration = (int) (FineSettings::query()->value('loan_duration_days') ?? 14);
-        $today = now()->startOfDay();
-        $loanDate = $today->toDateString();
-        $dueDate = $today->copy()->addDays($duration)->toDateString();
+        $today = now()->startOfDay()->toDateString();
 
+        // Buku baru: tanggal pinjam selalu hari ini. Tanggal jatuh tempo dibiarkan
+        // sesuai input (dapat diatur per buku). Buku lama (is_existing) tidak ikut.
         if (! empty($data['loanDetails']) && \is_array($data['loanDetails'])) {
             foreach ($data['loanDetails'] as $index => $detail) {
-                $data['loanDetails'][$index]['loan_date'] = $loanDate;
-                $data['loanDetails'][$index]['due_date'] = $dueDate;
+                if (! empty($detail['is_existing'])) {
+                    continue;
+                }
+                $data['loanDetails'][$index]['loan_date'] = $today;
             }
         }
 
@@ -36,7 +37,15 @@ class CreateLoan extends CreateRecord
     protected function beforeCreate(): void
     {
         $userId = $this->data['user_id'] ?? null;
-        $details = $this->data['loanDetails'] ?? [];
+
+        // Buang baris buku lama (pinjaman aktif yang di-load otomatis) agar tidak
+        // tersimpan ulang sebagai pinjaman baru dan tidak menggandakan stok.
+        $this->data['loanDetails'] = array_filter(
+            $this->data['loanDetails'] ?? [],
+            fn($detail) => empty($detail['is_existing'])
+        );
+
+        $details = $this->data['loanDetails'];
 
         if ($userId && ! Loan::checkUserVerified($userId)) {
             $this->failWith(
@@ -45,10 +54,10 @@ class CreateLoan extends CreateRecord
             );
         }
 
-        if (empty($details)) {
+        if (empty(array_filter($details, fn($d) => ! empty($d['book_id'])))) {
             $this->failWith(
                 'loanDetails',
-                'Minimal harus ada 1 buku yang dipinjam.'
+                'Minimal harus ada 1 buku baru yang dipinjam.'
             );
         }
 
@@ -59,16 +68,18 @@ class CreateLoan extends CreateRecord
             }
 
             if ($userId && Loan::hasActiveLoan($userId, $bookId)) {
+                $bookTitle = \App\Models\Book::query()->whereKey($bookId)->value('title') ?? 'tersebut';
                 $this->failWith(
                     "loanDetails.$index.book_id",
-                    'Peminjam masih memiliki pinjaman aktif untuk buku ini yang belum dikembalikan.'
+                    "Peminjam masih memiliki pinjaman aktif untuk buku \"{$bookTitle}\" yang belum dikembalikan."
                 );
             }
 
             if (! Loan::checkStock($bookId)) {
+                $bookTitle = \App\Models\Book::query()->whereKey($bookId)->value('title') ?? 'tersebut';
                 $this->failWith(
                     "loanDetails.$index.book_id",
-                    'Stok buku tidak tersedia.'
+                    "Stok buku \"{$bookTitle}\" tidak tersedia."
                 );
             }
         }

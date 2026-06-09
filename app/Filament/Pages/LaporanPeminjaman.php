@@ -132,11 +132,13 @@ class LaporanPeminjaman extends Page implements HasForms
 
         $period = $this->buildPeriodBuckets($mode, $year, $month, function ($start, $end) {
             return LoanDetail::query()
+                ->excludeDigital()
                 ->whereBetween('loan_date', [$start, $end])
                 ->count();
         }, $week);
 
         $rows = LoanDetail::query()
+            ->excludeDigital()
             ->with(['book', 'loan.user'])
             ->whereBetween('loan_date', [$period['rangeStart'], $period['rangeEnd']])
             ->orderBy('loan_date')
