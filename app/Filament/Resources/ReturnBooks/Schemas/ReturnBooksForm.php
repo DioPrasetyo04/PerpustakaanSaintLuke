@@ -12,6 +12,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Wizard;
 use Filament\Schemas\Components\Wizard\Step;
 use Filament\Schemas\Schema;
@@ -59,6 +60,7 @@ class ReturnBooksForm
                                             Hidden::make('return_book_id')->dehydrated(),
                                             Hidden::make('loan_detail_id')->dehydrated(),
                                             Hidden::make('book_id')->dehydrated(),
+                                            Hidden::make('has_review')->dehydrated(false),
 
                                             Grid::make(2)->schema([
                                                 TextInput::make('book_title')
@@ -99,6 +101,9 @@ class ReturnBooksForm
                                                 ->description('Berikan rating dan komentar untuk buku ini')
                                                 ->collapsible()
                                                 ->collapsed()
+                                                // Sembunyikan form review jika peminjam sudah pernah
+                                                // memberikan review untuk buku ini sebelumnya.
+                                                ->visible(fn(Get $get): bool => ! $get('has_review'))
                                                 ->schema([
                                                     ToggleButtons::make('rating')
                                                         ->label('Rating')

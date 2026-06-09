@@ -103,7 +103,7 @@ class ListBooks extends ListRecords
 
                 if (! empty($result['skipped'])) {
                     Notification::make()
-                        ->title(count($result['skipped']) . ' buku dilewati (judul sudah ada)')
+                        ->title(count($result['skipped']) . ' buku dilewati (judul, jilid & DDC sudah ada)')
                         ->body($this->formatSkipped($result['skipped']))
                         ->warning()
                         ->persistent()

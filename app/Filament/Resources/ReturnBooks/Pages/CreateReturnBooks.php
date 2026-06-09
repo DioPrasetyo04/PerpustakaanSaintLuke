@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\ReturnBooks\Pages;
 
 use App\Enums\BookCondition;
-use App\Enums\DiscountType;
 use App\Enums\LoanBookStatus;
 use App\Enums\PaymentStatus;
 use App\Enums\ReturnBookStatus;
@@ -15,6 +14,7 @@ use App\Models\LoanDetail;
 use App\Models\ReturnBook;
 use App\Models\ReturnBookCheck;
 use App\Models\ReviewBook;
+use App\Services\FineCalculatorService;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Support\Exceptions\Halt;
@@ -85,43 +85,20 @@ class CreateReturnBooks extends CreateRecord
         $book = $loanDetail->book;
         $condition = $item['condition'] ?? BookCondition::GOOD->value;
         $returnDate = Carbon::parse($item['return_date'] ?? now());
-        $dueDate = Carbon::parse($loanDetail->due_date);
 
-        $lateFee = 0;
-        $otherFee = 0;
+        $calc = FineCalculatorService::calculateRaw(
+            $condition,
+            $returnDate,
+            $loanDetail->due_date,
+            (float) $book->price,
+            $fineSetting,
+        );
 
-        $bookPrice = (float) $book->price;
-
-        $damageType = $fineSetting?->damage_discount_type instanceof DiscountType
-            ? $fineSetting->damage_discount_type
-            : DiscountType::tryFrom((string) $fineSetting?->damage_discount_type);
-
-        $lostType = $fineSetting?->lost_discount_type instanceof DiscountType
-            ? $fineSetting->lost_discount_type
-            : DiscountType::tryFrom((string) $fineSetting?->lost_discount_type);
-
-        $damageFee = (float) ($fineSetting?->damage_fee_book ?? 0);
-        $lostFee   = (float) ($fineSetting?->lost_fee_book ?? 0);
-
-        if ($fineSetting && $returnDate->gt($dueDate)) {
-            $lateDays = (int) $dueDate->diffInDays($returnDate);
-            $lateFee = $lateDays * (float) $fineSetting->late_fee_per_day;
-        }
-
-        if ($fineSetting && $condition === BookCondition::DAMAGED->value) {
-            $otherFee = $damageType === DiscountType::PERCENTAGE
-                ? ($damageFee * $bookPrice) / 100
-                : $damageFee;
-        }
-
-        if ($fineSetting && $condition === BookCondition::LOST->value) {
-            $otherFee = $lostType === DiscountType::PERCENTAGE
-                ? ($lostFee * $bookPrice) / 100
-                : $lostFee;
-        }
-
-        $totalFee = $lateFee + $otherFee;
-        $status = $totalFee > 0 ? ReturnBookStatus::COST : ReturnBookStatus::RETURNED;
+        $lateFee = $calc['late_fee'];
+        $otherFee = $calc['other_fee'];
+        $totalFee = $calc['total_fee'];
+        $shouldHaveFine = $calc['should_have_fine'];
+        $status = $shouldHaveFine ? ReturnBookStatus::COST : ReturnBookStatus::RETURNED;
 
         $returnBook = ReturnBook::create([
             'return_book_code' => generateUniqueCode('return_book', ReturnBook::class, 'return_book_code'),
@@ -151,7 +128,7 @@ class CreateReturnBooks extends CreateRecord
 
         $loanDetail->update(['status' => LoanBookStatus::RETURNED]);
 
-        if ($totalFee > 0) {
+        if ($shouldHaveFine) {
             Fine::create([
                 'return_book_id' => $returnBook->id,
                 'late_fee' => $lateFee,
@@ -223,6 +200,7 @@ class CreateReturnBooks extends CreateRecord
                 'return_date' => now()->toDateString(),
                 'condition' => BookCondition::GOOD->value,
                 'notes' => null,
+                'has_review' => false,
                 'rating' => null,
                 'comment' => null,
             ])

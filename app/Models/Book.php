@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\BookStatus;
 use App\Enums\PublishedBooks;
+use App\Services\FineCalculatorService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -62,6 +63,12 @@ class Book extends Model
                     ->whereKeyNot($book->getKey())
                     ->where('is_spotlight', true)
                     ->update(['is_spotlight' => false]);
+            }
+
+            // Saat harga buku diperbarui, sinkronkan ulang denda yang belum
+            // lunas agar nominalnya mengikuti harga buku terbaru.
+            if ($book->wasChanged('price')) {
+                FineCalculatorService::recalculateUnpaidForBook($book);
             }
         });
     }

@@ -47,7 +47,7 @@ class BookImportService
         $total = 0;
         $skipped = [];
         $failed = [];
-        $seenTitles = [];
+        $seenKeys = [];
         $columnMap = null;
         $rowNumber = 0;
         $headerScanned = 0;
@@ -102,11 +102,15 @@ class BookImportService
 
                     $total++;
 
-                    $titleKey = mb_strtolower($title);
+                    // Kunci duplikat memakai kombinasi judul + jilid + DDC, bukan
+                    // judul saja. Banyak buku berbagi judul yang sama tapi berbeda
+                    // jilid (kolom "Jld") atau nomor klasifikasi (DDC), mis.
+                    // "Biologi Kelas XII" Jld 2 dan Jld 3 adalah buku berbeda.
+                    $dedupeKey = $this->dedupeKey($title, $data['volume'], $data['classification_number']);
 
-                    // Lewati judul yang sudah ada (di file ini maupun di database) agar tidak dobel.
-                    if (isset($seenTitles[$titleKey]) || $this->bookTitleExists($title)) {
-                        $skipped[$rowNumber] = $title;
+                    // Lewati hanya jika kombinasi yang sama sudah ada (di file ini maupun di database) agar tidak dobel.
+                    if (isset($seenKeys[$dedupeKey]) || $this->bookExists($title, $data['volume'], $data['classification_number'])) {
+                        $skipped[$rowNumber] = $this->describeBook($title, $data['volume']);
 
                         continue;
                     }
@@ -116,7 +120,7 @@ class BookImportService
                             $this->createBook($data, $addedBy, $languageId);
                         });
 
-                        $seenTitles[$titleKey] = true;
+                        $seenKeys[$dedupeKey] = true;
                         $success++;
                     } catch (\Throwable $e) {
                         $failed[$rowNumber] = $e->getMessage();
@@ -260,11 +264,44 @@ class BookImportService
     }
 
     /**
-     * Cek apakah sudah ada buku dengan judul yang sama (case-insensitive).
+     * Bangun kunci duplikat dari kombinasi judul + jilid + nomor klasifikasi
+     * (semuanya dinormalisasi case-insensitive). Dua buku dianggap duplikat
+     * hanya jika ketiganya sama.
      */
-    protected function bookTitleExists(string $title): bool
+    protected function dedupeKey(string $title, mixed $volume, mixed $classificationNumber): string
     {
-        return Book::whereRaw('LOWER(title) = ?', [mb_strtolower($title)])->exists();
+        return implode('|', [
+            mb_strtolower(trim($title)),
+            mb_strtolower((string) $this->stringOrNull($volume)),
+            mb_strtolower((string) $this->stringOrNull($classificationNumber)),
+        ]);
+    }
+
+    /**
+     * Cek apakah sudah ada buku dengan kombinasi judul + jilid + nomor
+     * klasifikasi yang sama (case-insensitive). NULL diperlakukan sebagai
+     * string kosong agar cocok dengan kolom kosong di DB.
+     */
+    protected function bookExists(string $title, mixed $volume, mixed $classificationNumber): bool
+    {
+        $volume = (string) $this->stringOrNull($volume);
+        $classificationNumber = (string) $this->stringOrNull($classificationNumber);
+
+        return Book::query()
+            ->whereRaw('LOWER(title) = ?', [mb_strtolower(trim($title))])
+            ->whereRaw('LOWER(COALESCE(volume, "")) = ?', [mb_strtolower($volume)])
+            ->whereRaw('LOWER(COALESCE(classification_number, "")) = ?', [mb_strtolower($classificationNumber)])
+            ->exists();
+    }
+
+    /**
+     * Label buku untuk notifikasi "dilewati", menyertakan jilid bila ada.
+     */
+    protected function describeBook(string $title, mixed $volume): string
+    {
+        $volume = $this->stringOrNull($volume);
+
+        return $volume === null ? $title : $title . ' (Jld ' . $volume . ')';
     }
 
     protected function resolvePublisherId(mixed $name): ?int
