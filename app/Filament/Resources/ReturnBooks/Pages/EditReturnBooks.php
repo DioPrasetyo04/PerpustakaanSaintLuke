@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\ReturnBooks\Pages;
 
 use App\Enums\BookCondition;
-use App\Enums\DiscountType;
 use App\Enums\LoanBookStatus;
 use App\Enums\PaymentStatus;
 use App\Enums\ReturnBookStatus;
@@ -14,6 +13,7 @@ use App\Models\LoanDetail;
 use App\Models\ReturnBook;
 use App\Models\ReturnBookCheck;
 use App\Models\ReviewBook;
+use App\Services\FineCalculatorService;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
@@ -70,6 +70,7 @@ class EditReturnBooks extends EditRecord
                     'return_date' => $rb?->return_date ? Carbon::parse($rb->return_date)->toDateString() : null,
                     'condition' => $check?->condition?->value ?? BookCondition::GOOD->value,
                     'notes' => $check?->notes,
+                    'has_review' => (bool) $review,
                     'rating' => $review?->rating !== null ? (string) (float) $review->rating : null,
                     'comment' => $review?->comment,
                 ];
@@ -118,44 +119,23 @@ class EditReturnBooks extends EditRecord
 
         $condition = $item['condition'] ?? BookCondition::GOOD->value;
         $returnDate = Carbon::parse($item['return_date'] ?? $returnBook->return_date);
-        $dueDate = Carbon::parse($loanDetail->due_date);
 
         $oldCondition = $returnBook->returnBookCheck?->condition;
         $newCondition = BookCondition::tryFrom($condition);
 
-        $bookPrice = (float) $book->price;
-        $damageType = $fineSetting?->damage_discount_type instanceof DiscountType
-            ? $fineSetting->damage_discount_type
-            : DiscountType::tryFrom((string) $fineSetting?->damage_discount_type);
-        $lostType = $fineSetting?->lost_discount_type instanceof DiscountType
-            ? $fineSetting->lost_discount_type
-            : DiscountType::tryFrom((string) $fineSetting?->lost_discount_type);
+        $calc = FineCalculatorService::calculateRaw(
+            $condition,
+            $returnDate,
+            $loanDetail->due_date,
+            (float) $book->price,
+            $fineSetting,
+        );
 
-        $damageFee = (float) ($fineSetting?->damage_fee_book ?? 0);
-        $lostFee   = (float) ($fineSetting?->lost_fee_book ?? 0);
-
-        $lateFee = 0;
-        $otherFee = 0;
-
-        if ($fineSetting && $returnDate->gt($dueDate)) {
-            $lateDays = (int) $dueDate->diffInDays($returnDate);
-            $lateFee = $lateDays * (float) $fineSetting->late_fee_per_day;
-        }
-
-        if ($condition === BookCondition::DAMAGED->value) {
-            $otherFee = $damageType === DiscountType::PERCENTAGE
-                ? ($damageFee * $bookPrice) / 100
-                : $damageFee;
-        }
-
-        if ($condition === BookCondition::LOST->value) {
-            $otherFee = $lostType === DiscountType::PERCENTAGE
-                ? ($lostFee * $bookPrice) / 100
-                : $lostFee;
-        }
-
-        $totalFee = $lateFee + $otherFee;
-        $status = $totalFee > 0 ? ReturnBookStatus::COST : ReturnBookStatus::RETURNED;
+        $lateFee = $calc['late_fee'];
+        $otherFee = $calc['other_fee'];
+        $totalFee = $calc['total_fee'];
+        $shouldHaveFine = $calc['should_have_fine'];
+        $status = $shouldHaveFine ? ReturnBookStatus::COST : ReturnBookStatus::RETURNED;
 
         $returnBook->update([
             'return_date' => $returnDate->toDateString(),
@@ -183,7 +163,7 @@ class EditReturnBooks extends EditRecord
 
         $existingFine = Fine::where('return_book_id', $returnBook->id)->first();
 
-        if ($totalFee > 0) {
+        if ($shouldHaveFine) {
             if ($existingFine?->payment_status === PaymentStatus::SUCCESS) {
                 // skip: jangan ubah fine yang sudah dibayar
             } else {
