@@ -24,7 +24,7 @@ class BookImportService
      * @var array<string, array<int, string>>
      */
     protected array $aliases = [
-        'classification_number' => ['nomor klasifikasi', 'no klasifikasi', 'klasifikasi', 'classification number', 'classification_number', 'DDC', 'ddc'],
+        'classification_number' => ['DDC', 'nomor klasifikasi', 'no klasifikasi', 'klasifikasi', 'classification number', 'classification_number', 'ddc'],
         'title'                 => ['Judul Buku', 'judul', 'title'],
         'authors'               => ['author', 'authors', 'Pengarang', 'Penulis', 'author / pengarang', 'author/pengarang'],
         'volume'                => ['Jilid', 'Jld', 'volume', 'vol'],
@@ -50,6 +50,7 @@ class BookImportService
         $seenTitles = [];
         $columnMap = null;
         $rowNumber = 0;
+        $headerScanned = 0;
         $addedBy = auth()->id();
         $languageId = $this->resolveDefaultLanguageId();
 
@@ -59,9 +60,28 @@ class BookImportService
                     $rowNumber++;
                     $cells = $row->toArray();
 
-                    // Baris pertama dianggap header.
+                    // Cari baris header: lewati baris kosong / baris pembuka (judul,
+                    // gambar tertanam seperti "[Image #1]", dsb.) sampai ketemu baris
+                    // yang memuat kolom "Judul Buku".
                     if ($columnMap === null) {
-                        $columnMap = $this->mapColumns($cells);
+                        if ($this->isEmptyRow($cells)) {
+                            continue;
+                        }
+
+                        $headerScanned++;
+                        $candidate = $this->mapColumns($cells);
+
+                        if ($candidate !== null) {
+                            $columnMap = $candidate;
+                            continue;
+                        }
+
+                        // Batasi pencarian agar tidak menelusuri seluruh file kalau
+                        // memang tidak ada header yang valid.
+                        if ($headerScanned >= 15) {
+                            throw new \RuntimeException('Kolom "Judul Buku" tidak ditemukan pada file. Pastikan baris pertama berisi nama kolom.');
+                        }
+
                         continue;
                     }
 
@@ -70,17 +90,17 @@ class BookImportService
                         continue;
                     }
 
-                    $total++;
-
                     $data = $this->extractRow($cells, $columnMap);
 
                     $title = is_string($data['title']) ? trim($data['title']) : trim((string) $data['title']);
 
+                    // Baris tanpa judul (mis. baris sisa/footer yang ikut terbaca
+                    // karena ada sel nyasar) dilewati tanpa dihitung gagal.
                     if ($title === '') {
-                        $failed[$rowNumber] = 'Judul buku wajib diisi.';
-
                         continue;
                     }
+
+                    $total++;
 
                     $titleKey = mb_strtolower($title);
 
@@ -125,11 +145,13 @@ class BookImportService
 
     /**
      * Membangun pemetaan index kolom -> key kanonik berdasarkan baris header.
+     * Mengembalikan null jika baris ini bukan header yang valid (tidak memuat
+     * kolom "Judul Buku"), sehingga pemanggil bisa melanjutkan mencari header.
      *
      * @param  array<int, mixed>  $headerCells
-     * @return array<string, int>
+     * @return array<string, int>|null
      */
-    protected function mapColumns(array $headerCells): array
+    protected function mapColumns(array $headerCells): ?array
     {
         $map = [];
 
@@ -155,7 +177,7 @@ class BookImportService
         }
 
         if (! isset($map['title'])) {
-            throw new \RuntimeException('Kolom "Judul Buku" tidak ditemukan pada file. Pastikan baris pertama berisi nama kolom.');
+            return null;
         }
 
         return $map;
@@ -352,10 +374,16 @@ class BookImportService
             return '';
         }
 
-        $value = Str::lower(trim((string) $value));
+        $value = (string) $value;
 
-        // Rapatkan spasi berlebih.
-        return (string) preg_replace('/\s+/', ' ', $value);
+        // Ganti non-breaking space (Excel sering menyisipkannya) jadi spasi biasa.
+        $value = str_replace("\u{00A0}", ' ', $value);
+
+        $value = Str::lower(trim($value));
+
+        // Rapatkan spasi/baris baru berlebih (header bisa multi-baris seperti
+        // "Total\nExemplar").
+        return (string) preg_replace('/\s+/u', ' ', $value);
     }
 
     protected function stringOrNull(mixed $value): ?string
@@ -396,8 +424,10 @@ class BookImportService
             return null;
         }
 
-        // Abaikan nilai tahun yang tidak masuk akal.
-        if ($year < 0 || $year > (int) date('Y')) {
+        // Kolom DB bertipe MySQL YEAR yang hanya menerima rentang 1901-2155.
+        // Tahun di luar rentang masuk akal (mis. "200" akibat salah ketik)
+        // diabaikan agar tidak memicu "Numeric value out of range".
+        if ($year < 1901 || $year > (int) date('Y')) {
             return null;
         }
 

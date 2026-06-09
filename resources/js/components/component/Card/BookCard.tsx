@@ -34,7 +34,8 @@ const BookCard = ({
     avg_rating,
     types,
     language: bookLanguage,
-    isBookmarked = false,
+    is_bookmarked = false,
+    isBookmarked,
 }: BookCardProps) => {
     const { language } = useLanguage();
     const isAvailable = status === 'Tersedia';
@@ -121,7 +122,7 @@ const BookCard = ({
                             <BookmarkButton
                                 slug={slug}
                                 title={title}
-                                isBookmarked={isBookmarked}
+                                isBookmarked={isBookmarked ?? is_bookmarked}
                             />
                         </div>
                     </div>

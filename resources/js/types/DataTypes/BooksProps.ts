@@ -42,4 +42,5 @@ export type BookProps = {
     stock?: StockProps;
     loan?: LoanProps[];
     addedBy?: UserProps;
+    is_bookmarked?: boolean;
 };
