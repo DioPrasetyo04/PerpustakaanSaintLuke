@@ -12,7 +12,7 @@ export type AnnouncementProps = {
 };
 
 export type FlashProps = {
-    access_denied?: 'expired' | 'unauthorized';
+    access_denied?: 'expired' | 'unauthorized' | 'staff';
 };
 
 export type PageProps<

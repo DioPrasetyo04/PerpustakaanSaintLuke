@@ -25,6 +25,8 @@ class BookRepositories implements BookInterfaceRepositories
             'isbn',
             'synopsis',
             'number_of_pages',
+            'location_book',
+            'classification_number',
             'status',
             'cover',
             'is_published'

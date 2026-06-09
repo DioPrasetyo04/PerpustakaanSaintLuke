@@ -140,6 +140,14 @@ function BookShow() {
     const { book, recomendedBooks, reviews } = props;
     const t = bookDetailPage[language];
 
+    // Peran user yang sedang login (dibagikan via Inertia di HandleInertiaRequests).
+    // Staf (admin/super_admin) tidak boleh meminjam/membaca buku — fitur peminjaman
+    // hanya untuk akun anggota.
+    const authRoles =
+        (props as unknown as { auth?: { roles?: string[] } }).auth?.roles ?? [];
+    const STAFF_ROLES = ['admin', 'super_admin'];
+    const isStaff = authRoles.some((role) => STAFF_ROLES.includes(role));
+
     const bookAvailable = book?.status === 'Tersedia';
     const [wishlistPending, setWishlistPending] = useState(false);
     const [wishlistSaved, setWishlistSaved] = useState(book?.is_bookmarked ?? false);
@@ -152,6 +160,19 @@ function BookShow() {
     // Konfirmasi di sana yang mencatat peminjaman digital lalu membuka aset.
     const onHandleReadConfirmation = () => {
         if (!book) return;
+
+        // Validasi: akun staf (admin/super admin) tidak boleh membaca/meminjam buku.
+        if (isStaff) {
+            setNotification({
+                type: 'error',
+                message:
+                    language === 'id'
+                        ? 'Akun staf (admin/super admin) tidak dapat membaca atau meminjam buku. Silakan gunakan akun anggota.'
+                        : 'Staff accounts (admin/super admin) cannot read or borrow books. Please use a member account.',
+            });
+            return;
+        }
+
         router.get(route('loan.confirmation', book.slug));
     };
 
@@ -267,6 +288,15 @@ function BookShow() {
             k: 'Kategori',
             v: book.categories?.[0]?.name ?? '-',
             img: book.categories?.[0]?.icon,
+        },
+        {
+            k: language === 'id' ? 'No. Klasifikasi' : 'Classification No.',
+            v: book.classification_number ?? '-',
+            mono: true,
+        },
+        {
+            k: language === 'id' ? 'Lokasi Buku' : 'Book Location',
+            v: book.location_book ?? '-',
         },
     ];
 

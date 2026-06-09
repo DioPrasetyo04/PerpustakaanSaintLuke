@@ -32,11 +32,26 @@ class LoanController extends Controller
         ]);
     }
 
+    /**
+     * Akun staf (admin/super_admin) bukan anggota peminjam, jadi tidak boleh
+     * membaca/meminjam buku. Pengecekan ini ada di frontend (UX) sekaligus di
+     * sini sebagai pengaman bila route diakses langsung.
+     */
+    private function isStaff(\App\Models\User $user): bool
+    {
+        return $user->hasAnyRole(['admin', 'super_admin']);
+    }
+
     public function confirmation(string $slug)
     {
         // dd($slug);
         // dd('masuk controller sebelum service');
         $user = auth()->user();
+
+        // Tolak akun staf: tampilkan modal "Akun Staf Tidak Diizinkan" (multi-bahasa).
+        if ($this->isStaff($user)) {
+            return back()->with('access_denied', 'staff');
+        }
 
         // 🔥 HANDLE VERIFIED MANUAL (INERTIA WAY)
         if (!$user->hasVerifiedEmail()) {
@@ -62,6 +77,11 @@ class LoanController extends Controller
      */
     public function readDigital(string $slug)
     {
+        // Pengaman: akun staf tidak boleh meminjam/membaca buku.
+        if ($this->isStaff(auth()->user())) {
+            abort(403, 'Akun staf tidak dapat meminjam atau membaca buku.');
+        }
+
         $slug = $this->loanController->readDigitalBook($slug);
 
         return response()->json([
