@@ -142,7 +142,7 @@ function BookShow() {
 
     const bookAvailable = book?.status === 'Tersedia';
     const [wishlistPending, setWishlistPending] = useState(false);
-    const [wishlistSaved, setWishlistSaved] = useState(false);
+    const [wishlistSaved, setWishlistSaved] = useState(book?.is_bookmarked ?? false);
     const [notification, setNotification] = useState<{
         type: 'success' | 'error';
         message: string;
@@ -158,6 +158,31 @@ function BookShow() {
     const onHandleAddWishlist = () => {
         if (!book || wishlistPending) return;
         setWishlistPending(true);
+
+        // Jika sudah tersimpan, klik berikutnya menghapus bookmark (toggle),
+        // sama seperti tombol ikon bookmark pada kartu buku.
+        if (wishlistSaved) {
+            router.delete(route('bookmark.destroy', { slug: book.slug }), {
+                preserveScroll: true,
+                preserveState: true,
+                onSuccess: () => {
+                    setWishlistSaved(false);
+                    setNotification({
+                        type: 'success',
+                        message: `Bookmark untuk "${book.title}" berhasil dihapus.`,
+                    });
+                },
+                onError: () => {
+                    setNotification({
+                        type: 'error',
+                        message:
+                            'Gagal menghapus bookmark. Silakan coba lagi.',
+                    });
+                },
+                onFinish: () => setWishlistPending(false),
+            });
+            return;
+        }
 
         router.post(
             route('bookmark.store', { slug: book.slug }),
@@ -320,9 +345,7 @@ function BookShow() {
 
                                         <button
                                             onClick={onHandleAddWishlist}
-                                            disabled={
-                                                wishlistPending || wishlistSaved
-                                            }
+                                            disabled={wishlistPending}
                                             className={`btn-press mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full border py-2.5 text-sm font-medium transition-colors disabled:opacity-70 ${
                                                 wishlistSaved
                                                     ? 'border-cobalt bg-cobalt-50 text-cobalt dark:bg-cobalt/15 dark:text-cobalt-lt'

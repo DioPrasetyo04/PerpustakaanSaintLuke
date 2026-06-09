@@ -1,4 +1,4 @@
- import { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { router } from '@inertiajs/react';
 import { route } from 'ziggy-js';
@@ -146,7 +146,7 @@ const BookmarkButton = ({
                 {/* Tooltip */}
                 <span
                     role="tooltip"
-                    className="pointer-events-none absolute top-1/2 right-full mr-2 -translate-y-1/2 translate-x-1 rounded-lg bg-ink/90 px-2.5 py-1 text-xs font-medium whitespace-nowrap text-white opacity-0 shadow-lg backdrop-blur-sm transition-all duration-200 group-hover/bm:translate-x-0 group-hover/bm:opacity-100 dark:bg-white/90 dark:text-foreground"
+                    className="pointer-events-none absolute top-1/2 right-full mr-2 translate-x-1 -translate-y-1/2 rounded-lg bg-ink/90 px-2.5 py-1 text-xs font-medium whitespace-nowrap text-white opacity-0 shadow-lg backdrop-blur-sm transition-all duration-200 group-hover/bm:translate-x-0 group-hover/bm:opacity-100 dark:bg-white/90 dark:text-muted-foreground dark:shadow-black/30"
                 >
                     {tooltip}
                 </span>

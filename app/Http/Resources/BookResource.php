@@ -5,10 +5,41 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class BookResource extends JsonResource
 {
+    /**
+     * Cache id-buku yang di-bookmark oleh user, di-key per user id, agar
+     * status bookmark dihitung sekali per request (hindari N+1) dan TIDAK
+     * ikut ter-cache di payload buku (mencegah bocor antar user).
+     *
+     * @var array<int, array<int, int>>
+     */
+    protected static array $bookmarkedIdsCache = [];
+
+    /**
+     * @return array<int, int>
+     */
+    protected static function bookmarkedBookIds(): array
+    {
+        $userId = auth()->id();
+
+        if ($userId === null) {
+            return [];
+        }
+
+        if (! array_key_exists($userId, static::$bookmarkedIdsCache)) {
+            static::$bookmarkedIdsCache[$userId] = DB::table('bookmarks')
+                ->where('user_id', $userId)
+                ->pluck('book_id')
+                ->map(fn ($id) => (int) $id)
+                ->all();
+        }
+
+        return static::$bookmarkedIdsCache[$userId];
+    }
     /**
      * Transform the resource into an array.
      *
@@ -46,6 +77,9 @@ class BookResource extends JsonResource
             'is_published' => $this->when(isset($this->is_published), $this->is_published),
 
             'avg_rating' => $this->when(isset($this->avg_rating), (float) $this->avg_rating),
+
+            // Status bookmark untuk user yang sedang login (false bila tamu).
+            'is_bookmarked' => in_array((int) $this->id, static::bookmarkedBookIds(), true),
         ];
 
         if ($this->relationLoaded('reviews') && $this->reviews->isNotEmpty()) {
