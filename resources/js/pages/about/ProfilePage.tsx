@@ -9,7 +9,7 @@ const fadeUp = {
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
     return (
-        <span className="tracking-editorial inline-flex items-center gap-2 rounded-full bg-cobalt-50 px-3 py-1 text-[11px] font-semibold uppercase text-cobalt dark:bg-cobalt/15 dark:text-cobalt-lt">
+        <span className="inline-flex items-center gap-2 rounded-full bg-cobalt-50 px-3 py-1 text-[11px] font-semibold tracking-editorial text-cobalt uppercase dark:bg-cobalt/15 dark:text-cobalt-lt">
             <span className="h-1.5 w-1.5 rounded-full bg-cobalt dark:bg-cobalt-lt" />
             {children}
         </span>
@@ -29,11 +29,31 @@ const content = {
         mottoBy: 'Motto Yayasan',
         timelineLabel: 'Lima Babak Sejarah',
         milestones: [
-            { y: '1968', t: 'Awal Mula', b: 'Satu ruang kecil dengan 400 judul di belakang asrama. Pustakawan pertama adalah seorang romo yang juga mengajar Bahasa Latin.' },
-            { y: '1985', t: 'Perluasan Pertama', b: 'Yayasan mendirikan gedung perpustakaan dua lantai. Koleksi melampaui 3.000 judul, klub baca pertama dibentuk.' },
-            { y: '2003', t: 'Era Digital', b: 'Katalogisasi pertama dengan sistem komputer. Akses ke jurnal akademik dimulai melalui kerjasama dengan PNRI.' },
-            { y: '2018', t: 'Renovasi Modern', b: 'Renovasi total: ruang baca tenang, ruang diskusi, dan area koleksi langka. 9.500 judul dan 1.400 anggota aktif.' },
-            { y: '2026', t: 'Hari Ini', b: '12.480 koleksi, 1.856 anggota, dan portal daring yang Anda gunakan saat ini.' },
+            {
+                y: '1968',
+                t: 'Awal Mula',
+                b: 'Satu ruang kecil dengan 400 judul di belakang asrama. Pustakawan pertama adalah seorang romo yang juga mengajar Bahasa Latin.',
+            },
+            {
+                y: '1985',
+                t: 'Perluasan Pertama',
+                b: 'Yayasan mendirikan gedung perpustakaan dua lantai. Koleksi melampaui 3.000 judul, klub baca pertama dibentuk.',
+            },
+            {
+                y: '2003',
+                t: 'Era Digital',
+                b: 'Katalogisasi pertama dengan sistem komputer. Akses ke jurnal akademik dimulai melalui kerjasama dengan PNRI.',
+            },
+            {
+                y: '2018',
+                t: 'Renovasi Modern',
+                b: 'Renovasi total: ruang baca tenang, ruang diskusi, dan area koleksi langka. 9.500 judul dan 1.400 anggota aktif.',
+            },
+            {
+                y: '2026',
+                t: 'Hari Ini',
+                b: '12.480 koleksi, 1.856 anggota, dan portal daring yang Anda gunakan saat ini.',
+            },
         ],
         stats: [
             { v: '58', l: 'Tahun melayani' },
@@ -54,11 +74,31 @@ const content = {
         mottoBy: 'Foundation Motto',
         timelineLabel: 'Five Chapters of History',
         milestones: [
-            { y: '1968', t: 'The Beginning', b: 'One small room with 400 titles behind the dormitory. The first librarian was a priest who also taught Latin.' },
-            { y: '1985', t: 'First Expansion', b: 'The foundation built a two-storey library. The collection passed 3,000 titles; the first book club formed.' },
-            { y: '2003', t: 'Digital Era', b: 'First computerised cataloguing. Access to academic journals began via partnership with PNRI.' },
-            { y: '2018', t: 'Modern Renovation', b: 'A full renovation: quiet reading rooms, discussion rooms, and a rare-collection area. 9,500 titles and 1,400 active members.' },
-            { y: '2026', t: 'Today', b: '12,480 items, 1,856 members, and the online portal you are using right now.' },
+            {
+                y: '1968',
+                t: 'The Beginning',
+                b: 'One small room with 400 titles behind the dormitory. The first librarian was a priest who also taught Latin.',
+            },
+            {
+                y: '1985',
+                t: 'First Expansion',
+                b: 'The foundation built a two-storey library. The collection passed 3,000 titles; the first book club formed.',
+            },
+            {
+                y: '2003',
+                t: 'Digital Era',
+                b: 'First computerised cataloguing. Access to academic journals began via partnership with PNRI.',
+            },
+            {
+                y: '2018',
+                t: 'Modern Renovation',
+                b: 'A full renovation: quiet reading rooms, discussion rooms, and a rare-collection area. 9,500 titles and 1,400 active members.',
+            },
+            {
+                y: '2026',
+                t: 'Today',
+                b: '12,480 items, 1,856 members, and the online portal you are using right now.',
+            },
         ],
         stats: [
             { v: '58', l: 'Years of service' },
@@ -114,19 +154,27 @@ function ProfilePage() {
 
                     <div className="col-span-full lg:col-span-5">
                         <div className="lg:sticky lg:top-32">
-                            <div className="spine-shadow flex aspect-[4/5] flex-col justify-between bg-ink p-8 text-paper shadow-book-3d">
-                                <div className="tracking-editorial font-mono text-[10px] uppercase text-cobalt-lt">
+                            <div className="spine-shadow relative flex aspect-[16/11] flex-col justify-between overflow-hidden rounded-2xl bg-ink p-6 text-paper shadow-book-3d sm:aspect-[4/3] sm:p-8 lg:aspect-[4/5]">
+                                {/* Latar gambar ruang baca + overlay agar teks tetap terbaca */}
+                                <img
+                                    src="/assets/images/profile-library.svg"
+                                    alt="Ruang baca Perpustakaan Santo Lukas"
+                                    loading="lazy"
+                                    className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+                                />
+                                <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ink/85 via-ink/45 to-ink/90" />
+                                <div className="relative font-mono text-[10px] tracking-editorial text-cobalt-lt uppercase">
                                     {t.since}
                                 </div>
-                                <div>
-                                    <div className="font-display text-[120px] leading-none tabnum">
+                                <div className="relative">
+                                    <div className="tabnum font-display text-[88px] leading-none drop-shadow-lg sm:text-[110px] lg:text-[120px]">
                                         1968
                                     </div>
                                     <div className="mt-4 h-px w-12 bg-cobalt-lt" />
-                                    <div className="mt-4 font-quote text-2xl text-paper/85 italic">
+                                    <div className="mt-4 font-quote text-xl text-paper italic drop-shadow sm:text-2xl">
                                         {t.motto}
                                     </div>
-                                    <div className="tracking-editorial mt-3 font-mono text-[10px] uppercase text-paper/55">
+                                    <div className="mt-3 font-mono text-[10px] tracking-editorial text-paper/70 uppercase">
                                         {t.mottoBy}
                                     </div>
                                 </div>
@@ -135,7 +183,6 @@ function ProfilePage() {
                     </div>
                 </div>
             </div>
-
         </section>
     );
 }

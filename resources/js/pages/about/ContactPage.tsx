@@ -382,7 +382,7 @@ function ContactPage() {
                                     required
                                     value={form.status}
                                     onChange={(e) => set('status')(e.target.value)}
-                                    className={inputCls}
+                                    className={`${inputCls} cursor-pointer [&>option]:bg-card [&>option]:text-foreground dark:[&>option]:bg-night-2 dark:[&>option]:text-paper`}
                                 >
                                     <option value="">{t.selectPlaceholder}</option>
                                     {t.statuses.map((o) => (

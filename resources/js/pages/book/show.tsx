@@ -289,6 +289,15 @@ function BookShow() {
             v: book.categories?.[0]?.name ?? '-',
             img: book.categories?.[0]?.icon,
         },
+    ];
+
+    // Klasifikasi & Lokasi tampil sebagai baris terpisah 2 kolom proporsional
+    const biblioPair: {
+        k: string;
+        v: string | number;
+        mono?: boolean;
+        img?: string | null;
+    }[] = [
         {
             k: language === 'id' ? 'No. Klasifikasi' : 'Classification No.',
             v: book.classification_number ?? '-',
@@ -640,6 +649,34 @@ function BookShow() {
                                             </div>
                                         ))}
 
+                                    </dl>
+
+                                    {/* No. Klasifikasi & Lokasi Buku — baris sendiri, 2 kolom proporsional di desktop */}
+                                    <dl className="hairline mt-4 grid grid-cols-1 gap-px overflow-hidden rounded-xl2 border bg-line sm:grid-cols-2 dark:bg-night-line">
+                                        {biblioPair.map(({ k, v, mono, img }) => (
+                                            <div
+                                                key={k}
+                                                className="bg-card p-4 transition-colors hover:bg-cobalt-50 dark:bg-night-2 dark:hover:bg-night-3"
+                                            >
+                                                <dt className="tracking-editorial font-mono text-[10px] uppercase text-muted-foreground">
+                                                    {k}
+                                                </dt>
+                                                <dd
+                                                    className={`mt-1.5 flex items-center gap-2 text-foreground ${mono ? 'font-mono text-sm' : 'text-sm'}`}
+                                                >
+                                                    {img && (
+                                                        <ImageWithFallback
+                                                            src={img}
+                                                            alt={String(v)}
+                                                            className="h-6 w-6 shrink-0 rounded bg-white/5 object-contain ring-1 ring-border"
+                                                        />
+                                                    )}
+                                                    <span className="min-w-0 truncate">
+                                                        {v}
+                                                    </span>
+                                                </dd>
+                                            </div>
+                                        ))}
                                     </dl>
 
                                     {/* Format tersedia + penambah buku, berdampingan & responsif */}

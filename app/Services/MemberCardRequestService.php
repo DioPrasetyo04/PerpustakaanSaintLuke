@@ -66,14 +66,14 @@ class MemberCardRequestService
         }
 
         // WhatsApp — hanya staf yang punya nomor telepon.
+        // Pesan dibangun ulang per penerima agar tiap kiriman unik (anti-blokir).
         $waSent = 0;
-        $message = $this->buildWhatsAppMessage($user);
         foreach ($staff as $member) {
             $phone = $this->normalizePhone($member->phone);
             if (! $phone) {
                 continue;
             }
-            if ($this->whatsApp->sendText($phone, $message)) {
+            if ($this->whatsApp->sendText($phone, $this->buildWhatsAppMessage($user))) {
                 $waSent++;
             }
         }
@@ -85,16 +85,58 @@ class MemberCardRequestService
         ];
     }
 
+    /**
+     * Bangun pesan WhatsApp yang sedikit berbeda setiap kali dikirim
+     * (variasi emoji, sapaan, penutup, + stempel waktu & kode unik) supaya
+     * tidak terdeteksi sebagai spam/pesan identik yang berisiko diblokir WA.
+     */
     private function buildWhatsAppMessage(User $user): string
     {
-        return "🪪 *Permintaan Kartu Anggota — Saint Luke E-Library*\n\n"
-            . "Seorang anggota meminta dibuatkan kartu tanda anggota:\n\n"
-            . "👤 Nama: *{$user->name}*\n"
-            . '🔢 No. Anggota: ' . ($user->username ?: '-') . "\n"
-            . "📧 Email: {$user->email}\n"
-            . '📱 No. HP: ' . ($user->phone ?: '-') . "\n\n"
-            . 'Silakan buka panel admin → Anggota untuk menerbitkan kartunya:'
-            . "\n🔗 " . url('/admin/users');
+        // Kumpulan variasi — dipilih acak tiap pengiriman.
+        $headEmojis = ['🪪', '🆔', '📇', '🎫', '🪪✨'];
+        $greetings = [
+            'Halo Petugas Perpustakaan 👋',
+            'Selamat bertugas, Petugas Perpustakaan 🙏',
+            'Hai Tim Perpustakaan 👋',
+            'Permisi, Petugas Perpustakaan 🙌',
+        ];
+        $intros = [
+            'Seorang anggota meminta dibuatkan kartu tanda anggota:',
+            'Ada permintaan pembuatan kartu tanda anggota baru:',
+            'Mohon dibantu — seorang anggota mengajukan kartu tanda anggota:',
+            'Masuk satu permintaan kartu tanda anggota:',
+        ];
+        $nameEmojis = ['👤', '🧑', '🙋', '🧑‍🎓'];
+        $idEmojis = ['🔢', '🆔', '#️⃣'];
+        $mailEmojis = ['📧', '✉️', '📨'];
+        $phoneEmojis = ['📱', '☎️', '📞'];
+        $linkEmojis = ['🔗', '🌐', '➡️'];
+        $closings = [
+            'Silakan buka panel admin → Anggota untuk menerbitkan kartunya:',
+            'Terbitkan kartunya lewat panel admin → Anggota di sini:',
+            'Mohon diproses melalui panel admin → Anggota:',
+            'Lanjutkan penerbitan kartu di panel admin → Anggota:',
+        ];
+
+        $pick = static fn (array $a): string => $a[array_rand($a)];
+
+        $time = now()->translatedFormat('l, d F Y · H:i') . ' WIB';
+        // Kode referensi unik tiap pengiriman (anti pesan identik).
+        $ref = strtoupper(substr(md5($user->id . microtime(true) . random_int(0, 99999)), 0, 6));
+
+        return $pick($headEmojis) . " *Permintaan Kartu Anggota — Saint Luke E-Library*\n"
+            . "━━━━━━━━━━━━━━━━━━━━━\n\n"
+            . $pick($greetings) . "\n"
+            . $pick($intros) . "\n\n"
+            . $pick($nameEmojis) . " Nama: *{$user->name}*\n"
+            . $pick($idEmojis) . ' No. Anggota: ' . ($user->username ?: '-') . "\n"
+            . $pick($mailEmojis) . " Email: {$user->email}\n"
+            . $pick($phoneEmojis) . ' No. HP: ' . ($user->phone ?: '-') . "\n\n"
+            . $pick($closings)
+            . "\n" . $pick($linkEmojis) . ' ' . url('/admin/users') . "\n\n"
+            . "━━━━━━━━━━━━━━━━━━━━━\n"
+            . "🕒 Diterima: {$time}\n"
+            . "🧾 Ref: {$ref}";
     }
 
     /**

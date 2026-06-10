@@ -58,9 +58,9 @@ export function Footer() {
 
     return (
         <footer className="mt-0 bg-ink text-paper dark:bg-night-2">
-            <div className="mx-auto max-w-[100rem] px-6 pt-16 pb-10 lg:px-10">
-                <div className="grid grid-cols-1 gap-8 md:grid-cols-12">
-                    <div className="col-span-full md:col-span-5">
+            <div className="mx-auto max-w-[100rem] px-6 pt-16 pb-24 lg:px-10 lg:pb-10">
+                <div className="grid grid-cols-2 gap-8 md:grid-cols-12">
+                    <div className="col-span-2 md:col-span-5">
                         <div className="flex items-center gap-3">
                             <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-card p-1.5">
                                 <img
@@ -106,7 +106,7 @@ export function Footer() {
                         </div>
                     </div>
 
-                    <div className="col-span-6 md:col-span-2">
+                    <div className="col-span-1 md:col-span-2">
                         <div className="tracking-editorial mb-4 text-[10px] uppercase text-paper/45">
                             {l('explore')}
                         </div>
@@ -153,7 +153,7 @@ export function Footer() {
                             </li>
                         </ul>
                     </div>
-                    <div className="col-span-6 md:col-span-2">
+                    <div className="col-span-1 md:col-span-2">
                         <div className="tracking-editorial mb-4 text-[10px] uppercase text-paper/45">
                             {l('foundation')}
                         </div>
@@ -200,7 +200,7 @@ export function Footer() {
                             </li>
                         </ul>
                     </div>
-                    <div className="col-span-full md:col-span-3">
+                    <div className="col-span-2 md:col-span-3">
                         <div className="tracking-editorial mb-4 text-[10px] uppercase text-paper/45">
                             {l('visit')}
                         </div>
