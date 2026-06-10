@@ -106,16 +106,35 @@ class AdminPanelProvider extends PanelProvider
             ]);
     }
 
+    /**
+     * Cache record pengumuman hari ini selama satu request agar dua render hook
+     * (popup + badge status) tidak menjalankan query yang sama dua kali.
+     */
+    private ?Announcement $todayAnnouncement = null;
+
+    private bool $todayAnnouncementLoaded = false;
+
+    private function todayAnnouncement(): ?Announcement
+    {
+        if ($this->todayAnnouncementLoaded) {
+            return $this->todayAnnouncement;
+        }
+
+        $this->todayAnnouncementLoaded = true;
+
+        $this->todayAnnouncement = Announcement::query()
+            ->where('days', Days::today()->value)
+            ->where('is_active', true)
+            ->withoutTrashed()
+            ->first();
+
+        return $this->todayAnnouncement;
+    }
+
     private function resolveAnnouncementView(): \Illuminate\Support\HtmlString
     {
         try {
-            $today = Days::today();
-
-            $record = Announcement::query()
-                ->where('days', $today->value)
-                ->where('is_active', true)
-                ->withoutTrashed()
-                ->first();
+            $record = $this->todayAnnouncement();
 
             if (!$record) {
                 return new \Illuminate\Support\HtmlString('');
@@ -145,13 +164,7 @@ class AdminPanelProvider extends PanelProvider
     private function resolveLibraryStatusBadge(): \Illuminate\Support\HtmlString
     {
         try {
-            $today = Days::today();
-
-            $record = Announcement::query()
-                ->where('days', $today->value)
-                ->where('is_active', true)
-                ->withoutTrashed()
-                ->first();
+            $record = $this->todayAnnouncement();
 
             if (!$record) {
                 return new \Illuminate\Support\HtmlString('');
