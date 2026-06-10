@@ -19,6 +19,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class BooksTable
 {
@@ -112,7 +113,6 @@ class BooksTable
                 TextColumn::make('active_loans_count')
                     ->label('Sedang Dipinjam')
                     ->badge()
-                    ->state(fn($record) => $record->loanDetails()->whereDoesntHave('returnBook')->count())
                     ->formatStateUsing(fn($state) => $state > 0 ? "{$state} Dipinjam" : 'Tidak Dipinjam')
                     ->color(fn($state) => $state > 0 ? 'warning' : 'success')
                     ->icon(fn($state) => $state > 0 ? 'heroicon-s-arrow-right-circle' : 'heroicon-s-check-circle'),
@@ -120,11 +120,16 @@ class BooksTable
                 TextColumn::make('returned_loans_count')
                     ->label('Dikembalikan')
                     ->badge()
-                    ->state(fn($record) => $record->loanDetails()->whereHas('returnBook')->count())
-                    ->formatStateUsing(fn($state) => "{$state} Dikembalikan")
+                    ->formatStateUsing(fn($state) => ((int) $state) . ' Dikembalikan')
                     ->color(fn($state) => $state > 0 ? 'info' : 'gray')
                     ->icon('heroicon-s-arrow-left-circle'),
             ])
+            // Eager-load hitungan peminjaman aktif & yang sudah dikembalikan dalam
+            // satu query agregat, bukan 2 query COUNT per baris (hindari N+1).
+            ->modifyQueryUsing(fn(Builder $query) => $query->withCount([
+                'loanDetails as active_loans_count' => fn(Builder $q) => $q->whereDoesntHave('returnBook'),
+                'loanDetails as returned_loans_count' => fn(Builder $q) => $q->whereHas('returnBook'),
+            ]))
             ->filters([
                 TrashedFilter::make(),
             ])

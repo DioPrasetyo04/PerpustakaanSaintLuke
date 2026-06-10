@@ -138,239 +138,262 @@ const Navbar = ({ initialAuth }: { initialAuth?: any }) => {
 
     const avatarSrc = auth?.user?.avatar
         ? `/storage/${auth.user.avatar}`
-        : '/assets/images/default-avatar.png';
+        : '/assets/images/default-avatar.webp';
 
     return (
         <>
-        <header
-            className={`sticky top-0 z-40 transition-all duration-300 ${
-                scrolled
-                    ? 'hairline border-b bg-card/85 backdrop-blur-md dark:bg-night/85'
-                    : 'border-b border-transparent bg-paper dark:bg-night'
-            }`}
-        >
-            {/* main bar */}
-            <div className="mx-auto max-w-[100rem] px-6 lg:px-10">
-                <div className="flex h-[68px] items-center justify-between gap-3 lg:gap-4">
-                    <Link href="/" className="min-w-0" aria-label="Beranda">
-                        <BrandMark />
-                    </Link>
+            <header
+                className={`sticky top-0 z-40 transition-all duration-300 ${
+                    scrolled
+                        ? 'hairline border-b bg-card/85 backdrop-blur-md dark:bg-night/85'
+                        : 'border-b border-transparent bg-paper dark:bg-night'
+                }`}
+            >
+                {/* main bar */}
+                <div className="mx-auto max-w-[100rem] px-6 lg:px-10">
+                    <div className="flex h-[68px] items-center justify-between gap-3 lg:gap-4">
+                        <Link href="/" className="min-w-0" aria-label="Beranda">
+                            <BrandMark />
+                        </Link>
 
-                    {/* desktop nav */}
-                    <nav
-                        className="hidden shrink-0 items-center gap-1 lg:flex"
-                        aria-label="Navigasi utama"
-                    >
-                        {navItems.map((n: NavItem) => (
-                            <div
-                                key={n.id}
-                                className="relative"
-                                onMouseEnter={() => n.menu && handleEnter(n.id)}
-                                onMouseLeave={() => n.menu && handleLeave()}
-                            >
-                                <Link
-                                    href={n.href}
-                                    aria-current={
-                                        isGroupActive(n) ? 'page' : undefined
+                        {/* desktop nav */}
+                        <nav
+                            className="hidden shrink-0 items-center gap-1 lg:flex"
+                            aria-label="Navigasi utama"
+                        >
+                            {navItems.map((n: NavItem) => (
+                                <div
+                                    key={n.id}
+                                    className="relative"
+                                    onMouseEnter={() =>
+                                        n.menu && handleEnter(n.id)
                                     }
-                                    className={cn(
-                                        'nav-link inline-flex items-center gap-1 rounded-full px-3.5 py-2 font-sans text-[14px] font-medium transition-colors hover:text-cobalt dark:hover:text-cobalt-lt',
-                                        isGroupActive(n)
-                                            ? 'text-cobalt dark:text-cobalt-lt'
-                                            : 'text-foreground',
-                                    )}
+                                    onMouseLeave={() => n.menu && handleLeave()}
                                 >
-                                    {language === 'en'
-                                        ? n.label.en
-                                        : n.label.id}
-                                    {n.menu && (
-                                        <ChevronDown
-                                            className={`h-3 w-3 transition-transform ${openMenu === n.id ? 'rotate-180' : ''}`}
-                                        />
-                                    )}
-                                </Link>
-                                {n.menu && openMenu === n.id && (
-                                    <div className="hairline dd-enter in absolute top-full left-0 mt-3 w-[300px] overflow-hidden rounded-xl2 border bg-card shadow-lift dark:bg-night-2">
-                                        <div className="p-2">
-                                            {n.menu.map((m) => {
-                                                const subActive = isActive(
-                                                    m.href,
-                                                );
-                                                return (
-                                                    <Link
-                                                        key={m.id}
-                                                        href={m.href}
-                                                        aria-current={
-                                                            subActive
-                                                                ? 'page'
-                                                                : undefined
-                                                        }
-                                                        onClick={() =>
-                                                            setOpenMenu(null)
-                                                        }
-                                                        className="group flex items-start gap-3 rounded-lg px-4 py-3 transition-colors hover:bg-paper-2/70 dark:hover:bg-night-3"
-                                                    >
-                                                        <span
-                                                            className={cn(
-                                                                'mt-2 h-1.5 w-1.5 shrink-0 rounded-full transition-transform group-hover:scale-150',
+                                    <Link
+                                        href={n.href}
+                                        aria-current={
+                                            isGroupActive(n)
+                                                ? 'page'
+                                                : undefined
+                                        }
+                                        className={cn(
+                                            'nav-link inline-flex items-center gap-1 rounded-full px-3.5 py-2 font-sans text-[14px] font-medium transition-colors hover:text-cobalt dark:hover:text-cobalt-lt',
+                                            isGroupActive(n)
+                                                ? 'text-cobalt dark:text-cobalt-lt'
+                                                : 'text-foreground',
+                                        )}
+                                    >
+                                        {language === 'en'
+                                            ? n.label.en
+                                            : n.label.id}
+                                        {n.menu && (
+                                            <ChevronDown
+                                                className={`h-3 w-3 transition-transform ${openMenu === n.id ? 'rotate-180' : ''}`}
+                                            />
+                                        )}
+                                    </Link>
+                                    {n.menu && openMenu === n.id && (
+                                        <div className="hairline dd-enter in absolute top-full left-0 mt-3 w-[300px] overflow-hidden rounded-xl2 border bg-card shadow-lift dark:bg-night-2">
+                                            <div className="p-2">
+                                                {n.menu.map((m) => {
+                                                    const subActive = isActive(
+                                                        m.href,
+                                                    );
+                                                    return (
+                                                        <Link
+                                                            key={m.id}
+                                                            href={m.href}
+                                                            aria-current={
                                                                 subActive
-                                                                    ? 'bg-cobalt'
-                                                                    : 'bg-muted-foreground/30',
-                                                            )}
-                                                        />
-                                                        <span className="flex-1">
+                                                                    ? 'page'
+                                                                    : undefined
+                                                            }
+                                                            onClick={() =>
+                                                                setOpenMenu(
+                                                                    null,
+                                                                )
+                                                            }
+                                                            className="group flex items-start gap-3 rounded-lg px-4 py-3 transition-colors hover:bg-paper-2/70 dark:hover:bg-night-3"
+                                                        >
                                                             <span
                                                                 className={cn(
-                                                                    'block font-display text-[15px]',
+                                                                    'mt-2 h-1.5 w-1.5 shrink-0 rounded-full transition-transform group-hover:scale-150',
                                                                     subActive
-                                                                        ? 'text-cobalt dark:text-cobalt-lt'
-                                                                        : 'text-foreground',
+                                                                        ? 'bg-cobalt'
+                                                                        : 'bg-muted-foreground/30',
                                                                 )}
+                                                            />
+                                                            <span className="flex-1">
+                                                                <span
+                                                                    className={cn(
+                                                                        'block font-display text-[15px]',
+                                                                        subActive
+                                                                            ? 'text-cobalt dark:text-cobalt-lt'
+                                                                            : 'text-foreground',
+                                                                    )}
+                                                                >
+                                                                    {language ===
+                                                                    'en'
+                                                                        ? m
+                                                                              .label
+                                                                              .en
+                                                                        : m
+                                                                              .label
+                                                                              .id}
+                                                                </span>
+                                                            </span>
+                                                            <ArrowUpRight className="mt-1 h-3.5 w-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-60" />
+                                                        </Link>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </nav>
+
+                        {/* right controls */}
+                        <div className="flex shrink-0 items-center gap-2">
+                            {/* search */}
+                            <form
+                                onSubmit={submitSearch}
+                                role="search"
+                                className="hairline hidden h-10 items-center gap-2 rounded-full border bg-card/70 px-4 backdrop-blur transition-colors focus-within:border-cobalt xl:flex xl:w-[200px] 2xl:w-[260px] dark:bg-night-2/70"
+                            >
+                                <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+                                <input
+                                    type="search"
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    placeholder={t(
+                                        'Cari judul, penulis…',
+                                        'Search title, author…',
+                                    )}
+                                    className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+                                    aria-label="Pencarian katalog"
+                                />
+                            </form>
+
+                            {/* language switcher (dropdown, data-driven) */}
+                            <div className="hidden sm:block">
+                                <DropdownMenuLanguage isScrolled />
+                            </div>
+
+                            {/* dark toggle */}
+                            <button
+                                onClick={() =>
+                                    updateAppearance(isDark ? 'light' : 'dark')
+                                }
+                                aria-label={
+                                    isDark ? 'Mode terang' : 'Mode malam'
+                                }
+                                className="hairline grid h-10 w-10 place-items-center rounded-full border text-foreground transition-colors hover:border-cobalt/40 hover:text-cobalt dark:hover:text-cobalt-lt"
+                            >
+                                {isDark ? (
+                                    <Sun className="h-[17px] w-[17px]" />
+                                ) : (
+                                    <Moon className="h-[17px] w-[17px]" />
+                                )}
+                            </button>
+
+                            {/* auth */}
+                            {isAuthenticated ? (
+                                <div
+                                    className="relative hidden md:block"
+                                    onMouseEnter={() =>
+                                        handleEnter('__profile')
+                                    }
+                                    onMouseLeave={handleLeave}
+                                >
+                                    <button className="hairline flex items-center gap-2 rounded-full border py-1 pr-3 pl-1 transition-colors hover:border-cobalt/40">
+                                        <img
+                                            src={avatarSrc}
+                                            alt={auth.user.name}
+                                            className="h-8 w-8 rounded-full object-cover"
+                                        />
+                                        <span className="max-w-[100px] truncate text-sm font-medium text-foreground">
+                                            {auth.user.name}
+                                        </span>
+                                        <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                                    </button>
+                                    {openMenu === '__profile' && (
+                                        <div className="hairline dd-enter in absolute top-full right-0 mt-3 w-[220px] overflow-hidden rounded-xl2 border bg-card shadow-lift dark:bg-night-2">
+                                            <div className="p-2">
+                                                {profileSubNavItems.map(
+                                                    (item) => {
+                                                        const Icon =
+                                                            profileIcons[
+                                                                item.icon
+                                                            ] ?? User;
+                                                        const isLogout =
+                                                            item.icon ===
+                                                            'logout';
+                                                        return (
+                                                            <Link
+                                                                key={item.id}
+                                                                href={item.href}
+                                                                method={
+                                                                    isLogout
+                                                                        ? 'post'
+                                                                        : 'get'
+                                                                }
+                                                                as={
+                                                                    isLogout
+                                                                        ? 'button'
+                                                                        : 'a'
+                                                                }
+                                                                onClick={() =>
+                                                                    setOpenMenu(
+                                                                        null,
+                                                                    )
+                                                                }
+                                                                className={`flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-sm transition-colors ${
+                                                                    isLogout
+                                                                        ? 'text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10'
+                                                                        : 'text-foreground hover:bg-paper-2/70 dark:hover:bg-night-3'
+                                                                }`}
                                                             >
+                                                                <Icon className="h-4 w-4" />
                                                                 {language ===
                                                                 'en'
-                                                                    ? m.label.en
-                                                                    : m.label.id}
-                                                            </span>
-                                                        </span>
-                                                        <ArrowUpRight className="mt-1 h-3.5 w-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-60" />
-                                                    </Link>
-                                                );
-                                            })}
+                                                                    ? item.label
+                                                                          .en
+                                                                    : item.label
+                                                                          .id}
+                                                            </Link>
+                                                        );
+                                                    },
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                    </nav>
-
-                    {/* right controls */}
-                    <div className="flex shrink-0 items-center gap-2">
-                        {/* search */}
-                        <form
-                            onSubmit={submitSearch}
-                            role="search"
-                            className="hairline hidden h-10 items-center gap-2 rounded-full border bg-card/70 px-4 backdrop-blur transition-colors focus-within:border-cobalt xl:flex xl:w-[200px] 2xl:w-[260px] dark:bg-night-2/70"
-                        >
-                            <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
-                            <input
-                                type="search"
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                placeholder={t(
-                                    'Cari judul, penulis…',
-                                    'Search title, author…',
-                                )}
-                                className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
-                                aria-label="Pencarian katalog"
-                            />
-                        </form>
-
-                        {/* language switcher (dropdown, data-driven) */}
-                        <div className="hidden sm:block">
-                            <DropdownMenuLanguage isScrolled />
-                        </div>
-
-                        {/* dark toggle */}
-                        <button
-                            onClick={() =>
-                                updateAppearance(isDark ? 'light' : 'dark')
-                            }
-                            aria-label={isDark ? 'Mode terang' : 'Mode malam'}
-                            className="hairline grid h-10 w-10 place-items-center rounded-full border text-foreground transition-colors hover:border-cobalt/40 hover:text-cobalt dark:hover:text-cobalt-lt"
-                        >
-                            {isDark ? (
-                                <Sun className="h-[17px] w-[17px]" />
+                                    )}
+                                </div>
                             ) : (
-                                <Moon className="h-[17px] w-[17px]" />
+                                <Link
+                                    href={navAuthItems.href}
+                                    className="btn-press hidden items-center gap-2 rounded-full bg-cobalt px-4 py-2.5 font-sans text-[12px] font-semibold tracking-editorial text-white uppercase transition-colors hover:bg-cobalt-dk md:inline-flex"
+                                >
+                                    <User className="h-3.5 w-3.5" />
+                                    {language === 'en'
+                                        ? navAuthItems.label.en
+                                        : navAuthItems.label.id}
+                                </Link>
                             )}
-                        </button>
 
-                        {/* auth */}
-                        {isAuthenticated ? (
-                            <div
-                                className="relative hidden md:block"
-                                onMouseEnter={() => handleEnter('__profile')}
-                                onMouseLeave={handleLeave}
+                            {/* mobile hamburger */}
+                            <button
+                                onClick={() => setMobileOpen(true)}
+                                aria-label="Buka menu"
+                                className="hairline grid h-10 w-10 place-items-center rounded-full border text-foreground lg:hidden"
                             >
-                                <button className="hairline flex items-center gap-2 rounded-full border py-1 pr-3 pl-1 transition-colors hover:border-cobalt/40">
-                                    <img
-                                        src={avatarSrc}
-                                        alt={auth.user.name}
-                                        className="h-8 w-8 rounded-full object-cover"
-                                    />
-                                    <span className="max-w-[100px] truncate text-sm font-medium text-foreground">
-                                        {auth.user.name}
-                                    </span>
-                                    <ChevronDown className="h-3 w-3 text-muted-foreground" />
-                                </button>
-                                {openMenu === '__profile' && (
-                                    <div className="hairline dd-enter in absolute top-full right-0 mt-3 w-[220px] overflow-hidden rounded-xl2 border bg-card shadow-lift dark:bg-night-2">
-                                        <div className="p-2">
-                                            {profileSubNavItems.map((item) => {
-                                                const Icon =
-                                                    profileIcons[item.icon] ??
-                                                    User;
-                                                const isLogout =
-                                                    item.icon === 'logout';
-                                                return (
-                                                    <Link
-                                                        key={item.id}
-                                                        href={item.href}
-                                                        method={
-                                                            isLogout
-                                                                ? 'post'
-                                                                : 'get'
-                                                        }
-                                                        as={
-                                                            isLogout
-                                                                ? 'button'
-                                                                : 'a'
-                                                        }
-                                                        onClick={() =>
-                                                            setOpenMenu(null)
-                                                        }
-                                                        className={`flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-sm transition-colors ${
-                                                            isLogout
-                                                                ? 'text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10'
-                                                                : 'text-foreground hover:bg-paper-2/70 dark:hover:bg-night-3'
-                                                        }`}
-                                                    >
-                                                        <Icon className="h-4 w-4" />
-                                                        {language === 'en'
-                                                            ? item.label.en
-                                                            : item.label.id}
-                                                    </Link>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        ) : (
-                            <Link
-                                href={navAuthItems.href}
-                                className="btn-press hidden items-center gap-2 rounded-full bg-cobalt px-4 py-2.5 font-sans text-[12px] font-semibold tracking-editorial text-white uppercase transition-colors hover:bg-cobalt-dk md:inline-flex"
-                            >
-                                <User className="h-3.5 w-3.5" />
-                                {language === 'en'
-                                    ? navAuthItems.label.en
-                                    : navAuthItems.label.id}
-                            </Link>
-                        )}
-
-                        {/* mobile hamburger */}
-                        <button
-                            onClick={() => setMobileOpen(true)}
-                            aria-label="Buka menu"
-                            className="hairline grid h-10 w-10 place-items-center rounded-full border text-foreground lg:hidden"
-                        >
-                            <Menu className="h-5 w-5" />
-                        </button>
+                                <Menu className="h-5 w-5" />
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </header>
+            </header>
 
             {/* mobile drawer — DIRENDER DI LUAR <header>: header memakai
                 backdrop-filter saat scroll yang membuat containing block untuk
@@ -441,7 +464,8 @@ const Navbar = ({ initialAuth }: { initialAuth?: any }) => {
                                                 <ChevronDown
                                                     className={cn(
                                                         'h-4 w-4 transition-transform',
-                                                        expanded && 'rotate-180',
+                                                        expanded &&
+                                                            'rotate-180',
                                                     )}
                                                 />
                                             </button>
@@ -474,7 +498,8 @@ const Navbar = ({ initialAuth }: { initialAuth?: any }) => {
                                                                 {language ===
                                                                 'en'
                                                                     ? m.label.en
-                                                                    : m.label.id}
+                                                                    : m.label
+                                                                          .id}
                                                             </Link>
                                                         );
                                                     })}
@@ -512,7 +537,10 @@ const Navbar = ({ initialAuth }: { initialAuth?: any }) => {
                                 <span className="text-sm text-muted-foreground">
                                     {t('Bahasa', 'Language')}
                                 </span>
-                                <DropdownMenuLanguage variant="mobile" isScrolled />
+                                <DropdownMenuLanguage
+                                    variant="mobile"
+                                    isScrolled
+                                />
                             </div>
 
                             {/* theme: light / dark */}
@@ -587,47 +615,55 @@ const Navbar = ({ initialAuth }: { initialAuth?: any }) => {
                                         />
                                     </button>
                                     {mobileProfileOpen && (
-                                    <div className="hairline mt-1 border-t pt-1">
-                                        {profileSubNavItems.map((item) => {
-                                            const Icon =
-                                                profileIcons[item.icon] ?? User;
-                                            const isLogout =
-                                                item.icon === 'logout';
-                                            const itemActive =
-                                                !isLogout && isActive(item.href);
-                                            return (
-                                                <Link
-                                                    key={item.id}
-                                                    href={item.href}
-                                                    method={
-                                                        isLogout ? 'post' : 'get'
-                                                    }
-                                                    as={isLogout ? 'button' : 'a'}
-                                                    onClick={() =>
-                                                        setMobileOpen(false)
-                                                    }
-                                                    aria-current={
-                                                        itemActive
-                                                            ? 'page'
-                                                            : undefined
-                                                    }
-                                                    className={cn(
-                                                        'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors',
-                                                        isLogout
-                                                            ? 'text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10'
-                                                            : itemActive
-                                                              ? 'bg-cobalt-50 font-medium text-cobalt dark:bg-cobalt/10 dark:text-cobalt-lt'
-                                                              : 'text-foreground hover:bg-paper-2/70 dark:hover:bg-night-3',
-                                                    )}
-                                                >
-                                                    <Icon className="h-4 w-4" />
-                                                    {language === 'en'
-                                                        ? item.label.en
-                                                        : item.label.id}
-                                                </Link>
-                                            );
-                                        })}
-                                    </div>
+                                        <div className="hairline mt-1 border-t pt-1">
+                                            {profileSubNavItems.map((item) => {
+                                                const Icon =
+                                                    profileIcons[item.icon] ??
+                                                    User;
+                                                const isLogout =
+                                                    item.icon === 'logout';
+                                                const itemActive =
+                                                    !isLogout &&
+                                                    isActive(item.href);
+                                                return (
+                                                    <Link
+                                                        key={item.id}
+                                                        href={item.href}
+                                                        method={
+                                                            isLogout
+                                                                ? 'post'
+                                                                : 'get'
+                                                        }
+                                                        as={
+                                                            isLogout
+                                                                ? 'button'
+                                                                : 'a'
+                                                        }
+                                                        onClick={() =>
+                                                            setMobileOpen(false)
+                                                        }
+                                                        aria-current={
+                                                            itemActive
+                                                                ? 'page'
+                                                                : undefined
+                                                        }
+                                                        className={cn(
+                                                            'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors',
+                                                            isLogout
+                                                                ? 'text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10'
+                                                                : itemActive
+                                                                  ? 'bg-cobalt-50 font-medium text-cobalt dark:bg-cobalt/10 dark:text-cobalt-lt'
+                                                                  : 'text-foreground hover:bg-paper-2/70 dark:hover:bg-night-3',
+                                                        )}
+                                                    >
+                                                        <Icon className="h-4 w-4" />
+                                                        {language === 'en'
+                                                            ? item.label.en
+                                                            : item.label.id}
+                                                    </Link>
+                                                );
+                                            })}
+                                        </div>
                                     )}
                                 </div>
                             ) : (

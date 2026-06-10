@@ -43,4 +43,8 @@ return [
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect' => env('GOOGLE_REDIRECT_URI', '/auth/google/callback'),
     ],
+
+    'fonnte' => [
+        'token' => env('FONNTE_TOKEN'),
+    ],
 ];

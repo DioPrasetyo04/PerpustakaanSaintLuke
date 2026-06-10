@@ -15,7 +15,7 @@ class WhatsAppService
      */
     public function sendText(?string $phone, string $message)
     {
-        $token = env('FONNTE_TOKEN');
+        $token = config('services.fonnte.token');
         if (empty($token)) {
             Log::error('[Fonte] FONNTE_TOKEN tidak diset di .env');
             return null;
@@ -62,7 +62,7 @@ class WhatsAppService
 
     public function sendReminder($phone, $loanDetail, $diff)
     {
-        $token = env('FONNTE_TOKEN');
+        $token = config('services.fonnte.token');
         if (empty($token)) {
             Log::error('[Fonte] FONNTE_TOKEN tidak diset di .env');
             return null;
