@@ -1,0 +1,149 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="1200" viewBox="0 0 960 1200" fill="none" role="img" aria-label="Ilustrasi ruang baca perpustakaan">
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0f1a14"/>
+      <stop offset="0.5" stop-color="#13201a"/>
+      <stop offset="1" stop-color="#0b130f"/>
+    </linearGradient>
+    <radialGradient id="lamp" cx="0.72" cy="0.28" r="0.55">
+      <stop offset="0" stop-color="#f6d79a" stop-opacity="0.55"/>
+      <stop offset="0.4" stop-color="#e9b86a" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#e9b86a" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="shelf" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3a2a1d"/>
+      <stop offset="1" stop-color="#241a12"/>
+    </linearGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1a130d"/>
+      <stop offset="1" stop-color="#0a0805"/>
+    </linearGradient>
+    <linearGradient id="sheen" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.10"/>
+      <stop offset="0.5" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.04"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Backdrop -->
+  <rect width="960" height="1200" fill="url(#wall)"/>
+  <rect width="960" height="1200" fill="url(#lamp)"/>
+
+  <!-- Window with warm evening light -->
+  <g opacity="0.9">
+    <rect x="600" y="70" width="300" height="430" rx="6" fill="#1c2b22"/>
+    <rect x="612" y="82" width="276" height="406" rx="4" fill="#243a2c"/>
+    <rect x="612" y="82" width="276" height="406" rx="4" fill="url(#lamp)"/>
+    <rect x="746" y="82" width="8" height="406" fill="#0f1a14"/>
+    <rect x="612" y="280" width="276" height="8" fill="#0f1a14"/>
+    <rect x="600" y="70" width="300" height="430" rx="6" fill="none" stroke="#0c1410" stroke-width="10"/>
+  </g>
+
+  <!-- Bookshelves -->
+  <g>
+    <!-- shelf rows -->
+    <g id="shelves">
+      <!-- Row generator: 5 shelves on the left wall -->
+      <!-- Shelf 1 -->
+      <rect x="40" y="120" width="500" height="150" rx="4" fill="url(#shelf)"/>
+      <rect x="40" y="260" width="500" height="14" fill="#1b130c"/>
+      <!-- Shelf 2 -->
+      <rect x="40" y="300" width="500" height="150" rx="4" fill="url(#shelf)"/>
+      <rect x="40" y="440" width="500" height="14" fill="#1b130c"/>
+      <!-- Shelf 3 -->
+      <rect x="40" y="480" width="500" height="150" rx="4" fill="url(#shelf)"/>
+      <rect x="40" y="620" width="500" height="14" fill="#1b130c"/>
+    </g>
+  </g>
+
+  <!-- Books: colored spines (brand-leaning palette) -->
+  <g id="books">
+    <!-- Row 1 -->
+    <g transform="translate(56,132)">
+      <rect x="0"   y="0" width="26" height="126" fill="#2f6f54"/>
+      <rect x="30"  y="8" width="22" height="118" fill="#b9923f"/>
+      <rect x="56"  y="0" width="30" height="126" fill="#1f4d6b"/>
+      <rect x="90"  y="14" width="20" height="112" fill="#a23b2e"/>
+      <rect x="114" y="4" width="26" height="122" fill="#3d8a68"/>
+      <rect x="144" y="0" width="18" height="126" fill="#d8b15e"/>
+      <rect x="166" y="10" width="28" height="116" fill="#274b3a"/>
+      <rect x="198" y="0" width="24" height="126" fill="#6b4a8a"/>
+      <rect x="226" y="6" width="22" height="120" fill="#c47a35"/>
+      <rect x="252" y="0" width="30" height="126" fill="#2f6f54"/>
+      <rect x="286" y="12" width="20" height="114" fill="#1f4d6b"/>
+      <rect x="310" y="2" width="26" height="124" fill="#b9923f"/>
+      <rect x="340" y="0" width="22" height="126" fill="#7a3c33"/>
+      <rect x="366" y="8" width="28" height="118" fill="#3d8a68"/>
+      <rect x="398" y="0" width="20" height="126" fill="#d8b15e"/>
+      <rect x="422" y="6" width="26" height="120" fill="#274b3a"/>
+      <rect x="452" y="0" width="24" height="126" fill="#6b4a8a"/>
+    </g>
+    <!-- Row 2 -->
+    <g transform="translate(56,312)">
+      <rect x="0"   y="6" width="24" height="120" fill="#1f4d6b"/>
+      <rect x="28"  y="0" width="28" height="126" fill="#c47a35"/>
+      <rect x="60"  y="10" width="20" height="116" fill="#2f6f54"/>
+      <rect x="84"  y="0" width="26" height="126" fill="#a23b2e"/>
+      <rect x="114" y="4" width="22" height="122" fill="#d8b15e"/>
+      <rect x="140" y="0" width="30" height="126" fill="#274b3a"/>
+      <rect x="174" y="8" width="20" height="118" fill="#6b4a8a"/>
+      <rect x="198" y="0" width="26" height="126" fill="#3d8a68"/>
+      <rect x="228" y="6" width="24" height="120" fill="#b9923f"/>
+      <rect x="256" y="0" width="22" height="126" fill="#1f4d6b"/>
+      <rect x="282" y="10" width="28" height="116" fill="#7a3c33"/>
+      <rect x="314" y="0" width="20" height="126" fill="#2f6f54"/>
+      <rect x="338" y="4" width="26" height="122" fill="#d8b15e"/>
+      <rect x="368" y="0" width="24" height="126" fill="#274b3a"/>
+      <rect x="396" y="8" width="22" height="118" fill="#c47a35"/>
+      <rect x="422" y="0" width="30" height="126" fill="#3d8a68"/>
+      <rect x="456" y="6" width="20" height="120" fill="#6b4a8a"/>
+    </g>
+    <!-- Row 3 -->
+    <g transform="translate(56,492)">
+      <rect x="0"   y="0" width="28" height="126" fill="#3d8a68"/>
+      <rect x="32"  y="8" width="20" height="118" fill="#a23b2e"/>
+      <rect x="56"  y="0" width="26" height="126" fill="#d8b15e"/>
+      <rect x="86"  y="6" width="24" height="120" fill="#1f4d6b"/>
+      <rect x="114" y="0" width="22" height="126" fill="#2f6f54"/>
+      <rect x="140" y="10" width="28" height="116" fill="#b9923f"/>
+      <rect x="172" y="0" width="20" height="126" fill="#6b4a8a"/>
+      <rect x="196" y="4" width="26" height="122" fill="#274b3a"/>
+      <rect x="226" y="0" width="24" height="126" fill="#c47a35"/>
+      <rect x="254" y="8" width="22" height="118" fill="#7a3c33"/>
+      <rect x="280" y="0" width="30" height="126" fill="#2f6f54"/>
+      <rect x="314" y="6" width="20" height="120" fill="#d8b15e"/>
+      <rect x="338" y="0" width="26" height="126" fill="#1f4d6b"/>
+      <rect x="368" y="10" width="24" height="116" fill="#3d8a68"/>
+      <rect x="396" y="0" width="22" height="126" fill="#b9923f"/>
+      <rect x="422" y="6" width="28" height="120" fill="#a23b2e"/>
+      <rect x="454" y="0" width="20" height="126" fill="#274b3a"/>
+    </g>
+  </g>
+
+  <!-- Reading nook: armchair + lamp silhouette -->
+  <g>
+    <!-- floor -->
+    <rect x="0" y="820" width="960" height="380" fill="url(#floor)"/>
+    <!-- rug -->
+    <ellipse cx="480" cy="1080" rx="360" ry="70" fill="#1d2a22" opacity="0.7"/>
+    <!-- armchair -->
+    <g>
+      <path d="M300 1060 v-150 a60 60 0 0 1 60 -60 h180 a60 60 0 0 1 60 60 v150 z" fill="#243a2c"/>
+      <path d="M300 980 a40 40 0 0 0 -40 40 v40 h40 z" fill="#1c2e22"/>
+      <path d="M660 980 a40 40 0 0 1 40 40 v40 h-40 z" fill="#1c2e22"/>
+      <rect x="340" y="1000" width="280" height="60" rx="20" fill="#2f4a38"/>
+      <rect x="340" y="1000" width="280" height="60" rx="20" fill="url(#sheen)"/>
+    </g>
+    <!-- floor lamp -->
+    <g stroke="#16241c">
+      <rect x="752" y="700" width="8" height="360" fill="#16241c"/>
+      <path d="M716 700 h80 l-16 -70 h-48 z" fill="#e9b86a" opacity="0.85"/>
+      <ellipse cx="756" cy="1060" rx="46" ry="12" fill="#16241c"/>
+    </g>
+    <circle cx="756" cy="660" r="150" fill="url(#lamp)"/>
+  </g>
+
+  <!-- Soft global sheen + vignette for text legibility -->
+  <rect width="960" height="1200" fill="url(#sheen)" opacity="0.5"/>
+  <rect width="960" height="1200" fill="#070b08" opacity="0.18"/>
+</svg>
