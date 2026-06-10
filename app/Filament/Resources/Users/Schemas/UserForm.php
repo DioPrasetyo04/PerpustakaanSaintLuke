@@ -6,6 +6,7 @@ use App\Enums\SocialMedia;
 use App\Enums\UserType;
 use App\Models\User;
 use App\Notifications\AccountApprovedNotification;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
@@ -136,25 +137,43 @@ class UserForm
                                     Toggle::make('is_approved')
                                         ->label('Disetujui')
                                         ->helperText('Aktifkan untuk menyetujui akun user ini agar bisa mengakses panel admin.')
-                                        ->afterStateUpdated(function (bool $state, $record) {
-                                            if ($state && $record instanceof User && ! $record->is_approved) {
-                                                $record->approve(Auth::user());
-                                                $record->notify(new AccountApprovedNotification());
+                                        ->afterStateUpdated(function (bool $state, Set $set, $record) {
+                                            if ($state) {
+                                                $set('approved_at', now());
+
+                                                if ($record instanceof User && ! $record->is_approved) {
+                                                    $record->approve(Auth::user());
+                                                    $record->notify(new AccountApprovedNotification());
+                                                }
+                                            } else {
+                                                $set('approved_at', null);
                                             }
                                         })
                                         ->live(),
                                     DatePicker::make('approved_at')
                                         ->label('Disetujui Pada')
                                         ->nullable()
-                                        ->readOnly()
+                                        ->default(now())
                                         ->visibleOn('edit'),
                                 ]),
                             ]),
                             Section::make('Give Roles & Permissions To User')->description('Roles & Permissions To Access Maintain Information & Modification Data')->schema([
-                                Grid::make(2)->schema([
-                                    Select::make('roles')->multiple()->relationship('roles', 'name')->preload()->nullable(),
-                                    Select::make('permissions')->multiple()->relationship('permissions', 'name')->preload()->nullable(),
-                                ])
+                                CheckboxList::make('roles')
+                                    ->label('Roles')
+                                    ->relationship('roles', 'name')
+                                    ->searchable()
+                                    ->bulkToggleable()
+                                    ->columns(3)
+                                    ->gridDirection('row')
+                                    ->columnSpanFull(),
+                                CheckboxList::make('permissions')
+                                    ->label('Permissions')
+                                    ->relationship('permissions', 'name')
+                                    ->searchable()
+                                    ->bulkToggleable()
+                                    ->columns(3)
+                                    ->gridDirection('row')
+                                    ->columnSpanFull(),
                             ])
                         ]),
                 ])->columnSpanFull(),
