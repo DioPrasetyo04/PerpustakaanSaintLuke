@@ -20,6 +20,13 @@ class ReturnBookController extends Controller
 
     public function confirmation(string $slug, string $loanCode)
     {
+        // Pengaturan denda belum dikonfigurasi admin → jangan panggil service
+        // (FineSettings::checkSettings() akan firstOrFail → 404). Tolak proses
+        // dan tampilkan popup multi-bahasa "Pengaturan Denda Belum Diatur".
+        if (! \App\Models\FineSettings::query()->exists()) {
+            return back()->with('access_denied', 'fine_unset');
+        }
+
         $data = $this->returnController->getConfirmationReturnBookUserAuth($slug, $loanCode, auth()->id());
 
         // Buku sudah dikembalikan → jangan tampilkan halaman konfirmasi yang akan
@@ -31,12 +38,23 @@ class ReturnBookController extends Controller
         }
 
         return Inertia::render('book/return/Confirmation', [
-            'data' => $data
+            'data' => $data,
+            // Status konfigurasi denda: bila belum diatur admin, halaman menolak
+            // proses pengembalian dan memunculkan popup "Pengaturan Denda Belum
+            // Diatur" (tanpa redirect). Lihat Confirmation.tsx + AccessDeniedModal.
+            'fineSettingsConfigured' => \App\Models\FineSettings::query()->exists(),
         ]);
     }
 
     public function store(ReturnBookRequest $request, string $slug)
     {
+        // Pengaman server: tolak pengembalian bila pengaturan denda belum
+        // dikonfigurasi (perhitungan denda akan tidak valid tanpa setting).
+        // Picu popup multi-bahasa "Pengaturan Denda Belum Diatur".
+        if (! \App\Models\FineSettings::query()->exists()) {
+            return back()->with('access_denied', 'fine_unset');
+        }
+
         $validated = $request->validated();
 
         $return = $this->returnController->processReturnBook(

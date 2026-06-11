@@ -1096,6 +1096,7 @@ function LoansTable({ items }: { items: LoanItem[] }) {
                     <Th>Borrow Date</Th>
                     <Th>Due Date</Th>
                     <Th>Status</Th>
+                    <Th>Actions</Th>
                 </tr>
             </thead>
             <tbody className="divide-y divide-border bg-card">
@@ -1126,6 +1127,17 @@ function LoansTable({ items }: { items: LoanItem[] }) {
                                     <XCircle className="h-3 w-3 mr-1" /> Overdue
                                 </Badge>
                             )}
+                        </Td>
+                        <Td>
+                            <Link
+                                href={route('book.assets', {
+                                    slug: item.slug,
+                                })}
+                            >
+                                <Button size="sm" variant="outline">
+                                    <Eye className="h-4 w-4" />
+                                </Button>
+                            </Link>
                         </Td>
                     </motion.tr>
                 ))}

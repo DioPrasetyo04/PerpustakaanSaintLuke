@@ -26,6 +26,9 @@ pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pd
 export default function assets() {
     const { props } = usePage<AssetPageProps>();
     const { book, assets, totalAssets, loan } = props;
+    const fineSettingsConfigured =
+        (props as unknown as { fineSettingsConfigured?: boolean })
+            .fineSettingsConfigured ?? true;
     const { language } = useLanguage();
 
     const [selectedAsset, setSelectedAsset] = useState<AssetProps | null>(
@@ -166,6 +169,18 @@ export default function assets() {
     };
 
     const onHandleReturnBook = () => {
+        // Denda belum dikonfigurasi admin → JANGAN navigasi ke halaman konfirmasi
+        // (akan 404 / ditolak). Munculkan popup multi-bahasa di tempat. Pakai
+        // setTimeout agar listener AccessDeniedModal pasti sudah terpasang.
+        if (!fineSettingsConfigured) {
+            window.setTimeout(() => {
+                window.dispatchEvent(
+                    new CustomEvent('access-denied', { detail: 'fine_unset' }),
+                );
+            }, 0);
+            return;
+        }
+
         router.get(
             route('return.confirmation', {
                 slug: book?.slug,
@@ -185,13 +200,12 @@ export default function assets() {
                         </Button>
                     </Link>
 
-                    <Badge className="bg-cobalt">
-                        Borrowed until{' '}
-                        {formattedDate(
-                            book.loan?.map((l) => l.due_date)[0],
-                            language,
-                        )}
-                    </Badge>
+                    {loan?.due_date && (
+                        <Badge className="bg-cobalt">
+                            Borrowed until{' '}
+                            {formattedDate(loan.due_date, language)}
+                        </Badge>
+                    )}
                 </div>
 
                 {/* Book Info */}

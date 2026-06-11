@@ -105,7 +105,10 @@ export default function PDFViewer({ url }: Props) {
                             onClick={() => setPage((p) => Math.max(1, p - 1))}
                             disabled={page <= 1}
                             className={btn}
-                            aria-label={tr('Halaman sebelumnya', 'Previous page')}
+                            aria-label={tr(
+                                'Halaman sebelumnya',
+                                'Previous page',
+                            )}
                         >
                             <ChevronLeft className="h-4 w-4" />
                         </button>

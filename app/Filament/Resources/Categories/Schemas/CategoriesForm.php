@@ -52,7 +52,15 @@ class CategoriesForm
                             FileUpload::make('icon')
                                 ->label('Icon Of Categories')
                                 ->image()
-                                ->maxSize(1024) // 1MB
+                                ->acceptedFileTypes([
+                                    'image/png',
+                                    'image/jpeg',
+                                    'image/svg+xml',
+                                    'image/webp',
+                                    'image/gif',
+                                ])
+                                ->maxSize(2048)
+                                ->helperText('Format yang diperbolehkan: PNG, JPG, JPEG, SVG, WEBP, GIF. Maksimal ukuran 2MB.')
                                 ->directory('categories/icons')
                                 ->disk('public')
                                 ->visibility('public')
@@ -62,7 +70,15 @@ class CategoriesForm
                             FileUpload::make('photo')
                                 ->label('Photo Of Categories')
                                 ->image()
-                                ->maxSize(4096) // 4MB
+                                ->acceptedFileTypes([
+                                    'image/png',
+                                    'image/jpeg',
+                                    'image/svg+xml',
+                                    'image/webp',
+                                    'image/gif',
+                                ])
+                                ->maxSize(2048)
+                                ->helperText('Format yang diperbolehkan: PNG, JPG, JPEG, SVG, WEBP, GIF. Maksimal ukuran 2MB.')
                                 ->disk('public')
                                 ->directory('categories/images')
                                 ->imageResizeMode('cover')

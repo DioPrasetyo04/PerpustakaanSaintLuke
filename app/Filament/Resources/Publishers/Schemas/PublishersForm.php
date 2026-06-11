@@ -73,7 +73,15 @@ class PublishersForm
                             FileUpload::make('logo')
                                 ->label('Logo')
                                 ->image()
-                                ->maxSize(4096) // 4MB
+                                ->acceptedFileTypes([
+                                    'image/png',
+                                    'image/jpeg',
+                                    'image/svg+xml',
+                                    'image/webp',
+                                    'image/gif',
+                                ])
+                                ->maxSize(2048)
+                                ->helperText('Format yang diperbolehkan: PNG, JPG, JPEG, SVG, WEBP, GIF. Maksimal ukuran 2MB.')
                                 ->disk('public')
                                 ->visibility('public')
                                 ->directory('publishers/logos')

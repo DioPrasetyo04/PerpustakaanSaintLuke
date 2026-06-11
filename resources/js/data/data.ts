@@ -541,6 +541,11 @@ export const assetAccessDenied = {
             description:
                 'Akun staf (admin/super admin) tidak dapat membaca atau meminjam buku. Silakan gunakan akun anggota.',
         },
+        fine_unset: {
+            title: 'Pengaturan Denda Belum Diatur',
+            description:
+                'Konfigurasi pengaturan denda belum diatur oleh admin. Peminjaman belum dapat diproses. Silakan hubungi admin perpustakaan terlebih dahulu.',
+        },
     },
     en: {
         expired: {
@@ -557,6 +562,11 @@ export const assetAccessDenied = {
             title: 'Staff Account Not Allowed',
             description:
                 'Staff accounts (admin/super admin) cannot read or borrow books. Please use a member account.',
+        },
+        fine_unset: {
+            title: 'Fine Settings Not Configured',
+            description:
+                'The fine settings have not been configured by an admin yet, so borrowing cannot be processed. Please contact the library admin first.',
         },
     },
 };

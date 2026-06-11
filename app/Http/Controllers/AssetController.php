@@ -34,6 +34,10 @@ class AssetController extends Controller
             'assets' => $data['assets'],
             'loan' => $data['loan'],
             'totalAssets' => $data['total_assets'],
+            // Status konfigurasi denda: dipakai untuk memunculkan popup
+            // "Pengaturan Denda Belum Diatur" tanpa redirect saat tombol
+            // Kembalikan ditekan (tanpa harus menavigasi ke halaman konfirmasi).
+            'fineSettingsConfigured' => \App\Models\FineSettings::query()->exists(),
         ]);
     }
 

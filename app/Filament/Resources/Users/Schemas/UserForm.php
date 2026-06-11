@@ -64,11 +64,23 @@ class UserForm
                                         ->label('Phone')
                                         ->defaultCountry('id')
                                         ->separateDialCode()
-                                        ->showFlags()
-                                        ->required(),
+                                        ->showFlags(),
                                     DatePicker::make('date_of_birth')->label('Tanggal Ulang Tahun')->nullable(),
                                     Textarea::make('address')->label('Alamat')->string()->nullable(),
-                                    FileUpload::make('avatar')->disk('public')->directory('users')->visibility('public'),
+                                    FileUpload::make('avatar')
+                                        ->disk('public')
+                                        ->directory('users')
+                                        ->visibility('public')
+                                        ->image()
+                                        // Hanya gambar: jpg, jpeg, png, svg, gif. Selain itu ditolak.
+                                        ->acceptedFileTypes([
+                                            'image/jpeg',
+                                            'image/png',
+                                            'image/svg+xml',
+                                            'image/gif',
+                                        ])
+                                        // Maksimal ukuran file 2MB (nilai dalam kilobita).
+                                        ->maxSize(2048),
                                     Select::make('type')
                                         ->label('Tingkat Pendidikan')
                                         ->options(UserType::options())
@@ -101,30 +113,26 @@ class UserForm
                                             ->allowHtml()
                                             ->getOptionLabelUsing(fn($value) => SocialMedia::from($value)->html())
                                             ->searchable()
-                                            ->required()
                                             ->native(false)
+                                            // Wajib hanya bila baris ditambahkan; social media
+                                            // secara keseluruhan tetap opsional (lihat defaultItems 0).
+                                            ->required()
                                             ->columnSpan(1),
 
                                         TextInput::make('url')
                                             ->label('URL')
-                                            ->required()
                                             ->url()
                                             ->columnSpan(1),
 
                                         TextInput::make('username')
+                                            ->string()
                                             ->label('Username / Text')
                                             ->columnSpan(1),
                                     ])
                                     ->columns(3)
-                                    ->defaultItems(1)
-                                    ->minItems(1)
-                                    ->afterStateHydrated(function ($component, $state) {
-                                        if (blank($state)) {
-                                            $component->state([
-                                                []
-                                            ]);
-                                        }
-                                    })
+                                    // Social media opsional: boleh kosong (tanpa baris). Jika
+                                    // admin tidak menambah baris, tidak ada data yang di-insert.
+                                    ->defaultItems(0)
                                     ->addActionLabel('Tambah Social Media')
                                     ->reorderable()
                                     ->collapsible()
