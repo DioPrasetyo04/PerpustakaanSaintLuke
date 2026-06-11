@@ -4,7 +4,7 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { assetAccessDenied } from '@/data/data';
 import type { FlashProps, PageProps } from '@/types';
 
-type DeniedType = 'expired' | 'unauthorized' | 'staff';
+type DeniedType = 'expired' | 'unauthorized' | 'staff' | 'fine_unset';
 
 type Props = {
     initialFlash: FlashProps | null;
@@ -30,6 +30,22 @@ export default function AccessDeniedModal({ initialFlash }: Props) {
             }
         });
         return remove;
+    }, []);
+
+    // Trigger popup secara client-side TANPA navigasi/redirect. Komponen lain
+    // cukup men-dispatch: window.dispatchEvent(new CustomEvent('access-denied', { detail: 'fine_unset' })).
+    useEffect(() => {
+        const handler = (event: Event) => {
+            const type = (event as CustomEvent<DeniedType>).detail ?? null;
+            if (type) {
+                setDeniedType(type);
+                setVisible(true);
+                setAnimating(true);
+            }
+        };
+        window.addEventListener('access-denied', handler as EventListener);
+        return () =>
+            window.removeEventListener('access-denied', handler as EventListener);
     }, []);
 
     const dismiss = () => {

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { usePage, Link, router } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -21,10 +21,27 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { returnConfirmPage } from '@/data/data';
 
 export default function Confirmation() {
-    const { data } = usePage<any>().props;
+    const { data, fineSettingsConfigured } = usePage<any>().props;
     const { book, loan, late_fee, has_review, loan_type } = data;
     const { language } = useLanguage();
     const t = returnConfirmPage[language];
+
+    // Pengaturan denda belum dikonfigurasi admin → tolak pengembalian. Saat
+    // halaman dibuka, munculkan popup multi-bahasa "Pengaturan Denda Belum
+    // Diatur" (tanpa redirect) dan blokir tombol konfirmasi di bawah.
+    const fineUnset = fineSettingsConfigured === false;
+    useEffect(() => {
+        if (!fineUnset) return;
+        // Defer: pada full page load, effect anak ini jalan SEBELUM listener
+        // AccessDeniedModal (parent di app.tsx) terpasang. Tunda satu tick agar
+        // event 'access-denied' tidak terlewat.
+        const id = window.setTimeout(() => {
+            window.dispatchEvent(
+                new CustomEvent('access-denied', { detail: 'fine_unset' }),
+            );
+        }, 0);
+        return () => window.clearTimeout(id);
+    }, [fineUnset]);
 
     // Alur frontend kini 100% digital (peminjaman fisik dihapus). Hanya pinjaman
     // yang eksplisit 'physical' (mis. dibuat admin) yang diperlakukan fisik;
@@ -109,6 +126,13 @@ export default function Confirmation() {
     };
 
     const handleConfirmReturn = () => {
+        // Denda belum diatur → munculkan kembali popup penolakan, jangan proses.
+        if (fineUnset) {
+            window.dispatchEvent(
+                new CustomEvent('access-denied', { detail: 'fine_unset' }),
+            );
+            return;
+        }
         if (!isValidated) {
             setNotification({ type: 'error', message: t.validateError });
             return;
@@ -316,7 +340,9 @@ export default function Confirmation() {
                                     onClick={handleConfirmReturn}
                                     className="flex-1 gap-2 bg-cobalt text-white hover:bg-cobalt-dk"
                                     size="lg"
-                                    disabled={!isValidated || isSubmitting}
+                                    disabled={
+                                        !isValidated || isSubmitting || fineUnset
+                                    }
                                 >
                                     <CheckCircle2 className="h-4 w-4" />
                                     {isDigital

@@ -14,13 +14,15 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            RolePermissionSeeder::class,
-            StaffUsersSeeder::class,
-            OnlineResourceSeeder::class,
-            TestimonialSeeder::class,
-            EventSeeder::class,
-            OrganizationMemberSeeder::class,
+            // RolePermissionSeeder::class,
+            // StaffUsersSeeder::class,
+            // OnlineResourceSeeder::class,
+            // TestimonialSeeder::class,
+            // EventSeeder::class,
+            // OrganizationMemberSeeder::class,
+            // AdminUserSeeder::class,
             // LoanSeeder::class, // Aktifkan saat testing fitur reminder/auto-return; jalankan via: php artisan db:seed --class=LoanSeeder
+            // BookSeeder::class,
         ]);
     }
 }

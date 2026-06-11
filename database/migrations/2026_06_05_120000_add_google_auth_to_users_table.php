@@ -15,8 +15,9 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             // ID akun Google (sub) — null untuk akun yang mendaftar manual.
             $table->string('google_id')->nullable()->unique()->after('email');
-            // URL foto profil dari penyedia OAuth (Google mengirim URL absolut).
-            $table->string('avatar_url')->nullable()->after('avatar');
+            // URL foto profil dari penyedia OAuth. Google mengirim URL absolut yang
+            // panjangnya bisa >1000 karakter, jadi pakai TEXT (bukan varchar 255).
+            $table->text('avatar_url')->nullable()->after('avatar');
         });
 
         // Password boleh null: akun yang mendaftar via Google belum punya password lokal.

@@ -47,16 +47,32 @@ class GoogleController extends Controller
             ]);
         }
 
-        // Cari berdasarkan google_id terlebih dahulu, lalu fallback ke email.
+        // Cari berdasarkan google_id LEBIH DULU (akun Google yang sudah ada),
+        // baru fallback ke email. Memakai orWhere dalam satu query bisa
+        // mengembalikan baris email padahal google_id sudah dimiliki user lain,
+        // sehingga update-nya melanggar unique constraint (duplicate entry).
         $user = User::query()
             ->where('google_id', $googleUser->getId())
-            ->orWhere('email', $email)
             ->first();
 
+        if (! $user) {
+            $user = User::query()
+                ->where('email', $email)
+                ->first();
+        }
+
         if ($user) {
-            // Akun lama (manual maupun Google) — tautkan google_id bila belum ada.
+            // Akun lama (manual maupun Google) — tautkan google_id bila belum
+            // ada DAN belum dipakai user lain (hindari duplicate entry).
             if (! $user->google_id) {
-                $user->google_id = $googleUser->getId();
+                $googleIdTaken = User::query()
+                    ->where('google_id', $googleUser->getId())
+                    ->where('id', '!=', $user->id)
+                    ->exists();
+
+                if (! $googleIdTaken) {
+                    $user->google_id = $googleUser->getId();
+                }
             }
 
             if (! $user->avatar && ! $user->avatar_url && $googleUser->getAvatar()) {

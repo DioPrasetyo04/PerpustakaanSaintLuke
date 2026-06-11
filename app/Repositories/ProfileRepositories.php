@@ -43,7 +43,7 @@ class ProfileRepositories implements ProfileInterfaceRepositories
     {
         return Loan::query()
             ->where('user_id', $userId)
-            ->whereDoesntHave('returnBook')
+            ->whereHas('loanDetails', fn ($q) => $q->whereDoesntHave('returnBook'))
             ->exists();
     }
 

@@ -138,7 +138,9 @@ const Navbar = ({ initialAuth }: { initialAuth?: any }) => {
 
     const avatarSrc = auth?.user?.avatar
         ? `/storage/${auth.user.avatar}`
-        : '/assets/images/default-avatar.webp';
+        : auth?.user?.avatar_url
+          ? auth.user.avatar_url
+          : '/assets/images/default-avatar.webp';
 
     return (
         <>
@@ -170,29 +172,57 @@ const Navbar = ({ initialAuth }: { initialAuth?: any }) => {
                                     }
                                     onMouseLeave={() => n.menu && handleLeave()}
                                 >
-                                    <Link
-                                        href={n.href}
-                                        aria-current={
-                                            isGroupActive(n)
-                                                ? 'page'
-                                                : undefined
-                                        }
-                                        className={cn(
-                                            'nav-link inline-flex items-center gap-1 rounded-full px-3.5 py-2 font-sans text-[14px] font-medium transition-colors hover:text-cobalt dark:hover:text-cobalt-lt',
-                                            isGroupActive(n)
-                                                ? 'text-cobalt dark:text-cobalt-lt'
-                                                : 'text-foreground',
-                                        )}
-                                    >
-                                        {language === 'en'
-                                            ? n.label.en
-                                            : n.label.id}
-                                        {n.menu && (
+                                    {n.menu ? (
+                                        // Item bergrup (Katalog/Tentang): tombol
+                                        // toggle dropdown — TIDAK menavigasi ke
+                                        // n.href (yang tidak punya halaman).
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                setOpenMenu((cur) =>
+                                                    cur === n.id ? null : n.id,
+                                                )
+                                            }
+                                            aria-expanded={openMenu === n.id}
+                                            aria-current={
+                                                isGroupActive(n)
+                                                    ? 'page'
+                                                    : undefined
+                                            }
+                                            className={cn(
+                                                'nav-link inline-flex items-center gap-1 rounded-full px-3.5 py-2 font-sans text-[14px] font-medium transition-colors hover:text-cobalt dark:hover:text-cobalt-lt',
+                                                isGroupActive(n)
+                                                    ? 'text-cobalt dark:text-cobalt-lt'
+                                                    : 'text-foreground',
+                                            )}
+                                        >
+                                            {language === 'en'
+                                                ? n.label.en
+                                                : n.label.id}
                                             <ChevronDown
                                                 className={`h-3 w-3 transition-transform ${openMenu === n.id ? 'rotate-180' : ''}`}
                                             />
-                                        )}
-                                    </Link>
+                                        </button>
+                                    ) : (
+                                        <Link
+                                            href={n.href}
+                                            aria-current={
+                                                isGroupActive(n)
+                                                    ? 'page'
+                                                    : undefined
+                                            }
+                                            className={cn(
+                                                'nav-link inline-flex items-center gap-1 rounded-full px-3.5 py-2 font-sans text-[14px] font-medium transition-colors hover:text-cobalt dark:hover:text-cobalt-lt',
+                                                isGroupActive(n)
+                                                    ? 'text-cobalt dark:text-cobalt-lt'
+                                                    : 'text-foreground',
+                                            )}
+                                        >
+                                            {language === 'en'
+                                                ? n.label.en
+                                                : n.label.id}
+                                        </Link>
+                                    )}
                                     {n.menu && openMenu === n.id && (
                                         <div className="hairline dd-enter in absolute top-full left-0 mt-3 w-[300px] overflow-hidden rounded-xl2 border bg-card shadow-lift dark:bg-night-2">
                                             <div className="p-2">
@@ -307,7 +337,18 @@ const Navbar = ({ initialAuth }: { initialAuth?: any }) => {
                                     }
                                     onMouseLeave={handleLeave}
                                 >
-                                    <button className="hairline flex items-center gap-2 rounded-full border py-1 pr-3 pl-1 transition-colors hover:border-cobalt/40">
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setOpenMenu((cur) =>
+                                                cur === '__profile'
+                                                    ? null
+                                                    : '__profile',
+                                            )
+                                        }
+                                        aria-expanded={openMenu === '__profile'}
+                                        className="hairline flex items-center gap-2 rounded-full border py-1 pr-3 pl-1 transition-colors hover:border-cobalt/40"
+                                    >
                                         <img
                                             src={avatarSrc}
                                             alt={auth.user.name}

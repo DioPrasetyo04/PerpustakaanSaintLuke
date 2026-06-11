@@ -2,16 +2,26 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Language;
 use Illuminate\Database\Seeder;
 
 class LanguageSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * Seed daftar bahasa buku (dipakai relasi books.language_id).
      */
     public function run(): void
     {
-        //
+        $languages = [
+            ['code' => 'id', 'language' => 'Indonesia'],
+            ['code' => 'en', 'language' => 'English'],
+        ];
+
+        foreach ($languages as $language) {
+            Language::updateOrCreate(
+                ['code' => $language['code']],
+                ['language' => $language['language']],
+            );
+        }
     }
 }

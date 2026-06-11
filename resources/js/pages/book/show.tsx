@@ -138,6 +138,9 @@ function BookShow() {
     const { language } = useLanguage();
     const { props } = usePage<DetailBookProps>();
     const { book, recomendedBooks, reviews } = props;
+    const fineSettingsConfigured =
+        (props as unknown as { fineSettingsConfigured?: boolean })
+            .fineSettingsConfigured ?? true;
     const t = bookDetailPage[language];
 
     // Peran user yang sedang login (dibagikan via Inertia di HandleInertiaRequests).
@@ -170,6 +173,16 @@ function BookShow() {
                         ? 'Akun staf (admin/super admin) tidak dapat membaca atau meminjam buku. Silakan gunakan akun anggota.'
                         : 'Staff accounts (admin/super admin) cannot read or borrow books. Please use a member account.',
             });
+            return;
+        }
+
+        // Pengaturan denda belum dikonfigurasi admin → JANGAN redirect ke
+        // halaman konfirmasi. Munculkan popup multi-bahasa "Pengaturan Denda
+        // Belum Diatur" di tempat (tanpa navigasi). Lihat AccessDeniedModal.
+        if (!fineSettingsConfigured) {
+            window.dispatchEvent(
+                new CustomEvent('access-denied', { detail: 'fine_unset' }),
+            );
             return;
         }
 

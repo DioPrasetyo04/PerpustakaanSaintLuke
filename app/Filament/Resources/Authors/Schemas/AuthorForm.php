@@ -60,7 +60,22 @@ class AuthorForm
                                     Select::make('nationality')->label('Country')->options(countryOptions())->allowHtml()->searchable(),
                                     DatePicker::make('verified_at')->label('Tanggal Verifikasi')->displayFormat('d F Y'),
                                     RichEditor::make('bio')->label('biography')->maxLength(255)->columnSpanFull(),
-                                    FileUpload::make('avatar')->label('Photo')->acceptedFileTypes(['jpg', 'jpeg', 'png', 'webp', 'gif'])->image()->disk('public')->visibility('public')->directory('authors')->columnSpanFull(),
+                                    FileUpload::make('avatar')
+                                        ->label('Photo')
+                                        ->image()
+                                        ->acceptedFileTypes([
+                                            'image/png',
+                                            'image/jpeg',
+                                            'image/svg+xml',
+                                            'image/webp',
+                                            'image/gif',
+                                        ])
+                                        ->maxSize(2048)
+                                        ->helperText('Format yang diperbolehkan: PNG, JPG, JPEG, SVG, WEBP, GIF. Maksimal ukuran 2MB.')
+                                        ->disk('public')
+                                        ->visibility('public')
+                                        ->directory('authors')
+                                        ->columnSpanFull(),
                                 ]),
                             ]),
                         ]),

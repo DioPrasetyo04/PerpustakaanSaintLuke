@@ -26,71 +26,71 @@ const content = {
         visiLabel: 'Visi',
         misiLabel: 'Misi',
         visionPre: 'Menjadi ',
-        visionEm: 'rumah baca terbaik',
-        visionPost:
-            ' di lingkungan sekolah Yayasan Santo Lukas — tempat di mana setiap siswa, dari SD hingga SMA, menemukan setidaknya satu buku yang ',
-        visionEm2: 'mengubah cara mereka melihat dunia',
+        visionEm:
+            'Yayasan Pendidikan Katolik yang profesional, unggul, berdaya saing ',
+        visionPost: 'dan berdaya pikat baik',
+        visionEm2: 'di tingkat lokal maupun global',
         missions: [
             {
                 num: 'I',
-                t: 'Menyediakan koleksi yang berkualitas',
-                b: 'Setiap judul yang masuk ke rak kami dipilih oleh pustakawan dan diuji nilainya — bukan oleh algoritma, bukan oleh tren musiman, tapi oleh pembaca yang membaca lebih dulu sebelum merekomendasikan.',
+                t: 'Tata Kelola Profesional',
+                b: 'Melaksanakan tata kelola lembaga secara profesional, partisipatif, dinamis, akuntabel, dan transparan',
             },
             {
                 num: 'II',
-                t: 'Menumbuhkan budaya literasi sejak dini',
-                b: 'Klub baca rutin, lomba resensi, jam bercerita untuk SD, dan diskusi sastra untuk SMA — semuanya dirancang agar membaca menjadi kebiasaan, bukan kewajiban.',
+                t: 'Perkembangan Pendidikan Berkualitas',
+                b: 'Mengembangkan pendidikan dan pengajaran yang bermutu baik dalam bidang akademik, moral, dan iman,',
             },
             {
                 num: 'III',
-                t: 'Mengajarkan literasi digital yang sehat',
-                b: 'Membantu siswa membedakan sumber yang tepercaya, menulis kutipan dengan etis, dan menggunakan teknologi sebagai alat — bukan sebagai pengganti pikiran.',
+                t: 'Kultur Organisasi Yang Baik',
+                b: 'Menciptakan kultur organisasi yang baik melalui pembentukan karakter berdasarkan nilai-nilai Katolik dan Spirit Santo Lukas, karakter kebangsaan dan nilai-nilai moral universal',
             },
             {
                 num: 'IV',
-                t: 'Menjadi ruang sunyi yang menyambut',
-                b: 'Perpustakaan harus tetap menjadi tempat yang tenang, terang, dan ramah untuk berpikir — apapun yang terjadi di luar sana.',
+                t: 'Kerja Sama Profesional',
+                b: 'Melakukan kerja sama dengan berbagai pihak untuk meningkatkan kinerja lembaga',
             },
         ],
-        closing:
-            '"Membaca adalah cara paling tenang untuk mengubah hati. Dan hati yang berubah, mengubah segala yang lain."',
-        closingBy: 'Motto Yayasan Santo Lukas',
+        // closing:
+        //     '"Membaca adalah cara paling tenang untuk mengubah hati. Dan hati yang berubah, mengubah segala yang lain."',
+        // closingBy: 'Motto Yayasan Santo Lukas',
     },
     en: {
         eyebrow: 'About the Foundation',
         title: 'Vision & Mission',
         visiLabel: 'Vision',
         misiLabel: 'Mission',
-        visionPre: 'To be the ',
-        visionEm: 'finest reading home',
-        visionPost:
-            ' within the Saint Luke Foundation schools — a place where every student, from primary to senior high, finds at least one book that ',
-        visionEm2: 'changes how they see the world',
+        visionPre: 'Become ',
+        visionEm:
+            'A professional, superior, competitive Catholic Education Foundation ',
+        visionPost: 'and good appeal ',
+        visionEm2: 'at both local and global levels',
         missions: [
             {
                 num: 'I',
-                t: 'Provide a quality collection',
-                b: 'Every title on our shelves is chosen by librarians and tested for value — not by an algorithm, not by seasonal trends, but by readers who read first before recommending.',
+                t: 'Professional Governance',
+                b: 'Implement institutional governance in a professional, participatory, dynamic, accountable and transparent manner.',
             },
             {
                 num: 'II',
-                t: 'Grow a literacy culture early',
-                b: 'Regular book clubs, review contests, story hours for primary grades, and literary discussions for high school — all designed to make reading a habit, not an obligation.',
+                t: 'Development of Quality Education',
+                b: 'Develop good quality education and teaching in the fields of academics, morals and faith',
             },
             {
                 num: 'III',
-                t: 'Teach healthy digital literacy',
-                b: 'Helping students tell trustworthy sources apart, cite ethically, and use technology as a tool — not a replacement for thought.',
+                t: 'Good Organizational Culture',
+                b: 'Creating a good organizational culture through character building based on Catholic values ​​and the Spirit of Saint Luke, national character and universal moral values',
             },
             {
                 num: 'IV',
-                t: 'Be a quiet, welcoming space',
-                b: 'A library must remain a calm, bright, friendly place to think — whatever happens out there.',
+                t: 'Professional Collaboration',
+                b: 'Collaborate with various parties to improve institutional performance',
             },
         ],
-        closing:
-            '"Reading is the quietest way to change a heart. And a changed heart changes everything else."',
-        closingBy: 'Saint Luke Foundation Motto',
+        // closing:
+        //     '"Reading is the quietest way to change a heart. And a changed heart changes everything else."',
+        // closingBy: 'Saint Luke Foundation Motto',
     },
 };
 
@@ -178,7 +178,7 @@ function VisionMissionPage() {
                 </div>
 
                 {/* Closing */}
-                <motion.div
+                {/* <motion.div
                     {...fadeUp}
                     className="hairline mt-24 border-t pt-12 text-center"
                 >
@@ -191,7 +191,7 @@ function VisionMissionPage() {
                     <div className="mt-4 font-mono text-[20px] tracking-editorial text-muted-foreground uppercase">
                         {t.closingBy}
                     </div>
-                </motion.div>
+                </motion.div> */}
             </div>
         </section>
     );

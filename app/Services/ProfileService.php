@@ -33,7 +33,9 @@ class ProfileService
             'phone' => $user->phone,
             'address' => $user->address,
             'date_of_birth' => $user->date_of_birth,
-            'avatar' => $user->avatar ? Storage::url($user->avatar) : null,
+            'avatar' => $user->avatar
+                ? Storage::url($user->avatar)
+                : ($user->avatar_url ?: null),
             'created_at' => $user->created_at,
             'member_card' => $this->buildMemberCard($user),
             'socialmedia' => $user->socialmedia->map(function ($item) {

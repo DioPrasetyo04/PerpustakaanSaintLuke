@@ -57,6 +57,13 @@ class LoanController extends Controller
         if (!$user->hasVerifiedEmail()) {
             return Inertia::location(route('verification.notice'));
         }
+
+        // Pengaturan denda belum dikonfigurasi admin → jangan 404, tampilkan
+        // popup handler "konfigurasi denda belum diatur" (lihat AccessDeniedModal).
+        if (! \App\Models\FineSettings::query()->exists()) {
+            return back()->with('access_denied', 'fine_unset');
+        }
+
         $data = $this->loanController->getConfirmationLoanUserAuth($slug);
 
         // dd([

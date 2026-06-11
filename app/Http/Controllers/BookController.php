@@ -41,6 +41,9 @@ class BookController extends Controller
 
         return Inertia::render('book/show', [
             'book' => BookResource::make($dataDetailBook)->resolve(),
+            // Status konfigurasi denda: dipakai frontend untuk memunculkan popup
+            // "Pengaturan Denda Belum Diatur" tanpa redirect saat tombol Pinjam/Baca ditekan.
+            'fineSettingsConfigured' => \App\Models\FineSettings::query()->exists(),
             'recomendedBooks' => $this->bookController->transformBooks($dataRecomendedBooks),
             'reviews' => $this->bookController->transformReviewBooks($dataReviewsBook),
             'state' => [
