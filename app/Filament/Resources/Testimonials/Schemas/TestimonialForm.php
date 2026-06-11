@@ -64,20 +64,26 @@ class TestimonialForm
                                 ->disk('public')
                                 ->visibility('public')
                                 ->directory('testimonials/videos')
-                                ->maxSize(51200) // 50 MB
+                                ->maxSize(30720) // 30 MB
                                 ->required()
-                                ->helperText('Format: MP4, WebM, OGG, atau MOV. Maksimal 50 MB.')
+                                ->helperText('Format: MP4, WebM, OGG, atau MOV. Maksimal 30 MB.')
                                 ->columnSpanFull(),
 
                             FileUpload::make('thumbnail')
                                 ->label('Thumbnail / Poster (opsional)')
                                 ->image()
-                                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                                ->acceptedFileTypes([
+                                    'image/png',
+                                    'image/jpeg',
+                                    'image/svg+xml',
+                                    'image/webp',
+                                    'image/gif',
+                                ])
                                 ->disk('public')
                                 ->visibility('public')
                                 ->directory('testimonials/thumbnails')
                                 ->maxSize(2048)
-                                ->helperText('Gambar poster yang tampil sebelum video diputar.')
+                                ->helperText('Gambar poster yang tampil sebelum video diputar. Format: PNG, JPG, JPEG, SVG, GIF, webP. Maksimal 2 MB.')
                                 ->columnSpanFull(),
 
                             Toggle::make('is_active')

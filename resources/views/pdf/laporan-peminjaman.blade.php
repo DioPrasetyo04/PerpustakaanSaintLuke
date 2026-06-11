@@ -19,12 +19,13 @@
         <thead>
             <tr>
                 <th style="width:4%;">No</th>
-                <th style="width:18%;">Kode Pinjam</th>
-                <th style="width:20%;">Peminjam</th>
-                <th style="width:22%;">Buku</th>
-                <th style="width:12%;">Tgl Pinjam</th>
-                <th style="width:12%;">Jatuh Tempo</th>
-                <th style="width:12%;">Status</th>
+                <th style="width:16%;">Kode Pinjam</th>
+                <th style="width:18%;">Peminjam</th>
+                <th style="width:21%;">Buku</th>
+                <th style="width:9%;">Tipe</th>
+                <th style="width:11%;">Tgl Pinjam</th>
+                <th style="width:11%;">Jatuh Tempo</th>
+                <th style="width:10%;">Status</th>
             </tr>
         </thead>
         <tbody>
@@ -32,18 +33,22 @@
                 @php
                     $st = $r->status instanceof \BackedEnum ? $r->status->value : (string) $r->status;
                     $badge = $st === 'returned' ? 'green' : 'amber';
+                    $loanType = $r->loan_type instanceof \App\Enums\LoanType
+                        ? $r->loan_type
+                        : (\App\Enums\LoanType::tryFrom((string) $r->loan_type) ?? \App\Enums\LoanType::PHYSICAL);
                 @endphp
                 <tr>
                     <td class="no">{{ $i + 1 }}</td>
                     <td>{{ $r->loan?->loan_code ?? '-' }}</td>
                     <td>{{ $r->loan?->user?->name ?? '-' }}</td>
                     <td>{{ $r->book?->title ?? '-' }}</td>
+                    <td class="center">{{ $loanType->label() }}</td>
                     <td class="center">{{ optional($r->loan_date)->translatedFormat('d M Y') }}</td>
                     <td class="center">{{ optional($r->due_date)->translatedFormat('d M Y') }}</td>
                     <td class="center"><span class="badge {{ $badge }}">{{ ucfirst($st) }}</span></td>
                 </tr>
             @empty
-                <tr><td colspan="7" class="center">Tidak ada data.</td></tr>
+                <tr><td colspan="8" class="center">Tidak ada data.</td></tr>
             @endforelse
         </tbody>
     </table>

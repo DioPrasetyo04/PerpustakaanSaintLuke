@@ -23,6 +23,20 @@ class LoanResource extends JsonResource
         $dueDate  = $primaryDetail?->due_date  ?? $this->due_date;
         $book = $primaryDetail?->book ?? ($this->relationLoaded('book') ? $this->book : null);
 
+        // Tipe pinjaman. Resource ini dipakai untuk model Loan (punya loanDetails)
+        // maupun LoanDetail langsung (mis. daftar pinjaman di dashboard). Ambil dari
+        // detail utama bila ada, jika tidak dari atribut loan_type model itu sendiri.
+        $loanTypeRaw = $primaryDetail
+            ? $primaryDetail->loan_type
+            : ($this->resource->loan_type ?? null);
+        $loanTypeValue = $loanTypeRaw instanceof \App\Enums\LoanType
+            ? $loanTypeRaw->value
+            : $loanTypeRaw;
+        // Emit loan_type bila ada konteks pinjaman (detail utama atau atribut
+        // loan_type pada model). Jika tidak ter-emit, frontend memperlakukannya
+        // sebagai fisik (aman: tombol return disembunyikan).
+        $hasLoanContext = $primaryDetail !== null || $loanTypeValue !== null;
+
         $data = [
             'id' => $this->when(isset($this->id), $this->id),
             'user_id' => $this->when(isset($this->user_id), $this->user_id),
@@ -35,6 +49,14 @@ class LoanResource extends JsonResource
             'due_date' => $this->when(
                 (bool) $dueDate,
                 fn() => Carbon::parse($dueDate)->format('d F Y')
+            ),
+
+            // Tipe pinjaman (digital / physical). Null diperlakukan sebagai fisik.
+            // Dipakai frontend untuk menentukan apakah tombol "Return Book" boleh
+            // tampil (hanya untuk pinjaman digital).
+            'loan_type' => $this->when(
+                $hasLoanContext,
+                fn() => $loanTypeValue ?? \App\Enums\LoanType::PHYSICAL->value
             ),
 
             // OPTIONAL ATTRIBUTE
@@ -74,6 +96,7 @@ class LoanResource extends JsonResource
                 'loan_date' => $detail->loan_date ? Carbon::parse($detail->loan_date)->format('d F Y') : null,
                 'due_date' => $detail->due_date ? Carbon::parse($detail->due_date)->format('d F Y') : null,
                 'status' => $detail->status?->value ?? $detail->status,
+                'loan_type' => $detail->loan_type?->value ?? $detail->loan_type,
                 'book' => $detail->relationLoaded('book') && $detail->book
                     ? BookResource::make($detail->book)->resolve()
                     : null,

@@ -114,12 +114,18 @@ class EventForm
                         FileUpload::make('thumbnail')
                             ->label('Poster / Gambar Acara (opsional)')
                             ->image()
-                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                            ->acceptedFileTypes([
+                                'image/png',
+                                'image/jpeg',
+                                'image/svg+xml',
+                                'image/webp',
+                                'image/gif',
+                            ])
                             ->disk('public')
                             ->visibility('public')
                             ->directory('events/thumbnails')
                             ->maxSize(2048)
-                            ->helperText('Gambar tampil sebagai latar kartu acara.')
+                            ->helperText('Gambar tampil sebagai latar kartu acara. Format: PNG, JPG, JPEG, SVG, WEBP, GIF. Maksimal 2 MB.')
                             ->columnSpanFull(),
 
                         Toggle::make('is_active')

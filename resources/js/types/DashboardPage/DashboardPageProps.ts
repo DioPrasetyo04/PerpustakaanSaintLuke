@@ -28,6 +28,7 @@ export type LoanBook = {
     hours_left: number;
     minutes_left: number;
     deadline_status: 'Overdue' | 'danger' | 'warning' | 'safe';
+    loan_type?: 'physical' | 'digital' | string;
     book: {
         id: number;
         title: string;

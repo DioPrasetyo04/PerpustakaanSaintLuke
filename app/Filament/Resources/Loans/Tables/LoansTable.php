@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Loans\Tables;
 
 use App\Enums\LoanBookStatus;
 use App\Enums\LoanStatus;
+use App\Enums\LoanType;
 use App\Filament\Resources\ReturnBooks\ReturnBooksResource;
 use App\Models\Loan;
 use Filament\Actions\Action;
@@ -80,6 +81,24 @@ class LoansTable
                         default => 'heroicon-s-question-mark-circle',
                     }),
 
+                TextColumn::make('physicalLoanDetails.loan_type')
+                    ->label('Tipe Pinjaman')
+                    ->badge()
+                    ->listWithLineBreaks()
+                    ->limitList(3)
+                    ->expandableLimitedList()
+                    ->formatStateUsing(fn($state) => $state instanceof LoanType
+                        ? $state->label()
+                        : (LoanType::tryFrom((string) $state)?->label() ?? LoanType::PHYSICAL->label()))
+                    ->color(fn($state) => match (LoanType::tryFrom((string) ($state instanceof \BackedEnum ? $state->value : $state)) ?? LoanType::PHYSICAL) {
+                        LoanType::DIGITAL => 'info',
+                        default => 'warning',
+                    })
+                    ->icon(fn($state) => match (LoanType::tryFrom((string) ($state instanceof \BackedEnum ? $state->value : $state)) ?? LoanType::PHYSICAL) {
+                        LoanType::DIGITAL => 'heroicon-s-device-phone-mobile',
+                        default => 'heroicon-s-book-open',
+                    }),
+
                 TextColumn::make('physical_loan_details_count')
                     ->counts('physicalLoanDetails')
                     ->label('Total Buku')
@@ -143,7 +162,16 @@ class LoansTable
                     ->icon(Heroicon::OutlinedArrowUturnLeft)
                     ->color('success')
                     ->url(fn($record) => ReturnBooksResource::getUrl('create', ['loan_id' => $record->id]))
-                    ->visible(fn($record) => $record->loanDetails()->whereDoesntHave('returnBook')->exists()),
+                    // Hanya untuk pinjaman FISIK yang belum dikembalikan. Pinjaman
+                    // digital dikembalikan otomatis/oleh pengguna sendiri, jadi tidak
+                    // perlu (dan tidak boleh) diproses lewat loket pengembalian staf.
+                    ->visible(fn($record) => $record->loanDetails()
+                        ->where(function ($q) {
+                            $q->where('loan_type', '!=', LoanType::DIGITAL->value)
+                                ->orWhereNull('loan_type');
+                        })
+                        ->whereDoesntHave('returnBook')
+                        ->exists()),
                 DeleteAction::make()
                     ->before(function ($record) {
                         $bookIds = $record->loanDetails()

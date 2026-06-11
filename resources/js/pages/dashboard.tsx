@@ -452,16 +452,31 @@ export default function Dashboard() {
                                                                         View
                                                                     </Button>
                                                                 </a>
-                                                                <a
-                                                                    href={`/confirmation/return/book/${loan.book.slug}/${loan.loan_code}`}
-                                                                >
-                                                                    <Button
-                                                                        size="sm"
-                                                                        className="h-7 bg-primary px-2 text-[10px] whitespace-nowrap sm:h-8 sm:px-3 sm:text-xs"
+                                                                {/* Pengembalian sendiri hanya untuk pinjaman DIGITAL.
+                                                                    Buku FISIK dikembalikan langsung di perpustakaan
+                                                                    oleh petugas agar tidak ter-mark "returned" padahal
+                                                                    bukunya belum dikembalikan secara fisik. */}
+                                                                {(loan.loan_type ??
+                                                                    'physical') ===
+                                                                'digital' ? (
+                                                                    <a
+                                                                        href={`/confirmation/return/book/${loan.book.slug}/${loan.loan_code}`}
                                                                     >
-                                                                        Return
-                                                                    </Button>
-                                                                </a>
+                                                                        <Button
+                                                                            size="sm"
+                                                                            className="h-7 bg-primary px-2 text-[10px] whitespace-nowrap sm:h-8 sm:px-3 sm:text-xs"
+                                                                        >
+                                                                            Return
+                                                                        </Button>
+                                                                    </a>
+                                                                ) : (
+                                                                    <Badge
+                                                                        variant="outline"
+                                                                        className="justify-center border-brass/40 bg-brass/10 px-1.5 py-0 text-[9px] whitespace-nowrap text-brass sm:text-[10px] lg:text-xs"
+                                                                    >
+                                                                        Fisik
+                                                                    </Badge>
+                                                                )}
                                                             </div>
                                                         </div>
                                                     </Card>

@@ -111,9 +111,15 @@ class FineCalculatorService
             return 0;
         }
 
+        // Ikutkan denda yang BELUM lunas, plus denda "auto-lunas" bernominal 0
+        // (SUCCESS tetapi total_fee = 0) supaya jika harga buku kini diisi > 0
+        // nominalnya ikut dihitung ulang dan statusnya kembali menagih.
         $returnBooks = ReturnBook::query()
             ->whereHas('loanDetail', fn($q) => $q->where('book_id', $book->id))
-            ->whereHas('fine', fn($q) => $q->where('payment_status', '!=', PaymentStatus::SUCCESS->value))
+            ->whereHas('fine', fn($q) => $q->where(function ($q2) {
+                $q2->where('payment_status', '!=', PaymentStatus::SUCCESS->value)
+                    ->orWhere('total_fee', '<=', 0);
+            }))
             ->with(['loanDetail', 'returnBookCheck', 'fine'])
             ->get();
 
@@ -122,7 +128,13 @@ class FineCalculatorService
         DB::transaction(function () use ($returnBooks, $book, $fineSetting, &$updated) {
             foreach ($returnBooks as $returnBook) {
                 $fine = $returnBook->fine;
-                if (! $fine || $fine->payment_status === PaymentStatus::SUCCESS) {
+                if (! $fine) {
+                    continue;
+                }
+
+                // Lewati denda yang benar-benar sudah dibayar (SUCCESS & nominal > 0).
+                // Denda SUCCESS bernominal 0 = auto-lunas, tetap boleh dihitung ulang.
+                if ($fine->payment_status === PaymentStatus::SUCCESS && (float) $fine->total_fee > 0) {
                     continue;
                 }
 
@@ -136,6 +148,7 @@ class FineCalculatorService
                         'late_fee' => $calc['late_fee'],
                         'other_fee' => $calc['other_fee'],
                         'total_fee' => $calc['total_fee'],
+                        'payment_status' => Fine::paymentStatusForTotal($calc['total_fee'])->value,
                     ]);
 
                     if ($returnBook->status !== ReturnBookStatus::COST) {

@@ -268,6 +268,12 @@ function BookShow() {
     const formats = uniqueFormats(book.types);
     const showRead = formats.includes('digital');
 
+    // Buku digital saja (tanpa format Fisik) tidak memiliki manajemen stok di
+    // admin (step Stock disembunyikan), sehingga stok bernilai 0/0. Buku digital
+    // bisa diakses tanpa batas eksemplar → tampilkan tanda "Unlimited".
+    const isDigitalOnly =
+        formats.includes('digital') && !formats.includes('fisik');
+
     const firstSentence = (book.synopsis ?? '')
         .replace(/<[^>]*>/g, '')
         .split('.')[0];
@@ -310,6 +316,7 @@ function BookShow() {
         v: string | number;
         mono?: boolean;
         img?: string | null;
+        wrap?: boolean;
     }[] = [
         {
             k: language === 'id' ? 'No. Klasifikasi' : 'Classification No.',
@@ -319,6 +326,11 @@ function BookShow() {
         {
             k: language === 'id' ? 'Lokasi Buku' : 'Book Location',
             v: book.location_book ?? '-',
+        },
+        {
+            k: language === 'id' ? 'Alamat Penerbit' : 'Publisher Address',
+            v: book.publisher?.address ?? '-',
+            wrap: true,
         },
         {
             k: language === 'id' ? 'Jilid Buku' : 'Volume',
@@ -450,20 +462,37 @@ function BookShow() {
                                                     </div>
                                                 </div>
                                                 <div className="text-right">
-                                                    <div className="font-display text-3xl tabnum text-foreground">
-                                                        {book.stock?.available ??
-                                                            0}
-                                                        <span className="text-xl text-muted-foreground">
-                                                            /
-                                                            {book.stock?.total ??
-                                                                0}
-                                                        </span>
-                                                    </div>
-                                                    <div className="text-[10px] text-muted-foreground">
-                                                        {language === 'id'
-                                                            ? 'eksemplar'
-                                                            : 'copies'}
-                                                    </div>
+                                                    {isDigitalOnly ? (
+                                                        <>
+                                                            <div className="font-display text-3xl tabnum leading-none text-foreground">
+                                                                ∞
+                                                            </div>
+                                                            <div className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
+                                                                {language === 'id'
+                                                                    ? 'Tak Terbatas'
+                                                                    : 'Unlimited'}
+                                                            </div>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <div className="font-display text-3xl tabnum text-foreground">
+                                                                {book.stock
+                                                                    ?.available ??
+                                                                    0}
+                                                                <span className="text-xl text-muted-foreground">
+                                                                    /
+                                                                    {book.stock
+                                                                        ?.total ??
+                                                                        0}
+                                                                </span>
+                                                            </div>
+                                                            <div className="text-[10px] text-muted-foreground">
+                                                                {language === 'id'
+                                                                    ? 'eksemplar'
+                                                                    : 'copies'}
+                                                            </div>
+                                                        </>
+                                                    )}
                                                 </div>
                                             </div>
                                             {/* quick facts */}
@@ -673,9 +702,10 @@ function BookShow() {
 
                                     </dl>
 
-                                    {/* No. Klasifikasi, Lokasi & Jilid Buku — baris sendiri, kolom proporsional di desktop */}
-                                    <dl className="hairline mt-4 grid grid-cols-1 gap-px overflow-hidden rounded-xl2 border bg-line sm:grid-cols-2 lg:grid-cols-3 dark:bg-night-line">
-                                        {biblioPair.map(({ k, v, mono, img }) => (
+                                    {/* No. Klasifikasi, Lokasi, Alamat Penerbit & Jilid Buku — grid 2×2
+                                        (1 kolom di mobile, 2 kolom di tablet/desktop) agar rapi & seimbang */}
+                                    <dl className="hairline mt-4 grid grid-cols-1 gap-px overflow-hidden rounded-xl2 border bg-line sm:grid-cols-2 dark:bg-night-line">
+                                        {biblioPair.map(({ k, v, mono, img, wrap }) => (
                                             <div
                                                 key={k}
                                                 className="bg-card p-4 transition-colors hover:bg-cobalt-50 dark:bg-night-2 dark:hover:bg-night-3"
@@ -693,7 +723,9 @@ function BookShow() {
                                                             className="h-6 w-6 shrink-0 rounded bg-white/5 object-contain ring-1 ring-border"
                                                         />
                                                     )}
-                                                    <span className="min-w-0 truncate">
+                                                    <span
+                                                        className={`min-w-0 ${wrap ? 'break-words' : 'truncate'}`}
+                                                    >
                                                         {v}
                                                     </span>
                                                 </dd>

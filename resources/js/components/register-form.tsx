@@ -18,6 +18,7 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { RegisterDataPage } from '@/data/data';
 import PhoneField from './component/form/PhoneField';
 import AvatarField from './component/form/AvatarField';
+import { PasswordStrengthMeter } from './component/form/PasswordStrengthMeter';
 
 export interface RegisterFormData {
     name: string;
@@ -129,6 +130,9 @@ export function RegisterForm({
                                     onChange={onHandleChange}
                                     placeholder={text.placeholderPassword}
                                     required
+                                />
+                                <PasswordStrengthMeter
+                                    password={data.password}
                                 />
                                 {error.password && (
                                     <p className="text-lg font-semibold text-red-500">

@@ -8,6 +8,7 @@ export type LoanProps = {
     loan_code: string;
     loan_date: string;
     due_date: string;
+    loan_type?: 'physical' | 'digital' | string;
     user?: UserProps;
     book?: BookProps;
 };

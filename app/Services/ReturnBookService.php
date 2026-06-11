@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\BookCondition;
 use App\Enums\DiscountType;
 use App\Enums\LoanBookStatus;
+use App\Enums\LoanType;
 use App\Enums\PaymentStatus;
 use App\Enums\ReturnBookStatus;
 use App\Exceptions\BusinessException;
@@ -85,6 +86,15 @@ class ReturnBookService
                 throw new BusinessException('return.has_return_book');
             }
 
+            // Buku FISIK tidak boleh dikembalikan sendiri lewat frontend — harus
+            // diserahkan langsung ke perpustakaan & diproses petugas. Tanpa guard
+            // ini, pengguna bisa menandai pinjaman fisik "returned" padahal buku
+            // belum dikembalikan secara fisik (merugikan perpustakaan).
+            // Null diperlakukan sebagai fisik.
+            if (($loanDetail->loan_type ?? LoanType::PHYSICAL) !== LoanType::DIGITAL) {
+                throw new BusinessException('return.physical_staff_only', 403);
+            }
+
             $condition = $data['condition'] ?? BookCondition::GOOD->value;
 
             $fineSetting = FineSettings::checkSettings();
@@ -142,7 +152,7 @@ class ReturnBookService
                     'other_fee' => $otherFee,
                     'total_fee' => $totalFee,
                     'fine_date' => now(),
-                    'payment_status' => PaymentStatus::PENDING->value,
+                    'payment_status' => Fine::paymentStatusForTotal($totalFee)->value,
                 ]);
             }
 
