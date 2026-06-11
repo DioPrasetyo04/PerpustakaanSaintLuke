@@ -56,13 +56,20 @@ class AnnouncementForm
 
                         FileUpload::make('photo')
                             ->label('Foto Perpustakaan (per Hari)')
-                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
+                            ->acceptedFileTypes([
+                                'image/png',
+                                'image/jpeg',
+                                'image/svg+xml',
+                                'image/webp',
+                                'image/gif',
+                            ])
                             ->image()
                             ->disk('public')
                             ->visibility('public')
                             ->maxSize(2048)
                             ->directory('announcements')
                             ->required()
+                            ->helperText('Format: PNG, JPG, JPEG, SVG, WEBP, GIF. Maksimal 2 MB.')
                             ->columnSpanFull(),
 
                         RichEditor::make('description')

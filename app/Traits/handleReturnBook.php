@@ -121,7 +121,7 @@ trait HandleReturnBook
                     'other_fee' => $otherFee,
                     'total_fee' => $total,
                     'fine_date' => now(),
-                    'payment_status' => PaymentStatus::PENDING,
+                    'payment_status' => Fine::paymentStatusForTotal($total),
                 ]
             );
         });

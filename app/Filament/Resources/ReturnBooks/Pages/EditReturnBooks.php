@@ -164,9 +164,13 @@ class EditReturnBooks extends EditRecord
         $existingFine = Fine::where('return_book_id', $returnBook->id)->first();
 
         if ($shouldHaveFine) {
-            if ($existingFine?->payment_status === PaymentStatus::SUCCESS) {
-                // skip: jangan ubah fine yang sudah dibayar
-            } else {
+            // Jangan utak-atik denda yang benar-benar SUDAH DIBAYAR (SUCCESS dengan
+            // nominal > 0). Namun denda SUCCESS bernominal 0 adalah "auto-lunas"
+            // (tak bisa diproses Midtrans) — tetap boleh diperbarui bila kini > 0.
+            $isGenuinelyPaid = $existingFine?->payment_status === PaymentStatus::SUCCESS
+                && (float) $existingFine->total_fee > 0;
+
+            if (! $isGenuinelyPaid) {
                 Fine::updateOrCreate(
                     ['return_book_id' => $returnBook->id],
                     [
@@ -174,12 +178,17 @@ class EditReturnBooks extends EditRecord
                         'other_fee' => $otherFee,
                         'total_fee' => $totalFee,
                         'fine_date' => now(),
-                        'payment_status' => PaymentStatus::PENDING->value,
+                        'payment_status' => Fine::paymentStatusForTotal($totalFee)->value,
                     ],
                 );
             }
         } else {
-            if ($existingFine && $existingFine->payment_status !== PaymentStatus::SUCCESS) {
+            // Hapus denda bila tak lagi diperlukan, KECUALI yang benar-benar sudah
+            // dibayar (SUCCESS & nominal > 0). Denda auto-lunas Rp0 boleh dihapus.
+            $isGenuinelyPaid = $existingFine?->payment_status === PaymentStatus::SUCCESS
+                && (float) $existingFine->total_fee > 0;
+
+            if ($existingFine && ! $isGenuinelyPaid) {
                 $existingFine->delete();
             }
         }

@@ -870,57 +870,25 @@ class BookForm
                                         ->numeric()
                                         ->required()
                                         ->live()
-                                        ->default(0)
-                                        ->readOnly(
-                                            fn(Get $get) =>
-                                            $get('loan') > 0
-                                        )
-                                        ->disabled(
-                                            fn(Get $get) =>
-                                            $get('loan') > 0
-                                        ),
+                                        ->default(0),
 
                                     TextInput::make('loan')
                                         ->numeric()
                                         ->required()
                                         ->live()
-                                        ->default(0)
-                                        ->readOnly(
-                                            fn(Get $get) =>
-                                            $get('loan') > 0
-                                        )
-                                        ->disabled(
-                                            fn(Get $get) =>
-                                            $get('loan') > 0
-                                        ),
+                                        ->default(0),
 
                                     TextInput::make('lost')
                                         ->numeric()
                                         ->required()
                                         ->live()
-                                        ->default(0)
-                                        ->readOnly(
-                                            fn(Get $get) =>
-                                            $get('lost') > 0
-                                        )
-                                        ->disabled(
-                                            fn(Get $get) =>
-                                            $get('lost') > 0
-                                        ),
+                                        ->default(0),
 
                                     TextInput::make('damaged')
                                         ->numeric()
                                         ->required()
                                         ->live()
-                                        ->default(0)
-                                        ->readOnly(
-                                            fn(Get $get) =>
-                                            $get('damaged') > 0
-                                        )
-                                        ->disabled(
-                                            fn(Get $get) =>
-                                            $get('damaged') > 0
-                                        ),
+                                        ->default(0),
 
                                 ])
                                 ->columns(2),

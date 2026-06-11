@@ -31,6 +31,12 @@ export default function assets() {
             .fineSettingsConfigured ?? true;
     const { language } = useLanguage();
 
+    // Hanya pinjaman DIGITAL yang boleh dikembalikan sendiri oleh pengguna.
+    // Buku FISIK harus dikembalikan langsung ke perpustakaan & diproses petugas,
+    // sehingga tombol "Return Book" tidak boleh tampil agar data peminjaman fisik
+    // tidak ter-mark "returned" padahal bukunya belum dikembalikan secara fisik.
+    const isDigitalLoan = (loan?.loan_type ?? 'physical') === 'digital';
+
     const [selectedAsset, setSelectedAsset] = useState<AssetProps | null>(
         assets[0] ?? null,
     );
@@ -260,14 +266,39 @@ export default function assets() {
                                         </div>
                                     ))}
                                 </div>
-                                <Button
-                                    disabled={!loan}
-                                    onClick={onHandleReturnBook}
-                                    variant={'destructive'}
-                                    size={'md'}
-                                >
-                                    Return Book
-                                </Button>
+                                {/* Tipe pinjaman + tombol kembalikan (digital saja) */}
+                                <div className="flex items-center gap-2">
+                                    {loan?.loan_type && (
+                                        <Badge
+                                            variant="outline"
+                                            className={
+                                                isDigitalLoan
+                                                    ? 'border-cobalt/40 bg-cobalt/10 text-cobalt'
+                                                    : 'border-brass/40 bg-brass/10 text-brass'
+                                            }
+                                        >
+                                            {isDigitalLoan
+                                                ? 'Pinjaman Digital'
+                                                : 'Pinjaman Fisik'}
+                                        </Badge>
+                                    )}
+
+                                    {isDigitalLoan ? (
+                                        <Button
+                                            disabled={!loan}
+                                            onClick={onHandleReturnBook}
+                                            variant={'destructive'}
+                                            size={'md'}
+                                        >
+                                            Return Book
+                                        </Button>
+                                    ) : (
+                                        <span className="max-w-[220px] text-right text-xs text-muted-foreground">
+                                            Buku fisik dikembalikan langsung di
+                                            perpustakaan oleh petugas.
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </Card>

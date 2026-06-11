@@ -58,7 +58,7 @@ class LoanRepositories implements LoanInterfaceRepositories
         return Loan::query()
             ->select(['id', 'user_id', 'loan_code', 'status', 'created_at', 'updated_at'])
             ->with([
-                'loanDetails:id,loan_id,book_id,loan_date,due_date,status',
+                'loanDetails:id,loan_id,book_id,loan_date,due_date,status,loan_type',
                 'loanDetails.book:id,title,cover,slug',
                 'loanDetails.book.authors:id,name,username,avatar',
                 'user:id,name,email,username,avatar',
@@ -85,7 +85,7 @@ class LoanRepositories implements LoanInterfaceRepositories
         return Loan::query()
             ->select(['id', 'user_id', 'loan_code', 'status', 'created_at', 'updated_at'])
             ->with([
-                'loanDetails:id,loan_id,book_id,loan_date,due_date,status',
+                'loanDetails:id,loan_id,book_id,loan_date,due_date,status,loan_type',
                 'loanDetails.book:id,title,cover,slug',
                 'loanDetails.book.authors:id,name,username,avatar',
                 'user:id,name,email,username,avatar',

@@ -135,7 +135,7 @@ class CreateReturnBooks extends CreateRecord
                 'other_fee' => $otherFee,
                 'total_fee' => $totalFee,
                 'fine_date' => now(),
-                'payment_status' => PaymentStatus::PENDING->value,
+                'payment_status' => Fine::paymentStatusForTotal($totalFee)->value,
             ]);
         }
 

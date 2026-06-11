@@ -23,7 +23,22 @@ class InformationForm
             ->components([
                 Section::make('Annoncement Information')->description('Provide necessary information for the all announcements')->schema([
                     Grid::make(2)->schema([
-                        FileUpload::make('image')->label('Photo Announcement')->acceptedFileTypes(['jpg', 'jpeg', 'png', 'webp', 'gif'])->image()->disk('public')->visibility('public')->maxSize('2048')->directory('informations')->required(),
+                        FileUpload::make('image')
+                            ->label('Photo Announcement')
+                            ->acceptedFileTypes([
+                                'image/png',
+                                'image/jpeg',
+                                'image/svg+xml',
+                                'image/webp',
+                                'image/gif',
+                            ])
+                            ->image()
+                            ->disk('public')
+                            ->visibility('public')
+                            ->maxSize(2048)
+                            ->directory('informations')
+                            ->required()
+                            ->helperText('Format: PNG, JPG, JPEG, SVG, WEBP, GIF. Maksimal 2 MB.'),
                         TextInput::make('name')
                             ->label('Name Of Information')
                             ->live()
@@ -83,7 +98,15 @@ class InformationForm
                                         FileUpload::make('icon')
                                             ->label('Icon Of Categories')
                                             ->image()
-                                            ->maxSize(1024) // 1MB
+                                            ->acceptedFileTypes([
+                                                'image/png',
+                                                'image/jpeg',
+                                                'image/svg+xml',
+                                                'image/webp',
+                                                'image/gif',
+                                            ])
+                                            ->maxSize(2048)
+                                            ->helperText('Format: PNG, JPG, JPEG, SVG, WEBP, GIF. Maksimal 2 MB.')
                                             ->directory('categories/icons')
                                             ->disk('public')
                                             ->visibility('public')
@@ -93,7 +116,15 @@ class InformationForm
                                         FileUpload::make('photo')
                                             ->label('Photo Of Categories')
                                             ->image()
-                                            ->maxSize(4096) // 4MB
+                                            ->acceptedFileTypes([
+                                                'image/png',
+                                                'image/jpeg',
+                                                'image/svg+xml',
+                                                'image/webp',
+                                                'image/gif',
+                                            ])
+                                            ->maxSize(2048)
+                                            ->helperText('Format: PNG, JPG, JPEG, SVG, WEBP, GIF. Maksimal 2 MB.')
                                             ->disk('public')
                                             ->directory('categories/images')
                                             ->imageResizeMode('cover')

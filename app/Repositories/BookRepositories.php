@@ -32,7 +32,7 @@ class BookRepositories implements BookInterfaceRepositories
             'is_published'
         ])
             ->with([
-                'publisher:id,name,logo,slug',
+                'publisher:id,name,logo,slug,address',
                 'categories:id,name,icon,slug',
                 'authors:id,name,avatar',
                 'language:id,language,photo',

@@ -241,9 +241,20 @@ trait BuildsLaporan
     {
         $count = max(1, count($buckets));
 
-        $width  = $count > 30 ? 1100 : 800;
-        $height = 320;
-        $padding = ['top' => 30, 'right' => 30, 'bottom' => 70, 'left' => 60];
+        // Banyak label (mis. ratusan penerbit) ditulis VERTIKAL lurus (-90°)
+        // agar mudah dibaca dan tidak saling bertabrakan seperti label miring.
+        $verticalLabels = $count > 16;
+        $maxLabelLen = 28;
+
+        // Tiap bar diberi jatah lebar minimum supaya label vertikal punya ruang
+        // horizontal yang cukup; lebar kanvas tumbuh mengikuti jumlah bar.
+        $minBarSpace = $verticalLabels ? 16 : 26;
+
+        $padding = ['top' => 30, 'right' => 30, 'bottom' => $verticalLabels ? 200 : 70, 'left' => 60];
+
+        $innerHTarget = 240;
+        $width  = (int) max(800, $padding['left'] + $padding['right'] + $count * $minBarSpace);
+        $height = $verticalLabels ? ($padding['top'] + $innerHTarget + $padding['bottom']) : 320;
         $innerW = $width - $padding['left'] - $padding['right'];
         $innerH = $height - $padding['top'] - $padding['bottom'];
 
@@ -251,7 +262,6 @@ trait BuildsLaporan
         $barSpace = $innerW / $count;
         $barWidth = $barSpace * ($count > 40 ? 0.7 : 0.55);
         $showRange = $count <= 20;
-        $rotateLabels = $count > 16;
 
         $svg  = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' . $width . ' ' . $height . '" width="' . $width . '" height="' . $height . '">';
         $svg .= '<rect x="0" y="0" width="' . $width . '" height="' . $height . '" fill="#ffffff"/>';
@@ -272,12 +282,20 @@ trait BuildsLaporan
             if ($count <= 30) {
                 $svg .= '<text x="' . ($x + $barWidth / 2) . '" y="' . ($y - 5) . '" font-size="10" fill="#111827" text-anchor="middle" font-family="Arial" font-weight="bold">' . (is_float($val) && fmod($val, 1.0) !== 0.0 ? number_format($val, 0) : (int) $val) . '</text>';
             }
-            $labelY = $padding['top'] + $innerH + 16;
+            $labelY = $padding['top'] + $innerH + 12;
             $cx = $x + $barWidth / 2;
-            if ($rotateLabels) {
-                $svg .= '<text x="' . $cx . '" y="' . $labelY . '" font-size="9" fill="#374151" text-anchor="end" font-family="Arial" transform="rotate(-45 ' . $cx . ' ' . $labelY . ')">' . e($b['label']) . '</text>';
+
+            $label = (string) $b['label'];
+            if (mb_strlen($label) > $maxLabelLen) {
+                $label = rtrim(mb_substr($label, 0, $maxLabelLen - 1)) . '…';
+            }
+
+            if ($verticalLabels) {
+                // Rotasi -90° (lurus vertikal, bukan miring); anchor end membuat
+                // teks turun ke bawah sumbu dan terbaca dari bawah ke atas.
+                $svg .= '<text x="' . $cx . '" y="' . $labelY . '" font-size="9" fill="#374151" text-anchor="end" font-family="Arial" transform="rotate(-90 ' . $cx . ' ' . $labelY . ')">' . e($label) . '</text>';
             } else {
-                $svg .= '<text x="' . $cx . '" y="' . $labelY . '" font-size="10" fill="#374151" text-anchor="middle" font-family="Arial">' . e($b['label']) . '</text>';
+                $svg .= '<text x="' . $cx . '" y="' . $labelY . '" font-size="10" fill="#374151" text-anchor="middle" font-family="Arial">' . e($label) . '</text>';
                 if ($showRange) {
                     $svg .= '<text x="' . $cx . '" y="' . ($labelY + 14) . '" font-size="8" fill="#6b7280" text-anchor="middle" font-family="Arial">' . e($b['range']) . '</text>';
                 }

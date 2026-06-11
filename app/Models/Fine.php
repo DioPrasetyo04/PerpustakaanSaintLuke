@@ -44,6 +44,18 @@ class Fine extends Model
         return $this->returnBook?->loanDetail?->loan?->user;
     }
 
+    /**
+     * Status pembayaran yang seharusnya untuk sebuah total denda.
+     *
+     * Denda Rp0 (mis. buku sengaja berharga 0 dan dikembalikan tepat waktu)
+     * tidak bisa diproses Midtrans (gross_amount minimal Rp1), jadi langsung
+     * dianggap LUNAS (SUCCESS) — tidak perlu tombol bayar. Selebihnya PENDING.
+     */
+    public static function paymentStatusForTotal(float|int|string|null $total): PaymentStatus
+    {
+        return (float) $total > 0 ? PaymentStatus::PENDING : PaymentStatus::SUCCESS;
+    }
+
     public static function hasUnpaidFine(int $userId): bool
     {
         return self::query()
