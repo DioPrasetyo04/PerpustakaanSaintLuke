@@ -44,7 +44,7 @@ class LaporanPeminjaman extends Page implements HasForms
             'year'  => (string) now()->year,
             'month' => (string) now()->month,
             'week'  => '1',
-            'judul' => 'LAPORAN PEMINJAMAN BUKU PERPUSTAKAAN SAINT LUKE',
+            'judul' => 'LAPORAN PEMINJAMAN BUKU PERPUSTAKAAN SANTO LUKAS',
             'nomor' => '001/LAP-PJM/' . now()->format('m') . '/' . now()->format('Y'),
             'kota'  => 'Jakarta',
             'penandatangan_kiri'  => 'Petugas Perpustakaan',

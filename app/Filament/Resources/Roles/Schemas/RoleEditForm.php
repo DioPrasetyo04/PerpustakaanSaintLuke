@@ -123,15 +123,11 @@ class RoleEditForm
 
         $username = $author->username ? '@' . $author->username : '';
 
-        $verifiedBadge = $author->verified_at
-            ? '<span style="font-size:10px;padding:1px 6px;border-radius:9999px;background:#dcfce7;color:#15803d;margin-left:6px;font-weight:500;">Verified</span>'
-            : '<span style="font-size:10px;padding:1px 6px;border-radius:9999px;background:#fee2e2;color:#b91c1c;margin-left:6px;font-weight:500;">Unverified</span>';
-
         return '<span style="display:inline-flex;align-items:center;gap:8px;line-height:1.25;">'
             . $avatar
             . '<span style="display:inline-flex;flex-direction:column;min-width:0;">'
                 . '<span style="font-weight:600;color:currentColor;display:inline-flex;align-items:center;">'
-                    . e($author->name) . $verifiedBadge
+                    . e($author->name)
                 . '</span>'
                 . ($username ? '<span style="font-size:11px;color:#6b7280;">' . e($username) . '</span>' : '')
             . '</span>'

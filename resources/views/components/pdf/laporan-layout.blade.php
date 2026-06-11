@@ -32,8 +32,13 @@
         .period-box { border: 1px solid #d1d5db; background: #f9fafb; padding: 8px 12px; margin-bottom: 14px; font-size: 11px; }
         .period-box strong { display: inline-block; min-width: 140px; }
         .section-title { font-weight: bold; font-size: 12px; margin: 12px 0 6px; }
-        .chart-wrap { text-align: center; margin: 4px 0 12px; border: 1px solid #e5e7eb; padding: 6px; background: #ffffff; }
+        .chart-wrap { text-align: center; margin: 4px 0 12px; border: 1px solid #e5e7eb; padding: 6px; background: #ffffff; page-break-inside: avoid; }
         .chart-wrap img { max-width: 100%; height: auto; }
+
+        /* Paksa blok mulai di halaman baru. Dipakai mis. untuk memisahkan
+           section "Daftar Data Buku" dari chart penerbit yang sangat tinggi
+           (label sumbu-X banyak) agar tidak saling menimpa di dompdf. */
+        .page-break-before { page-break-before: always; }
 
         /* NOTE: border-collapse:separate (bukan collapse). Pada tabel besar
            (mis. Laporan Buku ~1000 baris) dompdf menghabiskan memori saat
@@ -47,6 +52,9 @@
         table.data tbody tr:nth-child(even) td { background: #f3f4f6; }
         table.data td.no, table.data td.center { text-align: center; }
         table.data td.right { text-align: right; }
+        /* Tabel rekap (Kategori/Penerbit) — lebih ringkas, ditumpuk vertikal. */
+        table.data.recap { width: 60%; margin-bottom: 14px; }
+
         .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; background: #dbeafe; color: #1e3a8a; font-size: 9.5px; font-weight: bold; }
         .badge.green { background: #d1fae5; color: #065f46; }
         .badge.amber { background: #fef3c7; color: #92400e; }
@@ -190,9 +198,9 @@
 
                 $line1 = "PERPUSTAKAAN SANTO LUKAS";
                 $line2 = "YAYASAN PENDIDIKAN UMUM SANTO LUKAS";
-                $line3 = "Jl. Pademangan I Gang 7 No. 23, Jakarta Utara 14410";
+                $line3 = "Jl. Pademangan II Gang VII No. 54, Jakarta Utara 14410";
                 $line4 = "Telepon (021) 6414260, 64714859";
-                $line5 = "Email: santo.lukas@yahoo.co.id";
+                $line5 = "Email: stlukaslibrary@gmail.com";
 
                 $sz1 = 15; $sz2 = 12; $sz3 = 10; $sz4 = 8;
 
@@ -218,8 +226,8 @@
                 $canvas->line($marginX, $footerY, $pageW - $marginX, $footerY, [0.15,0.15,0.15], 1.2);
 
                 $ftSz = 8.5;
-                $canvas->text($marginX, $footerY + 6,  "Perpustakaan Saint Luke",                  $fontReg, $ftSz, $gray);
-                $canvas->text($marginX, $footerY + 18, "Jl. Gembira Terusan No. 24, Jakarta Utara", $fontReg, $ftSz, $gray);
+                $canvas->text($marginX, $footerY + 6,  "Perpustakaan Yayasan Pendidikan Umum Santo Lukas",                  $fontReg, $ftSz, $gray);
+                $canvas->text($marginX, $footerY + 18, "Jl. Pademangan II Gang VII No. 54, Jakarta Utara 14410", $fontReg, $ftSz, $gray);
 
                 $ftTitleW = $fontMetrics->getTextWidth($ftTitle, $fontBold, $ftSz);
                 $canvas->text(($pageW - $ftTitleW) / 2, $footerY + 6, $ftTitle, $fontBold, $ftSz, [0.1,0.13,0.18]);

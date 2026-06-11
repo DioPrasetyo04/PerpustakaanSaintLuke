@@ -69,6 +69,7 @@ class BookResource extends JsonResource
 
             'location_book' => $this->when(isset($this->location_book), $this->location_book),
             'classification_number' => $this->when(isset($this->classification_number), $this->classification_number),
+            'volume' => $this->when(isset($this->volume), $this->volume),
 
             'cover' => $this->when(
                 isset($this->cover),

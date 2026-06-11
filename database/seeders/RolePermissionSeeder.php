@@ -13,7 +13,7 @@ class RolePermissionSeeder extends Seeder
     private const USER_MGMT_ENTITIES = ['User', 'Role', 'Permission', 'RouteAccess'];
 
     // Sumber daya Katalog Buku (Writer dapat akses)
-    private const BOOK_CATALOG_ENTITIES = ['Book', 'Author', 'Category', 'Publisher'];
+    private const BOOK_CATALOG_ENTITIES = ['Book', 'Author', 'Category', 'Publisher', 'Type', 'Language'];
 
     // Widget/page yang hanya relevan untuk buku (Writer)
     private const WRITER_VIEWS = [

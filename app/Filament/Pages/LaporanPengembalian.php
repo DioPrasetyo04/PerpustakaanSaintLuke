@@ -44,7 +44,7 @@ class LaporanPengembalian extends Page implements HasForms
             'year'  => (string) now()->year,
             'month' => (string) now()->month,
             'week'  => '1',
-            'judul' => 'LAPORAN PENGEMBALIAN BUKU PERPUSTAKAAN SAINT LUKE',
+            'judul' => 'LAPORAN PENGEMBALIAN BUKU PERPUSTAKAAN SANTO LUKAS',
             'nomor' => '001/LAP-RTB/' . now()->format('m') . '/' . now()->format('Y'),
             'kota'  => 'Jakarta',
             'penandatangan_kiri'  => 'Petugas Perpustakaan',

@@ -397,8 +397,7 @@ export const dataLoan = {
         confirmButton: 'Konfirmasi Baca',
         processing: 'Memproses...',
         cancel: 'Batal',
-        checked:
-            'Mohon Centang Persetujuan Untuk Menyetujui Ketentuan Akses',
+        checked: 'Mohon Centang Persetujuan Untuk Menyetujui Ketentuan Akses',
         'loan.success': 'Peminjaman berhasil',
         'loan.only_one_active': 'Hanya boleh 1 pinjaman aktif',
         'loan.same_book_active': 'Buku ini sudah dipinjam',
@@ -612,8 +611,8 @@ export const faqs: faqType = [
             en: 'Can I borrow more than one book?',
         },
         answer: {
-            id: 'Dalam sistem perpustakaan ini anda hanya boleh meminjam 1 buku, selama anda masih meminjam buku anda tidak bisa meminjam buku lain',
-            en: 'In this library system you can only borrow 1 book, as long as you are still borrowing a book you cannot borrow another book.',
+            id: 'Dalam sistem perpustakaan ini anda hanya boleh meminjam lebih dari 1 buku, tetapi anda tidak bisa meminjam buku yang sama selama proses peminjaman masih aktif',
+            en: 'In this library system you can borrow more than 1 book, but you cannot borrow the same book while the borrowing process is still active.',
         },
     },
     {

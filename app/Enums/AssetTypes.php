@@ -48,6 +48,18 @@ enum AssetTypes: string
     }
 
 
+    /**
+     * Maksimal ukuran upload (dalam KB, satuan yang dipakai Filament FileUpload).
+     * File (PDF/DOCX/XLSX) maksimal 30MB; Resources (gambar/audio/video) maksimal 20MB.
+     */
+    public function maxSize(): int
+    {
+        return match ($this) {
+            self::FILE => 30 * 1024,
+            self::RESOURCES => 20 * 1024,
+        };
+    }
+
     public function description(): string
     {
         return match ($this) {

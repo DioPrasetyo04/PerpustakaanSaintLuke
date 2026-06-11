@@ -30,7 +30,7 @@ const CONTACT = {
         'Jalan Pademangan II Gang 7 No. 54, Kelurahan Pademangan Timur, Kecamatan Pademangan, Kota Jakarta Utara, DKI Jakarta 14410',
     email: 'santo.lukas@yahoo.co.id',
     phone: '021-6507574',
-    ig: '@yayasansantolukas',
+    // ig: '@yayasansantolukas',
 };
 
 // URL Google Maps berdasarkan alamat pada halaman ini.
@@ -54,7 +54,14 @@ const content = {
         fPhone: 'Nomor telepon (opsional)',
         fSubject: 'Subjek',
         fMessage: 'Pesan Anda',
-        statuses: ['Siswa', 'Orang tua/Wali', 'Guru', 'Alumni', 'Tamu', 'Lainnya'],
+        statuses: [
+            'Siswa',
+            'Orang tua/Wali',
+            'Guru',
+            'Alumni',
+            'Tamu',
+            'Lainnya',
+        ],
         selectPlaceholder: 'Pilih status…',
         agree: 'Saya menyetujui pengelolaan data sesuai kebijakan privasi yayasan.',
         send: 'Kirim Pesan',
@@ -65,23 +72,28 @@ const content = {
         igLabel: 'Instagram',
         hoursLabel: 'Jam Operasional',
         hours: [
-            { day: 'Senin – Jumat', time: '06.30 – 16.00' },
-            { day: 'Sabtu', time: '07.00 – 12.00' },
+            { day: 'Senin – Jumat', time: '07.00 WIB – 15.00 WIB' },
+            { day: 'Sabtu', time: 'Tutup' },
             { day: 'Minggu & Libur Nasional', time: 'Tutup' },
         ],
         mapCaption: 'Perpustakaan Santo Lukas · Jakarta Utara',
         openMaps: 'Buka di Google Maps',
         // Notifikasi
         nSuccessTitle: 'Pesan terkirim. Terima kasih!',
-        nSuccessDesc: 'Petugas perpustakaan telah menerima pesan Anda dan akan membalas paling lambat 1×24 jam pada hari kerja.',
+        nSuccessDesc:
+            'Petugas perpustakaan telah menerima pesan Anda dan akan membalas paling lambat 1×24 jam pada hari kerja.',
         nConsentTitle: 'Persetujuan diperlukan',
-        nConsentDesc: 'Mohon centang persetujuan pengelolaan data terlebih dahulu sebelum mengirim pesan.',
+        nConsentDesc:
+            'Mohon centang persetujuan pengelolaan data terlebih dahulu sebelum mengirim pesan.',
         nNoStaffTitle: 'Pesan belum dapat dikirim',
-        nNoStaffDesc: 'Mohon maaf, saat ini petugas perpustakaan tidak tersedia. Silakan coba lagi nanti atau hubungi kami melalui telepon/surel.',
+        nNoStaffDesc:
+            'Mohon maaf, saat ini petugas perpustakaan tidak tersedia. Silakan coba lagi nanti atau hubungi kami melalui telepon/surel.',
         nFailTitle: 'Terjadi kesalahan',
-        nFailDesc: 'Pesan gagal dikirim karena gangguan teknis. Silakan coba beberapa saat lagi.',
+        nFailDesc:
+            'Pesan gagal dikirim karena gangguan teknis. Silakan coba beberapa saat lagi.',
         nValidationTitle: 'Lengkapi formulir',
-        nValidationDesc: 'Beberapa isian belum lengkap atau tidak valid. Mohon periksa kembali formulir Anda.',
+        nValidationDesc:
+            'Beberapa isian belum lengkap atau tidak valid. Mohon periksa kembali formulir Anda.',
         close: 'Tutup',
     },
     en: {
@@ -96,7 +108,14 @@ const content = {
         fPhone: 'Phone number (optional)',
         fSubject: 'Subject',
         fMessage: 'Your message',
-        statuses: ['Student', 'Parent/Guardian', 'Teacher', 'Alumni', 'Guest', 'Other'],
+        statuses: [
+            'Student',
+            'Parent/Guardian',
+            'Teacher',
+            'Alumni',
+            'Guest',
+            'Other',
+        ],
         selectPlaceholder: 'Select status…',
         agree: 'I agree to the processing of my data per the foundation privacy policy.',
         send: 'Send Message',
@@ -107,23 +126,28 @@ const content = {
         igLabel: 'Instagram',
         hoursLabel: 'Opening Hours',
         hours: [
-            { day: 'Mon – Fri', time: '06.30 – 16.00' },
-            { day: 'Saturday', time: '07.00 – 12.00' },
+            { day: 'Mon – Fri', time: '07.00 WIB – 15.00 WIB' },
+            { day: 'Saturday', time: 'Closed' },
             { day: 'Sunday & National Holidays', time: 'Closed' },
         ],
         mapCaption: 'Saint Luke Library · North Jakarta',
         openMaps: 'Open in Google Maps',
         // Notifications
         nSuccessTitle: 'Message sent. Thank you!',
-        nSuccessDesc: 'Our library staff has received your message and will reply within one business day.',
+        nSuccessDesc:
+            'Our library staff has received your message and will reply within one business day.',
         nConsentTitle: 'Consent required',
-        nConsentDesc: 'Please tick the data-processing consent before sending your message.',
+        nConsentDesc:
+            'Please tick the data-processing consent before sending your message.',
         nNoStaffTitle: 'Message could not be sent',
-        nNoStaffDesc: 'Sorry, no library staff is available right now. Please try again later or reach us by phone/email.',
+        nNoStaffDesc:
+            'Sorry, no library staff is available right now. Please try again later or reach us by phone/email.',
         nFailTitle: 'Something went wrong',
-        nFailDesc: 'Your message failed to send due to a technical issue. Please try again shortly.',
+        nFailDesc:
+            'Your message failed to send due to a technical issue. Please try again shortly.',
         nValidationTitle: 'Complete the form',
-        nValidationDesc: 'Some fields are missing or invalid. Please review your form and try again.',
+        nValidationDesc:
+            'Some fields are missing or invalid. Please review your form and try again.',
         close: 'Close',
     },
 };
@@ -135,22 +159,38 @@ const labelCls =
 const inputCls =
     'w-full bg-transparent text-foreground outline-none placeholder:text-muted-foreground/70';
 
-function ClickableMap({ caption, openLabel }: { caption: string; openLabel: string }) {
+function ClickableMap({
+    caption,
+    openLabel,
+}: {
+    caption: string;
+    openLabel: string;
+}) {
     return (
         <a
             href={MAPS_URL}
             target="_blank"
             rel="noopener noreferrer"
             aria-label={openLabel}
-            className="hairline group relative block aspect-[4/3] cursor-pointer overflow-hidden border bg-paper-2 transition-shadow hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cobalt dark:bg-night-3"
+            className="hairline group relative block aspect-[4/3] cursor-pointer overflow-hidden border bg-paper-2 transition-shadow hover:shadow-xl focus-visible:ring-2 focus-visible:ring-cobalt focus-visible:outline-none dark:bg-night-3"
         >
             <svg
                 className="absolute inset-0 h-full w-full transition-transform duration-500 group-hover:scale-105"
                 viewBox="0 0 400 300"
                 preserveAspectRatio="none"
             >
-                <rect x="0" y="0" width="400" height="300" className="fill-[#EFE9DC] dark:fill-[#161E1A]" />
-                <path d="M0 0 L400 0 L400 70 Q200 80 0 60 Z" fill="#1F9D73" opacity=".18" />
+                <rect
+                    x="0"
+                    y="0"
+                    width="400"
+                    height="300"
+                    className="fill-[#EFE9DC] dark:fill-[#161E1A]"
+                />
+                <path
+                    d="M0 0 L400 0 L400 70 Q200 80 0 60 Z"
+                    fill="#1F9D73"
+                    opacity=".18"
+                />
                 <g stroke="#8B847A" strokeWidth="2" opacity=".5" fill="none">
                     <path d="M0 180 L400 160" />
                     <path d="M0 130 Q200 145 400 110" />
@@ -177,12 +217,12 @@ function ClickableMap({ caption, openLabel }: { caption: string; openLabel: stri
             </div>
 
             {/* CTA hint */}
-            <div className="tracking-editorial absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-cobalt px-3 py-1.5 text-[10px] font-semibold uppercase text-white opacity-0 shadow-lg transition-opacity duration-300 group-hover:opacity-100">
+            <div className="absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-cobalt px-3 py-1.5 text-[10px] font-semibold tracking-editorial text-white uppercase opacity-0 shadow-lg transition-opacity duration-300 group-hover:opacity-100">
                 <ExternalLink className="h-3 w-3" />
                 {openLabel}
             </div>
 
-            <div className="tracking-editorial absolute bottom-3 left-3 inline-flex items-center gap-1.5 bg-card/90 px-3 py-2 font-mono text-[10px] uppercase backdrop-blur dark:bg-night/90">
+            <div className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 bg-card/90 px-3 py-2 font-mono text-[10px] tracking-editorial uppercase backdrop-blur dark:bg-night/90">
                 <MapPin className="h-3 w-3 text-cobalt dark:text-cobalt-lt" />
                 {caption}
             </div>
@@ -190,7 +230,15 @@ function ClickableMap({ caption, openLabel }: { caption: string; openLabel: stri
     );
 }
 
-function NoticeModal({ notice, onClose, t }: { notice: Notice; onClose: () => void; t: typeof content.id }) {
+function NoticeModal({
+    notice,
+    onClose,
+    t,
+}: {
+    notice: Notice;
+    onClose: () => void;
+    t: typeof content.id;
+}) {
     return (
         <AnimatePresence>
             {notice && (
@@ -207,14 +255,18 @@ function NoticeModal({ notice, onClose, t }: { notice: Notice; onClose: () => vo
                         initial={{ opacity: 0, scale: 0.94, y: 16 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.94, y: 16 }}
-                        transition={{ type: 'spring', stiffness: 260, damping: 24 }}
+                        transition={{
+                            type: 'spring',
+                            stiffness: 260,
+                            damping: 24,
+                        }}
                         onClick={(e) => e.stopPropagation()}
                         className="hairline relative w-full max-w-md overflow-hidden border bg-card shadow-2xl dark:bg-night-2"
                     >
                         <button
                             onClick={onClose}
                             aria-label={t.close}
-                            className="absolute right-4 top-4 grid h-8 w-8 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-foreground/5 hover:text-foreground"
+                            className="absolute top-4 right-4 grid h-8 w-8 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-foreground/5 hover:text-foreground"
                         >
                             <X className="h-4 w-4" />
                         </button>
@@ -255,7 +307,9 @@ function NoticeModal({ notice, onClose, t }: { notice: Notice; onClose: () => vo
 
                         <div
                             className={`h-1.5 w-full ${
-                                notice.kind === 'success' ? 'bg-cobalt' : 'bg-amber-500'
+                                notice.kind === 'success'
+                                    ? 'bg-cobalt'
+                                    : 'bg-amber-500'
                             }`}
                         />
                     </motion.div>
@@ -290,7 +344,11 @@ function ContactPage() {
 
         // Validasi persetujuan di sisi klien → popup notifikasi.
         if (!agree) {
-            setNotice({ kind: 'error', title: t.nConsentTitle, desc: t.nConsentDesc });
+            setNotice({
+                kind: 'error',
+                title: t.nConsentTitle,
+                desc: t.nConsentDesc,
+            });
             return;
         }
 
@@ -301,19 +359,42 @@ function ContactPage() {
             {
                 preserveScroll: true,
                 onSuccess: () => {
-                    setNotice({ kind: 'success', title: t.nSuccessTitle, desc: t.nSuccessDesc });
-                    setForm({ name: '', status: '', email: '', phone: '', subject: '', message: '' });
+                    setNotice({
+                        kind: 'success',
+                        title: t.nSuccessTitle,
+                        desc: t.nSuccessDesc,
+                    });
+                    setForm({
+                        name: '',
+                        status: '',
+                        email: '',
+                        phone: '',
+                        subject: '',
+                        message: '',
+                    });
                     setAgree(false);
                 },
                 onError: (errors) => {
                     const code = errors?.contact;
                     if (code === 'contact.no_manager') {
-                        setNotice({ kind: 'error', title: t.nNoStaffTitle, desc: t.nNoStaffDesc });
+                        setNotice({
+                            kind: 'error',
+                            title: t.nNoStaffTitle,
+                            desc: t.nNoStaffDesc,
+                        });
                     } else if (code === 'contact.failed') {
-                        setNotice({ kind: 'error', title: t.nFailTitle, desc: t.nFailDesc });
+                        setNotice({
+                            kind: 'error',
+                            title: t.nFailTitle,
+                            desc: t.nFailDesc,
+                        });
                     } else {
                         // Galat validasi field dari server.
-                        setNotice({ kind: 'error', title: t.nValidationTitle, desc: t.nValidationDesc });
+                        setNotice({
+                            kind: 'error',
+                            title: t.nValidationTitle,
+                            desc: t.nValidationDesc,
+                        });
                     }
                 },
                 onFinish: () => setSending(false),
@@ -323,7 +404,11 @@ function ContactPage() {
 
     return (
         <section className="bg-background pb-24">
-            <NoticeModal notice={notice} onClose={() => setNotice(null)} t={t} />
+            <NoticeModal
+                notice={notice}
+                onClose={() => setNotice(null)}
+                t={t}
+            />
 
             <div className="mx-auto max-w-[100rem] px-6 pt-16 lg:px-10">
                 <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
@@ -331,7 +416,7 @@ function ContactPage() {
                     <div className="col-span-full lg:col-span-7">
                         <motion.span
                             {...fadeUp}
-                            className="tracking-editorial inline-flex items-center gap-2 rounded-full bg-cobalt-50 px-3 py-1 text-[11px] font-semibold uppercase text-cobalt dark:bg-cobalt/15 dark:text-cobalt-lt"
+                            className="inline-flex items-center gap-2 rounded-full bg-cobalt-50 px-3 py-1 text-[11px] font-semibold tracking-editorial text-cobalt uppercase dark:bg-cobalt/15 dark:text-cobalt-lt"
                         >
                             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-cobalt dark:bg-cobalt-lt" />
                             {t.eyebrow}
@@ -369,22 +454,30 @@ function ContactPage() {
                                     type="text"
                                     required
                                     value={form.name}
-                                    onChange={(e) => set('name')(e.target.value)}
+                                    onChange={(e) =>
+                                        set('name')(e.target.value)
+                                    }
                                     className={inputCls}
                                     placeholder=" "
                                 />
                             </label>
 
                             {/* Status */}
-                            <label className={`col-span-2 sm:col-span-1 ${cellCls}`}>
+                            <label
+                                className={`col-span-2 sm:col-span-1 ${cellCls}`}
+                            >
                                 <div className={labelCls}>{t.fStatus}</div>
                                 <select
                                     required
                                     value={form.status}
-                                    onChange={(e) => set('status')(e.target.value)}
+                                    onChange={(e) =>
+                                        set('status')(e.target.value)
+                                    }
                                     className={`${inputCls} cursor-pointer [&>option]:bg-card [&>option]:text-foreground dark:[&>option]:bg-night-2 dark:[&>option]:text-paper`}
                                 >
-                                    <option value="">{t.selectPlaceholder}</option>
+                                    <option value="">
+                                        {t.selectPlaceholder}
+                                    </option>
                                     {t.statuses.map((o) => (
                                         <option key={o} value={o}>
                                             {o}
@@ -394,13 +487,17 @@ function ContactPage() {
                             </label>
 
                             {/* Surel */}
-                            <label className={`col-span-2 sm:col-span-1 ${cellCls}`}>
+                            <label
+                                className={`col-span-2 sm:col-span-1 ${cellCls}`}
+                            >
                                 <div className={labelCls}>{t.fEmail}</div>
                                 <input
                                     type="email"
                                     required
                                     value={form.email}
-                                    onChange={(e) => set('email')(e.target.value)}
+                                    onChange={(e) =>
+                                        set('email')(e.target.value)
+                                    }
                                     className={inputCls}
                                     placeholder="nama@gmail.com"
                                 />
@@ -410,7 +507,9 @@ function ContactPage() {
                             </label>
 
                             {/* Nomor telepon — komponen Phone Input */}
-                            <div className={`contact-phone col-span-2 ${cellCls}`}>
+                            <div
+                                className={`contact-phone col-span-2 ${cellCls}`}
+                            >
                                 <div className={labelCls}>{t.fPhone}</div>
                                 <PhoneInput
                                     country="id"
@@ -428,7 +527,9 @@ function ContactPage() {
                                     type="text"
                                     required
                                     value={form.subject}
-                                    onChange={(e) => set('subject')(e.target.value)}
+                                    onChange={(e) =>
+                                        set('subject')(e.target.value)
+                                    }
                                     className={inputCls}
                                     placeholder=" "
                                 />
@@ -441,19 +542,23 @@ function ContactPage() {
                                     rows={5}
                                     required
                                     value={form.message}
-                                    onChange={(e) => set('message')(e.target.value)}
+                                    onChange={(e) =>
+                                        set('message')(e.target.value)
+                                    }
                                     className={`${inputCls} resize-none`}
                                     placeholder="…"
                                 />
                             </label>
 
                             {/* Footer */}
-                            <div className="col-span-2 flex flex-col gap-4 bg-card p-5 dark:bg-night-2 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="col-span-2 flex flex-col gap-4 bg-card p-5 sm:flex-row sm:items-center sm:justify-between dark:bg-night-2">
                                 <label className="flex cursor-pointer items-start gap-2 text-xs text-foreground/70 sm:items-center">
                                     <input
                                         type="checkbox"
                                         checked={agree}
-                                        onChange={(e) => setAgree(e.target.checked)}
+                                        onChange={(e) =>
+                                            setAgree(e.target.checked)
+                                        }
                                         className="mt-0.5 h-4 w-4 accent-cobalt sm:mt-0"
                                     />
                                     {t.agree}
@@ -492,7 +597,7 @@ function ContactPage() {
                                 <div className="flex items-start gap-3">
                                     <MapPin className="mt-1 h-[18px] w-[18px] shrink-0 text-cobalt dark:text-cobalt-lt" />
                                     <div>
-                                        <div className="tracking-editorial flex items-center gap-1.5 font-mono text-[10px] uppercase text-muted-foreground">
+                                        <div className="flex items-center gap-1.5 font-mono text-[10px] tracking-editorial text-muted-foreground uppercase">
                                             {t.addressLabel}
                                             <ExternalLink className="h-3 w-3 opacity-0 transition-opacity group-hover:opacity-100" />
                                         </div>
@@ -503,18 +608,21 @@ function ContactPage() {
                                 </div>
                             </a>
 
-                            <ClickableMap caption={t.mapCaption} openLabel={t.openMaps} />
+                            <ClickableMap
+                                caption={t.mapCaption}
+                                openLabel={t.openMaps}
+                            />
 
                             <div className="hairline divide-y border bg-card dark:bg-night-2">
                                 <div className="flex items-center gap-3 p-5">
                                     <Phone className="h-4 w-4 shrink-0 text-cobalt dark:text-cobalt-lt" />
                                     <div>
-                                        <div className="tracking-editorial font-mono text-[10px] uppercase text-muted-foreground">
+                                        <div className="font-mono text-[10px] tracking-editorial text-muted-foreground uppercase">
                                             {t.phoneLabel}
                                         </div>
                                         <a
                                             href={`tel:${CONTACT.phone}`}
-                                            className="font-mono text-lg tabnum text-foreground hover:text-cobalt dark:hover:text-cobalt-lt"
+                                            className="tabnum font-mono text-lg text-foreground hover:text-cobalt dark:hover:text-cobalt-lt"
                                         >
                                             {CONTACT.phone}
                                         </a>
@@ -523,7 +631,7 @@ function ContactPage() {
                                 <div className="flex items-center gap-3 p-5">
                                     <Mail className="h-4 w-4 shrink-0 text-cobalt dark:text-cobalt-lt" />
                                     <div>
-                                        <div className="tracking-editorial font-mono text-[10px] uppercase text-muted-foreground">
+                                        <div className="font-mono text-[10px] tracking-editorial text-muted-foreground uppercase">
                                             {t.emailLabel}
                                         </div>
                                         <a
@@ -534,10 +642,10 @@ function ContactPage() {
                                         </a>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-3 p-5">
+                                {/* <div className="flex items-center gap-3 p-5">
                                     <Instagram className="h-4 w-4 shrink-0 text-cobalt dark:text-cobalt-lt" />
                                     <div>
-                                        <div className="tracking-editorial font-mono text-[10px] uppercase text-muted-foreground">
+                                        <div className="font-mono text-[10px] tracking-editorial text-muted-foreground uppercase">
                                             {t.igLabel}
                                         </div>
                                         <a
@@ -549,13 +657,13 @@ function ContactPage() {
                                             {CONTACT.ig}
                                         </a>
                                     </div>
-                                </div>
+                                </div> */}
                             </div>
 
                             <div className="bg-ink p-6 text-paper dark:bg-night-2">
                                 <div className="mb-4 flex items-center gap-2">
                                     <Clock className="h-4 w-4 text-cobalt-lt" />
-                                    <div className="tracking-editorial font-mono text-[10px] uppercase text-cobalt-lt">
+                                    <div className="font-mono text-[10px] tracking-editorial text-cobalt-lt uppercase">
                                         {t.hoursLabel}
                                     </div>
                                 </div>
@@ -565,8 +673,12 @@ function ContactPage() {
                                             key={h.day}
                                             className="flex items-center justify-between py-3"
                                         >
-                                            <dt className="text-sm text-paper/80">{h.day}</dt>
-                                            <dd className="font-mono text-sm tabnum">{h.time}</dd>
+                                            <dt className="text-sm text-paper/80">
+                                                {h.day}
+                                            </dt>
+                                            <dd className="tabnum font-mono text-sm">
+                                                {h.time}
+                                            </dd>
                                         </div>
                                     ))}
                                 </dl>

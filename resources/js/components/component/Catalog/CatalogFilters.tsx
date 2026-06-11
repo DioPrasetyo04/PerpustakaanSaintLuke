@@ -1,4 +1,5 @@
-import { X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { X, ChevronDown, Tag, Building2, User, Languages } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ImageWithFallback } from '@/components/common/ImageWithFallback';
 import type {
@@ -9,6 +10,175 @@ import type {
 type Lang = 'id' | 'en';
 
 const tr = (lang: Lang, id: string, en: string) => (lang === 'id' ? id : en);
+
+/* ───────── Reusable option shape for the icon dropdown ───────── */
+type SelectOption = {
+    value: string;
+    label: string;
+    image?: string | null;
+    count?: number;
+};
+
+/* Thumbnail: foto/ikon/avatar bila ada, kalau tidak fallback ikon di chip warna */
+function OptionThumb({
+    option,
+    fallbackIcon,
+    circular,
+}: {
+    option: SelectOption;
+    fallbackIcon: React.ReactNode;
+    circular?: boolean;
+}) {
+    const shape = circular ? 'rounded-full' : 'rounded-sm';
+    if (option.image) {
+        return (
+            <ImageWithFallback
+                src={option.image}
+                alt={option.label}
+                loading="lazy"
+                className={cn(
+                    'h-5 w-5 shrink-0 object-cover ring-1 ring-border',
+                    shape,
+                )}
+            />
+        );
+    }
+    return (
+        <span
+            className={cn(
+                'grid h-5 w-5 shrink-0 place-items-center bg-cobalt/10 text-cobalt dark:text-cobalt-lt',
+                shape,
+            )}
+        >
+            {fallbackIcon}
+        </span>
+    );
+}
+
+/* ───────── Custom single-select dropdown with icon/avatar per option ─────────
+ * Native <select> tidak bisa menampilkan gambar, jadi pakai dropdown sendiri.
+ * Data ikon/logo/avatar sudah di-eager-load dari server (tanpa N+1). */
+function IconSelect({
+    value,
+    onChange,
+    options,
+    placeholder,
+    fallbackIcon,
+    circular,
+}: {
+    value: string;
+    onChange: (v: string) => void;
+    options: SelectOption[];
+    placeholder: string;
+    fallbackIcon: React.ReactNode;
+    circular?: boolean;
+}) {
+    const [open, setOpen] = useState(false);
+    const ref = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!open) return;
+        const onDoc = (e: MouseEvent) => {
+            if (ref.current && !ref.current.contains(e.target as Node))
+                setOpen(false);
+        };
+        document.addEventListener('mousedown', onDoc);
+        return () => document.removeEventListener('mousedown', onDoc);
+    }, [open]);
+
+    const selected = options.find((o) => o.value === value);
+
+    return (
+        <div ref={ref} className="relative">
+            <button
+                type="button"
+                onClick={() => setOpen((s) => !s)}
+                aria-haspopup="listbox"
+                aria-expanded={open}
+                className="hairline flex w-full items-center justify-between gap-2 rounded-lg border bg-paper px-3 py-2.5 text-sm text-foreground outline-none transition-colors focus:border-cobalt dark:bg-night-3"
+            >
+                <span className="flex min-w-0 items-center gap-2">
+                    {selected ? (
+                        <>
+                            <OptionThumb
+                                option={selected}
+                                fallbackIcon={fallbackIcon}
+                                circular={circular}
+                            />
+                            <span className="truncate">{selected.label}</span>
+                        </>
+                    ) : (
+                        <span className="truncate text-muted-foreground">
+                            {placeholder}
+                        </span>
+                    )}
+                </span>
+                <ChevronDown
+                    className={cn(
+                        'h-4 w-4 shrink-0 text-muted-foreground transition-transform',
+                        open && 'rotate-180',
+                    )}
+                />
+            </button>
+
+            {open && (
+                <div
+                    role="listbox"
+                    className="custom-scrollbar hairline absolute z-30 mt-2 max-h-64 w-full overflow-y-auto rounded-lg border bg-card p-1 shadow-lift dark:bg-night-2"
+                >
+                    <button
+                        type="button"
+                        onClick={() => {
+                            onChange('');
+                            setOpen(false);
+                        }}
+                        className={cn(
+                            'flex w-full items-center rounded-md px-2.5 py-2 text-left text-sm transition-colors',
+                            !value
+                                ? 'bg-cobalt/10 text-cobalt dark:text-cobalt-lt'
+                                : 'text-foreground/75 hover:bg-foreground/[.04]',
+                        )}
+                    >
+                        {placeholder}
+                    </button>
+                    {options.map((o) => {
+                        const on = o.value === value;
+                        return (
+                            <button
+                                key={o.value}
+                                type="button"
+                                onClick={() => {
+                                    onChange(o.value);
+                                    setOpen(false);
+                                }}
+                                className={cn(
+                                    'flex w-full items-center justify-between gap-2 rounded-md px-2.5 py-2 text-left text-sm transition-colors',
+                                    on
+                                        ? 'bg-cobalt/10 text-cobalt dark:text-cobalt-lt'
+                                        : 'text-foreground/75 hover:bg-foreground/[.04]',
+                                )}
+                            >
+                                <span className="flex min-w-0 items-center gap-2">
+                                    <OptionThumb
+                                        option={o}
+                                        fallbackIcon={fallbackIcon}
+                                        circular={circular}
+                                    />
+                                    <span className="truncate">{o.label}</span>
+                                </span>
+                                {typeof o.count === 'number' && (
+                                    <span className="font-mono text-[10px] tabnum opacity-60">
+                                        {o.count}
+                                    </span>
+                                )}
+                            </button>
+                        );
+                    })}
+                </div>
+            )}
+        </div>
+    );
+}
 
 /* ───────── Removable active-filter chip ───────── */
 export function FilterChip({
@@ -120,7 +290,13 @@ export function FilterSidebar({
     options: CatalogOptions;
     setFilter: <K extends keyof Filters>(key: K, value: Filters[K]) => void;
     toggleArray: (
-        key: 'categories' | 'authors' | 'publishers' | 'types' | 'attachments',
+        key:
+            | 'categories'
+            | 'authors'
+            | 'publishers'
+            | 'languages'
+            | 'types'
+            | 'attachments',
         value: string,
     ) => void;
     onReset: () => void;
@@ -236,101 +412,129 @@ export function FilterSidebar({
                 />
             </div>
 
-            {/* Kategori */}
-            {options.categories.length > 0 && (
+            {/* Bahasa — checkbox, dengan bendera/ikon bahasa */}
+            {options.languages.length > 0 && (
                 <div className="mb-6">
-                    {groupLabel(tr(language, 'Kategori', 'Category'))}
-                    <div className="custom-scrollbar max-h-64 space-y-1 overflow-y-auto pr-1">
-                        {options.categories.map((c) => {
-                            const on = filters.categories.includes(c.name);
+                    {groupLabel(tr(language, 'Bahasa', 'Language'))}
+                    <div className="custom-scrollbar max-h-56 space-y-1.5 overflow-y-auto pr-1">
+                        {options.languages.map((l) => {
+                            const on = filters.languages.includes(l.language);
                             return (
-                                <button
-                                    key={c.id}
-                                    type="button"
-                                    onClick={() =>
-                                        toggleArray('categories', c.name)
-                                    }
-                                    className={cn(
-                                        'flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition-colors',
-                                        on
-                                            ? 'bg-cobalt/10 text-cobalt dark:text-cobalt-lt'
-                                            : 'text-foreground/75 hover:bg-foreground/[.04]',
-                                    )}
+                                <label
+                                    key={l.id}
+                                    className="flex cursor-pointer items-center justify-between gap-2 text-sm text-foreground/80 hover:text-cobalt dark:hover:text-cobalt-lt"
                                 >
-                                    <span className="flex min-w-0 items-center gap-2">
-                                        {c.icon && (
+                                    <span className="flex min-w-0 items-center gap-2.5">
+                                        <input
+                                            type="checkbox"
+                                            checked={on}
+                                            onChange={() =>
+                                                toggleArray(
+                                                    'languages',
+                                                    l.language,
+                                                )
+                                            }
+                                            className="accent-cobalt"
+                                        />
+                                        {l.photo ? (
                                             <ImageWithFallback
-                                                src={c.icon}
-                                                alt={c.name}
+                                                src={l.photo}
+                                                alt={l.language}
                                                 loading="lazy"
-                                                className="h-5 w-5 shrink-0 rounded-sm object-contain"
+                                                className="h-5 w-5 shrink-0 rounded-sm object-cover ring-1 ring-border"
                                             />
+                                        ) : (
+                                            <span className="grid h-5 w-5 shrink-0 place-items-center rounded-sm bg-cobalt/10 text-cobalt dark:text-cobalt-lt">
+                                                <Languages className="h-3 w-3" />
+                                            </span>
                                         )}
                                         <span className="truncate">
-                                            {c.name}
+                                            {l.language}
                                         </span>
                                     </span>
-                                    {typeof c.count_of_books === 'number' && (
-                                        <span className="text-[10px] font-mono tabnum opacity-60">
-                                            {c.count_of_books}
+                                    {typeof l.count_of_books === 'number' && (
+                                        <span className="font-mono text-[10px] tabnum opacity-60">
+                                            {l.count_of_books}
                                         </span>
                                     )}
-                                </button>
+                                </label>
                             );
                         })}
                     </div>
                 </div>
             )}
 
-            {/* Penerbit */}
-            {options.publishers.length > 0 && (
+            {/* Kategori — dropdown dengan ikon kategori */}
+            {options.categories.length > 0 && (
                 <div className="mb-6">
-                    {groupLabel(tr(language, 'Penerbit', 'Publisher'))}
-                    <select
-                        value={filters.publishers[0] ?? ''}
-                        onChange={(e) =>
-                            setFilter(
-                                'publishers',
-                                e.target.value ? [e.target.value] : [],
-                            )
+                    {groupLabel(tr(language, 'Kategori', 'Category'))}
+                    <IconSelect
+                        value={filters.categories[0] ?? ''}
+                        onChange={(v) =>
+                            setFilter('categories', v ? [v] : [])
                         }
-                        className="hairline w-full rounded-lg border bg-paper px-3 py-2.5 text-sm text-foreground outline-none focus:border-cobalt dark:bg-night-3"
-                    >
-                        <option value="">
-                            {tr(language, 'Semua penerbit', 'All publishers')}
-                        </option>
-                        {options.publishers.map((p) => (
-                            <option key={p.id} value={p.name}>
-                                {p.name}
-                            </option>
-                        ))}
-                    </select>
+                        placeholder={tr(
+                            language,
+                            'Semua kategori',
+                            'All categories',
+                        )}
+                        fallbackIcon={<Tag className="h-3 w-3" />}
+                        options={options.categories.map((c) => ({
+                            value: c.name,
+                            label: c.name,
+                            image: c.icon,
+                            count: c.count_of_books,
+                        }))}
+                    />
                 </div>
             )}
 
-            {/* Penulis */}
+            {/* Penerbit — dropdown dengan logo penerbit */}
+            {options.publishers.length > 0 && (
+                <div className="mb-6">
+                    {groupLabel(tr(language, 'Penerbit', 'Publisher'))}
+                    <IconSelect
+                        value={filters.publishers[0] ?? ''}
+                        onChange={(v) =>
+                            setFilter('publishers', v ? [v] : [])
+                        }
+                        placeholder={tr(
+                            language,
+                            'Semua penerbit',
+                            'All publishers',
+                        )}
+                        fallbackIcon={<Building2 className="h-3 w-3" />}
+                        options={options.publishers.map((p) => ({
+                            value: p.name,
+                            label: p.name,
+                            image: p.logo,
+                            count: p.count_of_books,
+                        }))}
+                    />
+                </div>
+            )}
+
+            {/* Penulis — dropdown dengan avatar penulis */}
             {options.authors.length > 0 && (
                 <div>
                     {groupLabel(tr(language, 'Penulis', 'Author'))}
-                    <select
+                    <IconSelect
                         value={filters.authors[0] ?? ''}
-                        onChange={(e) =>
-                            setFilter(
-                                'authors',
-                                e.target.value ? [e.target.value] : [],
-                            )
-                        }
-                        className="hairline w-full rounded-lg border bg-paper px-3 py-2.5 text-sm text-foreground outline-none focus:border-cobalt dark:bg-night-3"
-                    >
-                        <option value="">
-                            {tr(language, 'Semua penulis', 'All authors')}
-                        </option>
-                        {options.authors.map((a) => (
-                            <option key={a.id} value={a.name}>
-                                {a.name}
-                            </option>
-                        ))}
-                    </select>
+                        onChange={(v) => setFilter('authors', v ? [v] : [])}
+                        placeholder={tr(
+                            language,
+                            'Semua penulis',
+                            'All authors',
+                        )}
+                        fallbackIcon={<User className="h-3 w-3" />}
+                        circular
+                        options={options.authors.map((a) => ({
+                            value: a.name,
+                            label: a.name,
+                            image: a.avatar,
+                            count: a.count_of_books,
+                        }))}
+                    />
                 </div>
             )}
 

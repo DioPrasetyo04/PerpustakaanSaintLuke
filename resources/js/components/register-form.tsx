@@ -63,13 +63,13 @@ export function RegisterForm({
                     >
                         <FieldGroup>
                             <div className="flex flex-col items-center gap-2 text-center">
-                                <div className="flex flex-row items-center gap-2 p-3 text-center">
+                                <div className="flex flex-row items-center justify-center gap-2 p-3 text-center">
                                     <ImageWithFallback
                                         src="/assets/logos/Saint-Luke.png"
                                         alt="login-page-image"
-                                        className="h-12 w-12 items-center rounded-full object-cover object-center"
+                                        className="h-12 w-12 shrink-0 items-center rounded-full object-cover object-center"
                                     />
-                                    <h1 className="text-2xl font-bold">
+                                    <h1 className="text-2xl font-bold whitespace-nowrap">
                                         {text.logoHeader}
                                     </h1>
                                 </div>

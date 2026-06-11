@@ -45,7 +45,7 @@ class LaporanDenda extends Page implements HasForms
             'month'  => (string) now()->month,
             'week'   => '1',
             'metric' => 'count',
-            'judul'  => 'LAPORAN DENDA PERPUSTAKAAN SAINT LUKE',
+            'judul'  => 'LAPORAN DENDA PERPUSTAKAAN SANTO LUKAS',
             'nomor'  => '001/LAP-DND/' . now()->format('m') . '/' . now()->format('Y'),
             'kota'   => 'Jakarta',
             'penandatangan_kiri'  => 'Petugas Perpustakaan',

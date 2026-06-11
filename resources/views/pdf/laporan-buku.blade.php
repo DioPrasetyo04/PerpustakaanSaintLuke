@@ -34,59 +34,54 @@
         $sectionLetter = ['B', 'C', 'D', 'E'][$tableSection - 1] ?? 'D';
     @endphp
 
-    <div class="section-title">{{ $sectionLetter }}. Daftar Data Buku</div>
+    <div class="section-title {{ ($chartCategory || $chartPublisher) ? 'page-break-before' : '' }}">{{ $sectionLetter }}. Daftar Data Buku</div>
 
-    {{-- Category & Publisher breakdown side by side --}}
-    @if ($report['categoryStats']->isNotEmpty() || $report['publisherStats']->isNotEmpty())
-        <table style="width:100%; margin-bottom:12px; border-collapse:separate; border-spacing:0; font-size:10px;">
-            <tr>
-                @if ($report['categoryStats']->isNotEmpty())
-                    <td style="width:50%; vertical-align:top; padding-right:8px;">
-                        <table class="data" style="width:100%;">
-                            <thead>
-                                <tr>
-                                    <th colspan="2" style="text-align:center;">Rekap per Kategori</th>
-                                </tr>
-                                <tr>
-                                    <th style="width:75%;">Kategori</th>
-                                    <th style="width:25%;">Jumlah</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($report['categoryStats'] as $cat)
-                                    <tr>
-                                        <td>{{ $cat->name }}</td>
-                                        <td class="center">{{ $cat->books_count }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </td>
-                @endif
-                @if ($report['publisherStats']->isNotEmpty())
-                    <td style="width:50%; vertical-align:top; padding-left:8px;">
-                        <table class="data" style="width:100%;">
-                            <thead>
-                                <tr>
-                                    <th colspan="2" style="text-align:center;">Rekap per Penerbit</th>
-                                </tr>
-                                <tr>
-                                    <th style="width:75%;">Penerbit</th>
-                                    <th style="width:25%;">Jumlah</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($report['publisherStats'] as $pub)
-                                    <tr>
-                                        <td>{{ $pub->name }}</td>
-                                        <td class="center">{{ $pub->books_count }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </td>
-                @endif
-            </tr>
+    {{-- Rekap per Kategori & Penerbit.
+         Ditata bertumpuk (bukan side-by-side dalam satu sel tabel) agar dompdf
+         dapat memaginasi baris dengan benar. Konten di dalam satu <td> tidak
+         dipaginasi oleh dompdf sehingga daftar panjang (mis. ratusan penerbit)
+         akan meluber menimpa footer. --}}
+    @if ($report['categoryStats']->isNotEmpty())
+        <table class="data recap">
+            <thead>
+                <tr>
+                    <th colspan="2" style="text-align:center;">Rekap per Kategori</th>
+                </tr>
+                <tr>
+                    <th style="width:75%;">Kategori</th>
+                    <th style="width:25%;">Jumlah</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($report['categoryStats'] as $cat)
+                    <tr>
+                        <td>{{ $cat->name }}</td>
+                        <td class="center">{{ $cat->books_count }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    @endif
+
+    @if ($report['publisherStats']->isNotEmpty())
+        <table class="data recap">
+            <thead>
+                <tr>
+                    <th colspan="2" style="text-align:center;">Rekap per Penerbit</th>
+                </tr>
+                <tr>
+                    <th style="width:75%;">Penerbit</th>
+                    <th style="width:25%;">Jumlah</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($report['publisherStats'] as $pub)
+                    <tr>
+                        <td>{{ $pub->name }}</td>
+                        <td class="center">{{ $pub->books_count }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
         </table>
     @endif
 

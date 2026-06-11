@@ -31,7 +31,13 @@ import type {
     FeaturedCatalogBooksProps,
 } from '@/types/CatalogPage/CatalogBooksPageProps';
 
-type ArrayKey = 'categories' | 'authors' | 'publishers' | 'types' | 'attachments';
+type ArrayKey =
+    | 'categories'
+    | 'authors'
+    | 'publishers'
+    | 'languages'
+    | 'types'
+    | 'attachments';
 
 const sortMap: Record<string, { field: string; direction: string }> = {
     relevance: { field: '', direction: '' },
@@ -102,6 +108,7 @@ const BooksPage = () => {
             categories: [],
             authors: [],
             publishers: [],
+            languages: [],
             types: [],
             attachments: [],
             availability: '',
@@ -121,6 +128,7 @@ const BooksPage = () => {
             categories: local.categories,
             authors: local.authors,
             publishers: local.publishers,
+            languages: local.languages,
             types: local.types,
             attachments: local.attachments,
             availability: local.availability || undefined,
@@ -180,6 +188,7 @@ const BooksPage = () => {
         local.categories.length > 0 ||
         local.authors.length > 0 ||
         local.publishers.length > 0 ||
+        local.languages.length > 0 ||
         local.types.length > 0 ||
         local.attachments.length > 0 ||
         !!local.availability ||
@@ -386,6 +395,13 @@ const BooksPage = () => {
                                 key={`p-${p}`}
                                 label={p}
                                 onRemove={() => toggleArray('publishers', p)}
+                            />
+                        ))}
+                        {local.languages.map((l) => (
+                            <FilterChip
+                                key={`l-${l}`}
+                                label={l}
+                                onRemove={() => toggleArray('languages', l)}
                             />
                         ))}
                         {local.types.map((t) => (

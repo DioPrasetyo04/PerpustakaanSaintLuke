@@ -29,6 +29,16 @@ class PaymentController extends Controller
 
         $this->authorizeFineOwner($fine);
 
+        // Midtrans menolak gross_amount < 1 (IDR harus bilangan bulat ≥ 1).
+        // Denda Rp0 berarti tidak ada yang perlu dibayar — jangan panggil Snap.
+        $amount = (int) round((float) $fine->total_fee);
+
+        if ($amount < 1) {
+            return response()->json([
+                'error' => 'Nominal denda tidak valid (Rp0). Tidak ada tagihan yang perlu dibayar.',
+            ], 422);
+        }
+
         $orderId = 'FINE-' . $fine->id . '-' . time();
 
         $fine->order_id = $orderId;
@@ -37,7 +47,7 @@ class PaymentController extends Controller
         $params = [
             'transaction_details' => [
                 'order_id' => $orderId,
-                'gross_amount' => $fine->total_fee,
+                'gross_amount' => $amount,
             ],
             'customer_details' => [
                 'first_name' => $fine->user->username,

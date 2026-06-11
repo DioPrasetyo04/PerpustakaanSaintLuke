@@ -30,6 +30,10 @@ class AdminUserSeeder extends Seeder
         //    Ini yang membuat role 'admin' benar-benar mendapat seluruh resource Filament.
         $this->call(RolePermissionSeeder::class);
 
+        // 2b. Bangun katalog Route Access (route mana dibuka role apa + permission-nya).
+        //     Wajib SETELAH RolePermissionSeeder agar role sudah punya permission.
+        $this->call(RouteAccessSeeder::class);
+
         // 3. Buat / perbarui user super admin dan tetapkan role admin.
         $email = 'admin@perpustakaan-saint-luke.id';
 

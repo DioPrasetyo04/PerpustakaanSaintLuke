@@ -20,10 +20,10 @@ class AuthorStatsOverview extends StatsOverviewWidget
         $endOfMonth   = $now->copy()->endOfMonth();
 
         $total     = Author::query()->count();
-        $verified  = Author::query()->whereNotNull('verified_at')->count();
+        $withBooks = Author::query()->has('books')->count();
         $thisMonth = Author::query()->whereBetween('created_at', [$startOfMonth, $endOfMonth])->count();
 
-        $verifiedPercent = $total > 0 ? round($verified / $total * 100) : 0;
+        $withBooksPercent = $total > 0 ? round($withBooks / $total * 100) : 0;
 
         return [
             Stat::make('Total Penulis', $total)
@@ -31,9 +31,9 @@ class AuthorStatsOverview extends StatsOverviewWidget
                 ->descriptionIcon('heroicon-m-pencil-square')
                 ->color('info'),
 
-            Stat::make('Penulis Terverifikasi', $verified)
-                ->description($verifiedPercent . '% dari total penulis')
-                ->descriptionIcon('heroicon-m-check-badge')
+            Stat::make('Penulis dengan Buku', $withBooks)
+                ->description($withBooksPercent . '% dari total penulis')
+                ->descriptionIcon('heroicon-m-book-open')
                 ->color('success'),
 
             Stat::make('Penulis Baru Bulan Ini', $thisMonth)

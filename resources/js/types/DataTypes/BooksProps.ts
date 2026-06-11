@@ -30,6 +30,7 @@ export type BookProps = {
     book_code: string;
     location_book?: string;
     classification_number?: string;
+    volume?: string;
     status: BookStatus;
     is_published: boolean;
     publisher: PublisherProps;

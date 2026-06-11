@@ -11,12 +11,22 @@ export type CatalogCategoryOption = {
 export type CatalogAuthorOption = {
     id: number;
     name: string;
+    avatar?: string | null;
+    count_of_books?: number;
 };
 
 export type CatalogPublisherOption = {
     id: number;
     name: string;
     logo?: string | null;
+    count_of_books?: number;
+};
+
+export type CatalogLanguageOption = {
+    id: number;
+    language: string;
+    photo?: string | null;
+    count_of_books?: number;
 };
 
 export type CatalogTypeOption = {
@@ -30,6 +40,7 @@ export type CatalogFilters = {
     categories: string[];
     authors: string[];
     publishers: string[];
+    languages: string[];
     types: string[];
     attachments: string[];
     availability: string;
@@ -44,6 +55,7 @@ export type CatalogOptions = {
     categories: CatalogCategoryOption[];
     authors: CatalogAuthorOption[];
     publishers: CatalogPublisherOption[];
+    languages: CatalogLanguageOption[];
     types: CatalogTypeOption[];
     attachments: string[];
     yearBounds: { min: number; max: number };

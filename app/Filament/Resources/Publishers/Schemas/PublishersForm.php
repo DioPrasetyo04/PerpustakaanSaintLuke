@@ -77,11 +77,10 @@ class PublishersForm
                                     'image/png',
                                     'image/jpeg',
                                     'image/svg+xml',
-                                    'image/webp',
                                     'image/gif',
                                 ])
                                 ->maxSize(2048)
-                                ->helperText('Format yang diperbolehkan: PNG, JPG, JPEG, SVG, WEBP, GIF. Maksimal ukuran 2MB.')
+                                ->helperText('Format yang diperbolehkan: PNG, JPG, JPEG, SVG, GIF. Maksimal ukuran 2MB.')
                                 ->disk('public')
                                 ->visibility('public')
                                 ->directory('publishers/logos')
@@ -108,6 +107,7 @@ class PublishersForm
                                 ->getOptionLabelUsing(fn($value) => SocialMedia::from($value)->html())
                                 ->searchable()
                                 ->native(false)
+                                ->required()
                                 ->columnSpan(1),
 
                             TextInput::make('url')
@@ -120,15 +120,7 @@ class PublishersForm
                                 ->columnSpan(1),
                         ])
                         ->columns(3)
-                        ->defaultItems(1)
-                        ->minItems(1)
-                        ->afterStateHydrated(function ($component, $state) {
-                            if (blank($state)) {
-                                $component->state([
-                                    []
-                                ]);
-                            }
-                        })
+                        ->defaultItems(0)
                         ->addActionLabel('Tambah Social Media')
                         ->reorderable()
                         ->collapsible()
