@@ -320,6 +320,15 @@ function BookShow() {
             k: language === 'id' ? 'Lokasi Buku' : 'Book Location',
             v: book.location_book ?? '-',
         },
+        {
+            k: language === 'id' ? 'Jilid Buku' : 'Volume',
+            v: book.volume
+                ? language === 'id'
+                    ? `Jilid ke-${book.volume}`
+                    : `Volume ${book.volume}`
+                : '-',
+            mono: true,
+        },
     ];
 
     const bookFormats = uniqueFormats(book.types);
@@ -664,8 +673,8 @@ function BookShow() {
 
                                     </dl>
 
-                                    {/* No. Klasifikasi & Lokasi Buku — baris sendiri, 2 kolom proporsional di desktop */}
-                                    <dl className="hairline mt-4 grid grid-cols-1 gap-px overflow-hidden rounded-xl2 border bg-line sm:grid-cols-2 dark:bg-night-line">
+                                    {/* No. Klasifikasi, Lokasi & Jilid Buku — baris sendiri, kolom proporsional di desktop */}
+                                    <dl className="hairline mt-4 grid grid-cols-1 gap-px overflow-hidden rounded-xl2 border bg-line sm:grid-cols-2 lg:grid-cols-3 dark:bg-night-line">
                                         {biblioPair.map(({ k, v, mono, img }) => (
                                             <div
                                                 key={k}

@@ -43,7 +43,7 @@ class LaporanKunjungan extends Page implements HasForms
             'year'  => (string) now()->year,
             'month' => (string) now()->month,
             'week'  => '1',
-            'judul' => 'LAPORAN KUNJUNGAN PERPUSTAKAAN SAINT LUKE',
+            'judul' => 'LAPORAN KUNJUNGAN PERPUSTAKAAN SANTO LUKAS',
             'nomor' => '001/LAP-KJG/' . now()->format('m') . '/' . now()->format('Y'),
             'kota'  => 'Jakarta',
             'penandatangan_kiri'  => 'Petugas Perpustakaan',

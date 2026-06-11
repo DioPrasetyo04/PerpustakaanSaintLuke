@@ -73,7 +73,7 @@ export function Footer() {
                                 <div className="font-display text-2xl">
                                     {l('libraryName')}
                                 </div>
-                                <div className="tracking-editorial mt-1 text-[10px] uppercase text-paper/55">
+                                <div className="mt-1 text-[10px] tracking-editorial text-paper/55 uppercase">
                                     Yayasan Pendidikan · Jakarta Utara
                                 </div>
                             </div>
@@ -107,7 +107,7 @@ export function Footer() {
                     </div>
 
                     <div className="col-span-1 md:col-span-2">
-                        <div className="tracking-editorial mb-4 text-[10px] uppercase text-paper/45">
+                        <div className="mb-4 text-[10px] tracking-editorial text-paper/45 uppercase">
                             {l('explore')}
                         </div>
                         <ul className="space-y-2.5 text-sm text-paper/70">
@@ -154,7 +154,7 @@ export function Footer() {
                         </ul>
                     </div>
                     <div className="col-span-1 md:col-span-2">
-                        <div className="tracking-editorial mb-4 text-[10px] uppercase text-paper/45">
+                        <div className="mb-4 text-[10px] tracking-editorial text-paper/45 uppercase">
                             {l('foundation')}
                         </div>
                         <ul className="space-y-2.5 text-sm text-paper/70">
@@ -201,7 +201,7 @@ export function Footer() {
                         </ul>
                     </div>
                     <div className="col-span-2 md:col-span-3">
-                        <div className="tracking-editorial mb-4 text-[10px] uppercase text-paper/45">
+                        <div className="mb-4 text-[10px] tracking-editorial text-paper/45 uppercase">
                             {l('visit')}
                         </div>
                         <div className="space-y-2.5 text-sm text-paper/75">
@@ -217,7 +217,7 @@ export function Footer() {
                             </div>
                             <div className="flex items-start gap-2">
                                 <Mail className="mt-0.5 h-3.5 w-3.5 shrink-0 text-cobalt-lt" />{' '}
-                                santo.lukas@yahoo.co.id
+                                stlukaslibrary@gmail.com
                             </div>
                         </div>
                     </div>
@@ -225,7 +225,7 @@ export function Footer() {
 
                 <div className="mt-12 flex flex-col justify-between gap-3 border-t border-paper/10 pt-6 text-xs text-paper/55 md:flex-row">
                     <div>{l('copyright')}</div>
-                    <div className="tracking-editorial font-mono uppercase">
+                    <div className="font-mono tracking-editorial uppercase">
                         {l('tagline')}
                     </div>
                 </div>

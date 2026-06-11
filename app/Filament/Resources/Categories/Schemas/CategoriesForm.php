@@ -26,7 +26,7 @@ class CategoriesForm
 
                             // NAME
                             TextInput::make('name')
-                                ->label('Name Of Category')
+                                ->label('Nama Kategori')
                                 ->live()
                                 ->maxLength(255)
                                 ->afterStateUpdated(function (Set $set, $state) {
@@ -41,7 +41,7 @@ class CategoriesForm
 
                             // SLUG
                             TextInput::make('slug')
-                                ->label('Slug Of Category')
+                                ->label('Slug Kategori')
                                 ->maxLength(255)
                                 ->unique(ignoreRecord: true)
                                 ->readOnly()
@@ -50,7 +50,7 @@ class CategoriesForm
 
                             // ICON
                             FileUpload::make('icon')
-                                ->label('Icon Of Categories')
+                                ->label('Icon Kategori')
                                 ->image()
                                 ->acceptedFileTypes([
                                     'image/png',
@@ -68,7 +68,7 @@ class CategoriesForm
 
                             // PHOTO (FULL WIDTH)
                             FileUpload::make('photo')
-                                ->label('Photo Of Categories')
+                                ->label('Photo Kategori')
                                 ->image()
                                 ->acceptedFileTypes([
                                     'image/png',
@@ -87,7 +87,7 @@ class CategoriesForm
 
                             // DESCRIPTION (FULL WIDTH)
                             RichEditor::make('description')
-                                ->label('Description Of Categories')
+                                ->label('Description Kategori')
                                 ->columnSpanFull(),
 
                             // TOGGLE

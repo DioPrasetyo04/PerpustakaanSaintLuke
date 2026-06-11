@@ -57,6 +57,9 @@ class CatalogRepositories implements CatalogInterfaceRepositories
             ->when($publishers, function ($query) use ($publishers) {
                 $query->whereHas('publisher', fn($q) => $q->whereIn('name', (array) $publishers));
             })
+            ->when($filters['languages'] ?? null, function ($query, $languages) {
+                $query->whereHas('language', fn($q) => $q->whereIn('language', (array) $languages));
+            })
             ->when($filters['types'] ?? null, function ($query, $types) {
                 $query->whereHas('types', fn($q) => $q->whereIn('type', (array) $types));
             })

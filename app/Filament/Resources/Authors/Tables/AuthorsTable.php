@@ -9,7 +9,6 @@ use Filament\Actions\EditAction;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Support\Carbon;
 use Propaganistas\LaravelPhone\PhoneNumber;
 
 class AuthorsTable
@@ -72,7 +71,6 @@ class AuthorsTable
                     ->html()
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('verified_at')->searchable()->sortable()->label('Diverifikasi')->formatStateUsing(fn($state) => $state ? Carbon::parse($state)->format('d F Y') : null),
             ])
             ->filters([
                 //

@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
             // EventSeeder::class,
             // OrganizationMemberSeeder::class,
             // AdminUserSeeder::class,
-            // LoanSeeder::class, // Aktifkan saat testing fitur reminder/auto-return; jalankan via: php artisan db:seed --class=LoanSeeder
+            LoanSeeder::class, // Aktifkan saat testing fitur reminder/auto-return; jalankan via: php artisan db:seed --class=LoanSeeder
             // BookSeeder::class,
         ]);
     }

@@ -4,7 +4,6 @@ namespace App\Filament\Resources\Authors\Schemas;
 
 use App\Enums\SocialMedia;
 use App\Enums\UserGender;
-use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
@@ -25,12 +24,12 @@ class AuthorForm
         return $schema
             ->components([
                 Wizard::make([
-                    Step::make('Author Data')
-                        ->description('Information Author Data ')
+                    Step::make('Data Penulis')
+                        ->description('Informasi Data Penulis')
                         ->schema([
-                            Section::make('Author Information')->description('Provide the necessary information for the author books')->schema([
+                            Section::make('Data Penulis')->description('Informasi Data Penulis')->schema([
                                 Grid::make(3)->schema([
-                                    TextInput::make('name')->label('Author Name')->maxLength(255)->live()->afterStateUpdated(function (Set $set, $state) {
+                                    TextInput::make('name')->label('Nama')->maxLength(255)->live()->afterStateUpdated(function (Set $set, $state) {
                                         if (filled($state)) {
                                             $set('username', generateUsername($state));
                                         } else {
@@ -51,14 +50,15 @@ class AuthorForm
                                         ->defaultCountry('id')
                                         ->separateDialCode()
                                         ->showFlags(),
-                                    Select::make('gender')
-                                        ->label('Gender')
-                                        ->options(UserGender::optionViews())
-                                        ->allowHtml()
-                                        ->getOptionLabelUsing(fn($value) => UserGender::from($value)->html())
-                                        ->searchable(),
-                                    Select::make('nationality')->label('Country')->options(countryOptions())->allowHtml()->searchable(),
-                                    DatePicker::make('verified_at')->label('Tanggal Verifikasi')->displayFormat('d F Y'),
+                                    Grid::make(2)->schema([
+                                        Select::make('gender')
+                                            ->label('Gender')
+                                            ->options(UserGender::optionViews())
+                                            ->allowHtml()
+                                            ->getOptionLabelUsing(fn($value) => UserGender::from($value)->html())
+                                            ->searchable(),
+                                        Select::make('nationality')->label('Country')->options(countryOptions())->allowHtml()->searchable(),
+                                    ])->columnSpanFull(),
                                     RichEditor::make('bio')->label('biography')->maxLength(255)->columnSpanFull(),
                                     FileUpload::make('avatar')
                                         ->label('Photo')
@@ -79,8 +79,8 @@ class AuthorForm
                                 ]),
                             ]),
                         ]),
-                    Step::make('Social Media Author')
-                        ->description('Information Scoial Media Author')
+                    Step::make('Social Media Penulis')
+                        ->description('Information Social Media Penulis')
                         ->schema([
                             Repeater::make('socialmedia')
                                 ->relationship()
@@ -92,6 +92,7 @@ class AuthorForm
                                         ->getOptionLabelUsing(fn($value) => SocialMedia::from($value)->html())
                                         ->searchable()
                                         ->native(false)
+                                        ->required()
                                         ->columnSpan(1),
 
                                     TextInput::make('url')
@@ -104,15 +105,7 @@ class AuthorForm
                                         ->columnSpan(1),
                                 ])
                                 ->columns(3)
-                                ->defaultItems(1)
-                                ->minItems(1)
-                                ->afterStateHydrated(function ($component, $state) {
-                                    if (blank($state)) {
-                                        $component->state([
-                                            []
-                                        ]);
-                                    }
-                                })
+                                ->defaultItems(0)
                                 ->addActionLabel('Tambah Social Media')
                                 ->reorderable()
                                 ->collapsible()

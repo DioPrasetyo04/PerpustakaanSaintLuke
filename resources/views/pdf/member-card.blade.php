@@ -90,7 +90,7 @@
                         <td style="vertical-align:middle; padding-left:8px;">
                             <div class="h-t1">Perpustakaan</div>
                             <div class="h-t2">Yayasan Pendidikan Umum St. Lukas</div>
-                            <div class="h-t3">Jl. Pademangan II Gg. VII No. 1 &middot; Telp. 6471 4859, Jakarta Utara</div>
+                            <div class="h-t3">Jl. Pademangan II Gg. VII No. 54 &middot; Telp.6414260, 64714859, Jakarta Utara</div>
                         </td>
                     </tr>
                 </table>

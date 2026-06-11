@@ -24,7 +24,7 @@ class AuthorResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
-    protected static ?string $recordTitleAttribute = 'Author';
+    protected static ?string $recordTitleAttribute = 'Penulis';
 
     public static function form(Schema $schema): Schema
     {

@@ -38,6 +38,32 @@ use Illuminate\Database\Eloquent\Builder;
 
 class BookForm
 {
+    /**
+     * Apakah salah satu tipe terpilih berformat Digital?
+     * Buku Digital (atau Digital + Fisik) WAJIB memiliki minimal satu aset.
+     */
+    protected static function hasDigitalType(Get $get): bool
+    {
+        $ids = array_filter((array) ($get('types') ?? []));
+
+        return $ids !== [] && Type::whereIn('id', $ids)
+            ->where('type', BookType::DIGITAL->value)
+            ->exists();
+    }
+
+    /**
+     * Apakah salah satu tipe terpilih berformat Fisik?
+     * Hanya buku Fisik yang membutuhkan manajemen stok.
+     */
+    protected static function hasPhysicalType(Get $get): bool
+    {
+        $ids = array_filter((array) ($get('types') ?? []));
+
+        return $ids !== [] && Type::whereIn('id', $ids)
+            ->where('type', BookType::FISIK->value)
+            ->exists();
+    }
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
@@ -160,16 +186,12 @@ class BookForm
 
                                             $username = $record->username ? '@' . $record->username : '';
 
-                                            $verifiedBadge = $record->verified_at
-                                                ? '<span style="font-size:10px;padding:1px 6px;border-radius:9999px;background:#dcfce7;color:#15803d;margin-left:6px;font-weight:500;">Verified</span>'
-                                                : '<span style="font-size:10px;padding:1px 6px;border-radius:9999px;background:#fee2e2;color:#b91c1c;margin-left:6px;font-weight:500;">Unverified</span>';
-
                                             return new HtmlString(
                                                 '<span style="display:inline-flex;align-items:center;gap:8px;line-height:1.25;">'
                                                     . $avatar
                                                     . '<span style="display:inline-flex;flex-direction:column;min-width:0;">'
                                                     . '<span style="font-weight:600;color:currentColor;display:inline-flex;align-items:center;">'
-                                                    . e($record->name) . $verifiedBadge
+                                                    . e($record->name)
                                                     . '</span>'
                                                     . ($username ? '<span style="font-size:11px;color:#6b7280;">' . e($username) . '</span>' : '')
                                                     . '</span>'
@@ -181,26 +203,6 @@ class BookForm
                                         ->searchable(['name', 'username'])
                                         ->preload()
                                         ->required()
-                                        ->rules([
-                                            fn(): Closure => function (string $attribute, $value, Closure $fail) {
-                                                if (blank($value)) {
-                                                    return;
-                                                }
-
-                                                $ids = \is_array($value) ? $value : [$value];
-
-                                                $unverified = Author::whereIn('id', $ids)
-                                                    ->whereNull('verified_at')
-                                                    ->pluck('name')
-                                                    ->all();
-
-                                                if (! empty($unverified)) {
-                                                    foreach ($unverified as $name) {
-                                                        $fail("Penulis dengan nama \"{$name}\" belum terverifikasi.");
-                                                    }
-                                                }
-                                            },
-                                        ])
                                         ->createOptionForm([
                                             Section::make('Author Information')
                                                 ->description('Provide the necessary information for the author.')
@@ -227,8 +229,7 @@ class BookForm
                                                             ->searchable(),
                                                         DatePicker::make('date_of_birth')->label('Date Of Birth'),
                                                         Select::make('nationality')->label('Country')->options(countryOptions())->allowHtml()->searchable(),
-                                                        RichEditor::make('bio')->label('Biography'),
-                                                        DatePicker::make('verified_at')->label('Verified At')->displayFormat('Y-m-d'),
+                                                        RichEditor::make('bio')->label('Biography')->columnSpanFull(),
                                                         FileUpload::make('avatar')
                                                             ->image()
                                                             ->acceptedFileTypes([
@@ -257,6 +258,7 @@ class BookForm
                                                             ->getOptionLabelUsing(fn($value) => SocialMedia::from($value)->html())
                                                             ->searchable()
                                                             ->native(false)
+                                                            ->required()
                                                             ->columnSpan(1),
 
                                                         TextInput::make('url')
@@ -269,20 +271,12 @@ class BookForm
                                                             ->columnSpan(1),
                                                     ])
                                                     ->columns(3)
-                                                    ->defaultItems(1)
-                                                    ->minItems(1)
-                                                    ->afterStateHydrated(function ($component, $state) {
-                                                        if (blank($state)) {
-                                                            $component->state([
-                                                                []
-                                                            ]);
-                                                        }
-                                                    })
+                                                    ->defaultItems(0)
                                                     ->addActionLabel('Tambah Social Media')
                                                     ->reorderable()
                                                     ->collapsible()
                                             ])->columnSpanFull()
-                                        ])->label('Author')->createOptionUsing(function (array $data) {
+                                        ])->createOptionUsing(function (array $data) {
                                             $author = Author::firstOrCreate(
                                                 ['username' => $data['username'] ?? null],
                                                 $data
@@ -385,11 +379,10 @@ class BookForm
                                                                 'image/png',
                                                                 'image/jpeg',
                                                                 'image/svg+xml',
-                                                                'image/webp',
                                                                 'image/gif',
                                                             ])
                                                             ->maxSize(2048)
-                                                            ->helperText('Format yang diperbolehkan: PNG, JPG, JPEG, SVG, WEBP, GIF. Maksimal ukuran 2MB.')
+                                                            ->helperText('Format yang diperbolehkan: PNG, JPG, JPEG, SVG, GIF. Maksimal ukuran 2MB.')
                                                             ->disk('public')
                                                             ->visibility('public')
                                                             ->directory('publishers/logos')
@@ -428,20 +421,12 @@ class BookForm
                                                             ->columnSpan(1),
                                                     ])
                                                     ->columns(3)
-                                                    ->defaultItems(1)
-                                                    ->minItems(1)
-                                                    ->afterStateHydrated(function ($component, $state) {
-                                                        if (blank($state)) {
-                                                            $component->state([
-                                                                []
-                                                            ]);
-                                                        }
-                                                    })
+                                                    ->defaultItems(0)
                                                     ->addActionLabel('Tambah Social Media')
                                                     ->reorderable()
                                                     ->collapsible()
                                             ])->columnSpanFull() // 2 kolom utama
-                                        ])->label('Publisher')->createOptionUsing(function (array $data) {
+                                        ])->createOptionUsing(function (array $data) {
                                             $publisher = Publisher::firstOrCreate($data);
                                             return $publisher->id;
                                         })
@@ -542,7 +527,7 @@ class BookForm
                                             return $type->id;
                                         })
                                         ->createOptionModalHeading('Create Type Form'),
-                                    Select::make('categories')->relationship('categories', 'name')
+                                    Select::make('categories')->label('Kategori')->relationship('categories', 'name')
                                         ->getOptionLabelFromRecordUsing(function ($record) {
                                             $iconUrl = $record->icon ? asset('storage/' . $record->icon) : null;
 
@@ -645,7 +630,7 @@ class BookForm
                                                     ->default(true)
                                                     ->columnSpanFull(),
                                             ])
-                                        ])->label('Category')->createOptionUsing(function (array $data) {
+                                        ])->createOptionUsing(function (array $data) {
                                             $category = Category::firstOrCreate($data);
                                             return $category->id;
                                         })
@@ -676,7 +661,20 @@ class BookForm
                                                     }
                                                 })->required()->columnSpan(1),
                                                 TextInput::make('code')->maxLength(255)->unique(ignoreRecord: true)->readOnly()->disabled()->dehydrated(),
-                                                FileUpload::make('photo')->image()->maxSize(2048)->directory('languages')->disk('public')->visibility('public')->columnSpanFull(),
+                                                FileUpload::make('photo')
+                                                    ->image()
+                                                    ->acceptedFileTypes([
+                                                        'image/png',
+                                                        'image/jpeg',
+                                                        'image/svg+xml',
+                                                        'image/gif',
+                                                    ])
+                                                    ->maxSize(2048)
+                                                    ->helperText('Format yang diperbolehkan: PNG, JPG, JPEG, SVG, GIF. Maksimal ukuran 2MB.')
+                                                    ->directory('languages')
+                                                    ->disk('public')
+                                                    ->visibility('public')
+                                                    ->columnSpanFull(),
 
                                             ])->label('Create Language'),
                                         ])
@@ -747,49 +745,49 @@ class BookForm
                                 ])->columns(3),
                         ]),
                     Wizard\Step::make('Asset Books Information')->description('Asset Of Books')
+                        // Aset hanya relevan untuk buku Digital. Tampilkan step ini bila
+                        // minimal satu tipe terpilih = Digital (mis. Digital, atau
+                        // Digital + Fisik). Sembunyikan untuk Fisik saja atau saat
+                        // belum ada tipe yang dipilih.
+                        ->visible(fn(Get $get): bool => self::hasDigitalType($get))
                         ->schema([
                             Section::make('Asset Books')->description('Aset hanya wajib untuk buku berformat Digital. Buku Fisik saja boleh tanpa aset.')
                                 ->schema([
                                     Repeater::make('assets')
                                         ->label('Assets')
                                         ->relationship('assets')
-                                        ->helperText(function (Get $get): string {
-                                            $ids = (array) ($get('types') ?? []);
-                                            $hasDigital = $ids && Type::whereIn('id', $ids)
-                                                ->where('type', BookType::DIGITAL->value)
-                                                ->exists();
-
-                                            return $hasDigital
-                                                ? 'Buku Digital wajib memiliki minimal satu aset (mis. PDF / e-book).'
-                                                : 'Opsional untuk buku Fisik. Tambahkan aset hanya bila tersedia versi digital.';
-                                        })
-                                        ->minItems(function (Get $get): int {
-                                            $ids = (array) ($get('types') ?? []);
-                                            $hasDigital = $ids && Type::whereIn('id', $ids)
-                                                ->where('type', BookType::DIGITAL->value)
-                                                ->exists();
-
-                                            return $hasDigital ? 1 : 0;
-                                        })
+                                        ->helperText(fn(Get $get): string => self::hasDigitalType($get)
+                                            ? 'Buku Digital wajib memiliki minimal satu aset (mis. PDF / e-book).'
+                                            : 'Opsional untuk buku Fisik. Tambahkan aset hanya bila tersedia versi digital.')
+                                        ->required(fn(Get $get): bool => self::hasDigitalType($get))
+                                        ->minItems(fn(Get $get): int => self::hasDigitalType($get) ? 1 : 0)
                                         ->schema([
                                             Select::make('type')
                                                 ->label('Type Asset')
                                                 ->options(AssetTypes::options())
                                                 ->live()
                                                 ->afterStateUpdated(fn(Set $set) => $set('utility_path', null))
+                                                ->required()
                                                 ->columnSpan(1),
                                             FileUpload::make('utility_path')
                                                 ->key(fn($get) => 'upload-' . $get('type'))
                                                 ->label('Asset')
                                                 ->helperText(
-                                                    fn($get) =>
-                                                    $get('type')
-                                                        ? new HtmlString(
+                                                    function ($get) {
+                                                        if (! $get('type')) {
+                                                            return 'Select type first';
+                                                        }
+
+                                                        $asset = AssetTypes::from($get('type'));
+                                                        $maxMb = (int) ($asset->maxSize() / 1024);
+
+                                                        return new HtmlString(
                                                             '<div class="text-sm text-danger-600 dark:text-danger-400">'
-                                                                . AssetTypes::from($get('type'))->description()
+                                                                . e($asset->description())
+                                                                . ' &middot; Maksimal ukuran file ' . $maxMb . 'MB'
                                                                 . '</div>'
-                                                        )
-                                                        : 'Select type first'
+                                                        );
+                                                    }
                                                 )
                                                 ->disk('public')
                                                 ->directory('books/assets')
@@ -799,6 +797,12 @@ class BookForm
                                                     $get('type')
                                                         ? AssetTypes::from($get('type'))->allowedMimes()
                                                         : []
+                                                )
+                                                ->maxSize(
+                                                    fn($get) =>
+                                                    $get('type')
+                                                        ? AssetTypes::from($get('type'))->maxSize()
+                                                        : null
                                                 )
                                                 ->visible(fn($get) => filled($get('type')))
                                                 ->required()
@@ -816,13 +820,7 @@ class BookForm
                         // step ini bila minimal satu tipe terpilih = Fisik (mis. Fisik,
                         // atau Fisik + Digital). Sembunyikan untuk Digital saja atau
                         // saat belum ada tipe yang dipilih.
-                        ->visible(function (Get $get): bool {
-                            $ids = (array) ($get('types') ?? []);
-
-                            return $ids !== [] && Type::whereIn('id', $ids)
-                                ->where('type', BookType::FISIK->value)
-                                ->exists();
-                        })
+                        ->visible(fn(Get $get): bool => self::hasPhysicalType($get))
                         ->schema([
                             Section::make('Stock Books')
                                 ->relationship('stock')

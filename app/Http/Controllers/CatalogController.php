@@ -8,6 +8,7 @@ use App\Models\Asset;
 use App\Models\Author;
 use App\Models\Book;
 use App\Models\Category;
+use App\Models\Language;
 use App\Models\Publisher;
 use App\Models\Type;
 use App\Services\CatalogService;
@@ -53,6 +54,7 @@ class CatalogController extends Controller
                 'categories' => (array) $request->input('categories', []),
                 'authors' => (array) $request->input('authors', []),
                 'publishers' => (array) $request->input('publishers', []),
+                'languages' => (array) $request->input('languages', []),
                 'types' => (array) $request->input('types', []),
                 'attachments' => (array) $request->input('attachments', []),
                 'availability' => $request->input('availability', ''),
@@ -74,12 +76,38 @@ class CatalogController extends Controller
                         'icon' => $c->icon ? Storage::url($c->icon) : null,
                         'count_of_books' => $c->count_of_books,
                     ]),
-                'authors' => Author::query()->select(['id', 'name'])->orderBy('name')->get(),
-                'publishers' => Publisher::query()->select(['id', 'name', 'logo'])->orderBy('name')->get()
+                'authors' => Author::query()
+                    ->select(['id', 'name', 'avatar'])
+                    ->withCount('books as count_of_books')
+                    ->orderBy('name')
+                    ->get()
+                    ->map(fn($a) => [
+                        'id' => $a->id,
+                        'name' => $a->name,
+                        'avatar' => $a->avatar ? Storage::url($a->avatar) : null,
+                        'count_of_books' => $a->count_of_books,
+                    ]),
+                'publishers' => Publisher::query()
+                    ->select(['id', 'name', 'logo'])
+                    ->withCount('books as count_of_books')
+                    ->orderBy('name')
+                    ->get()
                     ->map(fn($p) => [
                         'id' => $p->id,
                         'name' => $p->name,
                         'logo' => $p->logo ? Storage::url($p->logo) : null,
+                        'count_of_books' => $p->count_of_books,
+                    ]),
+                'languages' => Language::query()
+                    ->select(['id', 'language', 'photo'])
+                    ->withCount('books as count_of_books')
+                    ->orderBy('language')
+                    ->get()
+                    ->map(fn($l) => [
+                        'id' => $l->id,
+                        'language' => $l->language,
+                        'photo' => $l->photo ? Storage::url($l->photo) : null,
+                        'count_of_books' => $l->count_of_books,
                     ]),
                 'types' => Type::query()->select(['id', 'type', 'icon'])->orderBy('type')->get(),
                 'attachments' => Asset::query()->select('type')->distinct()->orderBy('type')->pluck('type'),
@@ -113,7 +141,7 @@ class CatalogController extends Controller
     {
         $filters = $request->all();
         $authorPage = (int) $request->get('authors_page', 1);
-        $authorLoad = (int) $request->get('authors_load', 10);
+        $authorLoad = (int) $request->get('authors_load', 12);
 
         $authorsPaginator = $this->catalogController->getAuthorsRaw($filters, $authorLoad, $authorPage);
 
@@ -131,7 +159,7 @@ class CatalogController extends Controller
     {
         $filters = $request->all();
         $publisherPage = (int) $request->get('publishers_page', 1);
-        $publisherLoad = (int) $request->get('publishers_load', 10);
+        $publisherLoad = (int) $request->get('publishers_load', 12);
 
         $publishersPaginator = $this->catalogController->getPublishersRaw($filters, $publisherLoad, $publisherPage);
 
