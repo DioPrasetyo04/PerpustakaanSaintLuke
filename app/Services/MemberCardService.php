@@ -31,7 +31,7 @@ class MemberCardService
     /**
      * Barcode Code128 sebagai data-URI PNG.
      */
-    public static function barcodePngDataUri(string $value, int $widthFactor = 2, int $height = 55): string
+    public static function barcodePngDataUri(string $value, int $widthFactor = 3, int $height = 80): string
     {
         $generator = new BarcodeGeneratorPNG();
         $png = $generator->getBarcode($value, $generator::TYPE_CODE_128, $widthFactor, $height);

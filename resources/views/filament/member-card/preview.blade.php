@@ -1,87 +1,134 @@
 {{--
     Kartu Anggota Perpustakaan Santo Lukas — tampilan modal (HTML, landscape 2 kolom).
-    Mengikuti desain kartu fisik: KIRI = Nomor Anggota + Foto + Barcode (di samping foto),
-    KANAN = Header (logo + instansi) + data + tanda tangan.
+    Desain modern 2-tone: KIRI = panel emerald (Nomor Anggota + Foto + Barcode/QR di chip putih),
+    KANAN = panel putih (Header instansi + data + tanda tangan). Efek 3D + glossy sheen.
     Variabel berasal dari App\Services\MemberCardService::payload().
 --}}
 @php($issuedDate = $issued_at ? \Illuminate\Support\Carbon::parse($issued_at) : now())
 
 <style>
-    .mc-wrap { display:flex; flex-direction:column; align-items:center; gap:1rem;
-        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    .mc-wrap { display:flex; flex-direction:column; align-items:center; gap:1.25rem;
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+        perspective: 1600px; }
 
     .mc-card {
-        width:100%; max-width:40rem;
+        position:relative; width:100%; max-width:42rem;
         background:#ffffff; color:#0f172a;
-        border:1px solid #e2e8f0; border-left:6px solid #047857;
-        border-radius:.9rem; overflow:hidden;
-        box-shadow:0 20px 45px -18px rgba(0,0,0,.4);
+        border-radius:1.25rem; overflow:hidden;
+        transform: rotateX(2.2deg);
+        box-shadow:
+            0 1px 0 rgba(255,255,255,.6) inset,
+            0 18px 30px -12px rgba(4,120,87,.35),
+            0 40px 70px -28px rgba(15,23,42,.55);
+        transition: transform .35s ease, box-shadow .35s ease;
+    }
+    .mc-card:hover { transform: rotateX(0) translateY(-3px);
+        box-shadow:
+            0 1px 0 rgba(255,255,255,.6) inset,
+            0 26px 44px -14px rgba(4,120,87,.4),
+            0 56px 90px -32px rgba(15,23,42,.6);
+    }
+    /* glossy sheen overlay */
+    .mc-card::after {
+        content:""; position:absolute; inset:0; pointer-events:none; z-index:3;
+        background:linear-gradient(125deg, rgba(255,255,255,.35) 0%, rgba(255,255,255,0) 32%, rgba(255,255,255,0) 70%, rgba(255,255,255,.12) 100%);
     }
 
-    .mc-grid { display:flex; gap:0; }
-    .mc-col-left  { flex:0 0 42%; padding:1rem 1rem 1rem 1.1rem; border-right:1px dashed #cbd5e1;
+    .mc-grid { display:flex; gap:0; position:relative; z-index:1; }
+
+    /* ── Panel KIRI (emerald) ── */
+    .mc-col-left  {
+        flex:0 0 43%; padding:1.15rem 1.1rem 1.15rem 1.25rem;
+        display:flex; flex-direction:column;
+        color:#ecfdf5;
+        background:
+            radial-gradient(120% 120% at 0% 0%, rgba(255,255,255,.16) 0%, rgba(255,255,255,0) 45%),
+            linear-gradient(155deg, #065f46 0%, #047857 48%, #0f766e 100%);
+        position:relative;
+    }
+    /* subtle dot/grid texture */
+    .mc-col-left::before {
+        content:""; position:absolute; inset:0; opacity:.5;
+        background-image: radial-gradient(rgba(255,255,255,.12) 1px, transparent 1px);
+        background-size: 14px 14px;
+    }
+    .mc-col-left > * { position:relative; z-index:1; }
+
+    .mc-col-right { flex:1; padding:1.15rem 1.25rem; min-width:0; background:#ffffff;
         display:flex; flex-direction:column; }
-    .mc-col-right { flex:1; padding:1rem 1.1rem; min-width:0; }
 
     /* Nomor anggota */
-    .mc-no { margin-bottom:.85rem; }
-    .mc-no .lbl { font-size:.6rem; letter-spacing:.12em; text-transform:uppercase; color:#047857; font-weight:800; }
+    .mc-no { margin-bottom:.7rem; }
+    .mc-no .lbl { font-size:.6rem; letter-spacing:.16em; text-transform:uppercase; color:#a7f3d0; font-weight:800; }
     .mc-no .val {
-        font-size:1.15rem; font-weight:800; color:#065f46; letter-spacing:.05em;
-        border-bottom:2px dotted #94a3b8; padding-bottom:.15rem; word-break:break-all;
+        font-size:1.2rem; font-weight:800; color:#fff; letter-spacing:.04em;
+        padding-bottom:.3rem; word-break:break-all;
+        border-bottom:2px dashed rgba(255,255,255,.4);
+        text-shadow:0 1px 2px rgba(0,0,0,.18);
     }
 
-    /* Foto di tengah; kode di bawah (barcode kiri-bawah, QR kanan-bawah) */
-    .mc-photo-center { flex:1; display:flex; align-items:center; justify-content:center; margin:.5rem 0 .7rem; }
+    /* Foto di tengah dengan bingkai putih */
+    .mc-photo-center { flex:1; display:flex; align-items:center; justify-content:center; margin:.55rem 0 .8rem; }
     .mc-photo {
-        width: 80px; height: 100px; border: 2px solid #cbd5e1; object-fit: cover; object-position: top;
+        width: 92px; height: 116px; object-fit: cover; object-position: top;
+        border:3px solid #fff; border-radius:.55rem;
+        box-shadow:0 8px 18px -8px rgba(0,0,0,.5);
     }
     .mc-photo-fallback {
-        width:92px; height:116px; border-radius:.45rem;
+        width:92px; height:116px; border-radius:.55rem;
         display:flex; align-items:center; justify-content:center;
-        background:linear-gradient(135deg,#10b981,#047857); color:#fff;
-        font-size:2rem; font-weight:800; border:2px solid #cbd5e1;
+        background:linear-gradient(135deg,#fbbf24,#b0822f); color:#fff;
+        font-size:2.1rem; font-weight:800; border:3px solid #fff;
+        box-shadow:0 8px 18px -8px rgba(0,0,0,.5);
     }
-    .mc-codes-row { display:flex; justify-content:space-between; align-items:flex-end; gap:.5rem; }
-    .mc-bc-wrap { display:flex; flex-direction:column; align-items:flex-start; min-width:0; }
-    .mc-bc-wrap .bc { width:128px; max-width:100%; height:auto; }
-    .mc-bc-wrap .bcnum { font-size:.62rem; letter-spacing:.16em; color:#334155; font-weight:700; margin-top:.15rem; }
-    .mc-codes-row .qr { flex:0 0 auto; width:62px; height:62px; border:1px solid #e5e7eb; border-radius:.3rem; padding:2px; background:#fff; }
+
+    /* Chip kode (putih, agar barcode/QR tetap mudah dipindai) — barcode & QR sejajar */
+    .mc-codes {
+        background:#fff; border-radius:.7rem; padding:.7rem .8rem;
+        box-shadow:0 10px 22px -12px rgba(0,0,0,.45);
+        display:flex; align-items:center; gap:.8rem;
+    }
+    .mc-codes .bc-col { flex:1; min-width:0; display:flex; flex-direction:column; align-items:stretch; }
+    .mc-codes .bc { display:block; width:100%; height:82px; object-fit:fill; }
+    .mc-codes .bcnum { font-size:.66rem; letter-spacing:.06em; color:#065f46; font-weight:800; margin-top:.3rem; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .mc-codes .qr { flex:0 0 auto; width:82px; height:82px; }
 
     /* Header instansi */
     .mc-head { display:flex; align-items:center; gap:.6rem; padding-bottom:.65rem; border-bottom:2px solid #047857; }
     .mc-logo { width:48px; height:48px; flex:0 0 48px; object-fit:contain; }
-    .mc-head .t1 { font-size:.6rem; letter-spacing:.1em; text-transform:uppercase; color:#475569; font-weight:700; }
-    .mc-head .t2 { font-size:.8rem; font-weight:800; color:#065f46; line-height:1.2; white-space:nowrap; }
-    .mc-head .t3 { font-size:.56rem; color:#64748b; margin-top:1px; white-space:nowrap; }
+    .mc-head .t1 { font-size:.6rem; letter-spacing:.12em; text-transform:uppercase; color:#b0822f; font-weight:800; }
+    .mc-head .t2 { font-size:.84rem; font-weight:800; color:#065f46; line-height:1.2; white-space:nowrap; }
+    .mc-head .t3 { font-size:.56rem; color:#64748b; margin-top:2px; white-space:nowrap; }
     .mc-head > div { min-width:0; }
 
     /* Field */
-    .mc-fields { margin-top:.7rem; display:flex; flex-direction:column; gap:.32rem; }
-    .mc-row { display:flex; font-size:.78rem; }
-    .mc-row .k { flex:0 0 84px; color:#475569; font-weight:600; }
-    .mc-row .s { flex:0 0 8px; color:#475569; }
-    .mc-row .v { flex:1; color:#0f172a; font-weight:600; word-break:break-word; }
+    .mc-fields { margin-top:.8rem; display:flex; flex-direction:column; gap:.36rem; }
+    .mc-row { display:flex; font-size:.8rem; align-items:baseline; }
+    .mc-row .k { flex:0 0 86px; color:#64748b; font-weight:600; }
+    .mc-row .s { flex:0 0 8px; color:#94a3b8; }
+    .mc-row .v { flex:1; color:#0f172a; font-weight:700; word-break:break-word; }
 
-    /* Tanda tangan */
-    .mc-sign { margin-top:.9rem; text-align:right; font-size:.74rem; color:#334155; }
-    .mc-sign .city { }
-    .mc-sign .role { margin-top:.1rem; }
-    .mc-sign .name { margin-top:.9rem; font-weight:700; color:#0f172a; }
+    /* Tanda tangan — menempel di sudut kanan-bawah, beri ruang ttd */
+    .mc-sign { margin-top:auto; text-align:right; font-size:.76rem; color:#475569; }
+    .mc-sign .name { margin-top:3.25rem; font-weight:800; color:#065f46; }
 
     .mc-download {
-        display:inline-flex; align-items:center; gap:.45rem;
-        padding:.6rem 1.2rem; border-radius:.7rem;
-        background:#059669; color:#fff; font-weight:700; font-size:.85rem;
-        text-decoration:none; box-shadow:0 6px 16px -6px rgba(5,150,105,.6);
-        transition:background-color .15s;
+        display:inline-flex; align-items:center; gap:.5rem;
+        padding:.7rem 1.4rem; border-radius:.8rem;
+        background:linear-gradient(135deg,#059669,#047857); color:#fff; font-weight:700; font-size:.88rem;
+        text-decoration:none; box-shadow:0 10px 22px -8px rgba(5,150,105,.65);
+        transition:transform .15s, box-shadow .15s;
     }
-    .mc-download:hover { background:#047857; }
+    .mc-download:hover { transform:translateY(-2px); box-shadow:0 16px 28px -10px rgba(5,150,105,.7); }
     .mc-download svg { width:1.05rem; height:1.05rem; }
 
-    .dark .mc-card { background:#0b1220; color:#e2e8f0; border-color:rgba(255,255,255,.08); }
-    .dark .mc-row .v, .dark .mc-sign .name { color:#e2e8f0; }
-    .dark .mc-col-left { border-right-color:rgba(255,255,255,.12); }
+    /* Dark mode */
+    .dark .mc-card { background:#0b1220; color:#e2e8f0;
+        box-shadow:0 18px 30px -12px rgba(0,0,0,.6), 0 40px 70px -28px rgba(0,0,0,.7); }
+    .dark .mc-col-right { background:#0b1220; }
+    .dark .mc-head .t2, .dark .mc-sign .name { color:#34d399; }
+    .dark .mc-row .v { color:#e2e8f0; }
+    .dark .mc-row .k { color:#94a3b8; }
 </style>
 
 <div class="mc-wrap">
@@ -103,11 +150,11 @@
                     @endif
                 </div>
 
-                {{-- Barcode kiri-bawah, QR kanan-bawah --}}
-                <div class="mc-codes-row">
-                    <div class="mc-bc-wrap">
+                {{-- Chip kode: barcode (kiri) & QR (kanan) sejajar, ukuran besar --}}
+                <div class="mc-codes">
+                    <div class="bc-col">
                         <img src="{{ $barcode }}" class="bc" alt="Barcode" />
-                        <div class="bcnum">{{ $member_number }}</div>
+                        <span class="bcnum">{{ $member_number }}</span>
                     </div>
                     <img src="{{ $qr }}" class="qr" alt="QR" />
                 </div>

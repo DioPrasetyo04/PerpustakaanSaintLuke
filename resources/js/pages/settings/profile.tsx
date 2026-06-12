@@ -1031,9 +1031,13 @@ function MemberCardSection({
             {card ? (
                 <div className="flex flex-1 flex-col">
                     {/* Card preview — hover to download */}
-                    <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary to-brass p-5 text-white shadow-lg">
+                    <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary to-brass p-5 text-white shadow-[0_18px_40px_-18px_rgba(4,120,87,0.7)] ring-1 ring-white/10 transition-transform duration-300 hover:-translate-y-1">
+                        {/* Glossy sheen */}
+                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/25 via-transparent to-white/5" />
+                        {/* Decorative glow */}
+                        <div className="pointer-events-none absolute -top-16 -right-12 h-40 w-40 rounded-full bg-white/15 blur-2xl" />
                         {/* Header */}
-                        <div className="mb-4 flex items-center gap-2">
+                        <div className="relative z-10 mb-4 flex items-center gap-2">
                             {card.logo ? (
                                 <img
                                     src={card.logo}
@@ -1052,7 +1056,7 @@ function MemberCardSection({
                         </div>
 
                         {/* Body */}
-                        <div className="flex items-center gap-4">
+                        <div className="relative z-10 flex items-center gap-4">
                             <div className="flex h-20 w-20 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/20 ring-2 ring-white/40">
                                 {card.avatar ? (
                                     <img
@@ -1090,12 +1094,17 @@ function MemberCardSection({
 
                         {/* Barcode */}
                         {card.barcode && (
-                            <div className="mt-4 rounded-md bg-white p-2.5">
+                            <div className="relative z-10 mt-4 rounded-lg bg-white p-3 shadow-inner">
                                 <img
                                     src={card.barcode}
                                     alt="Barcode"
-                                    className="mx-auto h-12 w-full object-contain"
+                                    className="mx-auto h-16 w-full object-contain"
                                 />
+                                {card.member_number && (
+                                    <p className="mt-1 text-center font-mono text-[11px] font-bold tracking-[0.2em] text-primary">
+                                        {card.member_number}
+                                    </p>
+                                )}
                             </div>
                         )}
 
