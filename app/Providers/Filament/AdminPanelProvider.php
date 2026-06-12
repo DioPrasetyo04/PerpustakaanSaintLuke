@@ -35,6 +35,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->maxContentWidth('full')
+            ->globalSearch(false)
             ->brandName('E-Library Santo Lukas')
             ->brandLogo(fn() => view('filament.brand'))
             ->brandLogoHeight('2.75rem')
