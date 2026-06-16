@@ -35,6 +35,7 @@ class ReturnBooksTable
                 ->with([
                     'user',
                     'physicalLoanDetails.book',
+                    'physicalLoanDetails.returnBook.loanDetail',
                     'physicalLoanDetails.returnBook.returnBookCheck',
                     'physicalLoanDetails.returnBook.fine',
                 ]))
@@ -94,6 +95,56 @@ class ReturnBooksTable
                             : '-')
                         ->values()
                         ->all()),
+                TextColumn::make('due_dates')
+                    ->label('Batas Pengembalian')
+                    ->badge()
+                    ->listWithLineBreaks()
+                    ->limitList(3)
+                    ->expandableLimitedList()
+                    ->state(fn($record) => $record->physicalLoanDetails
+                        ->filter(fn($d) => $d->returnBook)
+                        ->map(fn($d) => $d->due_date
+                            ? Carbon::parse($d->due_date)->format('d M Y')
+                            : '-')
+                        ->values()
+                        ->all())
+                    ->color('warning')
+                    ->icon('heroicon-s-clock'),
+
+                TextColumn::make('late_status')
+                    ->label('Status Keterlambatan')
+                    ->badge()
+                    ->listWithLineBreaks()
+                    ->limitList(3)
+                    ->expandableLimitedList()
+                    ->state(fn($record) => $record->physicalLoanDetails
+                        ->filter(fn($d) => $d->returnBook)
+                        ->map(function ($d) {
+
+                            if (
+                                !$d->due_date ||
+                                !$d->returnBook?->return_date
+                            ) {
+                                return 'Tidak diketahui';
+                            }
+
+                            return Carbon::parse($d->returnBook->return_date)
+                                ->greaterThan(Carbon::parse($d->due_date))
+                                ? 'Terlambat'
+                                : 'Tepat waktu';
+                        })
+                        ->values()
+                        ->all())
+                    ->color(fn($state) => match ($state) {
+                        'Terlambat' => 'danger',
+                        'Tepat waktu' => 'success',
+                        default => 'gray',
+                    })
+                    ->icon(fn($state) => match ($state) {
+                        'Terlambat' => 'heroicon-s-exclamation-triangle',
+                        'Tepat waktu' => 'heroicon-s-check-circle',
+                        default => 'heroicon-s-question-mark-circle',
+                    }),
 
                 TextColumn::make('conditions')
                     ->label('Kondisi Buku')
@@ -128,19 +179,34 @@ class ReturnBooksTable
                     ->state(fn($record) => $record->physicalLoanDetails
                         ->filter(fn($d) => $d->returnBook)
                         ->map(function ($d) {
-                            $fine = $d->returnBook->fine;
-                            $total = $fine ? (float) $fine->total_fee : 0.0;
 
-                            return $total > 0
-                                ? 'Rp ' . number_format($total, 0, ',', '.')
-                                : 'Tidak ada';
+                            $fine = $d->returnBook->fine;
+
+                            if (! $fine || $fine->total_fee <= 0) {
+                                return 'Tidak ada denda';
+                            }
+
+                            return 'Rp ' . number_format(
+                                (float) $fine->total_fee,
+                                0,
+                                ',',
+                                '.'
+                            );
                         })
                         ->values()
                         ->all())
-                    ->color(fn($state) => str_starts_with((string) $state, 'Rp') ? 'danger' : 'gray')
-                    ->icon(fn($state) => str_starts_with((string) $state, 'Rp')
-                        ? 'heroicon-s-banknotes'
-                        : 'heroicon-s-minus-circle'),
+                    ->color(
+                        fn($state) =>
+                        str_starts_with((string) $state, 'Rp')
+                            ? 'danger'
+                            : 'success'
+                    )
+                    ->icon(
+                        fn($state) =>
+                        str_starts_with((string) $state, 'Rp')
+                            ? 'heroicon-s-banknotes'
+                            : 'heroicon-s-check-badge'
+                    ),
 
                 TextColumn::make('fine_statuses')
                     ->label('Status Denda')

@@ -117,6 +117,7 @@ class LoanForm
                                     // Sembunyikan buku yang masih aktif dipinjam oleh peminjam ini
                                     // dari daftar & pencarian agar tidak terpilih dua kali.
                                     ->relationship('book', 'title', function (Builder $query, Get $get, $livewire) {
+                                        $query->with('stock');
                                         $userId = $get('../../user_id') ?: data_get($livewire, 'data.user_id');
                                         $currentBookId = $get('book_id');
 
@@ -285,29 +286,109 @@ class LoanForm
         ];
     }
 
-    /** Label opsi Select buku: cover + judul + ISBN (HTML). */
+    /** Label opsi Select buku: cover + judul + ISBN + Stock */
     private static function bookOptionHtml(\App\Models\Book $book): HtmlString
     {
         $title = e($book->title);
-        $isbn = $book->isbn ? e($book->isbn) : null;
-        $code = $book->book_code ? e($book->book_code) : null;
-        $secondary = $isbn ? 'ISBN: ' . $isbn : ($code ? 'Kode: ' . $code : '');
 
-        $coverUrl = $book->cover ? asset('storage/' . $book->cover) : null;
+        $isbn = $book->isbn
+            ? e($book->isbn)
+            : '-';
+
+        $stock = $book->stock;
+
+        $available = $stock?->available ?? 0;
+        $total     = $stock?->total ?? 0;
+        $loan      = $stock?->loan ?? 0;
+        $lost      = $stock?->lost ?? 0;
+        $damaged   = $stock?->damaged ?? 0;
+
+        $coverUrl = $book->cover
+            ? asset('storage/' . $book->cover)
+            : null;
+
         $cover = $coverUrl
-            ? '<img src="' . e($coverUrl) . '" style="width:32px;height:44px;border-radius:4px;object-fit:cover;flex-shrink:0;border:1px solid #e5e7eb;background:#ffffff;" alt="">'
-            : '<span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:44px;border-radius:4px;background:#e0e7ff;color:#3730a3;font-weight:700;font-size:13px;flex-shrink:0;">'
-                . e(mb_strtoupper(mb_substr($title, 0, 1)))
-                . '</span>';
+            ? '<img src="' . e($coverUrl) . '"
+                style="
+                    width:32px;
+                    height:44px;
+                    border-radius:4px;
+                    object-fit:cover;
+                    border:1px solid #e5e7eb;
+                    background:#fff;
+                ">'
+            : '<span style="
+                display:inline-flex;
+                align-items:center;
+                justify-content:center;
+                width:32px;
+                height:44px;
+                border-radius:4px;
+                background:#e0e7ff;
+                color:#3730a3;
+                font-weight:700;
+            ">'
+            . e(mb_strtoupper(mb_substr($title, 0, 1)))
+            . '</span>';
 
         return new HtmlString(
-            '<span style="display:inline-flex;align-items:center;gap:10px;line-height:1.25;">'
-                . $cover
-                . '<span style="display:inline-flex;flex-direction:column;min-width:0;">'
-                . '<span style="font-weight:600;color:currentColor;">' . $title . '</span>'
-                . ($secondary ? '<span style="font-size:11px;color:#6b7280;">' . $secondary . '</span>' : '')
-                . '</span>'
-                . '</span>'
+            '
+        <div style="
+            display:flex;
+            align-items:center;
+            gap:10px;
+        ">
+            ' . $cover . '
+
+            <div style="
+                display:flex;
+                flex-direction:column;
+                gap:2px;
+            ">
+
+                <div style="
+                    font-weight:600;
+                    color:#111827;
+                ">
+                    ' . $title . '
+                </div>
+
+                <div style="
+                    font-size:11px;
+                    color:#6b7280;
+                ">
+                    ISBN: ' . $isbn . '
+                </div>
+
+                <div style="
+                    font-size:11px;
+                    color:#16a34a;
+                    font-weight:600;
+                ">
+                    Stock tersedia: ' . $available . '/' . $total . '
+                </div>
+
+                <div style="
+                    font-size:11px;
+                    color:#2563eb;
+                ">
+                    Dipinjam: ' . $loan . '
+                </div>
+                <div style="
+                    font-size:11px;
+                    color:#FF5F15;
+                ">
+                    Rusak: ' . $damaged . '
+                </div>
+                <div style="
+                    font-size:11px;
+                    color:#FF0000;
+                ">
+                    Hilang ' . $lost . '
+                </div>
+
+            </div>
+        </div>'
         );
     }
 

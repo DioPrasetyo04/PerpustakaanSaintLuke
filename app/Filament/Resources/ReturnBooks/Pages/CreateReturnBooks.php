@@ -57,11 +57,18 @@ class CreateReturnBooks extends CreateRecord
     protected function handleRecordCreation(array $data): Model
     {
         return DB::transaction(function () use ($data) {
-            $loan = Loan::with('loanDetails.book')->findOrFail($data['loan_id']);
+            $loan = Loan::with([
+                'loanDetails' => fn($query) => $query
+                    ->physical()
+                    ->with('book'),
+            ])->findOrFail($data['loan_id']);
             $fineSetting = FineSettings::first();
 
             foreach ($data['returns'] as $item) {
-                $loanDetail = LoanDetail::with('book')->findOrFail($item['loan_detail_id']);
+                $loanDetail = LoanDetail::query()
+                    ->physical()
+                    ->with('book')
+                    ->findOrFail($item['loan_detail_id']);
 
                 if ($loanDetail->loan_id !== $loan->id) {
                     continue;
@@ -183,7 +190,16 @@ class CreateReturnBooks extends CreateRecord
             return;
         }
 
-        $loan = Loan::with(['user', 'loanDetails.book', 'loanDetails.returnBook'])->find($loanId);
+        $loan = Loan::with([
+            'user',
+            'loanDetails' => fn($query) => $query
+                ->physical()
+                ->with([
+                    'book',
+                    'returnBook',
+                    'review',
+                ]),
+        ])->find($loanId);
 
         if (! $loan) {
             parent::fillForm();
