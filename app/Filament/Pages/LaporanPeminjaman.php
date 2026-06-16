@@ -23,7 +23,7 @@ class LaporanPeminjaman extends Page implements HasForms
     use BuildsLaporan;
     use HasPageShield;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::ClipboardDocumentList;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::DocumentArrowUp;
 
     protected static ?string $title = 'Laporan Peminjaman';
 

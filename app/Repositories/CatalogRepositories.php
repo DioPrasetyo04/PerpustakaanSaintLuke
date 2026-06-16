@@ -76,8 +76,15 @@ class CatalogRepositories implements CatalogInterfaceRepositories
                     'lost' => BookStatus::LOST->value,
                     'damaged' => BookStatus::DAMAGED->value,
                 ];
-                if (isset($map[$availability])) {
-                    $query->where('status', $map[$availability]);
+
+                // Frontend mengirim alias 'available' untuk Tersedia, tetapi
+                // mengirim nilai enum mentah (mis. "Hilang", "Rusak", "Dipinjam",
+                // "Tidak Tersedia") untuk status lainnya. Terima keduanya agar
+                // filter ketersediaan benar-benar diterapkan.
+                $status = $map[$availability] ?? BookStatus::tryFrom($availability)?->value;
+
+                if ($status !== null) {
+                    $query->where('status', $status);
                 }
             })
             ->where('is_published', PublishedBooks::PUBLISH->value)

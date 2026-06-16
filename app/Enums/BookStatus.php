@@ -107,4 +107,21 @@ enum BookStatus: string
             ])
             ->toArray();
     }
+
+    /**
+     * Status yang boleh dipilih manual oleh admin saat menambah/mengubah buku.
+     * Hanya Tersedia / Tidak Tersedia. Status Dipinjam/Hilang/Rusak diatur
+     * otomatis oleh sistem (alur peminjaman & pengembalian), bukan dipilih
+     * manual, sehingga tidak ditampilkan pada form.
+     *
+     * @return array<string, string>
+     */
+    public static function formOptionViews(): array
+    {
+        return collect([self::AVAILABLE, self::UNAVAILABLE])
+            ->mapWithKeys(fn($case) => [
+                $case->value => $case->html(),
+            ])
+            ->toArray();
+    }
 }

@@ -27,7 +27,11 @@ class PermissionResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
-    protected static ?string $recordTitleAttribute = 'Permission';
+    protected static ?string $recordTitleAttribute = 'title';
+
+    protected static ?string $modelLabel = 'Izin';
+
+    protected static ?string $pluralModelLabel = 'Izin';
 
     public static function form(Schema $schema): Schema
     {

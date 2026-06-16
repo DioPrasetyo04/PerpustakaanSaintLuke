@@ -7,16 +7,20 @@ use App\Enums\LoanStatus;
 use App\Enums\LoanType;
 use App\Filament\Resources\ReturnBooks\ReturnBooksResource;
 use App\Models\Loan;
+use App\Services\DigitalAutoReturnService;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
+use App\Models\User;
 
 class LoansTable
 {
@@ -44,7 +48,7 @@ class LoansTable
                     ->searchable()
                     ->sortable(),
 
-                ImageColumn::make('physicalLoanDetails.book.cover')
+                ImageColumn::make('loanDetails.book.cover')
                     ->label('Cover Book')
                     ->disk('public')
                     ->imageSize(50)
@@ -53,7 +57,7 @@ class LoansTable
                     ->overlap(0)
                     ->ring(2),
 
-                TextColumn::make('physicalLoanDetails.book.title')
+                TextColumn::make('loanDetails.book.title')
                     ->label('Buku Dipinjam')
                     ->badge()
                     ->color('info')
@@ -61,7 +65,7 @@ class LoansTable
                     ->limitList(3)
                     ->expandableLimitedList(),
 
-                TextColumn::make('physicalLoanDetails.status')
+                TextColumn::make('loanDetails.status')
                     ->label('Status Per Buku')
                     ->badge()
                     ->listWithLineBreaks()
@@ -81,7 +85,7 @@ class LoansTable
                         default => 'heroicon-s-question-mark-circle',
                     }),
 
-                TextColumn::make('physicalLoanDetails.loan_type')
+                TextColumn::make('loanDetails.loan_type')
                     ->label('Tipe Pinjaman')
                     ->badge()
                     ->listWithLineBreaks()
@@ -99,15 +103,15 @@ class LoansTable
                         default => 'heroicon-s-book-open',
                     }),
 
-                TextColumn::make('physical_loan_details_count')
-                    ->counts('physicalLoanDetails')
+                TextColumn::make('loan_details_count')
+                    ->counts('loanDetails')
                     ->label('Total Buku')
                     ->badge()
                     ->color('gray')
                     ->alignCenter()
                     ->sortable(),
 
-                TextColumn::make('physicalLoanDetails.loan_date')
+                TextColumn::make('loanDetails.loan_date')
                     ->label('Tanggal Pinjam')
                     ->date()
                     ->badge()
@@ -116,7 +120,7 @@ class LoansTable
                     ->limitList(3)
                     ->expandableLimitedList(),
 
-                TextColumn::make('physicalLoanDetails.due_date')
+                TextColumn::make('loanDetails.due_date')
                     ->label('Jatuh Tempo')
                     ->date()
                     ->badge()
@@ -144,16 +148,48 @@ class LoansTable
                     ->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
-            // Sembunyikan peminjaman yang seluruh bukunya digital (data tetap
-            // tersimpan, hanya tidak ditampilkan). Peminjaman tanpa detail
-            // sama sekali tetap tampil.
-            ->modifyQueryUsing(fn(Builder $query) => $query->where(function (Builder $q) {
-                $q->whereHas('physicalLoanDetails')
-                    ->orWhereDoesntHave('loanDetails');
-            }))
+            // Tampilkan semua peminjaman, termasuk yang bertipe digital. Akses
+            // baca buku digital dapat ditutup admin lewat aksi "Tutup Akses".
+            ->modifyQueryUsing(fn(Builder $query) => $query->with([
+                'user',
+                'loanDetails.book.authors',
+                'loanDetails.returnBook',
+            ]))
             ->filters([
-                //
+                SelectFilter::make('user_id')
+                    ->label('Filter Peminjam')
+                    ->placeholder('— Semua Peminjam —')
+                    ->searchable()
+                    ->preload()
+                    ->native(false)
+                    ->modifyFormFieldUsing(
+                        fn(\Filament\Forms\Components\Select $select) => $select->allowHtml()
+                    )
+                    ->options(function (): array {
+                        return User::query()
+                            ->whereHas('loans')
+                            ->orderBy('name')
+                            ->get()
+                            ->mapWithKeys(fn(User $user) => [
+                                $user->id => self::formatUserOption($user),
+                            ])
+                            ->toArray();
+                    })
+                    ->modifyQueryUsing(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            filled($data['value']),
+                            fn(Builder $q) => $q->where('user_id', $data['value'])
+                        );
+                    })
+                    ->indicateUsing(function (array $data): ?string {
+                        if (! filled($data['value'])) {
+                            return null;
+                        }
+                        $user = User::find($data['value']);
+                        return $user ? 'User: ' . $user->name : null;
+                    }),
             ])
+
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
@@ -172,6 +208,52 @@ class LoansTable
                         })
                         ->whereDoesntHave('returnBook')
                         ->exists()),
+                Action::make('revoke_digital_access')
+                    ->label('Tutup Akses')
+                    ->icon(Heroicon::OutlinedLockClosed)
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('Tutup Akses Buku Digital')
+                    ->modalDescription('Pengguna tidak akan bisa membuka buku digital ini lagi sampai meminjam kembali. Pengembalian dicatat otomatis dengan kondisi BAIK.')
+                    ->modalSubmitActionLabel('Ya, Tutup Akses')
+                    // Hanya untuk pinjaman DIGITAL yang aksesnya masih aktif
+                    // (belum dikembalikan). Pinjaman fisik tetap memakai tombol
+                    // "Pengembalian Buku" lewat loket pengembalian staf.
+                    ->visible(fn($record) => $record->loanDetails()
+                        ->where('loan_type', LoanType::DIGITAL->value)
+                        ->whereDoesntHave('returnBook')
+                        ->exists())
+                    ->action(function ($record) {
+                        $details = $record->loanDetails()
+                            ->where('loan_type', LoanType::DIGITAL->value)
+                            ->whereDoesntHave('returnBook')
+                            ->get();
+
+                        if ($details->isEmpty()) {
+                            Notification::make()
+                                ->icon('heroicon-s-information-circle')
+                                ->color('warning')
+                                ->title('Tidak ada akses digital aktif')
+                                ->body('Semua buku digital pada peminjaman ini sudah ditutup aksesnya.')
+                                ->send();
+
+                            return;
+                        }
+
+                        $service = app(DigitalAutoReturnService::class);
+                        foreach ($details as $detail) {
+                            $service->autoReturn($detail, 'Akses ditutup oleh admin');
+                        }
+
+                        $record->recomputeStatus();
+
+                        Notification::make()
+                            ->icon('heroicon-s-lock-closed')
+                            ->color('success')
+                            ->title('Akses digital ditutup')
+                            ->body('Pengguna tidak dapat mengakses buku digital ini sampai meminjam kembali.')
+                            ->send();
+                    }),
                 DeleteAction::make()
                     ->before(function ($record) {
                         $bookIds = $record->loanDetails()
@@ -196,6 +278,37 @@ class LoansTable
                         }
                     }),
             ]);
+    }
+
+    /**
+     * Format label opsi user untuk dropdown: nama, email, dan avatar (HTML).
+     * Filament SelectFilter mendukung HTML dalam option label via allowHtml().
+     */
+    private static function formatUserOption(User $user): string
+    {
+        // Ikuti logika getFilamentAvatarUrl() dari model User
+        if ($user->avatar) {
+            $avatarUrl = asset('storage/' . $user->avatar);
+        } elseif ($user->avatar_url) {
+            $avatarUrl = $user->avatar_url;
+        } else {
+            $avatarUrl = 'https://ui-avatars.com/api/?name=' . urlencode($user->name ?? 'User') . '&background=4f46e5&color=fff&size=40';
+        }
+
+        $name     = e($user->name ?? '-');
+        $email    = e($user->email ?? '');
+        $username = $user->username ? '<span style="font-size:0.7rem;color:#9ca3af;">@' . e($user->username) . '</span>' : '';
+
+        return '<div style="display:flex;align-items:center;gap:10px;padding:2px 0;">'
+            . '<img src="' . $avatarUrl . '" '
+            .     'style="width:34px;height:34px;border-radius:50%;object-fit:cover;flex-shrink:0;border:1px solid #e5e7eb;" '
+            .     'onerror="this.src=\'https://ui-avatars.com/api/?name=' . urlencode($user->name ?? 'U') . '&background=4f46e5&color=fff&size=40\'" />'
+            . '<div style="display:flex;flex-direction:column;line-height:1.4;min-width:0;">'
+            .     '<span style="font-weight:600;font-size:0.875rem;color:#111827;">' . $name . '</span>'
+            .     '<span style="font-size:0.75rem;color:#6b7280;">' . $email . '</span>'
+            .     $username
+            . '</div>'
+            . '</div>';
     }
 
     private static function toStatus(mixed $state): ?LoanStatus

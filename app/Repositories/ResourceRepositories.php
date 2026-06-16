@@ -59,26 +59,20 @@ class ResourceRepositories implements ResourceInterfaceRepositories
                 });
             })
             ->when($filters['availability'] ?? null, function ($query, $availability) {
-                switch ($availability) {
-                    case 'available':
-                        $query->where('status', BookStatus::AVAILABLE->value);
-                        break;
+                $map = [
+                    'available' => BookStatus::AVAILABLE->value,
+                    'borrowed' => BookStatus::LOAN->value,
+                    'unavailable' => BookStatus::UNAVAILABLE->value,
+                    'lost' => BookStatus::LOST->value,
+                    'damaged' => BookStatus::DAMAGED->value,
+                ];
 
-                    case 'borrowed':
-                        $query->where('status', BookStatus::LOAN->value);
-                        break;
+                // Terima alias kanonik ('available', dst.) maupun nilai enum
+                // mentah (mis. "Hilang") yang dikirim frontend.
+                $status = $map[$availability] ?? BookStatus::tryFrom($availability)?->value;
 
-                    case 'unavailable':
-                        $query->where('status', BookStatus::UNAVAILABLE->value);
-                        break;
-
-                    case 'lost':
-                        $query->where('status', BookStatus::LOST->value);
-                        break;
-
-                    case 'damaged':
-                        $query->where('status', BookStatus::DAMAGED->value);
-                        break;
+                if ($status !== null) {
+                    $query->where('status', $status);
                 }
             })
             ->paginate($perPage, ['*'], 'resources_page', $page);

@@ -28,7 +28,16 @@ class BookResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
-    protected static ?string $recordTitleAttribute = 'Buku';
+    // Label menu sidebar & nama entitas (judul "Buat Buku", breadcrumb, notifikasi).
+    protected static ?string $navigationLabel = 'Buku';
+
+    protected static ?string $modelLabel = 'Buku';
+
+    protected static ?string $pluralModelLabel = 'Buku';
+
+    // Kolom database yang dipakai sebagai judul satu record (global search,
+    // breadcrumb View/Edit, label relasi). HARUS nama kolom nyata, bukan teks.
+    protected static ?string $recordTitleAttribute = 'title';
 
     public static function form(Schema $schema): Schema
     {

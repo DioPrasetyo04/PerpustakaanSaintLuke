@@ -29,7 +29,9 @@ class ReturnBooksResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'loan_code';
 
-    protected static ?string $label = 'Return Book';
+    protected static ?string $modelLabel = 'Pengembalian Buku';
+
+    protected static ?string $pluralModelLabel = 'Pengembalian Buku';
 
     protected static ?string $pluralLabel = 'Return Books';
 

@@ -24,7 +24,11 @@ class InformationResource extends Resource
 
     protected static ?int $navigationSort = 32;
 
-    protected static ?string $recordTitleAttribute = 'Information';
+    protected static ?string $modelLabel = 'Informasi';
+
+    protected static ?string $pluralModelLabel = 'Informasi';
+
+    protected static ?string $recordTitleAttribute = 'title';
 
     public static function form(Schema $schema): Schema
     {

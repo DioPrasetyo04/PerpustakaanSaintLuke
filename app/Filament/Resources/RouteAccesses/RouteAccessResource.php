@@ -24,7 +24,11 @@ class RouteAccessResource extends Resource
 
     protected static ?int $navigationSort = 54;
 
-    protected static ?string $recordTitleAttribute = 'RouteAccess';
+    protected static ?string $recordTitleAttribute = 'title';
+
+    protected static ?string $modelLabel = 'Rute Akses';
+
+    protected static ?string $pluralModelLabel = 'Rute Akses';
 
     public static function form(Schema $schema): Schema
     {
