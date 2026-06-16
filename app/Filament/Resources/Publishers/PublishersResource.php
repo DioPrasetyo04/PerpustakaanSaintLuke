@@ -26,7 +26,11 @@ class PublishersResource extends Resource
 
     protected static ?int $navigationSort = 4;
 
-    protected static ?string $recordTitleAttribute = 'Publishers';
+    protected static ?string $recordTitleAttribute = 'title';
+
+    protected static ?string $modelLabel = 'Penerbit';
+
+    protected static ?string $pluralModelLabel = 'Penerbit';
 
     public static function form(Schema $schema): Schema
     {

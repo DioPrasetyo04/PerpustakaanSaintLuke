@@ -302,12 +302,17 @@ export function FilterSidebar({
     onReset: () => void;
     onClose?: () => void;
 }) {
+    // Hanya tampilkan ketersediaan yang relevan untuk pemustaka: Tersedia /
+    // Tidak Tersedia. Status Dipinjam/Hilang/Rusak adalah keadaan internal
+    // koleksi dan tidak ditawarkan sebagai filter publik.
     const availabilityOptions = [
         { v: '', label: tr(language, 'Semua', 'All') },
-        ...Object.entries(options.statusOptions).map(([key, label]) => ({
-            v: key === 'Tersedia' ? 'available' : key,
-            label: label as string,
-        })),
+        ...Object.entries(options.statusOptions)
+            .filter(([key]) => key === 'Tersedia' || key === 'Tidak Tersedia')
+            .map(([key, label]) => ({
+                v: key === 'Tersedia' ? 'available' : key,
+                label: label as string,
+            })),
     ];
 
     return (

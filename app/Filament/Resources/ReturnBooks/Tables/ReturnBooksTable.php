@@ -19,6 +19,9 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Filament\Tables\Filters\SelectFilter;
+use Illuminate\Database\Eloquent\Builder;
+use App\Models\User;
 
 class ReturnBooksTable
 {
@@ -172,8 +175,46 @@ class ReturnBooksTable
                         default => 'heroicon-s-minus-circle',
                     }),
             ])
+            ->modifyQueryUsing(fn(Builder $query) => $query->with([
+                'loanDetails.loan.user',
+                'loanDetails.book.authors',
+            ]))
             ->filters([
-                //
+                SelectFilter::make('user_id')
+                    ->label('Filter Peminjam')
+                    ->placeholder('Semua Pengembalian')
+                    ->searchable()
+                    ->preload()
+                    ->native(false)
+                    ->modifyFormFieldUsing(
+                        fn(\Filament\Forms\Components\Select $select) => $select->allowHtml()
+                    )
+                    ->options(function (): array {
+                        return User::query()
+                            ->whereHas('loans.loanDetails.returnBook')
+                            ->orderBy('name')
+                            ->get()
+                            ->mapWithKeys(fn(User $user) => [
+                                $user->id => self::formatUserOption($user),
+                            ])
+                            ->toArray();
+                    })
+                    ->modifyQueryUsing(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            filled($data['value']),
+                            fn(Builder $q) => $q->whereHas(
+                                'loanDetails.loan',
+                                fn(Builder $lq) => $lq->where('user_id', $data['value'])
+                            )
+                        );
+                    })
+                    ->indicateUsing(function (array $data): ?string {
+                        if (! filled($data['value'])) {
+                            return null;
+                        }
+                        $user = User::find($data['value']);
+                        return $user ? 'User: ' . $user->name : null;
+                    }),
             ])
             ->recordActions([
                 ViewAction::make(),
@@ -313,5 +354,36 @@ class ReturnBooksTable
                     'loan' => DB::raw('loan + 1'),
                 ]),
         };
+    }
+
+    /**
+     * Format label opsi user untuk dropdown: nama, email, dan avatar (HTML).
+     * Filament SelectFilter mendukung HTML dalam option label via allowHtml().
+     */
+    private static function formatUserOption(User $user): string
+    {
+        // Ikuti logika getFilamentAvatarUrl() dari model User
+        if ($user->avatar) {
+            $avatarUrl = asset('storage/' . $user->avatar);
+        } elseif ($user->avatar_url) {
+            $avatarUrl = $user->avatar_url;
+        } else {
+            $avatarUrl = 'https://ui-avatars.com/api/?name=' . urlencode($user->name ?? 'User') . '&background=4f46e5&color=fff&size=40';
+        }
+
+        $name     = e($user->name ?? '-');
+        $email    = e($user->email ?? '');
+        $username = $user->username ? '<span style="font-size:0.7rem;color:#9ca3af;">@' . e($user->username) . '</span>' : '';
+
+        return '<div style="display:flex;align-items:center;gap:10px;padding:2px 0;">'
+            . '<img src="' . $avatarUrl . '" '
+            .     'style="width:34px;height:34px;border-radius:50%;object-fit:cover;flex-shrink:0;border:1px solid #e5e7eb;" '
+            .     'onerror="this.src=\'https://ui-avatars.com/api/?name=' . urlencode($user->name ?? 'U') . '&background=4f46e5&color=fff&size=40\'" />'
+            . '<div style="display:flex;flex-direction:column;line-height:1.4;min-width:0;">'
+            .     '<span style="font-weight:600;font-size:0.875rem;color:#111827;">' . $name . '</span>'
+            .     '<span style="font-size:0.75rem;color:#6b7280;">' . $email . '</span>'
+            .     $username
+            . '</div>'
+            . '</div>';
     }
 }

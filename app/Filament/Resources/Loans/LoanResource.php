@@ -26,7 +26,11 @@ class LoanResource extends Resource
 
     protected static ?int $navigationSort = 11;
 
-    protected static ?string $recordTitleAttribute = 'Loan';
+    protected static ?string $recordTitleAttribute = 'title';
+
+    protected static ?string $modelLabel = 'Peminjaman';
+
+    protected static ?string $pluralModelLabel = 'Peminjaman';
 
     public static function form(Schema $schema): Schema
     {

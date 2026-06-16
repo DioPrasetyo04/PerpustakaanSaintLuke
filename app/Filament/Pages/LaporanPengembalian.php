@@ -23,7 +23,7 @@ class LaporanPengembalian extends Page implements HasForms
     use BuildsLaporan;
     use HasPageShield;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::ArrowUturnLeft;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::DocumentArrowDown;
 
     protected static ?string $title = 'Laporan Pengembalian';
 

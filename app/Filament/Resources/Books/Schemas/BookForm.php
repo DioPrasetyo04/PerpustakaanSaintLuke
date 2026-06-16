@@ -64,6 +64,16 @@ class BookForm
             ->exists();
     }
 
+    /**
+     * Buku Digital murni (Digital tanpa Fisik) tidak memiliki harga jual:
+     * field Harga dikunci ke 0 & dinonaktifkan. Buku Fisik (termasuk
+     * Digital + Fisik) tetap memerlukan harga untuk perhitungan denda.
+     */
+    protected static function isDigitalOnly(Get $get): bool
+    {
+        return self::hasDigitalType($get) && ! self::hasPhysicalType($get);
+    }
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
@@ -74,6 +84,322 @@ class BookForm
                             Section::make('Book Information')
                                 ->description('Provide the necessary information for the book.')
                                 ->schema([
+                                    Select::make('types')
+                                        ->label('Type Buku')
+                                        ->live()
+                                        // Buku digital murni: paksa harga ke 0 saat tipe berubah.
+                                        ->afterStateUpdated(function (Get $get, Set $set) {
+                                            if (self::isDigitalOnly($get)) {
+                                                $set('price', 0);
+                                            }
+                                        })
+                                        ->relationship('types', 'type')
+                                        ->getOptionLabelFromRecordUsing(function ($record) {
+                                            $iconUrl = $record->icon ? asset('storage/' . $record->icon) : null;
+                                            $typeEnum = BookType::tryFrom($record->type);
+
+                                            $iconHtml = $iconUrl
+                                                ? '<img src="' . $iconUrl . '" style="width:18px;height:18px;border-radius:3px;object-fit:cover" alt="' . e($record->type) . '">'
+                                                : ($typeEnum?->icon() ?? '');
+
+                                            $color = $typeEnum?->color() ?? '#374151';
+                                            $label = $typeEnum?->label() ?? ucfirst((string) $record->type);
+
+                                            return new HtmlString(
+                                                '<span style="display:inline-flex;align-items:center;gap:6px;">'
+                                                    . $iconHtml
+                                                    . '<span style="color:' . $color . ';font-weight:500;text-transform:capitalize;">' . e($label) . '</span>'
+                                                    . '</span>'
+                                            );
+                                        })
+                                        ->allowHtml()
+                                        ->multiple()
+                                        ->preload()
+                                        ->searchable()
+                                        ->required()
+                                        ->columnSpan(1)
+                                        ->createOptionForm([
+                                            Section::make('Type Information')
+                                                ->description('Choose the type enum and upload its icon.')
+                                                ->schema([
+                                                    Grid::make(2)->schema([
+                                                        Select::make('type')
+                                                            ->label('Type')
+                                                            ->options(BookType::options())
+                                                            ->allowHtml()
+                                                            ->getOptionLabelUsing(fn($value) => BookType::from($value)->html())
+                                                            ->native(false)
+                                                            ->searchable()
+                                                            ->unique(table: 'types', column: 'type', ignoreRecord: true)
+                                                            ->required()
+                                                            ->columnSpan(1),
+                                                        FileUpload::make('icon')
+                                                            ->label('Icon')
+                                                            ->image()
+                                                            ->acceptedFileTypes([
+                                                                'image/png',
+                                                                'image/jpeg',
+                                                                'image/svg+xml',
+                                                                'image/webp',
+                                                                'image/gif',
+                                                            ])
+                                                            ->maxSize(2048)
+                                                            ->helperText('Format yang diperbolehkan: PNG, JPG, JPEG, SVG, WEBP, GIF. Maksimal ukuran 2MB.')
+                                                            ->directory('types/icons')
+                                                            ->disk('public')
+                                                            ->visibility('public')
+                                                            ->imageResizeMode('cover')
+                                                            ->columnSpan(1),
+                                                    ]),
+                                                ])->columnSpanFull(),
+                                        ])
+                                        ->createOptionUsing(function (array $data) {
+                                            $type = Type::firstOrCreate(
+                                                ['type' => $data['type']],
+                                                ['icon' => $data['icon'] ?? null]
+                                            );
+
+                                            return $type->id;
+                                        })
+                                        ->createOptionModalHeading('Create Type Form'),
+                                    Select::make('categories')->label('Kategori')->relationship('categories', 'name')
+                                        ->getOptionLabelFromRecordUsing(function ($record) {
+                                            $iconUrl = $record->icon ? asset('storage/' . $record->icon) : null;
+
+                                            $icon = $iconUrl
+                                                ? '<img src="' . e($iconUrl) . '" style="width:22px;height:22px;border-radius:4px;object-fit:cover;flex-shrink:0;border:1px solid #e5e7eb;background:#ffffff;" alt="">'
+                                                : '<span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;background:#fce7f3;color:#9d174d;flex-shrink:0;">'
+                                                . '<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+                                                . '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>'
+                                                . '<path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>'
+                                                . '</svg>'
+                                                . '</span>';
+
+                                            return new HtmlString(
+                                                '<span style="display:inline-flex;align-items:center;gap:8px;line-height:1.25;">'
+                                                    . $icon
+                                                    . '<span style="font-weight:500;color:currentColor;text-transform:capitalize;">' . e($record->name) . '</span>'
+                                                    . '</span>'
+                                            );
+                                        })
+                                        ->allowHtml()
+                                        ->multiple()
+                                        ->preload()
+                                        ->searchable()
+                                        ->required()
+                                        ->columnSpan(1)
+                                        ->createOptionForm([
+                                            Grid::make(2)->schema([
+
+                                                // NAME
+                                                TextInput::make('name')
+                                                    ->label('Nama')
+                                                    ->live()
+                                                    ->maxLength(255)
+                                                    ->afterStateUpdated(function (Set $set, $state) {
+                                                        if (filled($state)) {
+                                                            $set('slug', generateSlug($state, Category::class));
+                                                        } else {
+                                                            $set('slug', null);
+                                                        }
+                                                    })
+                                                    ->required()
+                                                    ->columnSpan(1),
+
+                                                // SLUG
+                                                TextInput::make('slug')
+                                                    ->label('Slug')
+                                                    ->maxLength(255)
+                                                    ->unique(ignoreRecord: true)
+                                                    ->readOnly()
+                                                    ->dehydrated()
+                                                    ->columnSpan(1),
+
+                                                // ICON
+                                                FileUpload::make('icon')
+                                                    ->label('Icon')
+                                                    ->image()
+                                                    ->acceptedFileTypes([
+                                                        'image/png',
+                                                        'image/jpeg',
+                                                        'image/svg+xml',
+                                                        'image/webp',
+                                                        'image/gif',
+                                                    ])
+                                                    ->maxSize(2048)
+                                                    ->helperText('Format yang diperbolehkan: PNG, JPG, JPEG, SVG, WEBP, GIF. Maksimal ukuran 2MB.')
+                                                    ->directory('categories/icons')
+                                                    ->disk('public')
+                                                    ->visibility('public')
+                                                    ->columnSpanFull(),
+
+                                                // PHOTO (FULL WIDTH)
+                                                FileUpload::make('photo')
+                                                    ->label('Photo')
+                                                    ->image()
+                                                    ->acceptedFileTypes([
+                                                        'image/png',
+                                                        'image/jpeg',
+                                                        'image/svg+xml',
+                                                        'image/webp',
+                                                        'image/gif',
+                                                    ])
+                                                    ->maxSize(2048)
+                                                    ->helperText('Format yang diperbolehkan: PNG, JPG, JPEG, SVG, WEBP, GIF. Maksimal ukuran 2MB.')
+                                                    ->disk('public')
+                                                    ->directory('categories/images')
+                                                    ->imageResizeMode('cover')
+                                                    ->visibility('public')
+                                                    ->columnSpanFull(),
+
+                                                // DESCRIPTION (FULL WIDTH)
+                                                RichEditor::make('description')
+                                                    ->label('Deskripsi')
+                                                    ->columnSpanFull(),
+
+                                                // TOGGLE
+                                                Toggle::make('is_active')
+                                                    ->label('Is Active')
+                                                    ->onIcon('heroicon-m-check-badge')
+                                                    ->offIcon('heroicon-m-x-circle')
+                                                    ->default(true)
+                                                    ->columnSpanFull(),
+                                            ])
+                                        ])->createOptionUsing(function (array $data) {
+                                            $category = Category::firstOrCreate($data);
+                                            return $category->id;
+                                        })
+                                        ->createOptionModalHeading('Create Category Form'),
+                                    Select::make('publisher_id')
+                                        ->label('Penerbit')
+                                        ->relationship('publisher', 'name')
+                                        ->getOptionLabelFromRecordUsing(function ($record) {
+                                            $logoUrl = $record->logo ? asset('storage/' . $record->logo) : null;
+
+                                            $logo = $logoUrl
+                                                ? '<img src="' . e($logoUrl) . '" style="width:22px;height:22px;border-radius:4px;object-fit:cover;flex-shrink:0;border:1px solid #e5e7eb;background:#ffffff;vertical-align:middle;" alt="">'
+                                                : '<span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;background:#fef3c7;color:#92400e;font-weight:700;font-size:11px;flex-shrink:0;vertical-align:middle;">'
+                                                . e(mb_strtoupper(mb_substr((string) $record->name, 0, 1)))
+                                                . '</span>';
+
+                                            return '<span style="display:inline-flex;align-items:center;gap:8px;">'
+                                                . $logo
+                                                . '<span style="font-weight:500;color:currentColor;text-transform:capitalize;">' . e($record->name) . '</span>'
+                                                . '</span>';
+                                        })
+                                        ->allowHtml()
+                                        ->searchable(['name', 'email'])
+                                        ->preload()
+                                        ->required()
+                                        ->columnSpan(1)
+                                        ->createOptionForm([
+                                            Section::make('Publisher Information')
+                                                ->description('Provide the necessary information for the publisher.')
+                                                ->schema([
+                                                    Grid::make(2)->schema([
+                                                        // NAME
+                                                        TextInput::make('name')
+                                                            ->label('Name')
+                                                            ->live()
+                                                            ->maxLength(255)
+                                                            ->afterStateUpdated(function (Set $set, $state) {
+                                                                if (filled($state)) {
+                                                                    $set('slug', generateSlug($state, Publisher::class));
+                                                                } else {
+                                                                    $set('slug', null);
+                                                                }
+                                                            })
+                                                            ->required()
+                                                            ->columnSpan(1),
+
+                                                        // SLUG
+                                                        TextInput::make('slug')
+                                                            ->label('Slug')
+                                                            ->maxLength(255)
+                                                            ->unique(ignoreRecord: true)
+                                                            ->readOnly()
+                                                            ->dehydrated()
+                                                            ->columnSpan(1),
+
+                                                        TextInput::make('email')
+                                                            ->label('Email')
+                                                            ->email()
+                                                            ->maxLength(255)
+                                                            ->columnSpan(1),
+
+                                                        PhoneInput::make('phone')
+                                                            ->label('Phone')
+                                                            ->defaultCountry('id')
+                                                            ->separateDialCode()
+                                                            ->showFlags()
+                                                            ->columnSpan(1),
+
+
+                                                        Textarea::make('address')
+                                                            ->label('Address')
+                                                            ->maxLength(65535)
+                                                            ->columnSpanFull(),
+
+                                                        // PHOTO (FULL WIDTH)
+                                                        FileUpload::make('logo')
+                                                            ->label('Logo')
+                                                            ->image()
+                                                            ->acceptedFileTypes([
+                                                                'image/png',
+                                                                'image/jpeg',
+                                                                'image/svg+xml',
+                                                                'image/gif',
+                                                            ])
+                                                            ->maxSize(2048)
+                                                            ->helperText('Format yang diperbolehkan: PNG, JPG, JPEG, SVG, GIF. Maksimal ukuran 2MB.')
+                                                            ->disk('public')
+                                                            ->visibility('public')
+                                                            ->directory('publishers/logos')
+                                                            ->imageResizeMode('cover')
+                                                            ->columnSpanFull(),
+
+                                                        Toggle::make('is_active')
+                                                            ->label('activate this publisher')
+                                                            ->onIcon('heroicon-m-check-badge')
+                                                            ->offIcon('heroicon-m-x-circle')
+                                                            ->default(true)
+                                                            ->columnSpanFull(),
+
+                                                    ])
+                                                ])->columnSpanFull(),
+                                            Section::make('Social Media')->description('Social Media Information of User')->schema([
+                                                Repeater::make('socialmedia')
+                                                    ->relationship()
+                                                    ->schema([
+                                                        Select::make('platform')
+                                                            ->label('Platform')
+                                                            ->options(SocialMedia::options())
+                                                            ->allowHtml()
+                                                            ->getOptionLabelUsing(fn($value) => SocialMedia::from($value)->html())
+                                                            ->searchable()
+                                                            ->native(false)
+                                                            ->columnSpan(1),
+
+                                                        TextInput::make('url')
+                                                            ->label('URL')
+                                                            ->url()
+                                                            ->columnSpan(1),
+
+                                                        TextInput::make('username')
+                                                            ->label('Username / Text')
+                                                            ->columnSpan(1),
+                                                    ])
+                                                    ->columns(3)
+                                                    ->defaultItems(0)
+                                                    ->addActionLabel('Tambah Social Media')
+                                                    ->reorderable()
+                                                    ->collapsible()
+                                            ])->columnSpanFull() // 2 kolom utama
+                                        ])->createOptionUsing(function (array $data) {
+                                            $publisher = Publisher::firstOrCreate($data);
+                                            return $publisher->id;
+                                        })
+                                        ->createOptionModalHeading('Create Publisher Form'),
                                     TextInput::make('title')
                                         ->label('Judul Buku')
                                         ->live()
@@ -301,340 +627,6 @@ class BookForm
                                         ->label('Jumlah Halaman')
                                         ->numeric()
                                         ->columnSpan(1),
-                                    Select::make('publisher_id')
-                                        ->label('Penerbit')
-                                        ->relationship('publisher', 'name')
-                                        ->getOptionLabelFromRecordUsing(function ($record) {
-                                            $logoUrl = $record->logo ? asset('storage/' . $record->logo) : null;
-
-                                            $logo = $logoUrl
-                                                ? '<img src="' . e($logoUrl) . '" style="width:22px;height:22px;border-radius:4px;object-fit:cover;flex-shrink:0;border:1px solid #e5e7eb;background:#ffffff;vertical-align:middle;" alt="">'
-                                                : '<span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;background:#fef3c7;color:#92400e;font-weight:700;font-size:11px;flex-shrink:0;vertical-align:middle;">'
-                                                . e(mb_strtoupper(mb_substr((string) $record->name, 0, 1)))
-                                                . '</span>';
-
-                                            return '<span style="display:inline-flex;align-items:center;gap:8px;">'
-                                                . $logo
-                                                . '<span style="font-weight:500;color:currentColor;text-transform:capitalize;">' . e($record->name) . '</span>'
-                                                . '</span>';
-                                        })
-                                        ->allowHtml()
-                                        ->searchable(['name', 'email'])
-                                        ->preload()
-                                        ->required()
-                                        ->columnSpan(1)
-                                        ->createOptionForm([
-                                            Section::make('Publisher Information')
-                                                ->description('Provide the necessary information for the publisher.')
-                                                ->schema([
-                                                    Grid::make(2)->schema([
-                                                        // NAME
-                                                        TextInput::make('name')
-                                                            ->label('Name')
-                                                            ->live()
-                                                            ->maxLength(255)
-                                                            ->afterStateUpdated(function (Set $set, $state) {
-                                                                if (filled($state)) {
-                                                                    $set('slug', generateSlug($state, Publisher::class));
-                                                                } else {
-                                                                    $set('slug', null);
-                                                                }
-                                                            })
-                                                            ->required()
-                                                            ->columnSpan(1),
-
-                                                        // SLUG
-                                                        TextInput::make('slug')
-                                                            ->label('Slug')
-                                                            ->maxLength(255)
-                                                            ->unique(ignoreRecord: true)
-                                                            ->readOnly()
-                                                            ->dehydrated()
-                                                            ->columnSpan(1),
-
-                                                        TextInput::make('email')
-                                                            ->label('Email')
-                                                            ->email()
-                                                            ->maxLength(255)
-                                                            ->columnSpan(1),
-
-                                                        PhoneInput::make('phone')
-                                                            ->label('Phone')
-                                                            ->defaultCountry('id')
-                                                            ->separateDialCode()
-                                                            ->showFlags()
-                                                            ->columnSpan(1),
-
-
-                                                        Textarea::make('address')
-                                                            ->label('Address')
-                                                            ->maxLength(65535)
-                                                            ->columnSpanFull(),
-
-                                                        // PHOTO (FULL WIDTH)
-                                                        FileUpload::make('logo')
-                                                            ->label('Logo')
-                                                            ->image()
-                                                            ->acceptedFileTypes([
-                                                                'image/png',
-                                                                'image/jpeg',
-                                                                'image/svg+xml',
-                                                                'image/gif',
-                                                            ])
-                                                            ->maxSize(2048)
-                                                            ->helperText('Format yang diperbolehkan: PNG, JPG, JPEG, SVG, GIF. Maksimal ukuran 2MB.')
-                                                            ->disk('public')
-                                                            ->visibility('public')
-                                                            ->directory('publishers/logos')
-                                                            ->imageResizeMode('cover')
-                                                            ->columnSpanFull(),
-
-                                                        Toggle::make('is_active')
-                                                            ->label('activate this publisher')
-                                                            ->onIcon('heroicon-m-check-badge')
-                                                            ->offIcon('heroicon-m-x-circle')
-                                                            ->default(true)
-                                                            ->columnSpanFull(),
-
-                                                    ])
-                                                ])->columnSpanFull(),
-                                            Section::make('Social Media')->description('Social Media Information of User')->schema([
-                                                Repeater::make('socialmedia')
-                                                    ->relationship()
-                                                    ->schema([
-                                                        Select::make('platform')
-                                                            ->label('Platform')
-                                                            ->options(SocialMedia::options())
-                                                            ->allowHtml()
-                                                            ->getOptionLabelUsing(fn($value) => SocialMedia::from($value)->html())
-                                                            ->searchable()
-                                                            ->native(false)
-                                                            ->columnSpan(1),
-
-                                                        TextInput::make('url')
-                                                            ->label('URL')
-                                                            ->url()
-                                                            ->columnSpan(1),
-
-                                                        TextInput::make('username')
-                                                            ->label('Username / Text')
-                                                            ->columnSpan(1),
-                                                    ])
-                                                    ->columns(3)
-                                                    ->defaultItems(0)
-                                                    ->addActionLabel('Tambah Social Media')
-                                                    ->reorderable()
-                                                    ->collapsible()
-                                            ])->columnSpanFull() // 2 kolom utama
-                                        ])->createOptionUsing(function (array $data) {
-                                            $publisher = Publisher::firstOrCreate($data);
-                                            return $publisher->id;
-                                        })
-                                        ->createOptionModalHeading('Create Publisher Form'),
-                                    TextInput::make('classification_number')
-                                        ->label('Nomor Klasifikasi Buku')
-                                        ->maxLength(255)
-                                        ->placeholder('e.g. 813.54')
-                                        ->columnSpan(1),
-                                    TextInput::make('volume')
-                                        ->label('Jilid')
-                                        ->maxLength(255)
-                                        ->placeholder('e.g. 1')
-                                        ->columnSpan(1),
-                                    TextInput::make('location_book')
-                                        ->label('Lokasi Buku')
-                                        ->maxLength(255)
-                                        ->placeholder('e.g. Rak A-3, Lantai 2')
-                                        ->columnSpan(1),
-                                    Select::make('status')
-                                        ->label('Status')
-                                        ->options(BookStatus::optionViews())
-                                        ->getOptionLabelUsing(fn($value) => BookStatus::from($value)->html())
-                                        ->allowHtml()
-                                        ->native(false)
-                                        ->searchable()
-                                        ->default(BookStatus::AVAILABLE->value)
-                                        ->columnSpan(1),
-                                    Select::make('types')
-                                        ->label('Type Buku')
-                                        ->live()
-                                        ->relationship('types', 'type')
-                                        ->getOptionLabelFromRecordUsing(function ($record) {
-                                            $iconUrl = $record->icon ? asset('storage/' . $record->icon) : null;
-                                            $typeEnum = BookType::tryFrom($record->type);
-
-                                            $iconHtml = $iconUrl
-                                                ? '<img src="' . $iconUrl . '" style="width:18px;height:18px;border-radius:3px;object-fit:cover" alt="' . e($record->type) . '">'
-                                                : ($typeEnum?->icon() ?? '');
-
-                                            $color = $typeEnum?->color() ?? '#374151';
-                                            $label = $typeEnum?->label() ?? ucfirst((string) $record->type);
-
-                                            return new HtmlString(
-                                                '<span style="display:inline-flex;align-items:center;gap:6px;">'
-                                                    . $iconHtml
-                                                    . '<span style="color:' . $color . ';font-weight:500;text-transform:capitalize;">' . e($label) . '</span>'
-                                                    . '</span>'
-                                            );
-                                        })
-                                        ->allowHtml()
-                                        ->multiple()
-                                        ->preload()
-                                        ->searchable()
-                                        ->required()
-                                        ->columnSpan(1)
-                                        ->createOptionForm([
-                                            Section::make('Type Information')
-                                                ->description('Choose the type enum and upload its icon.')
-                                                ->schema([
-                                                    Grid::make(2)->schema([
-                                                        Select::make('type')
-                                                            ->label('Type')
-                                                            ->options(BookType::options())
-                                                            ->allowHtml()
-                                                            ->getOptionLabelUsing(fn($value) => BookType::from($value)->html())
-                                                            ->native(false)
-                                                            ->searchable()
-                                                            ->unique(table: 'types', column: 'type', ignoreRecord: true)
-                                                            ->required()
-                                                            ->columnSpan(1),
-                                                        FileUpload::make('icon')
-                                                            ->label('Icon')
-                                                            ->image()
-                                                            ->acceptedFileTypes([
-                                                                'image/png',
-                                                                'image/jpeg',
-                                                                'image/svg+xml',
-                                                                'image/webp',
-                                                                'image/gif',
-                                                            ])
-                                                            ->maxSize(2048)
-                                                            ->helperText('Format yang diperbolehkan: PNG, JPG, JPEG, SVG, WEBP, GIF. Maksimal ukuran 2MB.')
-                                                            ->directory('types/icons')
-                                                            ->disk('public')
-                                                            ->visibility('public')
-                                                            ->imageResizeMode('cover')
-                                                            ->columnSpan(1),
-                                                    ]),
-                                                ])->columnSpanFull(),
-                                        ])
-                                        ->createOptionUsing(function (array $data) {
-                                            $type = Type::firstOrCreate(
-                                                ['type' => $data['type']],
-                                                ['icon' => $data['icon'] ?? null]
-                                            );
-
-                                            return $type->id;
-                                        })
-                                        ->createOptionModalHeading('Create Type Form'),
-                                    Select::make('categories')->label('Kategori')->relationship('categories', 'name')
-                                        ->getOptionLabelFromRecordUsing(function ($record) {
-                                            $iconUrl = $record->icon ? asset('storage/' . $record->icon) : null;
-
-                                            $icon = $iconUrl
-                                                ? '<img src="' . e($iconUrl) . '" style="width:22px;height:22px;border-radius:4px;object-fit:cover;flex-shrink:0;border:1px solid #e5e7eb;background:#ffffff;" alt="">'
-                                                : '<span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;background:#fce7f3;color:#9d174d;flex-shrink:0;">'
-                                                . '<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
-                                                . '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>'
-                                                . '<path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>'
-                                                . '</svg>'
-                                                . '</span>';
-
-                                            return new HtmlString(
-                                                '<span style="display:inline-flex;align-items:center;gap:8px;line-height:1.25;">'
-                                                    . $icon
-                                                    . '<span style="font-weight:500;color:currentColor;text-transform:capitalize;">' . e($record->name) . '</span>'
-                                                    . '</span>'
-                                            );
-                                        })
-                                        ->allowHtml()
-                                        ->multiple()
-                                        ->preload()
-                                        ->searchable()
-                                        ->required()
-                                        ->columnSpan(1)
-                                        ->createOptionForm([
-                                            Grid::make(2)->schema([
-
-                                                // NAME
-                                                TextInput::make('name')
-                                                    ->label('Nama')
-                                                    ->live()
-                                                    ->maxLength(255)
-                                                    ->afterStateUpdated(function (Set $set, $state) {
-                                                        if (filled($state)) {
-                                                            $set('slug', generateSlug($state, Category::class));
-                                                        } else {
-                                                            $set('slug', null);
-                                                        }
-                                                    })
-                                                    ->required()
-                                                    ->columnSpan(1),
-
-                                                // SLUG
-                                                TextInput::make('slug')
-                                                    ->label('Slug')
-                                                    ->maxLength(255)
-                                                    ->unique(ignoreRecord: true)
-                                                    ->readOnly()
-                                                    ->dehydrated()
-                                                    ->columnSpan(1),
-
-                                                // ICON
-                                                FileUpload::make('icon')
-                                                    ->label('Icon')
-                                                    ->image()
-                                                    ->acceptedFileTypes([
-                                                        'image/png',
-                                                        'image/jpeg',
-                                                        'image/svg+xml',
-                                                        'image/webp',
-                                                        'image/gif',
-                                                    ])
-                                                    ->maxSize(2048)
-                                                    ->helperText('Format yang diperbolehkan: PNG, JPG, JPEG, SVG, WEBP, GIF. Maksimal ukuran 2MB.')
-                                                    ->directory('categories/icons')
-                                                    ->disk('public')
-                                                    ->visibility('public')
-                                                    ->columnSpanFull(),
-
-                                                // PHOTO (FULL WIDTH)
-                                                FileUpload::make('photo')
-                                                    ->label('Photo')
-                                                    ->image()
-                                                    ->acceptedFileTypes([
-                                                        'image/png',
-                                                        'image/jpeg',
-                                                        'image/svg+xml',
-                                                        'image/webp',
-                                                        'image/gif',
-                                                    ])
-                                                    ->maxSize(2048)
-                                                    ->helperText('Format yang diperbolehkan: PNG, JPG, JPEG, SVG, WEBP, GIF. Maksimal ukuran 2MB.')
-                                                    ->disk('public')
-                                                    ->directory('categories/images')
-                                                    ->imageResizeMode('cover')
-                                                    ->visibility('public')
-                                                    ->columnSpanFull(),
-
-                                                // DESCRIPTION (FULL WIDTH)
-                                                RichEditor::make('description')
-                                                    ->label('Deskripsi')
-                                                    ->columnSpanFull(),
-
-                                                // TOGGLE
-                                                Toggle::make('is_active')
-                                                    ->label('Is Active')
-                                                    ->onIcon('heroicon-m-check-badge')
-                                                    ->offIcon('heroicon-m-x-circle')
-                                                    ->default(true)
-                                                    ->columnSpanFull(),
-                                            ])
-                                        ])->createOptionUsing(function (array $data) {
-                                            $category = Category::firstOrCreate($data);
-                                            return $category->id;
-                                        })
-                                        ->createOptionModalHeading('Create Category Form'),
                                     Select::make('language_id')
                                         ->label('Bahasa')
                                         ->relationship('language', 'language')
@@ -682,6 +674,30 @@ class BookForm
                                             $language = Language::firstOrCreate($data);
                                             return $language->id;
                                         }),
+                                    TextInput::make('classification_number')
+                                        ->label('Nomor Klasifikasi Buku')
+                                        ->maxLength(255)
+                                        ->placeholder('e.g. 813.54')
+                                        ->columnSpan(1),
+                                    TextInput::make('volume')
+                                        ->label('Jilid')
+                                        ->maxLength(255)
+                                        ->placeholder('e.g. 1')
+                                        ->columnSpan(1),
+                                    TextInput::make('location_book')
+                                        ->label('Lokasi Buku')
+                                        ->maxLength(255)
+                                        ->placeholder('e.g. Rak A-3, Lantai 2')
+                                        ->columnSpan(1),
+                                    Select::make('status')
+                                        ->label('Status')
+                                        ->options(BookStatus::formOptionViews())
+                                        ->getOptionLabelUsing(fn($value) => BookStatus::from($value)->html())
+                                        ->allowHtml()
+                                        ->native(false)
+                                        ->searchable()
+                                        ->default(BookStatus::AVAILABLE->value)
+                                        ->columnSpan(1),
                                     FileUpload::make('cover')
                                         ->label('Cover Buku')
                                         ->image()
@@ -734,27 +750,40 @@ class BookForm
                                                     .replace(/\B(?=(\d{3})+(?!\d))/g, '.')
                                             ")
                                         )
+                                        // Buku digital murni tidak punya harga: nonaktifkan input
+                                        // dan kunci nilainya ke 0. Tetap di-dehydrate agar 0
+                                        // tetap tersimpan ke database (field disabled secara
+                                        // default tidak ikut terkirim).
+                                        ->disabled(fn(Get $get): bool => self::isDigitalOnly($get))
+                                        ->dehydrated()
+                                        ->helperText(fn(Get $get): ?string => self::isDigitalOnly($get)
+                                            ? 'Buku digital tidak memiliki harga — otomatis 0.'
+                                            : null)
                                         ->mutateStateForValidationUsing(
-                                            fn($state) => (int) str_replace('.', '', $state)
+                                            fn($state, Get $get) => self::isDigitalOnly($get)
+                                                ? 0
+                                                : (int) str_replace('.', '', (string) $state)
                                         )
                                         ->dehydrateStateUsing(
-                                            fn($state) => (int) str_replace('.', '', $state)
+                                            fn($state, Get $get) => self::isDigitalOnly($get)
+                                                ? 0
+                                                : (int) str_replace('.', '', (string) $state)
                                         )
                                         ->rules(['required', 'integer'])
                                         ->columnSpan(1),
                                 ])->columns(3),
                         ]),
-                    Wizard\Step::make('Asset Books Information')->description('Asset Of Books')
+                    Wizard\Step::make('Resource Buku')->description('Detail Resource Buku Digital')
                         // Aset hanya relevan untuk buku Digital. Tampilkan step ini bila
                         // minimal satu tipe terpilih = Digital (mis. Digital, atau
                         // Digital + Fisik). Sembunyikan untuk Fisik saja atau saat
                         // belum ada tipe yang dipilih.
                         ->visible(fn(Get $get): bool => self::hasDigitalType($get))
                         ->schema([
-                            Section::make('Asset Books')->description('Aset hanya wajib untuk buku berformat Digital. Buku Fisik saja boleh tanpa aset.')
+                            Section::make('Resource Buku')->description('Resource hanya wajib untuk buku berformat Digital. Buku Fisik saja boleh tanpa resource.')
                                 ->schema([
                                     Repeater::make('assets')
-                                        ->label('Assets')
+                                        ->label('Resource Digital')
                                         ->relationship('assets')
                                         ->helperText(fn(Get $get): string => self::hasDigitalType($get)
                                             ? 'Buku Digital wajib memiliki minimal satu aset (mis. PDF / e-book).'
@@ -763,7 +792,7 @@ class BookForm
                                         ->minItems(fn(Get $get): int => self::hasDigitalType($get) ? 1 : 0)
                                         ->schema([
                                             Select::make('type')
-                                                ->label('Type Asset')
+                                                ->label('Type Resource')
                                                 ->options(AssetTypes::options())
                                                 ->live()
                                                 ->afterStateUpdated(fn(Set $set) => $set('utility_path', null))
@@ -809,7 +838,7 @@ class BookForm
                                                 ->columnSpan(2),
                                         ])
                                         ->columns(3)
-                                        ->addActionLabel('Add Asset')
+                                        ->addActionLabel('Tambah Resource')
                                         ->reorderable()
                                         ->columnSpanFull(),
                                 ]),

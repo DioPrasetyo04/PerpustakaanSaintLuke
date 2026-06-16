@@ -7,6 +7,7 @@ import {
     Quote,
     BookPlus,
     AtSign,
+    Ban,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -163,6 +164,19 @@ function BookShow() {
     // Konfirmasi di sana yang mencatat peminjaman digital lalu membuka aset.
     const onHandleReadConfirmation = () => {
         if (!book) return;
+
+        // Validasi: status buku dari database. Buku "Tidak Tersedia" tidak dapat
+        // dibaca walaupun berformat digital.
+        if (!bookAvailable) {
+            setNotification({
+                type: 'error',
+                message:
+                    language === 'id'
+                        ? `Buku ini berstatus "${book.status}" dan tidak dapat dibaca saat ini.`
+                        : `This book is "${book.status}" and cannot be read right now.`,
+            });
+            return;
+        }
 
         // Validasi: akun staf (admin/super admin) tidak boleh membaca/meminjam buku.
         if (isStaff) {
@@ -402,18 +416,32 @@ function BookShow() {
                                     </div>
 
                                     <div className="mt-8 lg:max-w-[340px]">
-                                        {/* Buku Digital → Baca: arahkan ke konfirmasi akses. */}
+                                        {/* Buku Digital → Baca: arahkan ke konfirmasi akses.
+                                            Dinonaktifkan bila status buku "Tidak Tersedia"
+                                            (diambil dari database) walaupun berformat digital. */}
                                         {showRead && (
-                                            <Button
-                                                className="w-full gap-2 bg-cobalt text-white hover:bg-cobalt-dk"
-                                                size="lg"
-                                                onClick={onHandleReadConfirmation}
-                                            >
-                                                {language === 'id'
-                                                    ? 'Baca Buku'
-                                                    : 'Read Book'}
-                                                <BookOpen className="h-4 w-4" />
-                                            </Button>
+                                            <>
+                                                <Button
+                                                    className="w-full gap-2 bg-cobalt text-white hover:bg-cobalt-dk disabled:cursor-not-allowed disabled:hover:bg-cobalt"
+                                                    size="lg"
+                                                    onClick={onHandleReadConfirmation}
+                                                    disabled={!bookAvailable}
+                                                >
+                                                    {language === 'id'
+                                                        ? 'Baca Buku'
+                                                        : 'Read Book'}
+                                                    <BookOpen className="h-4 w-4" />
+                                                </Button>
+
+                                                {!bookAvailable && (
+                                                    <p className="mt-2 inline-flex w-full items-center justify-center gap-1.5 rounded-md bg-muted/60 px-3 py-2 text-center text-xs font-medium text-muted-foreground">
+                                                        <Ban className="h-3.5 w-3.5 shrink-0" />
+                                                        {language === 'id'
+                                                            ? `Buku berstatus "${book.status}" — belum dapat dibaca.`
+                                                            : `Book status: "${book.status}" — not readable yet.`}
+                                                    </p>
+                                                )}
+                                            </>
                                         )}
 
                                         <button
