@@ -21,6 +21,7 @@ use Filament\Tables\Table;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\User;
+use Illuminate\Support\HtmlString;
 
 class LoansTable
 {
@@ -64,6 +65,121 @@ class LoansTable
                     ->listWithLineBreaks()
                     ->limitList(3)
                     ->expandableLimitedList(),
+
+                TextColumn::make('id')
+                    ->label('Stock')
+                    ->html()
+                    ->formatStateUsing(function ($state, $record): HtmlString {
+
+                        $cards = [];
+
+                        $loanDetails = $record->loanDetails
+                            ->filter(fn($detail) => $detail->book)
+                            ->unique('book_id')
+                            ->values();
+
+                        foreach ($loanDetails as $detail) {
+
+                            $book = $detail->book;
+
+                            if (! $book) {
+                                continue;
+                            }
+
+                            $stock = $book->stock;
+
+                            // Buku digital
+                            if (! $stock) {
+
+                                $cards[] = "
+                                <div style='padding:8px;border:1px solid #fecaca;border-radius:8px;background:#fef2f2'>
+                                    <div style='font-weight:600'>{$book->title}</div>
+                                    <div style='color:#dc2626;font-size:12px'>
+                                        Stock 0 (Buku Digital)
+                                    </div>
+                                </div>";
+
+                                continue;
+                            }
+
+                            $cards[] = <<<HTML
+                        <div style="
+                            width:160px;
+                            border:1px solid #e5e7eb;
+                            border-radius:10px;
+                            padding:10px;
+                            background:#fff;
+                        ">
+
+                            <div style="
+                                font-size:14px;
+                                font-weight:700;
+                                color:#111827;
+                                margin-bottom:10px;
+                            ">
+                                {$book->title}
+                            </div>
+
+                            <div style="
+                                background:#f0fdf4;
+                                border:1px solid #86efac;
+                                color:#16a34a;
+                                border-radius:8px;
+                                padding:6px;
+                                text-align:center;
+                                font-size:13px;
+                                margin-bottom:8px;
+                            ">
+                                {$stock->available}/{$stock->total} tersedia
+                            </div>
+
+                            <div style="display:flex;flex-direction:column;gap:4px;">
+
+                                <div style="
+                                    background:#2563eb;
+                                    color:white;
+                                    border-radius:6px;
+                                    padding:4px;
+                                    text-align:center;
+                                    font-size:12px;
+                                ">
+                                    {$stock->loan} dipinjam
+                                </div>
+
+                                <div style="
+                                    background:#facc15;
+                                    color:#78350f;
+                                    border-radius:6px;
+                                    padding:4px;
+                                    text-align:center;
+                                    font-size:12px;
+                                ">
+                                    {$stock->lost} hilang
+                                </div>
+
+                                <div style="
+                                    background:#dc2626;
+                                    color:white;
+                                    border-radius:6px;
+                                    padding:4px;
+                                    text-align:center;
+                                    font-size:12px;
+                                ">
+                                    {$stock->damaged} rusak
+                                </div>
+
+                            </div>
+
+                        </div>
+                        HTML;
+                        }
+
+                        return new HtmlString(
+                            '<div style="display:flex;flex-direction:column;gap:8px">'
+                                . implode('', $cards)
+                                . '</div>'
+                        );
+                    }),
 
                 TextColumn::make('loanDetails.status')
                     ->label('Status Per Buku')
@@ -152,6 +268,9 @@ class LoansTable
             // baca buku digital dapat ditutup admin lewat aksi "Tutup Akses".
             ->modifyQueryUsing(fn(Builder $query) => $query->with([
                 'user',
+                'loanDetails',
+                'loanDetails.book',
+                'loanDetails.book.stock',
                 'loanDetails.book.authors',
                 'loanDetails.returnBook',
             ]))
@@ -201,11 +320,15 @@ class LoansTable
                     // Hanya untuk pinjaman FISIK yang belum dikembalikan. Pinjaman
                     // digital dikembalikan otomatis/oleh pengguna sendiri, jadi tidak
                     // perlu (dan tidak boleh) diproses lewat loket pengembalian staf.
+                    // ->visible(fn($record) => $record->loanDetails()
+                    //     ->where(function ($q) {
+                    //         $q->where('loan_type', '!=', LoanType::DIGITAL->value)
+                    //             ->orWhereNull('loan_type');
+                    //     })
+                    //     ->whereDoesntHave('returnBook')
+                    //     ->exists()),
                     ->visible(fn($record) => $record->loanDetails()
-                        ->where(function ($q) {
-                            $q->where('loan_type', '!=', LoanType::DIGITAL->value)
-                                ->orWhereNull('loan_type');
-                        })
+                        ->physical()
                         ->whereDoesntHave('returnBook')
                         ->exists()),
                 Action::make('revoke_digital_access')

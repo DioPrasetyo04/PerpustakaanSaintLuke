@@ -35,16 +35,23 @@ class LoanDetail extends Model
     ];
 
     /**
-     * Kecualikan detail peminjaman bertipe digital. Data tetap tersimpan di
-     * database, hanya tidak ikut ditampilkan/diproses (laporan & tabel).
-     * Nilai null diperlakukan sebagai fisik.
+     * Hanya peminjaman buku fisik.
+     * Nilai null dianggap sebagai buku fisik (kompatibilitas data lama).
      */
-    public function scopeExcludeDigital($query)
+    public function scopePhysical($query)
     {
         return $query->where(function ($q) {
             $q->where('loan_type', '!=', LoanType::DIGITAL->value)
                 ->orWhereNull('loan_type');
         });
+    }
+
+    /**
+     * Alias lama agar code existing tidak rusak.
+     */
+    public function scopeExcludeDigital($query)
+    {
+        return $this->scopePhysical($query);
     }
 
     public function loan(): BelongsTo
