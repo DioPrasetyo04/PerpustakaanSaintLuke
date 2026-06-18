@@ -24,6 +24,7 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
+use App\enums\BookType;
 
 class LoanForm
 {
@@ -117,7 +118,9 @@ class LoanForm
                                     // Sembunyikan buku yang masih aktif dipinjam oleh peminjam ini
                                     // dari daftar & pencarian agar tidak terpilih dua kali.
                                     ->relationship('book', 'title', function (Builder $query, Get $get, $livewire) {
-                                        $query->with('stock');
+                                        $query->with('stock')->whereHas('types', function ($q) {
+                                            $q->where('type', BookType::FISIK->value);
+                                        });
                                         $userId = $get('../../user_id') ?: data_get($livewire, 'data.user_id');
                                         $currentBookId = $get('book_id');
 
