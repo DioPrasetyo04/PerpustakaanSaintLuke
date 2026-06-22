@@ -79,8 +79,12 @@ class LoanForm
 
                                     $existing = self::existingLoanRows((int) $state);
                                     // Selalu sediakan satu baris kosong untuk menambah buku baru.
-                                    $existing[] = self::blankLoanRow();
-                                    $set('loanDetails', $existing);
+                                    $loanDetails = [
+                                        self::blankLoanRow(),
+                                        ...$existing,
+                                    ];
+
+                                    $set('loanDetails', $loanDetails);
                                 })
                                 ->required()
                                 ->columnSpanFull(),
@@ -387,7 +391,7 @@ class LoanForm
                     font-size:11px;
                     color:#FF0000;
                 ">
-                    Hilang ' . $lost . '
+                    Hilang: ' . $lost . '
                 </div>
 
             </div>
