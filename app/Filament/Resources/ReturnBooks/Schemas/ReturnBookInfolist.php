@@ -14,6 +14,11 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Infolists\Components\Actions;
+use Filament\Actions\Action;
+use App\Services\MidtransService;
+use Filament\Notifications\Notification;
+use Filament\Infolists\Components\ViewEntry;
 
 class ReturnBookInfolist
 {
@@ -152,7 +157,7 @@ class ReturnBookInfolist
                                                 ->placeholder('—'),
                                         ]),
                                     ])
-                                    ->visible(fn($state) => isset($state['returnBook']))
+                                    ->visible(fn($record) => filled($record?->returnBook))
                                     ->columnSpanFull(),
 
                                 Section::make('Pengecekan Kondisi')
@@ -179,6 +184,7 @@ class ReturnBookInfolist
 
                                             TextEntry::make('returnBook.returnBookCheck.notes')
                                                 ->label('Catatan Pengecekan')
+                                                ->html()
                                                 ->placeholder('Tidak ada catatan.'),
                                         ]),
                                     ])
@@ -218,15 +224,17 @@ class ReturnBookInfolist
                                                 })
                                                 ->placeholder('—'),
                                         ]),
+                                        ViewEntry::make('returnBook.fine')
+                                            ->view('filament.infolists.pay-fine-button'),
                                     ])
-                                    ->visible(fn($state) => isset($state['returnBook']['fine']))
+                                    ->visible(fn($record) => filled($record?->returnBook?->fine))
                                     ->columnSpanFull(),
 
                                 Section::make('Ulasan Peminjam')
                                     ->icon(Heroicon::OutlinedStar)
                                     ->schema([
                                         Grid::make(2)->schema([
-                                            TextEntry::make('review.rating')
+                                            TextEntry::make('returnBook.review.rating')
                                                 ->label('Rating')
                                                 ->badge()
                                                 ->color('warning')
@@ -234,13 +242,13 @@ class ReturnBookInfolist
                                                 ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 1) . ' / 5.0' : '—')
                                                 ->placeholder('—'),
 
-                                            TextEntry::make('review.comment')
+                                            TextEntry::make('returnBook.review.comment')
                                                 ->label('Komentar')
                                                 ->html()
                                                 ->placeholder('Belum ada ulasan.'),
                                         ]),
                                     ])
-                                    ->visible(fn($state) => isset($state['review']))
+                                    ->visible(fn($record) => filled($record?->returnBook?->review))
                                     ->columnSpanFull(),
                             ])
                             ->columnSpanFull(),

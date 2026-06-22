@@ -7,6 +7,9 @@ use App\Filament\Resources\ReturnBooks\Schemas\ReturnBookInfolist;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
+use App\Models\Fine;
+use App\Services\MidtransService;
+use Filament\Notifications\Notification;
 
 class ViewReturnBooks extends ViewRecord
 {
@@ -19,13 +22,35 @@ class ViewReturnBooks extends ViewRecord
             'loanDetails.book.authors',
             'loanDetails.returnBook.returnBookCheck',
             'loanDetails.returnBook.fine',
-            'loanDetails.review',
+            'loanDetails.returnBook.review',
         ]);
     }
 
     public function infolist(Schema $schema): Schema
     {
         return ReturnBookInfolist::configure($schema);
+    }
+
+    public function payFine(int $fineId): void
+    {
+        try {
+
+            $fine = Fine::findOrFail($fineId);
+
+            $snapToken = MidtransService::getSnapToken($fine);
+
+            $this->dispatch(
+                'midtrans-pay',
+                snapToken: $snapToken
+            );
+        } catch (\Exception $e) {
+
+            Notification::make()
+                ->title('Error Midtrans')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
+        }
     }
 
     protected function getHeaderActions(): array
