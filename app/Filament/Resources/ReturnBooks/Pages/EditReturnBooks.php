@@ -78,9 +78,8 @@ class EditReturnBooks extends EditRecord
             ->all();
 
         return [
+            'user_id' => $loan->user_id,
             'loan_id' => $loan->id,
-            'user_name' => $loan->user?->name,
-            'loan_code' => $loan->loan_code,
             'returns' => $returns,
         ];
     }

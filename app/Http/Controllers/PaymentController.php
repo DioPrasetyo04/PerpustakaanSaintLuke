@@ -91,16 +91,10 @@ class PaymentController extends Controller
         }
 
         // 🔥 ambil fine dari order_id
-        $fine = Fine::where('order_id', $request->order_id)->first();
+        $fines = Fine::where('order_id', $request->order_id)->get();
 
-        if (!$fine) {
+        if ($fines->isEmpty()) {
             return response()->json(['message' => 'Fine tidak ditemukan'], 404);
-        }
-
-        $returnBook = $fine->returnBook;
-
-        if (!$returnBook) {
-            return response()->json(['message' => 'Data Return Book Not Find'], 404);
         }
 
         // switch ($request->transaction_status) {
@@ -108,10 +102,10 @@ class PaymentController extends Controller
         //         $returnBook->fine->payment_status = PaymentStatus::SUCCESS->value;
         //         $returnBook->fine->payment_method = $request->payment_type;
         //         $returnBook->fine->save();
-
+        // 
         //         $returnBook->status = ReturnBookStatus::RETURNED->value;
         //         $returnBook->save();
-
+        // 
         //         return response()->json([
         //             'message' => 'Berhasil melakukan pembayaran',
         //         ], 200);
@@ -119,38 +113,38 @@ class PaymentController extends Controller
         //         $returnBook->fine->payment_status = PaymentStatus::SUCCESS->value;
         //         $returnBook->fine->payment_method = $request->payment_type;
         //         $returnBook->fine->save();
-
+        // 
         //         $returnBook->status = ReturnBookStatus::RETURNED->value;
         //         $returnBook->save();
-
+        // 
         //         return response()->json([
         //             'message' => 'Berhasil melakukan pembayaran',
         //         ]);
         //     case 'pending':
         //         $returnBook->fine->payment_status = PaymentStatus::PENDING->value;
         //         $returnBook->fine->save();
-
+        // 
         //         $returnBook->status = ReturnBookStatus::CHECKED->value;
         //         $returnBook->save();
-
+        // 
         //         return response()->json([
         //             'message' => 'Pembayaran tertunda',
         //         ]);
         //     case 'expired':
         //         $returnBook->fine->payment_status = PaymentStatus::FAILED->value;
         //         $returnBook->fine->save();
-
+        // 
         //         return response()->json([
         //             'message' => 'Pembayaran sudah kadaluarsa',
         //         ]);
         //     case 'cancel':
         //         $returnBook->fine->payment_status = PaymentStatus::FAILED->value;
         //         $returnBook->fine->save();
-
+        // 
         //         return response()->json([
         //             'message' => 'Pembayaran telah dibatalkan',
         //         ]);
-
+        // 
         //     default:
         //         return response()->json([
         //             'message' => 'Transaksi tidak ditemukan',
@@ -161,15 +155,17 @@ class PaymentController extends Controller
 
             case 'settlement':
             case 'capture':
-                $fine->update([
-                    'payment_status' => PaymentStatus::SUCCESS->value,
-                    'payment_method' => $request->payment_type,
-                ]);
-
-                if ($returnBook) {
-                    $returnBook->update([
-                        'status' => ReturnBookStatus::RETURNED->value
+                foreach ($fines as $fine) {
+                    $fine->update([
+                        'payment_status' => PaymentStatus::SUCCESS->value,
+                        'payment_method' => $request->payment_type,
                     ]);
+
+                    if ($fine->returnBook) {
+                        $fine->returnBook->update([
+                            'status' => ReturnBookStatus::RETURNED->value
+                        ]);
+                    }
                 }
 
                 return response()->json([
@@ -177,14 +173,16 @@ class PaymentController extends Controller
                 ], 200);
 
             case 'pending':
-                $fine->update([
-                    'payment_status' => PaymentStatus::PENDING->value,
-                ]);
-
-                if ($returnBook) {
-                    $returnBook->update([
-                        'status' => ReturnBookStatus::CHECKED->value
+                foreach ($fines as $fine) {
+                    $fine->update([
+                        'payment_status' => PaymentStatus::PENDING->value,
                     ]);
+
+                    if ($fine->returnBook) {
+                        $fine->returnBook->update([
+                            'status' => ReturnBookStatus::CHECKED->value
+                        ]);
+                    }
                 }
 
                 return response()->json([
@@ -194,18 +192,22 @@ class PaymentController extends Controller
             case 'expire': // ⚠️ Midtrans pakai "expire", bukan "expired"
             case 'cancel':
             case 'deny':
-                $fine->update([
-                    'payment_status' => PaymentStatus::FAILED->value,
-                ]);
+                foreach ($fines as $fine) {
+                    $fine->update([
+                        'payment_status' => PaymentStatus::FAILED->value,
+                    ]);
+                }
 
                 return response()->json([
                     'message' => 'Pembayaran gagal / dibatalkan',
                 ]);
 
             default:
-                $fine->update([
-                    'payment_status' => PaymentStatus::ERROR->value,
-                ]);
+                foreach ($fines as $fine) {
+                    $fine->update([
+                        'payment_status' => PaymentStatus::ERROR->value,
+                    ]);
+                }
 
                 return response()->json([
                     'message' => 'Status tidak dikenali',

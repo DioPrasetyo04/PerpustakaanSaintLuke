@@ -194,7 +194,7 @@ class LoanForm
                             ->defaultItems(1)
                             ->addActionLabel('Tambah Buku')
                             ->reorderable(false)
-                            ->collapsible()
+                            ->grid(2)
                             ->columnSpanFull(),
                     ])->columnSpanFull(),
             ]);

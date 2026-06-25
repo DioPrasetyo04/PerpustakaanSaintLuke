@@ -16,6 +16,7 @@ import {
     AlertCircle,
     Wallet,
     TrendingUp,
+    Calendar,
 } from 'lucide-react';
 import {
     LineChart,
@@ -41,6 +42,12 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { ImageWithFallback } from '@/components/common/ImageWithFallback';
 import Pagination from '@/components/component/Home/Pagination/Pagination';
 import Notification from '@/components/component/Notification/Notification';
@@ -48,6 +55,7 @@ import ConfirmDialog from '@/components/component/Notification/ConfirmDialog';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useSearch } from '@/hooks/useSearch';
 import { Paginated } from '@/types/pagination';
+import { PageProps } from '@/types';
 import { payFine } from '@/lib/midtrans';
 
 type TabId = 'bookmarks' | 'loans' | 'returns' | 'fines';
@@ -88,7 +96,23 @@ type ReturnItem = {
     return_date: string | null;
     due_date: string | null;
     condition: string | null;
+    notes: string | null;
     status: 'on-time' | 'late';
+    loan_code?: string;
+    loan_status?: string;
+    fine?: {
+        id: string;
+        order_id: string | null;
+        late_fee: number;
+        other_fee: number;
+        total_fee: number;
+        status: 'paid' | 'unpaid';
+        payment_status: string | null;
+    } | null;
+    review?: {
+        rating: number;
+        comment: string | null;
+    } | null;
 };
 
 type FineItem = {
@@ -98,6 +122,7 @@ type FineItem = {
     slug: string;
     author: string;
     cover_url: string | null;
+    borrow_date: string | null;
     due_date: string | null;
     return_date: string | null;
     days_overdue: number;
@@ -106,6 +131,10 @@ type FineItem = {
     other_fee: number;
     status: 'paid' | 'unpaid';
     payment_status: string | null;
+    condition?: string | null;
+    notes?: string | null;
+    return_book_code?: string | null;
+    return_status?: 'on-time' | 'late';
 };
 
 type TabFilters = {
@@ -155,7 +184,7 @@ type HistoryStats = {
     fines: FineStats;
 };
 
-type HistoryPageProps = {
+type HistoryPageProps = PageProps<{
     activeTab: TabId;
     stats: HistoryStats;
     bookmarks: Paginated<BookmarkItem>;
@@ -168,7 +197,7 @@ type HistoryPageProps = {
         returns: TabFilters;
         fines: TabFilters;
     };
-};
+}>;
 
 const TAB_CONFIG: Array<{ id: TabId; label: string; icon: typeof Bookmark }> = [
     { id: 'bookmarks', label: 'Bookmarked Books', icon: Bookmark },
@@ -201,6 +230,9 @@ export default function HistoryPage() {
     const [activeTab, setActiveTab] = useState<TabId>(() =>
         getInitialTabFromUrl(props.activeTab ?? 'bookmarks'),
     );
+
+    const [selectedFine, setSelectedFine] = useState<FineItem | null>(null);
+    const [selectedReturn, setSelectedReturn] = useState<ReturnItem | null>(null);
 
     // Per-tab search inputs (each preserved in URL via useSearch hook).
     const bookmarksSearchState = useSearch({
@@ -603,10 +635,17 @@ export default function HistoryPage() {
                     )}
                     {activeTab === 'loans' && <LoansTable items={loans.data} />}
                     {activeTab === 'returns' && (
-                        <ReturnsTable items={returns.data} />
+                        <ReturnsTable
+                            items={returns.data}
+                            onViewDetail={(item) => setSelectedReturn(item)}
+                        />
                     )}
                     {activeTab === 'fines' && (
-                        <FinesTable items={fines.data} onPay={handlePayFine} />
+                        <FinesTable
+                            items={fines.data}
+                            onPay={handlePayFine}
+                            onViewDetail={(item) => setSelectedFine(item)}
+                        />
                     )}
 
                     {/* Empty state */}
@@ -654,9 +693,421 @@ export default function HistoryPage() {
                 notification={notification}
                 onClose={() => setNotification(null)}
             />
+
+            {/* Return Detail Modal */}
+            {selectedReturn && (
+                <Dialog open={selectedReturn !== null} onOpenChange={(open) => !open && setSelectedReturn(null)}>
+                    <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto p-0">
+                        <div className="p-6">
+                            <DialogHeader className="mb-4">
+                                <DialogTitle className="text-xl font-bold flex items-center justify-between">
+                                    <span>Detail Pengembalian Buku</span>
+                                    <Badge variant="outline" className="font-mono text-xs">
+                                        {selectedReturn.return_book_code}
+                                    </Badge>
+                                </DialogTitle>
+                            </DialogHeader>
+
+                            {/* Book Info Header */}
+                            <div className="flex flex-col sm:flex-row gap-4 p-4 rounded-xl bg-muted/30 border mb-6">
+                                <div className="w-20 h-28 flex-shrink-0 rounded-lg overflow-hidden border bg-background self-center sm:self-start">
+                                    <ImageWithFallback
+                                        src={selectedReturn.cover_url ?? undefined}
+                                        alt={selectedReturn.book_title}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                                <div className="flex-1 flex flex-col justify-between">
+                                    <div>
+                                        <h4 className="font-bold text-foreground text-lg mb-1">
+                                            {selectedReturn.book_title}
+                                        </h4>
+                                        <p className="text-sm text-muted-foreground mb-3">
+                                            oleh {selectedReturn.author}
+                                        </p>
+                                    </div>
+                                    <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                                        {selectedReturn.loan_code && (
+                                            <div className="flex items-center gap-1 bg-background border px-2 py-1 rounded">
+                                                <span>Peminjaman:</span>
+                                                <span className="font-semibold text-foreground">{selectedReturn.loan_code}</span>
+                                            </div>
+                                        )}
+                                        {selectedReturn.loan_status && (
+                                            <div className="flex items-center gap-1 bg-background border px-2 py-1 rounded">
+                                                <span>Status:</span>
+                                                <span className="font-semibold text-foreground capitalize">{selectedReturn.loan_status.replace('_', ' ')}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Rental and Return Timestamps */}
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                                <div className="p-3 border rounded-xl bg-card shadow-soft flex flex-col justify-between">
+                                    <span className="text-xs text-muted-foreground mb-1 block">Tanggal Pinjam</span>
+                                    <div className="flex items-center gap-2 text-foreground font-semibold">
+                                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                                        <span>{formatDate(selectedReturn.borrow_date)}</span>
+                                    </div>
+                                </div>
+                                <div className="p-3 border rounded-xl bg-card shadow-soft flex flex-col justify-between">
+                                    <span className="text-xs text-muted-foreground mb-1 block">Jatuh Tempo</span>
+                                    <div className="flex items-center gap-2 text-foreground font-semibold">
+                                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                                        <span>{formatDate(selectedReturn.due_date)}</span>
+                                    </div>
+                                </div>
+                                <div className="p-3 border rounded-xl bg-card shadow-soft flex flex-col justify-between">
+                                    <span className="text-xs text-muted-foreground mb-1 block">Tanggal Kembali</span>
+                                    <div className="flex items-center gap-2 text-foreground font-semibold">
+                                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                                        <span>{formatDate(selectedReturn.return_date)}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Book Return Status / Condition */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 border-t pt-6 mb-6">
+                                <div>
+                                    <h5 className="font-semibold text-sm text-foreground mb-3 flex items-center gap-1.5">
+                                        <RefreshCw className="h-4 w-4 text-cobalt" />
+                                        Status Pengembalian
+                                    </h5>
+                                    <div className="flex flex-col gap-2">
+                                        <div className="flex items-center justify-between py-1 border-b">
+                                            <span className="text-sm text-muted-foreground">Ketepatan Waktu</span>
+                                            {getReturnStatusBadge(selectedReturn.status)}
+                                        </div>
+                                        <div className="flex items-center justify-between py-1">
+                                            <span className="text-sm text-muted-foreground">Kondisi Pengembalian</span>
+                                            {getConditionBadge(selectedReturn.condition)}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h5 className="font-semibold text-sm text-foreground mb-3 flex items-center gap-1.5">
+                                        <AlertCircle className="h-4 w-4 text-cobalt" />
+                                        Catatan Pengecekan
+                                    </h5>
+                                    <div className="p-3 rounded-xl border bg-muted/20 text-sm text-muted-foreground min-h-[70px]">
+                                        {selectedReturn.notes ? (
+                                            <div dangerouslySetInnerHTML={{ __html: selectedReturn.notes }} />
+                                        ) : (
+                                            <span className="italic">Tidak ada catatan kondisi buku.</span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Fine Breakdown Section */}
+                            {selectedReturn.fine && (
+                                <div className="border-t pt-6 mb-6">
+                                    <h5 className="font-semibold text-sm text-foreground mb-3 flex items-center gap-1.5">
+                                        <DollarSign className="h-4 w-4 text-rose-500" />
+                                        Rincian Denda
+                                    </h5>
+                                    <div className="p-4 rounded-xl border bg-rose-500/[0.02] space-y-3">
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-muted-foreground">Denda Keterlambatan</span>
+                                            <span className="font-medium text-foreground">{formatIDR(selectedReturn.fine.late_fee)}</span>
+                                        </div>
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-muted-foreground">Denda Kondisi Buku (Kerusakan/Kehilangan)</span>
+                                            <span className="font-medium text-foreground">{formatIDR(selectedReturn.fine.other_fee)}</span>
+                                        </div>
+                                        <div className="border-t pt-3 flex justify-between items-center">
+                                            <span className="font-semibold text-sm text-foreground">Total Denda</span>
+                                            <span className="font-bold text-lg text-rose-600 dark:text-rose-400">
+                                                {formatIDR(selectedReturn.fine.total_fee)}
+                                            </span>
+                                        </div>
+                                        <div className="flex flex-wrap items-center justify-between border-t pt-3 text-xs gap-2">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-muted-foreground">Status Pembayaran:</span>
+                                                {selectedReturn.fine.status === 'paid' ? (
+                                                    <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-medium">
+                                                        Paid
+                                                    </Badge>
+                                                ) : (
+                                                    <Badge className="bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 font-medium">
+                                                        Unpaid
+                                                    </Badge>
+                                                )}
+                                            </div>
+                                            {selectedReturn.fine.order_id && (
+                                                <div className="text-muted-foreground font-mono">
+                                                    ID: {selectedReturn.fine.order_id}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Review Section */}
+                            {selectedReturn.review && (
+                                <div className="border-t pt-6">
+                                    <h5 className="font-semibold text-sm text-foreground mb-3 flex items-center gap-1.5">
+                                        <Star className="h-4 w-4 text-amber-500" />
+                                        Ulasan Peminjam
+                                    </h5>
+                                    <div className="p-4 rounded-xl border bg-muted/20 space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-sm text-muted-foreground">Rating Diberikan</span>
+                                            <StarRating rating={selectedReturn.review.rating} />
+                                        </div>
+                                        {selectedReturn.review.comment && (
+                                            <div className="text-sm text-muted-foreground border-t pt-3">
+                                                <p className="italic">"{selectedReturn.review.comment}"</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </DialogContent>
+                </Dialog>
+            )}
+
+            {/* Fine Detail Modal */}
+            {selectedFine && (
+                <Dialog open={selectedFine !== null} onOpenChange={(open) => !open && setSelectedFine(null)}>
+                    <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto p-0">
+                        <div className="p-6">
+                            <DialogHeader className="mb-4">
+                                <DialogTitle className="text-xl font-bold flex items-center justify-between">
+                                    <span>Detail Denda</span>
+                                    {selectedFine.order_id && (
+                                        <Badge variant="outline" className="font-mono text-xs">
+                                            ID Transaksi: {selectedFine.order_id}
+                                        </Badge>
+                                    )}
+                                </DialogTitle>
+                            </DialogHeader>
+
+                            {/* Book Info Header */}
+                            <div className="flex flex-col sm:flex-row gap-4 p-4 rounded-xl bg-muted/30 border mb-6">
+                                <div className="w-20 h-28 flex-shrink-0 rounded-lg overflow-hidden border bg-background self-center sm:self-start">
+                                    <ImageWithFallback
+                                        src={selectedFine.cover_url ?? undefined}
+                                        alt={selectedFine.book_title}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                                <div className="flex-1 flex flex-col justify-between">
+                                    <div>
+                                        <h4 className="font-bold text-foreground text-lg mb-1">
+                                            {selectedFine.book_title}
+                                        </h4>
+                                        <p className="text-sm text-muted-foreground mb-3">
+                                            oleh {selectedFine.author}
+                                        </p>
+                                    </div>
+                                    <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                                        {selectedFine.return_book_code && (
+                                            <div className="flex items-center gap-1 bg-background border px-2 py-1 rounded">
+                                                <span>Kode Kembali:</span>
+                                                <span className="font-semibold text-foreground">{selectedFine.return_book_code}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Rental and Return Timestamps */}
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                                <div className="p-3 border rounded-xl bg-card shadow-soft flex flex-col justify-between">
+                                    <span className="text-xs text-muted-foreground mb-1 block">Tanggal Pinjam</span>
+                                    <div className="flex items-center gap-2 text-foreground font-semibold">
+                                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                                        <span>{formatDate(selectedFine.borrow_date)}</span>
+                                    </div>
+                                </div>
+                                <div className="p-3 border rounded-xl bg-card shadow-soft flex flex-col justify-between">
+                                    <span className="text-xs text-muted-foreground mb-1 block">Jatuh Tempo</span>
+                                    <div className="flex items-center gap-2 text-foreground font-semibold">
+                                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                                        <span>{formatDate(selectedFine.due_date)}</span>
+                                    </div>
+                                </div>
+                                <div className="p-3 border rounded-xl bg-card shadow-soft flex flex-col justify-between">
+                                    <span className="text-xs text-muted-foreground mb-1 block">Tanggal Kembali</span>
+                                    <div className="flex items-center gap-2 text-foreground font-semibold">
+                                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                                        <span>{formatDate(selectedFine.return_date)}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Return Status and Condition */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 border-t pt-6 mb-6">
+                                <div>
+                                    <h5 className="font-semibold text-sm text-foreground mb-3 flex items-center gap-1.5">
+                                        <RefreshCw className="h-4 w-4 text-cobalt" />
+                                        Status Pengembalian
+                                    </h5>
+                                    <div className="flex flex-col gap-2">
+                                        <div className="flex items-center justify-between py-1 border-b">
+                                            <span className="text-sm text-muted-foreground">Ketepatan Waktu</span>
+                                            {getReturnStatusBadge(selectedFine.return_status)}
+                                        </div>
+                                        <div className="flex items-center justify-between py-1">
+                                            <span className="text-sm text-muted-foreground">Kondisi Pengembalian</span>
+                                            {getConditionBadge(selectedFine.condition)}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h5 className="font-semibold text-sm text-foreground mb-3 flex items-center gap-1.5">
+                                        <AlertCircle className="h-4 w-4 text-cobalt" />
+                                        Catatan Pengecekan
+                                    </h5>
+                                    <div className="p-3 rounded-xl border bg-muted/20 text-sm text-muted-foreground min-h-[70px]">
+                                        {selectedFine.notes ? (
+                                            <div dangerouslySetInnerHTML={{ __html: selectedFine.notes }} />
+                                        ) : (
+                                            <span className="italic">Tidak ada catatan kondisi buku.</span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Fine Breakdown Section */}
+                            <div className="border-t pt-6 mb-6">
+                                <h5 className="font-semibold text-sm text-foreground mb-3 flex items-center gap-1.5">
+                                    <DollarSign className="h-4 w-4 text-rose-500" />
+                                    Rincian Denda
+                                </h5>
+                                <div className="p-4 rounded-xl border bg-rose-500/[0.02] space-y-3">
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-muted-foreground">Denda Keterlambatan</span>
+                                        <span className="font-medium text-foreground">{formatIDR(selectedFine.late_fee)}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-muted-foreground">Denda Kondisi Buku (Kerusakan/Kehilangan)</span>
+                                        <span className="font-medium text-foreground">{formatIDR(selectedFine.other_fee)}</span>
+                                    </div>
+                                    <div className="border-t pt-3 flex justify-between items-center">
+                                        <span className="font-semibold text-sm text-foreground">Total Denda</span>
+                                        <span className="font-bold text-lg text-rose-600 dark:text-rose-400">
+                                            {formatIDR(selectedFine.fine_amount)}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center justify-between border-t pt-3 text-xs">
+                                        <span className="text-muted-foreground">Status Pembayaran:</span>
+                                        {selectedFine.status === 'paid' ? (
+                                            <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-medium">
+                                                Paid
+                                            </Badge>
+                                        ) : (
+                                            <Badge className="bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 font-medium">
+                                                Unpaid
+                                            </Badge>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Pay Button inside Modal for unpaid fines */}
+                            <div className="flex justify-end gap-2 border-t pt-6">
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setSelectedFine(null)}
+                                >
+                                    Tutup
+                                </Button>
+                                {selectedFine.status === 'unpaid' && (
+                                    <Button
+                                        className="bg-primary hover:bg-primary/90 gap-2"
+                                        onClick={() => {
+                                            const id = selectedFine.id;
+                                            setSelectedFine(null);
+                                            handlePayFine(id);
+                                        }}
+                                    >
+                                        <CreditCard className="h-4 w-4" />
+                                        Bayar Sekarang
+                                    </Button>
+                                )}
+                            </div>
+                        </div>
+                    </DialogContent>
+                </Dialog>
+            )}
         </div>
     );
 }
+
+const StarRating = ({ rating }: { rating: number }) => {
+    return (
+        <div className="flex items-center gap-1">
+            {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                    key={star}
+                    className={`h-4 w-4 ${
+                        star <= Math.round(rating)
+                            ? 'text-amber-500 fill-amber-500'
+                            : 'text-muted/30 dark:text-muted/10'
+                    }`}
+                />
+            ))}
+            <span className="ml-1 text-sm font-semibold">{rating.toFixed(1)}</span>
+        </div>
+    );
+};
+
+const getConditionBadge = (condition: string | null | undefined) => {
+    if (!condition) return <span className="text-muted-foreground">-</span>;
+    const cond = condition.toLowerCase();
+    if (cond === 'baik' || cond === 'good') {
+        return (
+            <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 gap-1 font-medium">
+                <CheckCircle className="h-3 w-3" />
+                Baik
+            </Badge>
+        );
+    }
+    if (cond === 'rusak' || cond === 'damaged') {
+        return (
+            <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 gap-1 font-medium">
+                <AlertCircle className="h-3 w-3" />
+                Rusak
+            </Badge>
+        );
+    }
+    if (cond === 'hilang' || cond === 'lost') {
+        return (
+            <Badge className="bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 gap-1 font-medium">
+                <XCircle className="h-3 w-3" />
+                Hilang
+            </Badge>
+        );
+    }
+    return <Badge variant="outline">{condition}</Badge>;
+};
+
+const getReturnStatusBadge = (status: 'on-time' | 'late' | string | null | undefined) => {
+    if (!status) return null;
+    const isLate = status.toLowerCase() === 'late';
+    if (isLate) {
+        return (
+            <Badge className="bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 gap-1 font-medium">
+                <Clock className="h-3 w-3" />
+                Terlambat
+            </Badge>
+        );
+    }
+    return (
+        <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 gap-1 font-medium">
+            <CheckCircle className="h-3 w-3" />
+            Tepat Waktu
+        </Badge>
+    );
+};
 
 /* ------------------------------------------------------------------ */
 /* Stats & charts                                                     */
@@ -786,7 +1237,7 @@ function BookmarkStatsSection({ stats }: { stats: BookmarkStats }) {
                     <XAxis dataKey="label" tick={{ fontSize: 12 }} />
                     <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
                     <Tooltip
-                        formatter={(v: number) => [v, 'Bookmarks']}
+                        formatter={(v: any) => [v, 'Bookmarks']}
                         cursor={{ fill: 'rgba(30,58,138,0.08)' }}
                     />
                     <Bar dataKey="total" fill={COBALT} radius={[4, 4, 0, 0]} />
@@ -831,7 +1282,7 @@ function LoanStatsSection({ stats }: { stats: LoanStats }) {
                     <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                     <XAxis dataKey="label" tick={{ fontSize: 12 }} />
                     <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
-                    <Tooltip formatter={(v: number) => [v, 'Loans']} />
+                    <Tooltip formatter={(v: any) => [v, 'Loans']} />
                     <Line
                         type="monotone"
                         dataKey="total"
@@ -880,7 +1331,7 @@ function ReturnStatsSection({ stats }: { stats: ReturnStats }) {
                     <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                     <XAxis dataKey="label" tick={{ fontSize: 12 }} />
                     <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
-                    <Tooltip formatter={(v: number) => [v, 'Returns']} />
+                    <Tooltip formatter={(v: any) => [v, 'Returns']} />
                     <Line
                         type="monotone"
                         dataKey="total"
@@ -947,7 +1398,7 @@ function FineStatsSection({ stats }: { stats: FineStats }) {
                         }
                     />
                     <Tooltip
-                        formatter={(v: number) => [formatIDR(v), 'Paid']}
+                        formatter={(v: any) => [formatIDR(v), 'Paid']}
                         cursor={{ fill: 'rgba(245,158,11,0.08)' }}
                     />
                     <Bar dataKey="total" fill={ACCENT} radius={[4, 4, 0, 0]} />
@@ -1146,7 +1597,13 @@ function LoansTable({ items }: { items: LoanItem[] }) {
     );
 }
 
-function ReturnsTable({ items }: { items: ReturnItem[] }) {
+function ReturnsTable({
+    items,
+    onViewDetail,
+}: {
+    items: ReturnItem[];
+    onViewDetail: (item: ReturnItem) => void;
+}) {
     if (items.length === 0) return null;
     return (
         <TableWrap>
@@ -1157,6 +1614,7 @@ function ReturnsTable({ items }: { items: ReturnItem[] }) {
                     <Th>Return Date</Th>
                     <Th>Condition</Th>
                     <Th>Status</Th>
+                    <Th>Actions</Th>
                 </tr>
             </thead>
             <tbody className="divide-y divide-border bg-card">
@@ -1195,6 +1653,15 @@ function ReturnsTable({ items }: { items: ReturnItem[] }) {
                                 </Badge>
                             )}
                         </Td>
+                        <Td>
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => onViewDetail(item)}
+                            >
+                                <Eye className="h-4 w-4" />
+                            </Button>
+                        </Td>
                     </motion.tr>
                 ))}
             </tbody>
@@ -1205,9 +1672,11 @@ function ReturnsTable({ items }: { items: ReturnItem[] }) {
 function FinesTable({
     items,
     onPay,
+    onViewDetail,
 }: {
     items: FineItem[];
     onPay: (id: string) => void;
+    onViewDetail: (item: FineItem) => void;
 }) {
     if (items.length === 0) return null;
     return (
@@ -1257,24 +1726,33 @@ function FinesTable({
                             )}
                         </Td>
                         <Td>
-                            {item.status === 'unpaid' ? (
+                            <div className="flex items-center gap-2">
                                 <Button
                                     size="sm"
-                                    className="bg-primary hover:bg-primary/90"
-                                    onClick={() => onPay(item.id)}
-                                >
-                                    <CreditCard className="h-4 w-4 mr-2" />
-                                    Pay Now
-                                </Button>
-                            ) : (
-                                <Badge
                                     variant="outline"
-                                    className="text-green-600"
+                                    onClick={() => onViewDetail(item)}
                                 >
-                                    <CheckCircle className="h-3 w-3 mr-1" />
-                                    Paid
-                                </Badge>
-                            )}
+                                    <Eye className="h-4 w-4" />
+                                </Button>
+                                {item.status === 'unpaid' ? (
+                                    <Button
+                                        size="sm"
+                                        className="bg-primary hover:bg-primary/90"
+                                        onClick={() => onPay(item.id)}
+                                    >
+                                        <CreditCard className="h-4 w-4 mr-2" />
+                                        Pay Now
+                                    </Button>
+                                ) : (
+                                    <Badge
+                                        variant="outline"
+                                        className="text-green-600 font-medium"
+                                    >
+                                        <CheckCircle className="h-3 w-3 mr-1" />
+                                        Paid
+                                    </Badge>
+                                )}
+                            </div>
                         </Td>
                     </motion.tr>
                 ))}
