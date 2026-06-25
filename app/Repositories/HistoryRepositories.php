@@ -113,6 +113,8 @@ class HistoryRepositories implements HistoryInterfaceRepositories
                 'loanDetail.book.authors:id,name,username,avatar',
                 'loanDetail.loan:id,loan_code,user_id',
                 'returnBookCheck:id,return_book_id,condition,notes',
+                'fine:id,return_book_id,order_id,late_fee,other_fee,total_fee,payment_status',
+                'review:id,return_book_id,rating,comment',
             ])
             ->whereHas('loanDetail.loan', fn($q) => $q->where('user_id', $userId))
             ->when($search, function ($query, $value) {
@@ -161,6 +163,7 @@ class HistoryRepositories implements HistoryInterfaceRepositories
                 'returnBook.loanDetail.book:id,title,slug,cover',
                 'returnBook.loanDetail.book.authors:id,name,username,avatar',
                 'returnBook.loanDetail.loan:id,loan_code,user_id',
+                'returnBook.returnBookCheck:id,return_book_id,condition,notes',
             ])
             ->whereHas('returnBook.loanDetail.loan', fn($q) => $q->where('user_id', $userId))
             ->when($search, function ($query, $value) {

@@ -5,23 +5,26 @@ namespace App\Filament\Resources\ReturnBooks\Tables;
 use App\Enums\BookCondition;
 use App\Enums\LoanBookStatus;
 use App\Enums\PaymentStatus;
+use App\Enums\LoanStatus;
 use App\Models\Fine;
 use App\Models\Loan;
+use App\Models\User;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\DatePicker;
 use Filament\Notifications\Notification;
 use Filament\Support\Exceptions\Halt;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
-use App\Models\User;
 
 class ReturnBooksTable
 {
@@ -241,14 +244,16 @@ class ReturnBooksTable
                         default => 'heroicon-s-minus-circle',
                     }),
             ])
-            ->modifyQueryUsing(fn(Builder $query) => $query->with([
-                'loanDetails.loan.user',
-                'loanDetails.book.authors',
-            ]))
+            ->groups([
+                \Filament\Tables\Grouping\Group::make('user.name')
+                    ->label('Peminjam')
+                    ->collapsible(),
+            ])
+            ->defaultGroup('user.name')
             ->filters([
                 SelectFilter::make('user_id')
                     ->label('Filter Peminjam')
-                    ->placeholder('Semua Pengembalian')
+                    ->placeholder('— Semua Pengembalian —')
                     ->searchable()
                     ->preload()
                     ->native(false)
@@ -268,10 +273,7 @@ class ReturnBooksTable
                     ->modifyQueryUsing(function (Builder $query, array $data): Builder {
                         return $query->when(
                             filled($data['value']),
-                            fn(Builder $q) => $q->whereHas(
-                                'loanDetails.loan',
-                                fn(Builder $lq) => $lq->where('user_id', $data['value'])
-                            )
+                            fn(Builder $q) => $q->where('user_id', $data['value'])
                         );
                     })
                     ->indicateUsing(function (array $data): ?string {
@@ -279,7 +281,116 @@ class ReturnBooksTable
                             return null;
                         }
                         $user = User::find($data['value']);
-                        return $user ? 'User: ' . $user->name : null;
+                        return $user ? 'Peminjam: ' . $user->name : null;
+                    }),
+
+                Filter::make('loan_date')
+                    ->label('Tanggal Pinjam')
+                    ->form([
+                        DatePicker::make('loan_date_from')->label('Tanggal Pinjam Dari'),
+                        DatePicker::make('loan_date_until')->label('Tanggal Pinjam Sampai'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['loan_date_from'] ?? null, fn(Builder $q, $date) => $q->whereHas('loanDetails', fn($sub) => $sub->whereDate('loan_date', '>=', $date)))
+                            ->when($data['loan_date_until'] ?? null, fn(Builder $q, $date) => $q->whereHas('loanDetails', fn($sub) => $sub->whereDate('loan_date', '<=', $date)));
+                    })
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+                        if ($data['loan_date_from'] ?? null) {
+                            $indicators[] = 'Tanggal Pinjam Dari: ' . Carbon::parse($data['loan_date_from'])->format('d M Y');
+                        }
+                        if ($data['loan_date_until'] ?? null) {
+                            $indicators[] = 'Tanggal Pinjam Sampai: ' . Carbon::parse($data['loan_date_until'])->format('d M Y');
+                        }
+                        return $indicators;
+                    }),
+
+                Filter::make('due_date')
+                    ->label('Batas Pengembalian')
+                    ->form([
+                        DatePicker::make('due_date_from')->label('Batas Pengembalian Dari'),
+                        DatePicker::make('due_date_until')->label('Batas Pengembalian Sampai'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['due_date_from'] ?? null, fn(Builder $q, $date) => $q->whereHas('loanDetails', fn($sub) => $sub->whereDate('due_date', '>=', $date)))
+                            ->when($data['due_date_until'] ?? null, fn(Builder $q, $date) => $q->whereHas('loanDetails', fn($sub) => $sub->whereDate('due_date', '<=', $date)));
+                    })
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+                        if ($data['due_date_from'] ?? null) {
+                            $indicators[] = 'Batas Pengembalian Dari: ' . Carbon::parse($data['due_date_from'])->format('d M Y');
+                        }
+                        if ($data['due_date_until'] ?? null) {
+                            $indicators[] = 'Batas Pengembalian Sampai: ' . Carbon::parse($data['due_date_until'])->format('d M Y');
+                        }
+                        return $indicators;
+                    }),
+
+                Filter::make('return_date')
+                    ->label('Tanggal Pengembalian')
+                    ->form([
+                        DatePicker::make('return_date_from')->label('Tanggal Pengembalian Dari'),
+                        DatePicker::make('return_date_until')->label('Tanggal Pengembalian Sampai'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['return_date_from'] ?? null, fn(Builder $q, $date) => $q->whereHas('loanDetails.returnBook', fn($sub) => $sub->whereDate('return_date', '>=', $date)))
+                            ->when($data['return_date_until'] ?? null, fn(Builder $q, $date) => $q->whereHas('loanDetails.returnBook', fn($sub) => $sub->whereDate('return_date', '<=', $date)));
+                    })
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+                        if ($data['return_date_from'] ?? null) {
+                            $indicators[] = 'Tanggal Pengembalian Dari: ' . Carbon::parse($data['return_date_from'])->format('d M Y');
+                        }
+                        if ($data['return_date_until'] ?? null) {
+                            $indicators[] = 'Tanggal Pengembalian Sampai: ' . Carbon::parse($data['return_date_until'])->format('d M Y');
+                        }
+                        return $indicators;
+                    }),
+
+                SelectFilter::make('status')
+                    ->label('Status Pinjaman')
+                    ->options(LoanStatus::options()),
+
+                \Filament\Tables\Filters\Filter::make('denda_pending')
+                    ->label('Status Denda')
+                    ->form([
+                        \Filament\Forms\Components\Select::make('fine_status')
+                            ->label('Status Denda')
+                            ->placeholder('— Semua —')
+                            ->native(false)
+                            ->options([
+                                'pending' => '⏳ Ada Denda Belum Lunas',
+                                'paid'    => '✅ Semua Denda Lunas',
+                                'none'    => '🚫 Tidak Ada Denda',
+                            ]),
+                    ])
+                    ->modifyQueryUsing(function (Builder $query, array $data): Builder {
+                        return match ($data['fine_status'] ?? null) {
+                            'pending' => $query->whereHas(
+                                'loanDetails.returnBook.fine',
+                                fn($q) => $q->where('payment_status', \App\Enums\PaymentStatus::PENDING)
+                            ),
+                            'paid' => $query->whereHas(
+                                'loanDetails.returnBook.fine',
+                                fn($q) => $q->where('payment_status', \App\Enums\PaymentStatus::SUCCESS)
+                            )->whereDoesntHave(
+                                'loanDetails.returnBook.fine',
+                                fn($q) => $q->where('payment_status', \App\Enums\PaymentStatus::PENDING)
+                            ),
+                            'none' => $query->whereDoesntHave('loanDetails.returnBook.fine'),
+                            default => $query,
+                        };
+                    })
+                    ->indicateUsing(function (array $data): ?string {
+                        return match ($data['fine_status'] ?? null) {
+                            'pending' => 'Denda: Ada yang Belum Lunas',
+                            'paid'    => 'Denda: Semua Lunas',
+                            'none'    => 'Denda: Tidak Ada',
+                            default   => null,
+                        };
                     }),
             ])
             ->recordActions([

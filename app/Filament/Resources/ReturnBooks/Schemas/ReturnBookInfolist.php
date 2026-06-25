@@ -90,169 +90,240 @@ class ReturnBookInfolist
                     ->schema([
                         RepeatableEntry::make('loanDetails')
                             ->hiddenLabel()
+                            ->grid(2)
                             ->schema([
-                                Grid::make(4)->schema([
-                                    ImageEntry::make('book.cover')
-                                        ->label('Cover')
-                                        ->disk('public')
-                                        ->height(140)
-                                        ->extraImgAttributes(['class' => 'rounded-md object-cover'])
-                                        ->columnSpan(1),
-
-                                    Grid::make(2)->schema([
-                                        TextEntry::make('book.title')->label('Judul Buku')->weight('bold'),
-                                        TextEntry::make('book.book_code')->label('Kode Buku')->badge()->color('gray')->copyable(),
-                                        TextEntry::make('book.authors.name')->label('Penulis')->badge()->color('gray')->listWithLineBreaks()->placeholder('—'),
-                                        TextEntry::make('book.isbn')->label('ISBN')->placeholder('—'),
-
-                                        TextEntry::make('loan_date')
-                                            ->label('Tanggal Pinjam')
-                                            ->date('d M Y')
-                                            ->badge()->color('warning')
-                                            ->icon('heroicon-s-calendar-days'),
-
-                                        TextEntry::make('due_date')
-                                            ->label('Jatuh Tempo')
-                                            ->date('d M Y')
-                                            ->badge()->color('danger')
-                                            ->icon('heroicon-s-exclamation-circle'),
-
-                                        TextEntry::make('status')
-                                            ->label('Status Buku')
-                                            ->badge()
-                                            ->formatStateUsing(fn($state) => self::toBookStatus($state)?->label() ?? '-')
-                                            ->color(fn($state) => match (self::toBookStatus($state)) {
-                                                LoanBookStatus::BORROWED => 'warning',
-                                                LoanBookStatus::RETURNED => 'success',
-                                                default => 'gray',
-                                            }),
-                                    ])->columnSpan(3),
-                                ]),
-
-                                Section::make('Data Pengembalian')
-                                    ->icon(Heroicon::OutlinedArrowUturnLeft)
+                                Section::make(fn($record) => $record?->book?->title ?? 'Detail Buku')
+                                    ->icon(Heroicon::OutlinedBookOpen)
+                                    ->collapsible()
+                                    ->collapsed()
                                     ->schema([
                                         Grid::make(3)->schema([
-                                            TextEntry::make('returnBook.return_book_code')
-                                                ->label('Kode Pengembalian')
-                                                ->badge()->color('info')->copyable()
-                                                ->placeholder('Belum dikembalikan'),
+                                            ImageEntry::make('book.cover')
+                                                ->label('Cover')
+                                                ->disk('public')
+                                                ->height(160)
+                                                ->width(120)
+                                                ->extraAttributes(['class' => 'w-[120px] max-w-full'])
+                                                ->extraImgAttributes(['class' => 'w-full h-full rounded-lg object-cover shadow'])
+                                                ->columnSpan(1),
 
-                                            TextEntry::make('returnBook.return_date')
-                                                ->label('Tanggal Pengembalian')
-                                                ->date('d M Y')
-                                                ->badge()->color('success')
-                                                ->placeholder('—'),
-
-                                            TextEntry::make('returnBook.status')
-                                                ->label('Status Pengembalian')
-                                                ->badge()
-                                                ->formatStateUsing(fn($state) => self::toReturnStatus($state)?->label() ?? '-')
-                                                ->color(fn($state) => match (self::toReturnStatus($state)) {
-                                                    ReturnBookStatus::RETURNED => 'success',
-                                                    ReturnBookStatus::CHECKED => 'info',
-                                                    ReturnBookStatus::COST => 'danger',
-                                                    default => 'gray',
-                                                })
-                                                ->placeholder('—'),
+                                            Grid::make(2)->schema([
+                                                TextEntry::make('book.title')
+                                                    ->label('Judul Buku')
+                                                    ->weight('bold')
+                                                    ->columnSpanFull(),
+                                                TextEntry::make('book.book_code')
+                                                    ->label('Kode Buku')
+                                                    ->badge()
+                                                    ->color('gray')
+                                                    ->copyable(),
+                                                TextEntry::make('book.isbn')
+                                                    ->label('ISBN')
+                                                    ->placeholder('—'),
+                                                TextEntry::make('book.authors.name')
+                                                    ->label('Penulis')
+                                                    ->badge()
+                                                    ->color('info')
+                                                    ->listWithLineBreaks()
+                                                    ->placeholder('—')
+                                                    ->columnSpanFull(),
+                                                TextEntry::make('loan_date')
+                                                    ->label('Tanggal Pinjam')
+                                                    ->date('d M Y')
+                                                    ->badge()->color('warning')
+                                                    ->icon('heroicon-s-calendar-days'),
+                                                TextEntry::make('due_date')
+                                                    ->label('Jatuh Tempo')
+                                                    ->date('d M Y')
+                                                    ->badge()->color('danger')
+                                                    ->icon('heroicon-s-exclamation-circle'),
+                                                TextEntry::make('status')
+                                                    ->label('Status Buku')
+                                                    ->badge()
+                                                    ->formatStateUsing(fn($state) => self::toBookStatus($state)?->label() ?? '-')
+                                                    ->color(fn($state) => match (self::toBookStatus($state)) {
+                                                        LoanBookStatus::BORROWED => 'warning',
+                                                        LoanBookStatus::RETURNED => 'success',
+                                                        default => 'gray',
+                                                     })
+                                                    ->columnSpanFull(),
+                                            ])->columnSpan(2),
                                         ]),
+
+                                        Section::make('Data Pengembalian')
+                                            ->icon(Heroicon::OutlinedArrowUturnLeft)
+                                            ->collapsible()
+                                            ->collapsed()
+                                            ->schema([
+                                                Grid::make(2)->schema([
+                                                    TextEntry::make('returnBook.return_book_code')
+                                                        ->label('Kode Pengembalian')
+                                                        ->badge()->color('info')->copyable()
+                                                        ->placeholder('Belum dikembalikan'),
+
+                                                    TextEntry::make('returnBook.return_date')
+                                                        ->label('Tanggal Pengembalian')
+                                                        ->date('d M Y')
+                                                        ->badge()->color('success')
+                                                        ->placeholder('—'),
+
+                                                    TextEntry::make('returnBook.status')
+                                                        ->label('Status Pengembalian')
+                                                        ->badge()
+                                                        ->formatStateUsing(fn($state) => self::toReturnStatus($state)?->label() ?? '-')
+                                                        ->color(fn($state) => match (self::toReturnStatus($state)) {
+                                                            ReturnBookStatus::RETURNED => 'success',
+                                                            ReturnBookStatus::CHECKED => 'info',
+                                                            ReturnBookStatus::COST => 'danger',
+                                                            default => 'gray',
+                                                        })
+                                                        ->placeholder('—')
+                                                        ->columnSpanFull(),
+                                                ]),
+                                            ])
+                                            ->visible(fn($record) => filled($record?->returnBook))
+                                            ->columnSpanFull(),
+
+                                        Section::make('Pengecekan Kondisi')
+                                            ->icon(Heroicon::OutlinedClipboardDocumentCheck)
+                                            ->collapsible()
+                                            ->collapsed()
+                                            ->schema([
+                                                Grid::make(2)->schema([
+                                                    TextEntry::make('returnBook.returnBookCheck.condition')
+                                                        ->label('Kondisi Buku')
+                                                        ->badge()
+                                                        ->formatStateUsing(fn($state) => self::toCondition($state)?->value ?? '-')
+                                                        ->color(fn($state) => match (self::toCondition($state)) {
+                                                            BookCondition::GOOD => 'success',
+                                                            BookCondition::DAMAGED => 'warning',
+                                                            BookCondition::LOST => 'danger',
+                                                            default => 'gray',
+                                                        })
+                                                        ->icon(fn($state) => match (self::toCondition($state)) {
+                                                            BookCondition::GOOD => 'heroicon-s-check-circle',
+                                                            BookCondition::DAMAGED => 'heroicon-s-exclamation-triangle',
+                                                            BookCondition::LOST => 'heroicon-s-x-circle',
+                                                            default => 'heroicon-s-question-mark-circle',
+                                                        })
+                                                        ->placeholder('—'),
+
+                                                    TextEntry::make('returnBook.returnBookCheck.notes')
+                                                        ->label('Catatan Pengecekan')
+                                                        ->html()
+                                                        ->placeholder('Tidak ada catatan.')
+                                                        ->columnSpanFull(),
+                                                ]),
+                                            ])
+                                            ->visible(fn($state) => isset($state['returnBook']['returnBookCheck']))
+                                            ->columnSpanFull(),
+
+                                        Section::make('Denda')
+                                            ->icon(Heroicon::OutlinedCurrencyDollar)
+                                            ->collapsible()
+                                            ->collapsed()
+                                            ->schema([
+                                                Grid::make(2)->schema([
+                                                    TextEntry::make('returnBook.fine.late_fee')
+                                                        ->label('Denda Keterlambatan')
+                                                        ->money('IDR', divideBy: 1, locale: 'id_ID')
+                                                        ->helperText(function ($record) {
+                                                            if (!filled($record?->returnBook?->fine?->late_fee) || $record->returnBook->fine->late_fee <= 0) return null;
+                                                            $settings = \App\Models\FineSettings::checkSettings();
+                                                            $rate = $settings->late_fee_per_day;
+                                                            if ($rate > 0) {
+                                                                $days = round($record->returnBook->fine->late_fee / $rate);
+                                                                return "Detail denda keterlambatan: {$days} hari x Rp " . number_format($rate, 0, ',', '.');
+                                                            }
+                                                            return null;
+                                                        })
+                                                        ->placeholder('—'),
+
+                                                    TextEntry::make('returnBook.fine.other_fee')
+                                                        ->label('Denda Lain')
+                                                        ->money('IDR', divideBy: 1, locale: 'id_ID')
+                                                        ->helperText(function ($record) {
+                                                            if (!filled($record?->returnBook?->fine?->other_fee) || $record->returnBook->fine->other_fee <= 0) return null;
+                                                            $condition = $record->returnBook->returnBookCheck->condition ?? null;
+                                                            $settings = \App\Models\FineSettings::checkSettings();
+                                                            $bookPrice = $record->book->price ?? 0;
+                                                            
+                                                            $prefix = "Detail denda lainnya: ";
+                                                            if ($condition === \App\Enums\BookCondition::DAMAGED) {
+                                                                if ($settings->damage_discount_type === \App\Enums\DiscountType::PERCENTAGE) {
+                                                                    return $prefix . "{$settings->damage_fee_book}% (Kerusakan) x (Harga Buku Rp " . number_format($bookPrice, 0, ',', '.') . ")";
+                                                                }
+                                                                return $prefix . "Nominal Tetap";
+                                                            } elseif ($condition === \App\Enums\BookCondition::LOST) {
+                                                                if ($settings->lost_discount_type === \App\Enums\DiscountType::PERCENTAGE) {
+                                                                    return $prefix . "{$settings->lost_fee_book}% (Kehilangan) x (Harga Buku Rp " . number_format($bookPrice, 0, ',', '.') . ")";
+                                                                }
+                                                                return $prefix . "Nominal Tetap";
+                                                            }
+                                                            return null;
+                                                        })
+                                                        ->placeholder('—'),
+
+                                                    TextEntry::make('returnBook.fine.total_fee')
+                                                        ->label('Total Denda')
+                                                        ->money('IDR', divideBy: 1, locale: 'id_ID')
+                                                        ->weight('bold')
+                                                        ->color('danger')
+                                                        ->placeholder('—'),
+
+                                                    TextEntry::make('returnBook.fine.payment_status')
+                                                        ->label('Status Pembayaran')
+                                                        ->badge()
+                                                        ->formatStateUsing(fn($state) => self::toPaymentStatus($state)?->name ?? '-')
+                                                        ->color(fn($state) => match (self::toPaymentStatus($state)) {
+                                                            PaymentStatus::SUCCESS => 'success',
+                                                            PaymentStatus::PENDING => 'warning',
+                                                            PaymentStatus::FAILED, PaymentStatus::ERROR => 'danger',
+                                                            default => 'gray',
+                                                        })
+                                                        ->placeholder('—'),
+                                                ]),
+                                            ])
+                                            ->visible(fn($record) => filled($record?->returnBook?->fine))
+                                            ->columnSpanFull(),
+
+                                        Section::make('Ulasan Peminjam')
+                                            ->icon(Heroicon::OutlinedStar)
+                                            ->collapsible()
+                                            ->collapsed()
+                                            ->schema([
+                                                Grid::make(3)->schema([
+                                                    TextEntry::make('returnBook.review.rating')
+                                                        ->label('Rating')
+                                                        ->badge()
+                                                        ->color('warning')
+                                                        ->icon('heroicon-s-star')
+                                                        ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 1) . ' / 5.0' : '—')
+                                                        ->placeholder('—')
+                                                        ->columnSpan(1),
+
+                                                    TextEntry::make('returnBook.review.comment')
+                                                        ->label('Komentar')
+                                                        ->html()
+                                                        ->placeholder('Belum ada ulasan.')
+                                                        ->columnSpan(2),
+                                                ]),
+                                            ])
+                                            ->visible(fn($record) => filled($record?->returnBook?->review))
+                                            ->columnSpanFull(),
                                     ])
-                                    ->visible(fn($record) => filled($record?->returnBook))
-                                    ->columnSpanFull(),
-
-                                Section::make('Pengecekan Kondisi')
-                                    ->icon(Heroicon::OutlinedClipboardDocumentCheck)
-                                    ->schema([
-                                        Grid::make(2)->schema([
-                                            TextEntry::make('returnBook.returnBookCheck.condition')
-                                                ->label('Kondisi Buku')
-                                                ->badge()
-                                                ->formatStateUsing(fn($state) => self::toCondition($state)?->value ?? '-')
-                                                ->color(fn($state) => match (self::toCondition($state)) {
-                                                    BookCondition::GOOD => 'success',
-                                                    BookCondition::DAMAGED => 'warning',
-                                                    BookCondition::LOST => 'danger',
-                                                    default => 'gray',
-                                                })
-                                                ->icon(fn($state) => match (self::toCondition($state)) {
-                                                    BookCondition::GOOD => 'heroicon-s-check-circle',
-                                                    BookCondition::DAMAGED => 'heroicon-s-exclamation-triangle',
-                                                    BookCondition::LOST => 'heroicon-s-x-circle',
-                                                    default => 'heroicon-s-question-mark-circle',
-                                                })
-                                                ->placeholder('—'),
-
-                                            TextEntry::make('returnBook.returnBookCheck.notes')
-                                                ->label('Catatan Pengecekan')
-                                                ->html()
-                                                ->placeholder('Tidak ada catatan.'),
-                                        ]),
-                                    ])
-                                    ->visible(fn($state) => isset($state['returnBook']['returnBookCheck']))
-                                    ->columnSpanFull(),
-
-                                Section::make('Denda')
-                                    ->icon(Heroicon::OutlinedCurrencyDollar)
-                                    ->schema([
-                                        Grid::make(4)->schema([
-                                            TextEntry::make('returnBook.fine.late_fee')
-                                                ->label('Denda Keterlambatan')
-                                                ->money('IDR', divideBy: 1, locale: 'id_ID')
-                                                ->placeholder('—'),
-
-                                            TextEntry::make('returnBook.fine.other_fee')
-                                                ->label('Denda Lain')
-                                                ->money('IDR', divideBy: 1, locale: 'id_ID')
-                                                ->placeholder('—'),
-
-                                            TextEntry::make('returnBook.fine.total_fee')
-                                                ->label('Total Denda')
-                                                ->money('IDR', divideBy: 1, locale: 'id_ID')
-                                                ->weight('bold')
-                                                ->color('danger')
-                                                ->placeholder('—'),
-
-                                            TextEntry::make('returnBook.fine.payment_status')
-                                                ->label('Status Pembayaran')
-                                                ->badge()
-                                                ->formatStateUsing(fn($state) => self::toPaymentStatus($state)?->name ?? '-')
-                                                ->color(fn($state) => match (self::toPaymentStatus($state)) {
-                                                    PaymentStatus::SUCCESS => 'success',
-                                                    PaymentStatus::PENDING => 'warning',
-                                                    PaymentStatus::FAILED, PaymentStatus::ERROR => 'danger',
-                                                    default => 'gray',
-                                                })
-                                                ->placeholder('—'),
-                                        ]),
-                                        ViewEntry::make('returnBook.fine')
-                                            ->view('filament.infolists.pay-fine-button'),
-                                    ])
-                                    ->visible(fn($record) => filled($record?->returnBook?->fine))
-                                    ->columnSpanFull(),
-
-                                Section::make('Ulasan Peminjam')
-                                    ->icon(Heroicon::OutlinedStar)
-                                    ->schema([
-                                        Grid::make(2)->schema([
-                                            TextEntry::make('returnBook.review.rating')
-                                                ->label('Rating')
-                                                ->badge()
-                                                ->color('warning')
-                                                ->icon('heroicon-s-star')
-                                                ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 1) . ' / 5.0' : '—')
-                                                ->placeholder('—'),
-
-                                            TextEntry::make('returnBook.review.comment')
-                                                ->label('Komentar')
-                                                ->html()
-                                                ->placeholder('Belum ada ulasan.'),
-                                        ]),
-                                    ])
-                                    ->visible(fn($record) => filled($record?->returnBook?->review))
-                                    ->columnSpanFull(),
                             ])
                             ->columnSpanFull(),
                     ])->columnSpanFull(),
+
+                Section::make('Total Pembayaran Denda')
+                    ->icon(Heroicon::OutlinedCurrencyDollar)
+                    ->schema([
+                        ViewEntry::make('total_fine_payment')
+                            ->view('filament.infolists.total-fine-payment')
+                    ])
+                    ->visible(fn($record) => self::hasFines($record))
+                    ->columnSpanFull(),
             ]);
     }
 
@@ -294,5 +365,18 @@ class ReturnBookInfolist
             return $state;
         }
         return is_scalar($state) ? PaymentStatus::tryFrom((string) $state) : null;
+    }
+
+    private static function hasFines($record): bool
+    {
+        if (!$record) {
+            return false;
+        }
+        foreach ($record->loanDetails as $detail) {
+            if ($detail->returnBook && $detail->returnBook->fine && $detail->returnBook->fine->total_fee > 0) {
+                return true;
+            }
+        }
+        return false;
     }
 }

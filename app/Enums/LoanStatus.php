@@ -15,7 +15,7 @@ enum LoanStatus: string
 
     public function label(): string
     {
-        return strtoupper($this->name);
+        return $this->value;
     }
 
     public static function options(): array

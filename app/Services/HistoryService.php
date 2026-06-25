@@ -135,6 +135,9 @@ class HistoryService
         $detail = $return->loanDetail;
         $book = $detail?->book;
         $check = $return->returnBookCheck;
+        $fine = $return->fine;
+        $review = $return->review;
+        $loan = $detail?->loan;
 
         $returnDate = $return->return_date ? Carbon::parse($return->return_date) : null;
         $dueDate = $detail?->due_date ? Carbon::parse($detail->due_date) : null;
@@ -156,7 +159,23 @@ class HistoryService
             'return_date' => $returnDate?->toDateString(),
             'due_date' => $dueDate?->toDateString(),
             'condition' => $check?->condition?->value,
+            'notes' => $check?->notes,
             'status' => $status,
+            'loan_code' => $loan?->loan_code,
+            'loan_status' => $loan?->status?->value ?? $loan?->status,
+            'fine' => $fine ? [
+                'id' => $fine->id,
+                'order_id' => $fine->order_id,
+                'late_fee' => (float) $fine->late_fee,
+                'other_fee' => (float) $fine->other_fee,
+                'total_fee' => (float) $fine->total_fee,
+                'status' => $fine->payment_status === PaymentStatus::SUCCESS ? 'paid' : 'unpaid',
+                'payment_status' => $fine->payment_status?->value,
+            ] : null,
+            'review' => $review ? [
+                'rating' => (float) $review->rating,
+                'comment' => $review->comment,
+            ] : null,
         ];
     }
 
@@ -165,14 +184,21 @@ class HistoryService
         $returnBook = $fine->returnBook;
         $detail = $returnBook?->loanDetail;
         $book = $detail?->book;
+        $check = $returnBook?->returnBookCheck;
 
         $dueDate = $detail?->due_date ? Carbon::parse($detail->due_date) : null;
         $returnDate = $returnBook?->return_date ? Carbon::parse($returnBook->return_date) : null;
+        $loanDate = $detail?->loan_date ? Carbon::parse($detail->loan_date) : null;
 
         $referenceDate = $returnDate ?? Carbon::today();
         $daysOverdue = 0;
         if ($dueDate && $referenceDate->gt($dueDate)) {
             $daysOverdue = (int) $dueDate->diffInDays($referenceDate);
+        }
+
+        $returnStatus = 'on-time';
+        if ($returnDate && $dueDate && $returnDate->gt($dueDate)) {
+            $returnStatus = 'late';
         }
 
         $isPaid = $fine->payment_status === PaymentStatus::SUCCESS;
@@ -184,12 +210,17 @@ class HistoryService
             'slug' => $book?->slug,
             'author' => $book?->authors->pluck('name')->join(', '),
             'cover_url' => $book?->cover ? Storage::url($book->cover) : null,
+            'borrow_date' => $loanDate?->toDateString(),
             'due_date' => $dueDate?->toDateString(),
             'return_date' => $returnDate?->toDateString(),
             'days_overdue' => $daysOverdue,
             'late_fee' => (float) $fine->late_fee,
             'other_fee' => (float) $fine->other_fee,
             'fine_amount' => (float) $fine->total_fee,
+            'condition' => $check?->condition?->value,
+            'notes' => $check?->notes,
+            'return_book_code' => $returnBook?->return_book_code,
+            'return_status' => $returnStatus,
             'status' => $isPaid ? 'paid' : 'unpaid',
             'payment_status' => $fine->payment_status?->value,
         ];

@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\ReturnBooks\Schemas;
 
 use App\Enums\BookCondition;
+use App\Models\User;
+use App\Models\Loan;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
@@ -13,9 +15,11 @@ use Filament\Forms\Components\ToggleButtons;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Components\Wizard;
 use Filament\Schemas\Components\Wizard\Step;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Model;
 
 class ReturnBooksForm
 {
@@ -30,19 +34,91 @@ class ReturnBooksForm
                             Section::make('Informasi Peminjaman')
                                 ->description('Data peminjaman yang akan diproses pengembaliannya')
                                 ->schema([
-                                    Hidden::make('loan_id')->dehydrated(),
                                     Grid::make(2)->schema([
-                                        TextInput::make('user_name')
+                                        Select::make('user_id')
                                             ->label('Peminjam')
-                                            ->readOnly()
-                                            ->disabled()
-                                            ->dehydrated(false),
+                                            ->searchable()
+                                            ->options(function (?Model $record) {
+                                                $query = User::query();
+                                                if ($record && $record->exists) {
+                                                    $query->where(function ($q) use ($record) {
+                                                        $q->whereHas('loans.loanDetails', fn($sub) => $sub->whereDoesntHave('returnBook'))
+                                                          ->orWhere('id', $record->user_id);
+                                                    });
+                                                } else {
+                                                    $query->whereHas('loans.loanDetails', fn($sub) => $sub->whereDoesntHave('returnBook'));
+                                                }
+                                                return $query->pluck('name', 'id');
+                                            })
+                                            ->live()
+                                            ->afterStateUpdated(function (Set $set) {
+                                                $set('loan_id', null);
+                                                $set('returns', []);
+                                            })
+                                            ->required()
+                                            ->disabledOn('edit'),
 
-                                        TextInput::make('loan_code')
+                                        Select::make('loan_id')
                                             ->label('Kode Pinjam')
-                                            ->readOnly()
-                                            ->disabled()
-                                            ->dehydrated(false),
+                                            ->searchable()
+                                            ->options(function (Get $get, ?Model $record) {
+                                                $userId = $get('user_id');
+                                                if (! $userId) {
+                                                    return [];
+                                                }
+                                                $query = Loan::where('user_id', $userId);
+                                                if ($record && $record->exists) {
+                                                    $query->where(function($q) use ($record) {
+                                                        $q->whereHas('loanDetails', fn($sub) => $sub->whereDoesntHave('returnBook'))
+                                                          ->orWhere('id', $record->id);
+                                                    });
+                                                } else {
+                                                    $query->whereHas('loanDetails', fn($sub) => $sub->whereDoesntHave('returnBook'));
+                                                }
+                                                return $query->pluck('loan_code', 'id');
+                                            })
+                                            ->live()
+                                            ->afterStateUpdated(function ($state, Set $set) {
+                                                if (! $state) {
+                                                    $set('returns', []);
+                                                    return;
+                                                }
+
+                                                $loan = Loan::with([
+                                                    'loanDetails' => fn($query) => $query
+                                                        ->physical()
+                                                        ->with([
+                                                            'book',
+                                                            'returnBook',
+                                                            'review',
+                                                        ]),
+                                                ])->find($state);
+
+                                                if (! $loan) {
+                                                    $set('returns', []);
+                                                    return;
+                                                }
+
+                                                $returns = $loan->loanDetails
+                                                    ->filter(fn($detail) => ! $detail->returnBook)
+                                                    ->values()
+                                                    ->map(fn($detail) => [
+                                                        'loan_detail_id' => $detail->id,
+                                                        'book_id' => $detail->book_id,
+                                                        'book_title' => $detail->book?->title,
+                                                        'return_date' => now()->toDateString(),
+                                                        'condition' => BookCondition::GOOD->value,
+                                                        'notes' => null,
+                                                        'has_review' => false,
+                                                        'rating' => null,
+                                                        'comment' => null,
+                                                    ])
+                                                    ->all();
+
+                                                $set('returns', $returns);
+                                            })
+                                            ->required()
+                                            ->disabledOn('edit'),
                                     ]),
                                 ])->columnSpanFull(),
                         ]),
