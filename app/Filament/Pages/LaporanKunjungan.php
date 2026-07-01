@@ -95,7 +95,8 @@ class LaporanKunjungan extends Page implements HasForms
                         ->default('1')
                         ->required()
                         ->live()
-                        ->visible(fn(\Filament\Schemas\Components\Utilities\Get $get) => $get('mode') === 'daily_week'),
+                        ->visible(fn(\Filament\Schemas\Components\Utilities\Get $get) => $get('mode') === 'daily_week')
+                        ->columnSpanFull(),
                 ]),
 
                 Grid::make(2)->schema([
