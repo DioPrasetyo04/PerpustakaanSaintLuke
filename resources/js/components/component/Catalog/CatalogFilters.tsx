@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { X, ChevronDown, Tag, Building2, User, Languages } from 'lucide-react';
+import { X, ChevronDown, Tag, Building2, User, Languages, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ImageWithFallback } from '@/components/common/ImageWithFallback';
 import type {
@@ -57,7 +57,8 @@ function OptionThumb({
 
 /* ───────── Custom single-select dropdown with icon/avatar per option ─────────
  * Native <select> tidak bisa menampilkan gambar, jadi pakai dropdown sendiri.
- * Data ikon/logo/avatar sudah di-eager-load dari server (tanpa N+1). */
+ * Data ikon/logo/avatar sudah di-eager-load dari server (tanpa N+1).
+ * Search input otomatis muncul di dalam dropdown untuk mempermudah pencarian. */
 function IconSelect({
     value,
     onChange,
@@ -65,6 +66,7 @@ function IconSelect({
     placeholder,
     fallbackIcon,
     circular,
+    searchPlaceholder = 'Cari...',
 }: {
     value: string;
     onChange: (v: string) => void;
@@ -72,21 +74,40 @@ function IconSelect({
     placeholder: string;
     fallbackIcon: React.ReactNode;
     circular?: boolean;
+    searchPlaceholder?: string;
 }) {
     const [open, setOpen] = useState(false);
+    const [query, setQuery] = useState('');
     const ref = useRef<HTMLDivElement>(null);
+    const searchRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        if (!open) return;
+        if (!open) {
+            setQuery('');
+            return;
+        }
         const onDoc = (e: MouseEvent) => {
             if (ref.current && !ref.current.contains(e.target as Node))
                 setOpen(false);
         };
         document.addEventListener('mousedown', onDoc);
-        return () => document.removeEventListener('mousedown', onDoc);
+        // Auto-focus search input when dropdown opens
+        const t = setTimeout(() => searchRef.current?.focus(), 50);
+        return () => {
+            document.removeEventListener('mousedown', onDoc);
+            clearTimeout(t);
+        };
     }, [open]);
 
     const selected = options.find((o) => o.value === value);
+
+    const filtered = query.trim()
+        ? options.filter((o) =>
+              o.label.toLowerCase().includes(query.toLowerCase()),
+          )
+        : options;
+
+    const showSearch = options.length >= 5;
 
     return (
         <div ref={ref} className="relative">
@@ -124,61 +145,103 @@ function IconSelect({
             {open && (
                 <div
                     role="listbox"
-                    className="custom-scrollbar hairline absolute z-30 mt-2 max-h-64 w-full overflow-y-auto rounded-lg border bg-card p-1 shadow-lift dark:bg-night-2"
+                    className="hairline absolute z-30 mt-2 w-full overflow-hidden rounded-lg border bg-card shadow-lift dark:bg-night-2"
                 >
-                    <button
-                        type="button"
-                        onClick={() => {
-                            onChange('');
-                            setOpen(false);
-                        }}
-                        className={cn(
-                            'flex w-full items-center rounded-md px-2.5 py-2 text-left text-sm transition-colors',
-                            !value
-                                ? 'bg-cobalt/10 text-cobalt dark:text-cobalt-lt'
-                                : 'text-foreground/75 hover:bg-foreground/[.04]',
-                        )}
-                    >
-                        {placeholder}
-                    </button>
-                    {options.map((o) => {
-                        const on = o.value === value;
-                        return (
+                    {/* Search input inside dropdown */}
+                    {showSearch && (
+                        <div className="border-b border-border p-2">
+                            <div className="relative flex items-center">
+                                <Search className="absolute left-2.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                                <input
+                                    ref={searchRef}
+                                    type="text"
+                                    value={query}
+                                    onChange={(e) => setQuery(e.target.value)}
+                                    placeholder={searchPlaceholder}
+                                    className="h-8 w-full rounded-md bg-paper pl-8 pr-8 text-sm text-foreground placeholder:text-muted-foreground outline-none dark:bg-night-3"
+                                />
+                                {query && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setQuery('')}
+                                        className="absolute right-2 grid h-4 w-4 place-items-center rounded-full text-muted-foreground hover:text-foreground"
+                                    >
+                                        <X className="h-3 w-3" />
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Options list */}
+                    <div className="custom-scrollbar max-h-56 overflow-y-auto p-1">
+                        {/* "All" / reset option — hanya tampil kalau tidak ada query */}
+                        {!query && (
                             <button
-                                key={o.value}
                                 type="button"
                                 onClick={() => {
-                                    onChange(o.value);
+                                    onChange('');
                                     setOpen(false);
                                 }}
                                 className={cn(
-                                    'flex w-full items-center justify-between gap-2 rounded-md px-2.5 py-2 text-left text-sm transition-colors',
-                                    on
+                                    'flex w-full items-center rounded-md px-2.5 py-2 text-left text-sm transition-colors',
+                                    !value
                                         ? 'bg-cobalt/10 text-cobalt dark:text-cobalt-lt'
                                         : 'text-foreground/75 hover:bg-foreground/[.04]',
                                 )}
                             >
-                                <span className="flex min-w-0 items-center gap-2">
-                                    <OptionThumb
-                                        option={o}
-                                        fallbackIcon={fallbackIcon}
-                                        circular={circular}
-                                    />
-                                    <span className="truncate">{o.label}</span>
-                                </span>
-                                {typeof o.count === 'number' && (
-                                    <span className="font-mono text-[10px] tabnum opacity-60">
-                                        {o.count}
-                                    </span>
-                                )}
+                                {placeholder}
                             </button>
-                        );
-                    })}
+                        )}
+
+                        {filtered.length === 0 ? (
+                            <div className="px-3 py-6 text-center text-xs text-muted-foreground">
+                                Tidak ada hasil untuk &ldquo;{query}&rdquo;
+                            </div>
+                        ) : (
+                            filtered.map((o) => {
+                                const on = o.value === value;
+                                return (
+                                    <button
+                                        key={o.value}
+                                        type="button"
+                                        onClick={() => {
+                                            onChange(o.value);
+                                            setOpen(false);
+                                        }}
+                                        className={cn(
+                                            'flex w-full items-center justify-between gap-2 rounded-md px-2.5 py-2 text-left text-sm transition-colors',
+                                            on
+                                                ? 'bg-cobalt/10 text-cobalt dark:text-cobalt-lt'
+                                                : 'text-foreground/75 hover:bg-foreground/[.04]',
+                                        )}
+                                    >
+                                        <span className="flex min-w-0 items-center gap-2">
+                                            <OptionThumb
+                                                option={o}
+                                                fallbackIcon={fallbackIcon}
+                                                circular={circular}
+                                            />
+                                            <span className="truncate">
+                                                {o.label}
+                                            </span>
+                                        </span>
+                                        {typeof o.count === 'number' && (
+                                            <span className="font-mono text-[10px] tabnum opacity-60">
+                                                {o.count}
+                                            </span>
+                                        )}
+                                    </button>
+                                );
+                            })
+                        )}
+                    </div>
                 </div>
             )}
         </div>
     );
 }
+
 
 /* ───────── Removable active-filter chip ───────── */
 export function FilterChip({
@@ -483,6 +546,11 @@ export function FilterSidebar({
                             'Semua kategori',
                             'All categories',
                         )}
+                        searchPlaceholder={tr(
+                            language,
+                            'Cari kategori...',
+                            'Search category...',
+                        )}
                         fallbackIcon={<Tag className="h-3 w-3" />}
                         options={options.categories.map((c) => ({
                             value: c.name,
@@ -508,6 +576,11 @@ export function FilterSidebar({
                             'Semua penerbit',
                             'All publishers',
                         )}
+                        searchPlaceholder={tr(
+                            language,
+                            'Cari penerbit...',
+                            'Search publisher...',
+                        )}
                         fallbackIcon={<Building2 className="h-3 w-3" />}
                         options={options.publishers.map((p) => ({
                             value: p.name,
@@ -530,6 +603,11 @@ export function FilterSidebar({
                             language,
                             'Semua penulis',
                             'All authors',
+                        )}
+                        searchPlaceholder={tr(
+                            language,
+                            'Cari penulis...',
+                            'Search author...',
                         )}
                         fallbackIcon={<User className="h-3 w-3" />}
                         circular

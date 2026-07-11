@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Log;
 class ContactMessageService
 {
     /** Peran petugas yang menerima pesan kontak. */
-    private const RECEIVER_ROLE = 'manager';
+    private const RECEIVER_ROLES = ['admin', 'manager'];
 
     public function __construct(protected WhatsAppService $whatsApp)
     {
@@ -27,15 +27,15 @@ class ContactMessageService
      * @param  array{name:string,status:string,email:string,phone:?string,subject:string,message:string}  $data
      * @return array{manager_count:int, wa_sent:int}
      *
-     * @throws BusinessException ketika tidak ada petugas `manager`.
+     * @throws BusinessException ketika tidak ada petugas `manager` atau `admin`.
      */
     public function send(array $data): array
     {
-        $managers = User::query()
-            ->role(self::RECEIVER_ROLE)
+        $receivers = User::query()
+            ->role(self::RECEIVER_ROLES)
             ->get();
 
-        if ($managers->isEmpty()) {
+        if ($receivers->isEmpty()) {
             // Tidak ada petugas perpustakaan → pesan tidak bisa dikirim.
             throw new BusinessException('contact.no_manager', 422);
         }
@@ -43,27 +43,32 @@ class ContactMessageService
         $message = $this->buildMessage($data);
 
         $waSent = 0;
-        foreach ($managers as $manager) {
-            $phone = $this->normalizePhone($manager->phone);
+        $sentPhones = [];
+        foreach ($receivers as $receiver) {
+            $phone = $this->normalizePhone($receiver->phone);
             if (! $phone) {
+                continue;
+            }
+            if (in_array($phone, $sentPhones, true)) {
                 continue;
             }
             if ($this->whatsApp->sendText($phone, $message)) {
                 $waSent++;
+                $sentPhones[] = $phone;
             }
         }
 
         if ($waSent === 0) {
-            // Manager ADA, tetapi WhatsApp gagal terkirim (nomor kosong, atau
+            // Penerima ADA, tetapi WhatsApp gagal terkirim (nomor kosong, atau
             // device Fonnte terputus). Ini gangguan teknis, bukan "tanpa petugas".
-            Log::warning('[Contact] Manager ada tetapi tidak ada WA yang berhasil terkirim', [
-                'manager_count' => $managers->count(),
+            Log::warning('[Contact] Penerima ada tetapi tidak ada WA yang berhasil terkirim', [
+                'receiver_count' => $receivers->count(),
             ]);
             throw new BusinessException('contact.failed', 422);
         }
 
         return [
-            'manager_count' => $managers->count(),
+            'manager_count' => $receivers->count(),
             'wa_sent' => $waSent,
         ];
     }

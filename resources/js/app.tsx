@@ -10,6 +10,7 @@ import { Footer } from './components/Layouts/Footer/Footer';
 import AnnouncementModal from './components/component/Announcement/AnnouncementModal';
 import LibraryStatusBadge from './components/component/LibraryStatusBadge/LibraryStatusBadge';
 import AccessDeniedModal from './components/component/AccessDenied/AccessDeniedModal';
+import SweetAlertListener from './components/component/SweetAlertListener/SweetAlertListener';
 import type { PageProps, AnnouncementProps } from './types';
 import axios from 'axios';
 
@@ -67,7 +68,8 @@ createInertiaApp({
         const root = createRoot(el);
         const initialProps = props.initialPage.props as PageProps;
         const initialAuth = initialProps.auth ?? null;
-        const announcement: AnnouncementProps | null = initialProps.announcement ?? null;
+        const announcement: AnnouncementProps | null =
+            initialProps.announcement ?? null;
         const flash = initialProps.flash ?? null;
 
         root.render(
@@ -76,6 +78,7 @@ createInertiaApp({
                     <AnnouncementModal announcement={announcement} />
                     <LibraryStatusBadge initialAnnouncement={announcement} />
                     <AccessDeniedModal initialFlash={flash} />
+                    <SweetAlertListener initialFlash={flash} />
                     <Navbar initialAuth={initialAuth} />
                     <div className="flex-1 overflow-x-clip">
                         <App {...props} />

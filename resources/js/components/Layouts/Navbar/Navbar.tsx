@@ -368,7 +368,7 @@ const Navbar = ({ initialAuth }: { initialAuth?: any }) => {
                                                             profileIcons[
                                                                 item.icon
                                                             ] ?? User;
-                                                        const isLogout =
+                                        const isLogout =
                                                             item.icon ===
                                                             'logout';
                                                         return (

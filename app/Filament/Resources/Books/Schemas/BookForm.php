@@ -758,7 +758,7 @@ class BookForm
                                         ->dehydrated()
                                         ->helperText(fn(Get $get): ?string => self::isDigitalOnly($get)
                                             ? 'Buku digital tidak memiliki harga — otomatis 0.'
-                                            : null)
+                                            : 'Masukkan Harga')
                                         ->mutateStateForValidationUsing(
                                             fn($state, Get $get) => self::isDigitalOnly($get)
                                                 ? 0

@@ -31,6 +31,7 @@ class HandleInertiaRequests extends Middleware
             'announcement' => $this->getTodayAnnouncement(),
             'flash' => [
                 'access_denied' => fn () => $request->session()->get('access_denied'),
+                'success' => fn () => $request->session()->get('success'),
             ],
             'csrfToken' => fn () => $request->session()->token(),
         ];

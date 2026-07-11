@@ -106,9 +106,9 @@ class GoogleController extends Controller
 
         // Belum terverifikasi → arahkan ke halaman verifikasi email.
         if (! $user->hasVerifiedEmail()) {
-            return redirect()->route('verification.notice');
+            return redirect()->route('verification.notice')->with('success', 'login_success');
         }
 
-        return redirect()->intended(route('home', absolute: false));
+        return redirect()->intended(route('home', absolute: false))->with('success', 'login_success');
     }
 }
