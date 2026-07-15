@@ -2,12 +2,18 @@
 
 namespace App\Notifications;
 
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Arr;
 
-class LoanReminderNotification extends Notification
+class LoanReminderNotification extends Notification implements ShouldQueue
 {
+    use Queueable;
+
+    public $tries = 3;
+    public $timeout = 120;
     protected $loan;
     protected $diff;
 

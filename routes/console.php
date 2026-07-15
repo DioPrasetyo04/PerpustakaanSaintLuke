@@ -10,10 +10,13 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::call(function () {
-    app(SendLoanReminder::class)->handle();
-})->hourly();
+// Schedule::call(function () {
+//     app(SendLoanReminder::class)->handle();
+// })->hourly();
 
-Schedule::call(function () {
-    app(AutoReturnExpiredLoans::class)->handle();
-})->hourly();
+// Schedule::call(function () {
+//     app(AutoReturnExpiredLoans::class)->handle();
+// })->hourly();
+
+Schedule::command('reminder:loan')->hourly();
+Schedule::command('loan:auto-return-expired')->hourly();
