@@ -58,7 +58,7 @@ class SendLoanReminder extends Command
 
             $this->line("LoanDetail #{$detail->id} (user {$user->email}, phone={$user->phone}): due={$dueDate->format('Y-m-d')}, diff={$diff}");
 
-            if (! \in_array($diff, [3, 1, 0], true)) {
+            if (! \in_array($diff, [3, 2, 1, 0], true)) {
                 continue;
             }
 

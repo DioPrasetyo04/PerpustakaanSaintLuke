@@ -20,7 +20,7 @@ class AutoReturnExpiredLoans extends Command
         $expiredDetails = LoanDetail::query()
             ->whereDoesntHave('returnBook')
             ->where('loan_type', LoanType::DIGITAL->value)
-            ->where('due_date', '<', Carbon::today())
+            ->where('due_date', '<=', Carbon::today())
             ->get();
 
         $count = $expiredDetails->count();

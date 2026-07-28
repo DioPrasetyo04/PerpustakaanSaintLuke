@@ -2,18 +2,12 @@
 
 namespace App\Notifications;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Arr;
 
-class LoanReminderNotification extends Notification implements ShouldQueue
+class LoanReminderNotification extends Notification
 {
-    use Queueable;
-
-    public $tries = 3;
-    public $timeout = 120;
     protected $loan;
     protected $diff;
 
@@ -43,12 +37,13 @@ class LoanReminderNotification extends Notification implements ShouldQueue
     {
         $status = match ($this->diff) {
             3 => '3 Hari Lagi',
+            2 => '2 Hari Lagi',
             1 => '1 Hari Lagi',
             0 => 'Hari Ini'
         };
 
         $variant = [
-            'greeting' => Arr::random(['Halo', 'Hai', 'Salam', 'Hello', 'Selamat pagi']),
+            'greeting' => Arr::random(['Halo', 'Hai', 'Salam', 'Hello', 'Hallow']),
             'header' => Arr::random([
                 '📚 Reminder E-Library Santo Lukas 📚',
                 '🔔 Pengingat Peminjaman Buku 🔔',
