@@ -52,8 +52,18 @@ class Book extends Model
     ];
 
     /**
+     * Cek apakah buku sedang dalam peminjaman aktif
+     * (memiliki detail peminjaman yang belum dikembalikan, baik fisik maupun digital).
+     */
+    public function hasActiveLoans(): bool
+    {
+        return $this->loanDetails()->whereDoesntHave('returnBook')->exists();
+    }
+
+    /**
      * Jaga agar hanya ada satu buku "Sorotan" aktif: saat sebuah buku
      * ditandai spotlight, buku lain otomatis dilepas tandanya.
+     * Juga cegah penghapusan buku (soft delete / force delete) yang masih aktif dipinjam.
      */
     protected static function booted(): void
     {
@@ -69,6 +79,18 @@ class Book extends Model
             // lunas agar nominalnya mengikuti harga buku terbaru.
             if ($book->wasChanged('price')) {
                 FineCalculatorService::recalculateUnpaidForBook($book);
+            }
+        });
+
+        static::deleting(function (Book $book) {
+            if ($book->hasActiveLoans()) {
+                return false;
+            }
+        });
+
+        static::forceDeleting(function (Book $book) {
+            if ($book->hasActiveLoans()) {
+                return false;
             }
         });
     }

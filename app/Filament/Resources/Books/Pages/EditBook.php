@@ -10,6 +10,9 @@ use Filament\Actions\RestoreAction;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Storage;
 
+use Filament\Notifications\Notification;
+use Filament\Support\Exceptions\Halt;
+
 class EditBook extends EditRecord
 {
     protected static string $resource = BookResource::class;
@@ -17,8 +20,32 @@ class EditBook extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
-            ForceDeleteAction::make(),
+            DeleteAction::make()
+                ->before(function (DeleteAction $action) {
+                    if ($this->record->hasActiveLoans()) {
+                        Notification::make()
+                            ->danger()
+                            ->title('Buku Tidak Bisa Dihapus')
+                            ->body("Buku \"{$this->record->title}\" masih aktif dipinjam dan tidak dapat dihapus. Harap selesaikan seluruh peminjaman (fisik maupun digital) sebelum menghapus buku ini.")
+                            ->persistent()
+                            ->send();
+
+                        throw new Halt();
+                    }
+                }),
+            ForceDeleteAction::make()
+                ->before(function (ForceDeleteAction $action) {
+                    if ($this->record->hasActiveLoans()) {
+                        Notification::make()
+                            ->danger()
+                            ->title('Buku Tidak Bisa Dihapus')
+                            ->body("Buku \"{$this->record->title}\" masih aktif dipinjam dan tidak dapat dihapus. Harap selesaikan seluruh peminjaman (fisik maupun digital) sebelum menghapus buku ini.")
+                            ->persistent()
+                            ->send();
+
+                        throw new Halt();
+                    }
+                }),
             RestoreAction::make(),
         ];
     }

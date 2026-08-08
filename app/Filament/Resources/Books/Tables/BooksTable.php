@@ -19,6 +19,9 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use App\Models\Book;
+use Filament\Notifications\Notification;
+use Filament\Support\Exceptions\Halt;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\HtmlString;
 
@@ -222,14 +225,68 @@ class BooksTable
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
-                DeleteAction::make(),
-                ForceDeleteAction::make(),
+                DeleteAction::make()
+                    ->before(function (DeleteAction $action, Book $record) {
+                        if ($record->hasActiveLoans()) {
+                            Notification::make()
+                                ->danger()
+                                ->title('Buku Tidak Bisa Dihapus')
+                                ->body("Buku \"{$record->title}\" masih aktif dipinjam dan tidak dapat dihapus. Harap selesaikan seluruh peminjaman (fisik maupun digital) sebelum menghapus buku ini.")
+                                ->persistent()
+                                ->send();
+
+                            throw new Halt();
+                        }
+                    }),
+                ForceDeleteAction::make()
+                    ->before(function (ForceDeleteAction $action, Book $record) {
+                        if ($record->hasActiveLoans()) {
+                            Notification::make()
+                                ->danger()
+                                ->title('Buku Tidak Bisa Dihapus')
+                                ->body("Buku \"{$record->title}\" masih aktif dipinjam dan tidak dapat dihapus. Harap selesaikan seluruh peminjaman (fisik maupun digital) sebelum menghapus buku ini.")
+                                ->persistent()
+                                ->send();
+
+                            throw new Halt();
+                        }
+                    }),
                 RestoreAction::make()
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                    ForceDeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->before(function (DeleteBulkAction $action, \Illuminate\Database\Eloquent\Collection $records) {
+                            $activeBooks = $records->filter(fn (Book $book) => $book->hasActiveLoans());
+
+                            if ($activeBooks->isNotEmpty()) {
+                                $titles = $activeBooks->pluck('title')->implode(', ');
+                                Notification::make()
+                                    ->danger()
+                                    ->title('Buku Tidak Bisa Dihapus')
+                                    ->body("Buku berikut masih aktif dipinjam (fisik/digital) dan tidak dapat dihapus: {$titles}.")
+                                    ->persistent()
+                                    ->send();
+
+                                throw new Halt();
+                            }
+                        }),
+                    ForceDeleteBulkAction::make()
+                        ->before(function (ForceDeleteBulkAction $action, \Illuminate\Database\Eloquent\Collection $records) {
+                            $activeBooks = $records->filter(fn (Book $book) => $book->hasActiveLoans());
+
+                            if ($activeBooks->isNotEmpty()) {
+                                $titles = $activeBooks->pluck('title')->implode(', ');
+                                Notification::make()
+                                    ->danger()
+                                    ->title('Buku Tidak Bisa Dihapus')
+                                    ->body("Buku berikut masih aktif dipinjam (fisik/digital) dan tidak dapat dihapus: {$titles}.")
+                                    ->persistent()
+                                    ->send();
+
+                                throw new Halt();
+                            }
+                        }),
                     RestoreBulkAction::make(),
                 ]),
             ]);
