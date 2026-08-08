@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\Auth;
 
 class UsersTable
 {
+
     public static function configure(Table $table): Table
     {
         return $table

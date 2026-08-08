@@ -8,7 +8,7 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class PublisherStatsOverview extends StatsOverviewWidget
 {
-    protected ?string $heading = 'Statistik Penerbit';
+    protected ?string $heading = 'Data Penerbit';
 
     protected ?string $description = 'Ringkasan data penerbit buku.';
 

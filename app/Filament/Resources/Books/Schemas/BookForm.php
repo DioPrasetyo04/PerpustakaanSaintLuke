@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Books\Schemas;
 
 use App\Enums\SocialMedia;
 use App\Models\Category;
+use App\Models\LocationOfBook;
 use App\Models\Publisher;
 use Closure;
 use Filament\Forms\Components\Toggle;
@@ -684,10 +685,39 @@ class BookForm
                                         ->maxLength(255)
                                         ->placeholder('e.g. 1')
                                         ->columnSpan(1),
-                                    TextInput::make('location_book')
+                                    // TextInput::make('location_book')
+                                    //     ->label('Lokasi Buku')
+                                    //     ->maxLength(255)
+                                    //     ->placeholder('e.g. Rak A-3, Lantai 2')
+                                    //     ->columnSpan(1),
+                                    Select::make('location_book_id')
                                         ->label('Lokasi Buku')
-                                        ->maxLength(255)
-                                        ->placeholder('e.g. Rak A-3, Lantai 2')
+                                        ->relationship('locationOfBook', 'location')
+                                        ->searchable()
+                                        ->preload()
+                                        ->createOptionForm([
+                                            Section::make('Tambah Lokasi Buku')
+                                                ->description('Masukkan nama lokasi rak/lantai untuk buku ini.')
+                                                ->schema([
+                                                    TextInput::make('location')
+                                                        ->label('Lokasi')
+                                                        ->placeholder('e.g. Rak A-3, Lantai 2')
+                                                        ->maxLength(255)
+                                                        ->required(),
+                                                ])
+                                        ])
+                                        ->createOptionUsing(function (array $data) {
+                                            // Buat entri lokasi baru hanya dengan field 'location'.
+                                            // book_id dibiarkan null karena kolom sudah nullable —
+                                            // hubungan ke buku dikelola dari sisi 'books.location_of_book_id'
+                                            // yang akan di-set oleh Filament setelah form buku disimpan.
+                                            $location = LocationOfBook::create([
+                                                'book_id'  => null,
+                                                'location' => $data['location'],
+                                            ]);
+                                            return $location->id;
+                                        })
+                                        ->createOptionModalHeading('Tambah Lokasi Buku')
                                         ->columnSpan(1),
                                     Select::make('status')
                                         ->label('Status')

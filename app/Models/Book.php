@@ -32,7 +32,7 @@ class Book extends Model
         'isbn',
         'synopsis',
         'number_of_pages',
-        'location_book',
+        'location_of_book_id',
         'classification_number',
         'volume',
         'status',
@@ -138,5 +138,10 @@ class Book extends Model
             'id',
             'id'
         );
+    }
+
+    public function locationOfBook(): HasOne
+    {
+        return $this->hasOne(LocationOfBook::class, 'book_id');
     }
 }

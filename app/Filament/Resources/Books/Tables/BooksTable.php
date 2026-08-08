@@ -30,7 +30,9 @@ class BooksTable
             ->columns([
                 ImageColumn::make('cover')->label('Cover')->circular()->imageSize(50)->disk('public'),
                 TextColumn::make('book_code')->label('Book Code')->searchable()->sortable()->copyable(),
-                TextColumn::make('location_book')
+                TextColumn::make('title')->label('Title')->searchable()->sortable()->limit(40)->tooltip(fn($state) => $state),
+                TextColumn::make('slug')->label('Slug')->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('locationOfBook.location')
                     ->label('Lokasi Buku')
                     ->badge()
                     ->color('gray')
@@ -38,8 +40,6 @@ class BooksTable
                     ->placeholder('Belum diatur')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('title')->label('Title')->searchable()->sortable()->limit(40)->tooltip(fn($state) => $state),
-                TextColumn::make('slug')->label('Slug')->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('addedBy.name')->label('Added By')->searchable()->sortable(),
                 TextColumn::make('authors.name')
                     ->label('Penulis')
@@ -52,7 +52,6 @@ class BooksTable
                 TextColumn::make('publisher.name')->label('Penerbit')->searchable()->sortable(),
                 TextColumn::make('publication_year')->label('Tahun Terbit')->searchable()->sortable(),
                 TextColumn::make('isbn')->label('ISBN')->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
-
                 TextColumn::make('types.type')
                     ->label('Tipe Resource')
                     ->badge()
