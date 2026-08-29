@@ -8,20 +8,14 @@ use Illuminate\Database\Seeder;
 class LanguageSeeder extends Seeder
 {
     /**
-     * Seed daftar bahasa buku (dipakai relasi books.language_id).
+     * Seed daftar bahasa buku menggunakan LanguageFactory.
+     * Setiap bahasa memiliki code unik (id, en, ar, dll.).
      */
     public function run(): void
     {
-        $languages = [
-            ['code' => 'id', 'language' => 'Indonesia'],
-            ['code' => 'en', 'language' => 'English'],
-        ];
+        // Seed 2 bahasa utama (Indonesia & Inggris) yang paling sering dipakai
+        Language::factory()->count(2)->create();
 
-        foreach ($languages as $language) {
-            Language::updateOrCreate(
-                ['code' => $language['code']],
-                ['language' => $language['language']],
-            );
-        }
+        $this->command?->info('LanguageSeeder: ' . Language::count() . ' bahasa tersedia.');
     }
 }

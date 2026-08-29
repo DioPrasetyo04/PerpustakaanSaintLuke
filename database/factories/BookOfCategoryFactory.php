@@ -2,10 +2,15 @@
 
 namespace Database\Factories;
 
+use App\Models\Book;
+use App\Models\Category;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\book_of_category>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\BookOfCategory>
+ *
+ * Pivot table book_of_categories: category_id, book_id
+ * Factory ini digunakan untuk mengisi relasi many-to-many buku ↔ kategori.
  */
 class BookOfCategoryFactory extends Factory
 {
@@ -17,7 +22,8 @@ class BookOfCategoryFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'category_id' => Category::inRandomOrder()->value('id') ?? Category::factory(),
+            'book_id'     => Book::inRandomOrder()->value('id') ?? Book::factory(),
         ];
     }
 }

@@ -37,18 +37,10 @@ class AdminUserSeeder extends Seeder
         // 3. Buat / perbarui user super admin dan tetapkan role admin.
         $email = 'admin@perpustakaan-saint-luke.id';
 
-        $admin = User::firstOrCreate(
-            ['email' => $email],
-            [
-                'name' => 'Super Admin',
-                'username' => 'superadmin',
-                'email' => $email,
-                'password' => Hash::make('Admin@12345'),
-                'is_approved' => true,
-                'approved_at' => now(),
-                'email_verified_at' => now(),
-            ]
-        );
+        $admin = User::where('email', $email)->first();
+        if (! $admin) {
+            $admin = User::factory()->admin()->create();
+        }
 
         $admin->syncRoles(['admin']);
 

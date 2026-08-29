@@ -14,8 +14,10 @@ use Illuminate\Support\Str;
 class FineSeeder extends Seeder
 {
     /**
-     * Seed denda keterlambatan untuk pengembalian yang melewati jatuh tempo
-     * (status COST). Dependensi: ReturnBookSeeder & FineSettingsSeeder.
+     * Seed denda keterlambatan menggunakan FineFactory.
+     * Hanya pengembalian dengan status COST (terlambat) yang dikenai denda.
+     *
+     * Dependensi: ReturnBookSeeder & FineSettingsSeeder.
      */
     public function run(): void
     {
@@ -32,32 +34,32 @@ class FineSeeder extends Seeder
         $perDay = (int) (FineSettings::query()->value('late_fee_per_day') ?? 1000);
 
         foreach ($lateReturns as $return) {
-            $detail = $return->loanDetail;
-            if (! $detail) {
+            // Hindari duplikat
+            if (Fine::where('return_book_id', $return->id)->exists()) {
                 continue;
             }
 
-            $daysLate = Carbon::parse($detail->due_date)->diffInDays(Carbon::parse($return->return_date));
-            $daysLate = max(1, $daysLate);
-            $lateFee = $daysLate * $perDay;
+            $detail   = $return->loanDetail;
+            $daysLate = $detail
+                ? max(1, (int) Carbon::parse($detail->due_date)->diffInDays(Carbon::parse($return->return_date)))
+                : 1;
 
-            // Sebagian denda sudah lunas, sebagian masih menunggu pembayaran.
-            $isPaid = ($return->id % 2) === 0;
+            $lateFee  = $daysLate * $perDay;
+            $isPaid   = ($return->id % 2) === 0;
 
-            Fine::firstOrCreate(
-                ['return_book_id' => $return->id],
-                [
-                    'order_id' => 'ORD-' . Str::upper(Str::random(10)),
-                    'late_fee' => $lateFee,
-                    'other_fee' => 0,
-                    'total_fee' => $lateFee,
-                    'fine_date' => $return->return_date,
-                    'payment_method' => $isPaid ? 'cash' : null,
-                    'payment_status' => $isPaid ? PaymentStatus::SUCCESS->value : PaymentStatus::PENDING->value,
-                ],
-            );
+            // Buat via FineFactory dengan override nilai yang dihitung
+            Fine::factory()->create([
+                'return_book_id' => $return->id,
+                'order_id'       => 'ORD-' . strtoupper(Str::random(10)),
+                'late_fee'       => $lateFee,
+                'other_fee'      => 0,
+                'total_fee'      => $lateFee,
+                'fine_date'      => $return->return_date,
+                'payment_method' => $isPaid ? 'cash' : null,
+                'payment_status' => $isPaid ? PaymentStatus::SUCCESS->value : PaymentStatus::PENDING->value,
+            ]);
         }
 
-        $this->command?->info('FineSeeder: ' . $lateReturns->count() . ' denda dibuat.');
+        $this->command?->info('FineSeeder: ' . Fine::count() . ' denda dibuat.');
     }
 }

@@ -8,12 +8,13 @@ use Illuminate\Database\Seeder;
 class TypeSeeder extends Seeder
 {
     /**
-     * Seed tipe/format buku (digital & fisik). Dipakai relasi book_of_types.
+     * Seed tipe/format buku (digital & fisik) menggunakan TypeFactory.
      */
     public function run(): void
     {
-        foreach (['digital', 'fisik'] as $type) {
-            Type::updateOrCreate(['type' => $type], ['type' => $type]);
-        }
+        Type::factory()->physical()->create();
+        Type::factory()->digital()->create();
+
+        $this->command?->info('TypeSeeder: ' . Type::count() . ' tipe buku tersedia.');
     }
 }

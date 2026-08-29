@@ -11,38 +11,46 @@ use Illuminate\Support\Str;
 class SocialMediaSeeder extends Seeder
 {
     /**
-     * Seed akun media sosial (polymorphic) untuk para penulis.
+     * Seed akun media sosial (polymorphic) untuk para penulis menggunakan SocialMediaFactory.
+     * Setiap penulis mendapat 2 platform (Instagram & Twitter) yang unik.
+     *
      * Dependensi: AuthorsSeeder.
      */
     public function run(): void
     {
         $authors = Author::query()->get();
+
         if ($authors->isEmpty()) {
             $this->command?->warn('SocialMediaSeeder dilewati: belum ada penulis (jalankan AuthorsSeeder).');
             return;
         }
 
+        $platforms = [SocialMediaEnum::INSTAGRAM, SocialMediaEnum::TWITTER];
+
         foreach ($authors as $author) {
             $handle = Str::slug($author->name, '');
 
-            $accounts = [
-                ['platform' => SocialMediaEnum::INSTAGRAM->value, 'url' => 'https://instagram.com/' . $handle, 'username' => $handle],
-                ['platform' => SocialMediaEnum::TWITTER->value, 'url' => 'https://twitter.com/' . $handle, 'username' => '@' . $handle],
-            ];
+            foreach ($platforms as $platform) {
+                $url = match ($platform) {
+                    SocialMediaEnum::INSTAGRAM => 'https://instagram.com/' . $handle,
+                    SocialMediaEnum::TWITTER   => 'https://twitter.com/' . $handle,
+                    default                    => 'https://social.example.com/' . $handle,
+                };
 
-            foreach ($accounts as $account) {
                 SocialMedia::updateOrCreate(
                     [
-                        'socialable_id' => $author->id,
+                        'socialable_id'   => $author->id,
                         'socialable_type' => Author::class,
-                        'platform' => $account['platform'],
+                        'platform'        => $platform->value,
                     ],
                     [
-                        'url' => $account['url'],
-                        'username' => $account['username'],
+                        'url'      => $url,
+                        'username' => $handle,
                     ],
                 );
             }
         }
+
+        $this->command?->info('SocialMediaSeeder: media sosial dihubungkan ke ' . $authors->count() . ' penulis.');
     }
 }

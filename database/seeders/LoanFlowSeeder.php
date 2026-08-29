@@ -10,21 +10,22 @@ use App\Models\Loan;
 use App\Models\LoanDetail;
 use App\Models\Type;
 use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 class LoanFlowSeeder extends Seeder
 {
     /**
-     * Seed peminjaman anggota (Loan + LoanDetail). Pengembalian, denda, dan
-     * ulasan diisi seeder lanjutan (ReturnBookSeeder, FineSeeder, ReviewBookSeeder).
+     * Seed peminjaman anggota (Loan + LoanDetail) menggunakan LoanFactory & LoanDetailFactory.
+     * Pengembalian, denda, dan ulasan diisi seeder lanjutan.
      *
      * Dependensi: MemberUserSeeder & BookSeeder.
      */
     public function run(): void
     {
         $members = User::query()->where('email', 'like', '%@example.com')->get();
-        $books = Book::query()->with('types')->get();
+        $books   = Book::query()->with('types')->get();
 
         if ($members->isEmpty() || $books->isEmpty()) {
             $this->command?->warn('LoanFlowSeeder dilewati: butuh anggota (MemberUserSeeder) dan buku (BookSeeder).');
@@ -32,37 +33,40 @@ class LoanFlowSeeder extends Seeder
         }
 
         $digitalTypeId = Type::where('type', 'digital')->value('id');
-        $today = Carbon::today();
+        $today         = Carbon::today();
 
         foreach ($members as $member) {
-            $loanCount = random_int(1, 2);
+            $loanCount = fake()->numberBetween(1, 2);
 
             for ($n = 1; $n <= $loanCount; $n++) {
-                $loanCode = 'LN-' . str_pad((string) $member->id, 3, '0', STR_PAD_LEFT) . '-' . $n;
+                // Buat Loan via factory
+                $loan = Loan::factory()->create([
+                    'user_id'   => $member->id,
+                    'loan_code' => 'LN-' . str_pad((string) $member->id, 3, '0', STR_PAD_LEFT) . '-' . $n,
+                    'status'    => LoanStatus::LOANED->value,
+                ]);
 
-                $loan = Loan::firstOrCreate(
-                    ['loan_code' => $loanCode],
-                    ['user_id' => $member->id, 'status' => LoanStatus::LOANED->value],
-                );
-
-                // Buku unik per loan.
-                $picks = $books->shuffle()->take(random_int(1, 2));
-                // Peminjaman dimulai antara 1-20 hari lalu.
-                $loanDate = $today->copy()->subDays(random_int(1, 20));
-                $dueDate = $loanDate->copy()->addDays(14);
+                // Pilih 1-2 buku unik untuk dipinjam
+                $picks    = $books->shuffle()->take(fake()->numberBetween(1, 2));
+                $loanDate = $today->copy()->subDays(fake()->numberBetween(1, 20));
+                $dueDate  = $loanDate->copy()->addDays(14);
 
                 foreach ($picks as $book) {
                     $isDigital = $digitalTypeId && $book->types->contains('id', $digitalTypeId);
 
-                    LoanDetail::firstOrCreate(
-                        ['loan_id' => $loan->id, 'book_id' => $book->id],
-                        [
-                            'loan_date' => $loanDate,
-                            'due_date' => $dueDate,
-                            'status' => LoanBookStatus::BORROWED->value,
-                            'loan_type' => $isDigital ? LoanType::DIGITAL->value : LoanType::PHYSICAL->value,
-                        ],
-                    );
+                    // Hindari duplikat loan_id + book_id
+                    if (LoanDetail::where('loan_id', $loan->id)->where('book_id', $book->id)->exists()) {
+                        continue;
+                    }
+
+                    LoanDetail::factory()->create([
+                        'loan_id'   => $loan->id,
+                        'book_id'   => $book->id,
+                        'loan_date' => $loanDate->toDateString(),
+                        'due_date'  => $dueDate->toDateString(),
+                        'status'    => LoanBookStatus::BORROWED->value,
+                        'loan_type' => $isDigital ? LoanType::DIGITAL->value : LoanType::PHYSICAL->value,
+                    ]);
                 }
             }
         }

@@ -35,8 +35,12 @@ class RolePermissionSeeder extends Seeder
     {
         Artisan::call('permission:cache-reset');
 
+        // Buat role menggunakan RoleFactory
         foreach (['admin', 'manager', 'writer', 'user', 'member'] as $name) {
-            Role::findOrCreate($name, 'web');
+            $role = Role::where('name', $name)->where('guard_name', 'web')->first();
+            if (! $role) {
+                Role::factory()->state(['name' => $name, 'guard_name' => 'web'])->create();
+            }
         }
 
         $allPermissions   = Permission::pluck('name')->all();
@@ -45,40 +49,42 @@ class RolePermissionSeeder extends Seeder
         $writerRole       = Role::findByName('writer',  'web');
 
         // ── Admin: semua permission ──────────────────────────────────────
-        $adminRole->syncPermissions($allPermissions);
+        if (! empty($allPermissions)) {
+            $adminRole->syncPermissions($allPermissions);
 
-        // ── Manager: semua permission kecuali Manajemen Pengguna ─────────
-        $managerPermissions = array_filter($allPermissions, function (string $perm) {
-            foreach (self::USER_MGMT_ENTITIES as $entity) {
-                if (str_ends_with($perm, ':' . $entity)) {
-                    return false;
+            // ── Manager: semua permission kecuali Manajemen Pengguna ─────────
+            $managerPermissions = array_filter($allPermissions, function (string $perm) {
+                foreach (self::USER_MGMT_ENTITIES as $entity) {
+                    if (str_ends_with($perm, ':' . $entity)) {
+                        return false;
+                    }
                 }
-            }
-            return true;
-        });
+                return true;
+            });
 
-        $managerRole->syncPermissions(array_values($managerPermissions));
+            $managerRole->syncPermissions(array_values($managerPermissions));
 
-        // ── Writer: hanya Katalog Buku + widget buku + dashboard ─────────
-        $writerPermissions = array_filter($allPermissions, function (string $perm) {
-            foreach (self::BOOK_CATALOG_ENTITIES as $entity) {
-                if (str_ends_with($perm, ':' . $entity)) {
+            // ── Writer: hanya Katalog Buku + widget buku + dashboard ─────────
+            $writerPermissions = array_filter($allPermissions, function (string $perm) {
+                foreach (self::BOOK_CATALOG_ENTITIES as $entity) {
+                    if (str_ends_with($perm, ':' . $entity)) {
+                        return true;
+                    }
+                }
+                if (in_array($perm, self::WRITER_VIEWS, true)) {
                     return true;
                 }
-            }
-            if (in_array($perm, self::WRITER_VIEWS, true)) {
-                return true;
-            }
-            return false;
-        });
+                return false;
+            });
 
-        $writerRole->syncPermissions(array_values($writerPermissions));
+            $writerRole->syncPermissions(array_values($writerPermissions));
+        }
 
         Artisan::call('permission:cache-reset');
 
-        $this->command->info('✅ Roles & permissions seeded:');
-        $this->command->info('   admin   → ' . $adminRole->permissions()->count() . ' permissions (all)');
-        $this->command->info('   manager → ' . $managerRole->permissions()->count() . ' permissions (minus user management)');
-        $this->command->info('   writer  → ' . $writerRole->permissions()->count() . ' permissions (book catalog only)');
+        $this->command?->info('✅ Roles & permissions seeded:');
+        $this->command?->info('   admin   → ' . $adminRole->permissions()->count() . ' permissions (all)');
+        $this->command?->info('   manager → ' . $managerRole->permissions()->count() . ' permissions (minus user management)');
+        $this->command?->info('   writer  → ' . $writerRole->permissions()->count() . ' permissions (book catalog only)');
     }
 }

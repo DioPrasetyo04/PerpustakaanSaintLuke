@@ -4,44 +4,45 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use App\Models\Visit;
-use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
 class VisitSeeder extends Seeder
 {
     /**
-     * Seed riwayat kunjungan anggota selama beberapa hari terakhir.
+     * Seed riwayat kunjungan anggota perpustakaan menggunakan VisitFactory.
+     * Setiap anggota berkunjung 2–4 kali pada hari berbeda selama 20 hari terakhir.
+     *
      * Dependensi: MemberUserSeeder.
      */
     public function run(): void
     {
         $members = User::query()->where('email', 'like', '%@example.com')->get();
+
         if ($members->isEmpty()) {
             $this->command?->warn('VisitSeeder dilewati: belum ada anggota (jalankan MemberUserSeeder).');
             return;
         }
 
         foreach ($members as $member) {
-            // Tiap anggota berkunjung beberapa kali pada hari berbeda.
-            $days = collect(range(0, 20))->shuffle()->take(random_int(2, 4));
+            // Tiap anggota berkunjung pada 2-4 hari berbeda (unik per hari)
+            $days  = collect(range(0, 20))->shuffle()->take(fake()->numberBetween(2, 4));
+            $usedDays = [];
 
             foreach ($days as $offset) {
-                $visitDate = Carbon::today('Asia/Jakarta')->subDays($offset)->setTime(random_int(8, 15), random_int(0, 59));
+                // Satu kunjungan per hari per user
+                if (in_array($offset, $usedDays)) {
+                    continue;
+                }
+                $usedDays[] = $offset;
 
-                Visit::firstOrCreate(
-                    [
-                        'user_id' => $member->id,
-                        'visit_date' => $visitDate->toDateString() . ' 00:00:00',
-                    ],
-                    [
-                        'name' => $member->name,
-                        'address' => $member->address,
-                        'visit_date' => $visitDate,
-                        'type' => $member->type,
-                        'note' => 'Kunjungan membaca & meminjam buku.',
-                    ],
-                );
+                Visit::factory()->forUser($member)->create([
+                    'visit_date' => now('Asia/Jakarta')
+                        ->subDays($offset)
+                        ->setTime(fake()->numberBetween(8, 15), fake()->randomElement([0, 30])),
+                ]);
             }
         }
+
+        $this->command?->info('VisitSeeder: ' . Visit::count() . ' kunjungan dibuat.');
     }
 }

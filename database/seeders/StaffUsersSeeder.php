@@ -4,40 +4,28 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class StaffUsersSeeder extends Seeder
 {
+    /**
+     * Seed user staff (writer & manager) menggunakan UserFactory.
+     */
     public function run(): void
     {
-        $writer = User::firstOrCreate(
-            ['email' => 'writer@perpustakaan-saint-luke.id'],
-            [
-                'name'              => 'Staff Penulis',
-                'username'          => 'writer',
-                'password'          => Hash::make('Writer@12345'),
-                'is_approved'       => true,
-                'approved_at'       => now(),
-                'email_verified_at' => now(),
-            ]
-        );
+        $writer = User::where('email', 'writer@perpustakaan-saint-luke.id')->first();
+        if (! $writer) {
+            $writer = User::factory()->staffWriter()->create();
+        }
         $writer->syncRoles(['writer']);
 
-        $manager = User::firstOrCreate(
-            ['email' => 'manager@perpustakaan-saint-luke.id'],
-            [
-                'name'              => 'Staff Manager',
-                'username'          => 'manager',
-                'password'          => Hash::make('Manager@12345'),
-                'is_approved'       => true,
-                'approved_at'       => now(),
-                'email_verified_at' => now(),
-            ]
-        );
+        $manager = User::where('email', 'manager@perpustakaan-saint-luke.id')->first();
+        if (! $manager) {
+            $manager = User::factory()->staffManager()->create();
+        }
         $manager->syncRoles(['manager']);
 
-        $this->command->info('✅ Staff users seeded:');
-        $this->command->info('   writer  → writer@perpustakaan-saint-luke.id  (pass: Writer@12345)');
-        $this->command->info('   manager → manager@perpustakaan-saint-luke.id (pass: Manager@12345)');
+        $this->command?->info('✅ Staff users seeded:');
+        $this->command?->info('   writer  → writer@perpustakaan-saint-luke.id  (pass: Writer@12345)');
+        $this->command?->info('   manager → manager@perpustakaan-saint-luke.id (pass: Manager@12345)');
     }
 }

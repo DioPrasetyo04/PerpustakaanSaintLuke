@@ -29,7 +29,8 @@ class RouteAccessSeeder extends Seeder
         $permissions = Permission::all();
 
         if ($permissions->isEmpty()) {
-            $this->command?->warn('⚠️  Tidak ada permission. Jalankan AdminUserSeeder / shield:generate terlebih dulu.');
+            $this->command?->warn('⚠️  Tidak ada permission. Menggunakan dummy RouteAccess dari factory.');
+            RouteAccess::factory()->count(7)->create();
             return;
         }
 

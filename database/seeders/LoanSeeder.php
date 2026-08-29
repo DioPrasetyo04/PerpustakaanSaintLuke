@@ -77,18 +77,18 @@ class LoanSeeder extends Seeder
         foreach ($scenarios as $i => $s) {
             $book = $books[$i % $bookCount];
 
-            $loan = Loan::create([
-                'user_id' => $user->id,
+            $loan = Loan::factory()->create([
+                'user_id'   => $user->id,
                 'loan_code' => 'TEST-' . Str::upper(Str::random(8)),
-                'status' => LoanStatus::LOANED,
+                'status'    => LoanStatus::LOANED->value,
             ]);
 
-            LoanDetail::create([
-                'loan_id' => $loan->id,
-                'book_id' => $book->id,
-                'loan_date' => $today->copy()->addDays($s['loan_offset']),
-                'due_date' => $today->copy()->addDays($s['due_offset']),
-                'status' => LoanBookStatus::BORROWED,
+            LoanDetail::factory()->create([
+                'loan_id'   => $loan->id,
+                'book_id'   => $book->id,
+                'loan_date' => $today->copy()->addDays($s['loan_offset'])->toDateString(),
+                'due_date'  => $today->copy()->addDays($s['due_offset'])->toDateString(),
+                'status'    => LoanBookStatus::BORROWED->value,
             ]);
 
             $this->command?->info("Created Loan #{$loan->id} ({$loan->loan_code}) — {$s['label']}, book='{$book->title}'");
