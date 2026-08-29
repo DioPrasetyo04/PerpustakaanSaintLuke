@@ -103,14 +103,7 @@ class UsersTable
                 EditAction::make(),
                 DeleteAction::make(),
                 RestoreAction::make(),
-                ForceDeleteAction::make()
-            ])
-            ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
-                DeleteAction::make(),
                 ForceDeleteAction::make(),
-                RestoreAction::make()
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
