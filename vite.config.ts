@@ -4,19 +4,17 @@ import react from '@vitejs/plugin-react';
 import laravel from 'laravel-vite-plugin';
 import { defineConfig } from 'vite';
 
-const viteDevServerUrl = process.env.VITE_DEV_SERVER_URL;
-
 export default defineConfig({
-    server: viteDevServerUrl
-        ? {
-              origin: viteDevServerUrl,
-              cors: { origin: '*' },
-              hmr: {
-                  host: new URL(viteDevServerUrl).hostname,
-                  protocol: 'wss',
-              },
-          }
-        : undefined,
+    server: {
+        host: '0.0.0.0',
+        port: 5173,
+        hmr: {
+            host: 'localhost',
+        },
+        watch: {
+            usePolling: true,
+        },
+    },
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.tsx'],

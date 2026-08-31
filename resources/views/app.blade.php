@@ -7,6 +7,9 @@
         <!-- ✅ WAJIB INI -->
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
+        <!-- CSP Configuration untuk Midtrans & Vite WebSocket -->
+        <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; script-src * 'unsafe-inline' 'unsafe-eval' https://app.midtrans.com https://app.sandbox.midtrans.com; connect-src * 'unsafe-inline' ws: wss:; img-src * data: blob:; style-src * 'unsafe-inline'; font-src * data:;">
+
         <title inertia>{{ config('app.name', 'Perpustakaan Santo Lukas') }}</title>
         <link rel="icon" href="/assets/logos/Saint-Luke.png" type="image/x-icon" size="32x32" />
 
@@ -236,7 +239,8 @@
         <!-- Midtrans Snap -->
         <script
             src="{{ config('midtrans.is_production') ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}"
-            data-client-key="{{ config('midtrans.client_key') }}"></script>
+            data-client-key="{{ config('midtrans.client_key') }}"
+            defer></script>
 
         <!-- Scripts -->
         @routes
