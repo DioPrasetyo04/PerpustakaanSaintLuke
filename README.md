@@ -554,6 +554,17 @@ chmod -R 775 storage bootstrap/cache
 
 ---
 
+### Referensi Data User
+
+Aktor	Akun Gmail	Password
+Admin	prasetyodio04@gmail.com	Password123#
+Admin 2	admin@perpustakaan-saint-luke.id	Admin@12345
+
+Staff Manager	manager@perpustakaan-saint-luke.id	Manager@12345
+
+Penulis / Writer	writer@perpustakaan-saint-luke.id	Writer@12345
+
+
 ### Referensi file deploy di repo
 
 - [`deploy/SETUP.md`](deploy/SETUP.md) — panduan scheduler & queue lintas environment
